@@ -1,8 +1,8 @@
-export class UsernameExistsError extends Error {
+import { BaseError } from "./baseError";
+export class UsernameExistsError extends BaseError {
   public readonly username: string;
   constructor(username: string) {
-    super('Username already exists');
+    super('Username already exists', 'UsernameExistsError');
     this.username = username;
-    this.name = 'UsernameExistsError';
   }
 }

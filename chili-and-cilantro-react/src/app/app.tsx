@@ -7,6 +7,7 @@ import ApiAccess from '../components/api-access';
 import Callback from '../components/callback';
 import LoginLink from '../components/login-link';
 import LogoutLink from '../components/logout-link';
+import Register from '../pages/register';
 import UserProfile from '../pages/user-profile';
 
 import { Route, Routes, Link } from 'react-router-dom';
@@ -29,6 +30,11 @@ export function App() {
           <li>
             <Link to="/page-2">Page 2</Link>
           </li>
+          {!isAuthenticated && (
+            <li>
+              <Link to="/register">Register</Link>
+            </li>
+          )}
           {!isAuthenticated && (
             <li>
               <LoginLink />
@@ -57,6 +63,7 @@ export function App() {
           }
         />
         <Route path="/callback" element={<Callback />} />
+        <Route path="/register" element={<Register />} />
         <Route
           path="/profile"
           element={
