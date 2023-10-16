@@ -1,0 +1,33 @@
+{
+  "name": "chili-and-cilantro-react-e2e",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "chili-and-cilantro-react-e2e/src",
+  "projectType": "application",
+  "targets": {
+    "e2e": {
+      "executor": "@nx/cypress:cypress",
+      "options": {
+        "cypressConfig": "chili-and-cilantro-react-e2e/cypress.config.ts",
+        "devServerTarget": "chili-and-cilantro-react:serve:development",
+        "testingType": "e2e"
+      },
+      "configurations": {
+        "production": {
+          "devServerTarget": "chili-and-cilantro-react:serve:production"
+        },
+        "ci": {
+          "devServerTarget": "chili-and-cilantro-react:serve-static"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["chili-and-cilantro-react-e2e/**/*.{js,ts}"]
+      }
+    }
+  },
+  "tags": [],
+  "implicitDependencies": ["chili-and-cilantro-react"]
+}

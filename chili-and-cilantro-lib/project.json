@@ -1,0 +1,43 @@
+{
+  "name": "chili-and-cilantro-lib",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "chili-and-cilantro-lib/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/chili-and-cilantro-lib",
+        "main": "chili-and-cilantro-lib/src/index.ts",
+        "tsConfig": "chili-and-cilantro-lib/tsconfig.lib.json",
+        "assets": ["chili-and-cilantro-lib/*.md"]
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "chili-and-cilantro-lib/**/*.ts",
+          "chili-and-cilantro-lib/package.json"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "chili-and-cilantro-lib/jest.config.ts",
+        "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
+      }
+    }
+  },
+  "tags": []
+}
