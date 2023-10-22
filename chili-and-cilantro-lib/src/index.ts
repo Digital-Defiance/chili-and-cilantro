@@ -1,4 +1,5 @@
 export * from './lib/enumerations/modelName';
+export * from './lib/enumerations/gamePhase';
 export * from './lib/interfaces/hasCreation';
 export * from './lib/interfaces/hasCreator';
 export * from './lib/interfaces/hasDeleter';

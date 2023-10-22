@@ -28,4 +28,5 @@ export interface IUser
   email_verified: boolean;
   // metadata
   lastLogin?: Date;
+  name: string;
 }
