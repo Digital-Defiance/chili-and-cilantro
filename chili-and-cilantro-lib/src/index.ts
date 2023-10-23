@@ -1,5 +1,6 @@
 export * from './lib/enumerations/action';
 export * from './lib/enumerations/chefState';
+export * from './lib/enumerations/firstChef';
 export * from './lib/enumerations/modelName';
 export * from './lib/enumerations/gamePhase';
 export * from './lib/interfaces/hasCreation';

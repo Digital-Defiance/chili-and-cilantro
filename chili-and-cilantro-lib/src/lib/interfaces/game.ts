@@ -2,6 +2,7 @@ import { Schema } from "mongoose";
 import { IHasID } from "./hasId";
 import { IHasTimestamps } from "./hasTimestamps";
 import { IAction } from "./action";
+import { FirstChef } from '../enumerations/firstChef';
 import { GamePhase } from "../enumerations/gamePhase";
 
 export interface IGame extends IHasID, IHasTimestamps {
@@ -10,9 +11,10 @@ export interface IGame extends IHasID, IHasTimestamps {
   eliminatedChefs: Schema.Types.ObjectId[];
   chefs: Schema.Types.ObjectId[];
   maxChefs: number;
-  currentChef: Schema.Types.ObjectId;
+  currentChef: number;
   currentPhase: GamePhase;
-  firstChef: Schema.Types.ObjectId;
+  firstChef: FirstChef;
+  turnOrder: Schema.Types.ObjectId[];
   roundHistory: IAction[];
-  owner: Schema.Types.ObjectId;
+  host: Schema.Types.ObjectId;
 }

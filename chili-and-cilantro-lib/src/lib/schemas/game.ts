@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { GamePhase } from '../enumerations/gamePhase';
 import ModelName from '../enumerations/modelName';
+import { FirstChef } from '../enumerations/firstChef';
 
 const { Schema } = mongoose;
 
@@ -16,19 +17,24 @@ export const GameSchema = new Schema({
   eliminatedChefs: [{
     type: Schema.Types.ObjectId,
     ref: ModelName.Chef,
+    required: true,
   }],
   chefs: [{
     type: Schema.Types.ObjectId,
     ref: ModelName.Chef,
     required: true,
   }],
+  firstChef: {
+    type: String,
+    enum: Object.values(FirstChef),
+    required: true,
+  },
   maxChefs: {
     type: Number,
     required: true,
   },
   currentChef: {
-    type: Schema.Types.ObjectId,
-    ref: ModelName.Chef,
+    type: Number,
     required: true,
   },
   currentPhase: {
@@ -36,16 +42,17 @@ export const GameSchema = new Schema({
     enum: Object.values(GamePhase),
     required: true,
   },
-  firstChef: {
-    type: Schema.Types.ObjectId,
-    ref: ModelName.Chef,
-    required: true,
-  },
   roundHistory: [{
     type: Schema.Types.ObjectId,
     ref: ModelName.Action,
+    required: true,
   }],
-  owner: {
+  turnOrder: [{
+    type: Schema.Types.ObjectId,
+    ref: ModelName.Chef,
+    required: true,
+  }],
+  host: {
     type: Schema.Types.ObjectId,
     ref: ModelName.User,
     required: true,

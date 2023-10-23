@@ -8,5 +8,5 @@ export interface IChef extends IHasID {
   hand: ICard[];
   userId: Schema.Types.ObjectId;
   state: ChefState;
-  owner: boolean;
+  host: boolean;
 }

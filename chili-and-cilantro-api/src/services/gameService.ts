@@ -3,6 +3,7 @@ import { Document } from 'mongoose';
 import {
   Action,
   BaseModel,
+  FirstChef,
   IAction, IUser, IGame, IChef,
   ModelName,
   ChefState,
@@ -22,7 +23,7 @@ export class GameService {
 
   }
 
-  public async createGame(user: IUser, name: string, password: string, maxChefs: number): Promise<{ game: IGame & Document, chef: IChef & Document }> {
+  public async createGame(user: IUser, name: string, password: string, maxChefs: number, firstChef: FirstChef): Promise<{ game: IGame & Document, chef: IChef & Document }> {
     const gameId = new ObjectId();
     const chefId = new ObjectId();
     const game = await GameModel.create({
@@ -31,8 +32,11 @@ export class GameService {
       password,
       maxChefs: maxChefs,
       gamePhase: GamePhase.LOBBY,
+      currentChef: 0,
+      firstChef: firstChef,
       chefs: [chefId],
-      owner: user._id,
+      turnOrder: [chefId], // will be chosen when the game is about to start
+      host: user._id,
     });
     const chef = await ChefModel.create({
       _id: chefId,
@@ -40,7 +44,7 @@ export class GameService {
       userId: user._id,
       hand: [],
       state: ChefState.LOBBY,
-      owner: true,
+      host: true,
     });
     const action = await ActionModel.create({
       chef: chef._id,
@@ -69,7 +73,7 @@ export class GameService {
       userId: user._id,
       hand: [],
       state: ChefState.LOBBY,
-      owner: false,
+      host: false,
     });
     const action = await ActionModel.create({
       chef: chef._id,

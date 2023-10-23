@@ -15,5 +15,5 @@ export const ChefSchema = new Schema<IChef>({
   hand: [CardSchema],
   userId: { type: Schema.Types.ObjectId, required: true, ref: ModelName.User },
   state: { type: String, enum: Object.values(ChefState), required: true },
-  owner: { type: Boolean, required: true, default: false },
+  host: { type: Boolean, required: true, default: false },
 }, { timestamps: true })
