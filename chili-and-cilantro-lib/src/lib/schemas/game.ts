@@ -26,7 +26,7 @@ export const GameSchema = new Schema({
     type: Number,
     required: true,
   },
-  currentTurn: {
+  currentChef: {
     type: Schema.Types.ObjectId,
     ref: ModelName.Chef,
     required: true,
