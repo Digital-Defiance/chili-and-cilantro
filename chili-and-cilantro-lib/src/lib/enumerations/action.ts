@@ -1,15 +1,15 @@
 export enum Action {
-  CREATE_GAME = 'CREATE_GAME',     // A player creates a new game
-  START_GAME = 'START_GAME',       // A player starts a game
-  JOIN_GAME = 'JOIN_GAME',         // A player joins a game
-  END_GAME = 'END_GAME',           // A player ends a game
-  PLACE_CARD = 'PLACE_CARD',      // Players place a card face down
-  START_BIDDING = 'START_BIDDING', // A player decides to start bidding instead of placing a card
-  MAKE_BID = 'MAKE_BID',          // Players state how many cards they think they can flip without revealing a 'Chili'
-  PASS = 'PASS',                 // Players decide not to increase the bid and don't want to flip cards
-  FLIP_CARD = 'FLIP_CARD',        // The player who won the bid flips a card
+  CREATE_GAME = 'CREATE_GAME',     // A chef creates a new game
+  START_GAME = 'START_GAME',       // A chef starts a game
+  JOIN_GAME = 'JOIN_GAME',         // A chef joins a game
+  END_GAME = 'END_GAME',           // A chef ends a game
+  PLACE_CARD = 'PLACE_CARD',      // Chefs place a card face down
+  START_BIDDING = 'START_BIDDING', // A chef decides to start bidding instead of placing a card
+  MAKE_BID = 'MAKE_BID',          // Chefs state how many cards they think they can flip without revealing a 'Chili'
+  PASS = 'PASS',                 // Chefs decide not to increase the bid and don't want to flip cards
+  FLIP_CARD = 'FLIP_CARD',        // The chef who won the bid flips a card
   END_ROUND = 'END_ROUND',        // The round ends after the flip phase concludes, either by successful bid fulfillment or by revealing a 'Chili'
-  START_NEW_ROUND = 'START_NEW_ROUND', // Players initiate a new round after the previous round concludes
-  MESSAGE = 'MESSAGE',           // Optional: If players can chat or there are game announcements
-  QUIT_GAME = 'QUIT_GAME',        // A player decides to leave the game
+  START_NEW_ROUND = 'START_NEW_ROUND', // Chefs initiate a new round after the previous round concludes
+  MESSAGE = 'MESSAGE',           // Optional: If chefs can chat or there are game announcements
+  QUIT_GAME = 'QUIT_GAME',        // A chef decides to leave the game
 }

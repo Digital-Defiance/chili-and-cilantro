@@ -1,7 +1,7 @@
 export enum ModelNameCollection {
   Action = 'actions',
+  Chef = 'chefs',
   Game = 'games',
-  Player = 'players',
   User = 'users',
 }
 

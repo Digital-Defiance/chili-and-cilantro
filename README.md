@@ -12,12 +12,12 @@ Your goal is to successfully season your dish by turning over a specified number
 
 **Setup:**
 1. Each chef receives a set of four cards: 3 Cilantro and 1 Chili.
-2. Determine the first player - perhaps the last person who cooked a meal!
+2. Determine the first chef - perhaps the last person who cooked a meal!
 
 **Gameplay:**
-1. **Seasoning Round**: Players take turns placing one card face-down, starting with the first player and going clockwise.
+1. **Seasoning Round**: Chefs take turns placing one card face-down, starting with the first chef and going clockwise.
    
-2. **The Bid**: Once each chef has placed a card, starting from the first player, decide: Bid or Pass. Bidding indicates how many cilantro cards you believe you can flip over without uncovering a chili. Each bid must be higher than the previous.
+2. **The Bid**: Once each chef has placed a card, starting from the first chef, decide: Bid or Pass. Bidding indicates how many cilantro cards you believe you can flip over without uncovering a chili. Each bid must be higher than the previous.
 
 3. **The Tasting**: If you placed the highest bid, your tasting begins! Start flipping your own cards first. If you meet your bid without flipping a chili, your dish is a success!
    

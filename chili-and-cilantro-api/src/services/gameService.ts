@@ -3,9 +3,9 @@ import { Document } from 'mongoose';
 import {
   Action,
   BaseModel,
-  IAction, IUser, IGame, IPlayer,
+  IAction, IUser, IGame, IChef,
   ModelName,
-  PlayerState,
+  ChefState,
   GamePhase,
   ICreateGameAction,
   ICreateGameDetails,
@@ -14,70 +14,70 @@ import { InvalidGameError } from '../errors/invalidGame';
 import { InvalidPasswordError } from '../errors/invalidPassword';
 
 const ActionModel = BaseModel.getModel<IAction>(ModelName.Action);
+const ChefModel = BaseModel.getModel<IChef>(ModelName.Chef);
 const GameModel = BaseModel.getModel<IGame>(ModelName.Game);
-const PlayerModel = BaseModel.getModel<IPlayer>(ModelName.Player);
 
 export class GameService {
   constructor() {
 
   }
 
-  public async createGame(user: IUser, name: string, password: string, maxPlayers: number): Promise<{ game: IGame & Document, player: IPlayer & Document }> {
+  public async createGame(user: IUser, name: string, password: string, maxChefs: number): Promise<{ game: IGame & Document, chef: IChef & Document }> {
     const gameId = new ObjectId();
-    const playerId = new ObjectId();
+    const chefId = new ObjectId();
     const game = await GameModel.create({
       _id: gameId,
       name,
       password,
-      maxPlayers,
+      maxChefs: maxChefs,
       gamePhase: GamePhase.LOBBY,
-      players: [playerId],
+      chefs: [chefId],
       owner: user._id,
     });
-    const player = await PlayerModel.create({
-      _id: playerId,
+    const chef = await ChefModel.create({
+      _id: chefId,
       gameId: gameId,
       userId: user._id,
       hand: [],
-      state: PlayerState.LOBBY,
+      state: ChefState.LOBBY,
       owner: true,
     });
     const action = await ActionModel.create({
-      player: player._id,
+      chef: chef._id,
       type: Action.CREATE_GAME,
       details: {},
     });
-    return { game, player };
+    return { game, chef: chef };
   }
 
-  public async joinGame(user: IUser, gameId: string, password: string): Promise<{ game: IGame & Document, player: IPlayer & Document }> {
+  public async joinGame(user: IUser, gameId: string, password: string): Promise<{ game: IGame & Document, chef: IChef & Document }> {
     const game = await GameModel.findOne({ _id: gameId });
     if (!game) {
       throw new InvalidGameError();
     }
     if (game.password !== password) {
-      throw new InvalidPasswordError();
+      throw new InvalidPasswordError('Invalid game password');
     }
     if (game.currentPhase !== GamePhase.LOBBY) {
       throw new Error('Game has already started');
     }
-    if (game.players.length >= game.maxPlayers) {
+    if (game.chefs.length >= game.maxChefs) {
       throw new Error('Game is full');
     }
-    const player = await PlayerModel.create({
+    const chef = await ChefModel.create({
       gameId: game._id,
       userId: user._id,
       hand: [],
-      state: PlayerState.LOBBY,
+      state: ChefState.LOBBY,
       owner: false,
     });
     const action = await ActionModel.create({
-      player: player._id,
+      chef: chef._id,
       type: Action.JOIN_GAME,
       details: {},
     })
-    game.players.push(player._id);
+    game.chefs.push(chef._id);
     await game.save();
-    return { game, player };
+    return { game, chef: chef };
   }
 }

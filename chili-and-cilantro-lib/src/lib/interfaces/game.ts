@@ -7,12 +7,12 @@ import { GamePhase } from "../enumerations/gamePhase";
 export interface IGame extends IHasID, IHasTimestamps {
   name: string;
   password: string;
-  eliminatedPlayers: Schema.Types.ObjectId[];
-  players: Schema.Types.ObjectId[];
-  maxPlayers: number;
+  eliminatedChefs: Schema.Types.ObjectId[];
+  chefs: Schema.Types.ObjectId[];
+  maxChefs: number;
   currentTurn: Schema.Types.ObjectId;
   currentPhase: GamePhase;
-  firstPlayer: Schema.Types.ObjectId;
+  firstChef: Schema.Types.ObjectId;
   roundHistory: IAction[];
   owner: Schema.Types.ObjectId;
 }

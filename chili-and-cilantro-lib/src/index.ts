@@ -1,7 +1,7 @@
 export * from './lib/enumerations/action';
+export * from './lib/enumerations/chefState';
 export * from './lib/enumerations/modelName';
 export * from './lib/enumerations/gamePhase';
-export * from './lib/enumerations/playerState';
 export * from './lib/interfaces/hasCreation';
 export * from './lib/interfaces/hasCreator';
 export * from './lib/interfaces/hasDeleter';
@@ -17,7 +17,7 @@ export * from './lib/interfaces/action';
 export * from './lib/interfaces/createGameAction';
 export * from './lib/interfaces/createGameDetails';
 export * from './lib/interfaces/game';
-export * from './lib/interfaces/player';
+export * from './lib/interfaces/chef';
 export * from './lib/interfaces/user';
 export * from './lib/models/baseModel';
 export * from './lib/schema';

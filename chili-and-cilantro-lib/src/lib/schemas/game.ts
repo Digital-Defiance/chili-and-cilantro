@@ -13,22 +13,22 @@ export const GameSchema = new Schema({
     type: String,
     required: true,
   },
-  eliminatedPlayers: [{
+  eliminatedChefs: [{
     type: Schema.Types.ObjectId,
-    ref: ModelName.Player,
+    ref: ModelName.Chef,
   }],
-  players: [{
+  chefs: [{
     type: Schema.Types.ObjectId,
-    ref: ModelName.Player,
+    ref: ModelName.Chef,
     required: true,
   }],
-  maxPlayers: {
+  maxChefs: {
     type: Number,
     required: true,
   },
   currentTurn: {
     type: Schema.Types.ObjectId,
-    ref: ModelName.Player,
+    ref: ModelName.Chef,
     required: true,
   },
   currentPhase: {
@@ -36,9 +36,9 @@ export const GameSchema = new Schema({
     enum: Object.values(GamePhase),
     required: true,
   },
-  firstPlayer: {
+  firstChef: {
     type: Schema.Types.ObjectId,
-    ref: ModelName.Player,
+    ref: ModelName.Chef,
     required: true,
   },
   roundHistory: [{

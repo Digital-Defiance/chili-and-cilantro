@@ -1,19 +1,19 @@
 import { Schema } from "mongoose";
-import { IPlayer } from "../interfaces/player";
+import { IChef } from "../interfaces/chef";
 import ModelName from "../enumerations/modelName";
 import { ICard } from "../interfaces/card";
 import { CardType } from "../enumerations/cardType";
-import { PlayerState } from "../enumerations/playerState";
+import { ChefState } from "../enumerations/chefState";
 
 export const CardSchema = new Schema<ICard>({
   type: { type: String, enum: Object.values(CardType), required: true },
   faceUp: { type: Boolean, required: true },
 }, { _id: false });
 
-export const PlayerSchema = new Schema<IPlayer>({
+export const ChefSchema = new Schema<IChef>({
   gameId: { type: Schema.Types.ObjectId, required: true, ref: ModelName.Game },
   hand: [CardSchema],
   userId: { type: Schema.Types.ObjectId, required: true, ref: ModelName.User },
-  state: { type: String, enum: Object.values(PlayerState), required: true },
+  state: { type: String, enum: Object.values(ChefState), required: true },
   owner: { type: Boolean, required: true, default: false },
 }, { timestamps: true })

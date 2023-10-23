@@ -8,11 +8,11 @@ import { ISchemaModels } from './interfaces/schemaModels';
 import { ModelData } from './schemaModelData';
 import { IGame } from './interfaces/game';
 import { IAction } from './interfaces/action';
-import { IPlayer } from './interfaces/player';
+import { IChef } from './interfaces/chef';
 
 export const SchemaModels: ISchemaModels = {
   Action: BaseModel.create<IAction>(ModelData[ModelName.Action]).Model,
+  Chef: BaseModel.create<IChef>(ModelData[ModelName.Chef]).Model,
   Game: BaseModel.create<IGame>(ModelData[ModelName.Game]).Model,
-  Player: BaseModel.create<IPlayer>(ModelData[ModelName.Player]).Model,
   User: BaseModel.create<IUser>(ModelData[ModelName.User]).Model,
 };

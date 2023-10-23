@@ -1,7 +1,7 @@
 import { ModelName } from './enumerations/modelName';
 import { ModelNameCollection } from './enumerations/modelNameCollection';
 import { ActionSchema } from './schemas/action';
-import { PlayerSchema } from './schemas/player';
+import { ChefSchema } from './schemas/chef';
 import { UserSchema } from './schemas/user';
 import { ISchemaModelData } from './interfaces/schemaModelData';
 import { GameSchema } from './schemas/game';
@@ -19,7 +19,7 @@ function modelNameCollectionToPath(
 export const ModelData: ISchemaModelData = {
   Action: {
     name: ModelName.Action,
-    description: 'An action taken by a player in a game.',
+    description: 'An action taken by a chef in a game.',
     collection: ModelNameCollection.Action,
     schema: ActionSchema,
     path: modelNameCollectionToPath(ModelNameCollection.Action),
@@ -31,12 +31,12 @@ export const ModelData: ISchemaModelData = {
     schema: GameSchema,
     path: modelNameCollectionToPath(ModelNameCollection.Game),
   },
-  Player: {
-    name: ModelName.Player,
-    description: 'A player in a game.',
-    collection: ModelNameCollection.Player,
-    schema: PlayerSchema,
-    path: modelNameCollectionToPath(ModelNameCollection.Player),
+  Chef: {
+    name: ModelName.Chef,
+    description: 'A chef in a game.',
+    collection: ModelNameCollection.Chef,
+    schema: ChefSchema,
+    path: modelNameCollectionToPath(ModelNameCollection.Chef),
   },
   User: {
     name: ModelName.User,

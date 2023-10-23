@@ -1,4 +1,4 @@
-export enum PlayerState {
+export enum ChefState {
   LOBBY = 'lobby',
   ELIMINATED = 'eliminated',
   PLAYING = 'playing',
