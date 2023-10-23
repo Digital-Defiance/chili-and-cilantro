@@ -1,5 +1,5 @@
 import { BaseError } from "./baseError";
-export class InvalidEmail extends BaseError {
+export class InvalidEmailError extends BaseError {
   public readonly email: string;
 
   constructor(email: string) {

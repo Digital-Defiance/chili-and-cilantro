@@ -6,8 +6,8 @@ import {
   IUser,
   ModelName,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { InvalidEmail } from '../errors/invalidEmail';
-import { InvalidPassword } from '../errors/invalidPassword';
+import { InvalidEmailError } from '../errors/invalidEmail';
+import { InvalidPasswordError } from '../errors/invalidPassword';
 import { EmailExistsError } from '../errors/emailExists';
 import { UsernameExistsError } from '../errors/usernameExists';
 import { managementClient } from '../auth0';
@@ -23,7 +23,7 @@ export class UserService {
   ): Promise<Document<unknown, object, IUser>> {
     // Email validation using validator.js
     if (!validator.isEmail(email)) {
-      throw new InvalidEmail(email);
+      throw new InvalidEmailError(email);
     }
 
     if (await UserModel.findOne({ email: email })) {
@@ -42,7 +42,7 @@ export class UserService {
       !/\d/.test(password) ||
       !/[A-Za-z]/.test(password)
     ) {
-      throw new InvalidPassword(
+      throw new InvalidPasswordError(
         'Password must be at least 8 characters long and contain both letters and numbers',
       );
     }

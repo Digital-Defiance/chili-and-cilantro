@@ -1,5 +1,5 @@
 import { BaseError } from "./baseError";
-export class InvalidPassword extends BaseError {
+export class InvalidPasswordError extends BaseError {
   constructor(message: string) {
     super(message, 'InvalidPassword');
   }

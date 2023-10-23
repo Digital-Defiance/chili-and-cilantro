@@ -1,4 +1,8 @@
 export enum Action {
+  CREATE_GAME = 'CREATE_GAME',     // A player creates a new game
+  START_GAME = 'START_GAME',       // A player starts a game
+  JOIN_GAME = 'JOIN_GAME',         // A player joins a game
+  END_GAME = 'END_GAME',           // A player ends a game
   PLACE_CARD = 'PLACE_CARD',      // Players place a card face down
   START_BIDDING = 'START_BIDDING', // A player decides to start bidding instead of placing a card
   MAKE_BID = 'MAKE_BID',          // Players state how many cards they think they can flip without revealing a 'Chili'

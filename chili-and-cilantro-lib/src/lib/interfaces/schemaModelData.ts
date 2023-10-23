@@ -1,6 +1,8 @@
 import { IModelData } from './modelData';
 
 export interface ISchemaModelData {
-  User: IModelData;
+  Action: IModelData;
   Game: IModelData;
+  Player: IModelData;
+  User: IModelData;
 }

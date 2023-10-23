@@ -96,4 +96,45 @@ export class JwtService {
       return res.status(401).json({ message: 'Invalid access token' });
     }
   }
+
+  /**
+   * Decodes the provided JWT, extracts the Auth0 user ID, and fetches the corresponding user from MongoDB.
+   * This function assumes the JWT has already been validated.
+   * 
+   * @param token The already validated JWT.
+   * @returns The user data from MongoDB corresponding to the Auth0 user ID in the token.
+   */
+  public async getUserFromValidatedToken(token: string): Promise<Document & IUser | null> {
+    // Decode the token (without verification)
+    const decoded = await new Promise<JwtPayload | null>((resolve, reject) => {
+      verify(
+        token,
+        this.getKey.bind(this),
+        { algorithms: ['RS256'] },
+        (err, decoded) => {
+          if (err) {
+            reject(new Error(`Token Verification Failed: ${err.message}`));
+          } else {
+            resolve(decoded as JwtPayload);
+          }
+        },
+      );
+    });
+
+    if (!decoded || !decoded.sub) {
+      throw new Error('Invalid token: unable to extract payload or user ID');
+    }
+
+    // The 'sub' field in Auth0 tokens holds the Auth0 user ID
+    const auth0UserId = decoded.sub;
+
+    // Fetch the user from MongoDB using the Auth0 user ID
+    const user = await UserService.getUserByAuth0Id(auth0UserId);
+
+    if (!user) {
+      throw new Error('User not found in database');
+    }
+
+    return user;
+  }
 }

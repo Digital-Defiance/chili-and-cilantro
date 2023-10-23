@@ -1,4 +1,4 @@
 export enum CardType {
-  Chili = 'chili',
-  Cilantro = 'cilantro',
+  CHILI = 'chili',
+  CILANTRO = 'cilantro',
 }

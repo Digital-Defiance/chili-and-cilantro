@@ -1,7 +1,12 @@
 import { Schema } from "mongoose";
-import { IUser } from "./user";
+import { PlayerState } from '../enumerations/playerState';
+import { ICard } from "./card";
+import { IHasID } from "./hasId";
 
-export interface IPlayer extends IUser {
+export interface IPlayer extends IHasID {
   gameId: Schema.Types.ObjectId;
-  hand: Schema.Types.ObjectId[];
+  hand: ICard[];
+  userId: Schema.Types.ObjectId;
+  state: PlayerState;
+  owner: boolean;
 }
