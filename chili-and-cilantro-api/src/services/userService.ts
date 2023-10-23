@@ -13,10 +13,13 @@ import { UsernameExistsError } from '../errors/usernameExists';
 import { managementClient } from '../auth0';
 import { environment } from '../environment';
 
-const UserModel = BaseModel.getModel<IUser>(ModelName.User);
+export const MIN_PASSWORD_LENGTH = 8;
+export const MAX_PASSWORD_LENGTH = 255;
 
 export class UserService {
-  public static async register(
+  private readonly UserModel = BaseModel.getModel<IUser>(ModelName.User);
+
+  public async register(
     email: string,
     username: string,
     password: string,
@@ -26,11 +29,11 @@ export class UserService {
       throw new InvalidEmailError(email);
     }
 
-    if (await UserModel.findOne({ email: email })) {
+    if (await this.UserModel.findOne({ email: email })) {
       throw new EmailExistsError(email);
     }
 
-    if (await UserModel.findOne({ username: username })) {
+    if (await this.UserModel.findOne({ username: username })) {
       throw new UsernameExistsError(username);
     }
 
@@ -38,12 +41,13 @@ export class UserService {
     // and keep the previous logic for password. Adjust this logic if needed.
     if (
       !password ||
-      password.length < 8 ||
+      password.length < MIN_PASSWORD_LENGTH ||
+      password.length > MAX_PASSWORD_LENGTH ||
       !/\d/.test(password) ||
       !/[A-Za-z]/.test(password)
     ) {
       throw new InvalidPasswordError(
-        'Password must be at least 8 characters long and contain both letters and numbers',
+        `Password must be between ${MIN_PASSWORD_LENGTH} and ${MAX_PASSWORD_LENGTH} characters long and contain both letters and numbers.`,
       );
     }
 
@@ -64,7 +68,7 @@ export class UserService {
       const auth0User = auth0UserResponse.data;
 
       // Register user in local MongoDB
-      const newUser = await UserModel.create({
+      const newUser = await this.UserModel.create({
         email: email,
         username: auth0User.username,
         auth0Id: auth0User.user_id,
@@ -79,11 +83,11 @@ export class UserService {
     }
   }
 
-  public static async getUserByAuth0Id(
+  public async getUserByAuth0Id(
     auth0Id: string,
   ): Promise<Document & IUser> {
     try {
-      const user = await UserModel.findOne({ auth0Id: auth0Id });
+      const user = await this.UserModel.findOne({ auth0Id: auth0Id });
       if (!user) {
         throw new Error(`User with Auth0 ID ${auth0Id} not found`);
       }

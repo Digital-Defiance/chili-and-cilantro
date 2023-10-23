@@ -1,9 +1,10 @@
-import { BaseError } from "./baseError";
-export class InvalidEmailError extends BaseError {
+import { ValidationError } from "./validationError";
+
+export class InvalidEmailError extends ValidationError {
   public readonly email: string;
 
   constructor(email: string) {
-    super('Invalid Email Address', 'InvalidEmail');
+    super('Invalid email address.', 'Invalid email.');
     this.email = email;
   }
 }

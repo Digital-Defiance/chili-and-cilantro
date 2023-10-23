@@ -1,8 +1,9 @@
 import { BaseError } from "./baseError";
-export class UsernameExistsError extends BaseError {
+import { ValidationError } from "./validationError";
+export class UsernameExistsError extends ValidationError {
   public readonly username: string;
   constructor(username: string) {
-    super('Username already exists', 'UsernameExistsError');
+    super('Username already exists.', 'Invalid username.');
     this.username = username;
   }
 }

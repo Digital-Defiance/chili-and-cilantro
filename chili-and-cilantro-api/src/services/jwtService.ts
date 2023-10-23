@@ -14,7 +14,8 @@ import { UserService } from './userService';
 import { IUser } from '@chili-and-cilantro/chili-and-cilantro-lib';
 
 export class JwtService {
-  private client: JwksClient;
+  private readonly client: JwksClient;
+  private readonly userService: UserService = new UserService();
 
   constructor() {
     this.client = new JwksClient({
@@ -85,7 +86,7 @@ export class JwtService {
         return res.status(401).json({ message: 'Unable to determine user id' });
       }
 
-      const user = await UserService.getUserByAuth0Id(auth0User.user_id);
+      const user = await this.userService.getUserByAuth0Id(auth0User.user_id);
       if (!user) {
         return res.status(401).json({ message: 'User not found' });
       }
@@ -129,7 +130,7 @@ export class JwtService {
     const auth0UserId = decoded.sub;
 
     // Fetch the user from MongoDB using the Auth0 user ID
-    const user = await UserService.getUserByAuth0Id(auth0UserId);
+    const user = await this.userService.getUserByAuth0Id(auth0UserId);
 
     if (!user) {
       throw new Error('User not found in database');

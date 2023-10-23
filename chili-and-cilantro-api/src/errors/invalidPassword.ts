@@ -1,6 +1,7 @@
-import { BaseError } from "./baseError";
-export class InvalidPasswordError extends BaseError {
+import { ValidationError } from "./validationError";
+
+export class InvalidPasswordError extends ValidationError {
   constructor(message: string) {
-    super(message, 'InvalidPassword');
+    super(message, 'Invalid password.');
   }
 }

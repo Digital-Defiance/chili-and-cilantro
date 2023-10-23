@@ -1,4 +1,4 @@
-export class BaseError extends Error {
+export abstract class BaseError extends Error {
   public readonly message: string;
   public readonly name: string;
   constructor(message: string, name: string) {

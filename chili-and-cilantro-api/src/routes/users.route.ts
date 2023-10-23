@@ -2,15 +2,15 @@ import { Request, Response, Router } from 'express';
 import { UserService } from '../services/userService';
 import { validateAccessToken } from '../middlewares/auth0';
 import { JwtService } from '../services/jwtService';
-import { managementClient } from '../auth0';
 
 export const usersRouter = Router();
+const userService = new UserService();
 const jwtService = new JwtService();
 
 usersRouter.post('/register', async (req: Request, res: Response) => {
   const { email, username, password } = req.body;
   try {
-    await UserService.register(email, username, password);
+    await userService.register(email, username, password);
     res.status(201).json({
       message: 'User created successfully',
       email: email,
