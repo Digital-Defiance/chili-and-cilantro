@@ -21,10 +21,11 @@ import { InvalidGameNameError } from '../errors/invalidGameName';
 import { InvalidGamePasswordError } from '../errors/invalidGamePassword';
 import { InvalidGameParameterError } from '../errors/invalidGameParameter';
 import { InvalidUserNameError } from '../errors/invalidUserName';
-
+import { NotEnoughChefsError } from '../errors/notEnoughChefs';
 
 
 export const MAX_CHEFS = 8;
+export const MIN_CHEFS = 3;
 export const MIN_PASSWORD_LENGTH = 3;
 export const MAX_PASSWORD_LENGTH = 30;
 export const MIN_GAME_NAME_LENGTH = 2;
@@ -60,8 +61,8 @@ export class GameService {
       name: gameName,
       password,
       maxChefs: maxChefs,
-      gamePhase: GamePhase.LOBBY,
-      currentChef: 0,
+      currentPhase: GamePhase.LOBBY,
+      currentChef: -1,
       firstChef: firstChef,
       chefs: [chefId],
       turnOrder: [chefId], // will be chosen when the game is about to start
@@ -134,8 +135,8 @@ export class GameService {
       name: existingGame.name,
       password: existingGame.password,
       maxChefs: existingGame.maxChefs,
-      gamePhase: GamePhase.LOBBY,
-      currentChef: 0,
+      currentPhase: GamePhase.LOBBY,
+      currentChef: -1,
       firstChef: firstChef,
       chefs: [chefId],
       turnOrder: [chefId], // will be chosen when the game is about to start
@@ -155,5 +156,53 @@ export class GameService {
       details: {},
     });
     return { game, chef };
+  }
+
+  // Utility method to shuffle array (consider placing this in a shared utility file)
+  private shuffleArray(array: any[]): any[] {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+    }
+    return array;
+  }
+
+  public async startGame(gameId: string, firstChefId?: string): Promise<IGame & Document> {
+    const game = await this.GameModel.findOne({ _id: gameId });
+    if (!game) {
+      throw new InvalidGameError();
+    }
+    if (game.currentPhase !== GamePhase.LOBBY) {
+      throw new GameInProgressError();
+    }
+    if (game.chefs.length < MIN_CHEFS) {
+      throw new NotEnoughChefsError(game.chefs.length, MIN_CHEFS);
+    }
+    game.currentPhase = GamePhase.SETUP;
+    // if a firstChefId is provided, they go first and the turn order is randomized
+    // create a random order of players
+    // turnOrder is an array of chef ids, in order
+    const chefIds = game.chefs.map(chef => chef.toString());
+    if (firstChefId) {
+      // Verify the firstChefId is valid and part of the game
+      if (!chefIds.includes(firstChefId)) {
+        throw new InvalidGameParameterError('First chef must be one of the chefs in the game.', 'firstChefId');
+      }
+
+      // Prepare the turn order
+      const firstChefIndex = chefIds.indexOf(firstChefId);
+      const remainingChefs = [...chefIds]; // Clone the array
+      remainingChefs.splice(firstChefIndex, 1); // Remove the firstChefId
+      const shuffledRemainingChefs = this.shuffleArray(remainingChefs); // Implement or use a utility method to shuffle the array
+
+      game.turnOrder = [firstChefId, ...shuffledRemainingChefs]; // Combine the first chef with the shuffled remaining chefs
+    } else {
+      // Handle the case when no firstChefId is provided
+      // For example, shuffle all chefs and set the turn order
+      game.turnOrder = this.shuffleArray(chefIds);
+      game.currentChef = 0;
+    }
+    const savedGame = await game.save();
+    return savedGame;
   }
 }
