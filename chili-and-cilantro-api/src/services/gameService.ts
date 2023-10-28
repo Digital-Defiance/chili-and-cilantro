@@ -128,6 +128,9 @@ export class GameService {
     if (!existingGame) {
       throw new InvalidGameError();
     }
+    if (existingGame.currentPhase !== GamePhase.GAME_OVER) {
+      throw new GameInProgressError();
+    }
     const gameId = new ObjectId();
     const chefId = new ObjectId();
     const game = await this.GameModel.create({
