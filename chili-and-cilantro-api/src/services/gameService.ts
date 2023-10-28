@@ -121,4 +121,39 @@ export class GameService {
     await game.save();
     return { game, chef };
   }
+
+  public async createNewGameFromExisting(existingGameId: string, firstChef: FirstChef): Promise<{ game: IGame & Document, chef: IChef & Document }> {
+    const existingGame = await this.GameModel.findOne({ _id: existingGameId });
+    if (!existingGame) {
+      throw new InvalidGameError();
+    }
+    const gameId = new ObjectId();
+    const chefId = new ObjectId();
+    const game = await this.GameModel.create({
+      _id: gameId,
+      name: existingGame.name,
+      password: existingGame.password,
+      maxChefs: existingGame.maxChefs,
+      gamePhase: GamePhase.LOBBY,
+      currentChef: 0,
+      firstChef: firstChef,
+      chefs: [chefId],
+      turnOrder: [chefId], // will be chosen when the game is about to start
+      host: existingGame.host,
+    });
+    const chef = await this.ChefModel.create({
+      _id: chefId,
+      gameId: gameId,
+      userId: existingGame.host,
+      hand: [],
+      state: ChefState.LOBBY,
+      host: true,
+    });
+    const action = await this.ActionModel.create({
+      chef: chef._id,
+      type: Action.CREATE_GAME,
+      details: {},
+    });
+    return { game, chef };
+  }
 }
