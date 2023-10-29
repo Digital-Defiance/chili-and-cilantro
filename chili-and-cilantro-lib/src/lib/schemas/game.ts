@@ -2,10 +2,11 @@ import mongoose from 'mongoose';
 import { GamePhase } from '../enumerations/gamePhase';
 import ModelName from '../enumerations/modelName';
 import { FirstChef } from '../enumerations/firstChef';
+import { IGame } from '../interfaces/game';
 
 const { Schema } = mongoose;
 
-export const GameSchema = new Schema({
+export const GameSchema = new Schema<IGame>({
   name: {
     type: String,
     required: true,
@@ -56,6 +57,21 @@ export const GameSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: ModelName.User,
     required: true,
+  },
+  lastGame: {
+    type: Schema.Types.ObjectId,
+    ref: ModelName.Game,
+    required: false,
+  },
+  highestBidder: {
+    type: Schema.Types.ObjectId,
+    ref: ModelName.Chef,
+    required: false,
+  },
+  winner: {
+    type: Schema.Types.ObjectId,
+    ref: ModelName.Chef,
+    required: false,
   },
 }, {
   timestamps: true, // This will provide createdAt and updatedAt fields automatically

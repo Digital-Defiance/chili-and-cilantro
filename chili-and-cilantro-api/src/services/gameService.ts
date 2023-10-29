@@ -144,6 +144,7 @@ export class GameService {
       chefs: [chefId],
       turnOrder: [chefId], // will be chosen when the game is about to start
       host: existingGame.host,
+      lastGame: existingGame._id,
     });
     const chef = await this.ChefModel.create({
       _id: chefId,

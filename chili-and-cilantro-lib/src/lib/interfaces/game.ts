@@ -17,4 +17,7 @@ export interface IGame extends IHasID, IHasTimestamps {
   turnOrder: Schema.Types.ObjectId[];
   roundHistory: IAction[];
   host: Schema.Types.ObjectId;
+  lastGame?: Schema.Types.ObjectId;
+  highestBidder?: Schema.Types.ObjectId;
+  winner?: Schema.Types.ObjectId;
 }
