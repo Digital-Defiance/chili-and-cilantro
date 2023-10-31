@@ -2,19 +2,24 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 import express, { Application } from 'express';
 import https from 'https';
+import { Server, createServer } from "http";
 import fs from 'fs';
+import socket from 'socket.io';
 import { environment } from './environment';
 import { setupDatabase } from './setupDatabase';
 import { setupMiddlewares } from './setupMiddlewares';
 import { setupRoutes } from './setupRoutes';
 import { setupStaticReactApp } from './setupStaticReactApp';
+import { setupSockets } from './setupSockets';
 
 declare global {
   namespace Express {
-    interface User {}
+    interface User { }
   }
 }
-const app: Application = express();
+export const app: Application = express();
+export let server: https.Server | Server;
+export let io: socket.Server;
 
 async function configureApplication(app: Application): Promise<void> {
   await setupDatabase();
@@ -23,7 +28,7 @@ async function configureApplication(app: Application): Promise<void> {
   await setupStaticReactApp(app);
 }
 
-configureApplication(app).then(() => {
+configureApplication(app).then(async () => {
   if (environment.developer.sslEnabled) {
     const path =
       (process.env.NX_WORKSPACE_ROOT ?? '.') +
@@ -32,18 +37,19 @@ configureApplication(app).then(() => {
       key: fs.readFileSync(path + 'cert.key'),
       cert: fs.readFileSync(path + 'cert.pem'),
     };
-    https
-      .createServer(httpsOptions, app)
-      .listen(environment.developer.port, () => {
-        console.log(
-          `[ ready ] https://${environment.developer.host}:${environment.developer.port}`,
-        );
-      });
+    server = https.createServer(httpsOptions, app);
+    server.listen(environment.developer.port, () => {
+      console.log(
+        `[ ready ] https://${environment.developer.host}:${environment.developer.port}`,
+      );
+    });
   } else {
-    app.listen(environment.developer.port, environment.developer.host, () => {
+    server = createServer(app);
+    server.listen(environment.developer.port, () => {
       console.log(
         `[ ready ] http://${environment.developer.host}:${environment.developer.port}`,
       );
     });
   }
+  io = setupSockets(server);
 });

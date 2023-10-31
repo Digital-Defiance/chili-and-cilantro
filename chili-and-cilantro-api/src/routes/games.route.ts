@@ -17,8 +17,9 @@ gamesRouter.post('/create', validateAccessToken,
     if (!user) {
       return res.status(401).json({ message: 'User not found' });
     }
-    const { name, password, maxChefs, firstChef } = req.body;
+    const { name, userName, password, maxChefs, firstChef } = req.body;
     const sanitizedName = (name as string)?.trim();
+    const sanitizedUserName = (userName as string)?.trim();
     const sanitizedPassword = (password as string)?.trim().toLowerCase();
     const sanitizedMaxChefs = parseInt(maxChefs, 10);
     const sanitizedFirstChef: FirstChef = firstChef as FirstChef;
@@ -34,8 +35,11 @@ gamesRouter.post('/create', validateAccessToken,
     if (!sanitizedFirstChef || !Object.values(FirstChef).includes(sanitizedFirstChef)) {
       return res.status(400).json({ message: 'Invalid first chef' });
     }
+    if (!validator.isAlphanumeric(userName)) {
+      return res.status(400).json({ message: 'Invalid user name' });
+    }
 
-    const game = await gameService.createGame(user, sanitizedName, sanitizedPassword, sanitizedMaxChefs, sanitizedFirstChef);
+    const game = await gameService.createGame(user, sanitizedUserName, sanitizedName, sanitizedPassword, sanitizedMaxChefs, sanitizedFirstChef);
   });
 
 gamesRouter.post('/join', validateAccessToken,
@@ -45,15 +49,15 @@ gamesRouter.post('/join', validateAccessToken,
     if (!user) {
       return res.status(401).json({ message: 'User not found' });
     }
-    const { name, password, maxChefs, firstChef } = req.body;
-    const sanitizedName = (name as string)?.trim();
+    const { gameId, userName, password } = req.body;
+    const sanitizedUserName = (userName as string)?.trim();
     const sanitizedPassword = (password as string)?.trim().toLowerCase();
-    if (!validator.isAlphanumeric(name) || sanitizedName.length < 2 || sanitizedName.length > MAX_GAME_NAME_LENGTH) {
-      return res.status(400).json({ message: 'Invalid name' });
-    }
     if (sanitizedPassword.length > 0 && !validator.isAlphanumeric(sanitizedPassword)) {
       return res.status(400).json({ message: 'Invalid password' });
     }
+    if (!validator.isAlphanumeric(sanitizedUserName)) {
+      return res.status(400).json({ message: 'Invalid user name' });
+    }
 
-    const game = await gameService.joinGame(user, sanitizedName, sanitizedPassword, sanitizedMaxChefs, sanitizedFirstChef);
+    const game = await gameService.joinGame(gameId, sanitizedPassword, user, sanitizedUserName);
   });

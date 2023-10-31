@@ -38,6 +38,7 @@ export const environment: IEnvironment = {
     host: host,
     port: port,
     sslEnabled: sslEnabled,
+    corsOrigin: process.env.CORS_ORIGIN ?? getSiteUrl(),
   },
   auth0: {
     database: process.env.AUTH0_DATABASE ?? '',

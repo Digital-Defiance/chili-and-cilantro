@@ -6,6 +6,7 @@ export interface IEnvironment {
     host: string;
     port: number;
     sslEnabled: boolean;
+    corsOrigin: string;
   };
   auth0: {
     database: string;
