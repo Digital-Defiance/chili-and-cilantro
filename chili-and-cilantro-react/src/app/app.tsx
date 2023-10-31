@@ -5,6 +5,7 @@ import styles from './app.module.scss';
 import AccountError from '../pages/account-error';
 import ApiAccess from '../components/api-access';
 import Callback from '../components/callback';
+import Game from '../components/game';
 import LoginLink from '../components/login-link';
 import LogoutLink from '../components/logout-link';
 import Register from '../pages/register';
@@ -38,6 +39,11 @@ export function App() {
           {!isAuthenticated && (
             <li>
               <LoginLink />
+            </li>
+          )}
+          {isAuthenticated && (
+            <li>
+              <Link to="/game">Game</Link>
             </li>
           )}
           {isAuthenticated && (
@@ -77,6 +83,14 @@ export function App() {
           element={
             <div>
               <AuthenticationGuard component={ApiAccess} />
+            </div>
+          }
+        />
+        <Route
+          path="/game"
+          element={
+            <div>
+              <AuthenticationGuard component={Game} />
             </div>
           }
         />

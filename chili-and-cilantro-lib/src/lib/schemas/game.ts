@@ -7,6 +7,10 @@ import { IGame } from '../interfaces/game';
 const { Schema } = mongoose;
 
 export const GameSchema = new Schema<IGame>({
+  code: {
+    type: String,
+    required: true,
+  },
   name: {
     type: String,
     required: true,
@@ -20,7 +24,7 @@ export const GameSchema = new Schema<IGame>({
     ref: ModelName.Chef,
     required: true,
   }],
-  chefs: [{
+  chefIds: [{
     type: Schema.Types.ObjectId,
     ref: ModelName.Chef,
     required: true,
@@ -53,7 +57,12 @@ export const GameSchema = new Schema<IGame>({
     ref: ModelName.Chef,
     required: true,
   }],
-  host: {
+  hostChefId: {
+    type: Schema.Types.ObjectId,
+    ref: ModelName.Chef,
+    required: true,
+  },
+  hostUserId: {
     type: Schema.Types.ObjectId,
     ref: ModelName.User,
     required: true,

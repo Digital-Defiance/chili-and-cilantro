@@ -4,12 +4,11 @@ import { validateAccessToken } from '../middlewares/auth0';
 import { JwtService } from '../services/jwtService';
 
 export const usersRouter = Router();
-const userService = new UserService();
-const jwtService = new JwtService();
 
 usersRouter.post('/register', async (req: Request, res: Response) => {
   const { email, username, password } = req.body;
   try {
+    const userService = new UserService();
     await userService.register(email, username, password);
     res.status(201).json({
       message: 'User created successfully',
@@ -25,6 +24,7 @@ usersRouter.post(
   '/validate',
   validateAccessToken,
   async (req: Request, res: Response) => {
+    const jwtService = new JwtService();
     jwtService.authenticateUser(req, res, async (user, auth0User) => {
       if (
         auth0User.email_verified &&

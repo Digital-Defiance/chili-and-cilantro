@@ -1,8 +1,8 @@
 import { ValidationError } from "./validationError";
-import { MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH } from "../services/gameService";
+import constants from "../constants";
 
 export class InvalidGamePasswordError extends ValidationError {
   constructor() {
-    super(`Must be alphanumeric and between ${MIN_PASSWORD_LENGTH} and ${MAX_PASSWORD_LENGTH}.`, "Invalid game password.");
+    super(`Must be alphanumeric and between ${constants.MIN_PASSWORD_LENGTH} and ${constants.MAX_PASSWORD_LENGTH}.`, "Invalid game password.");
   }
 }

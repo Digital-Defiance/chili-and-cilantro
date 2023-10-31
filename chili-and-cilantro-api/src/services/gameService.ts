@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb';
-import { Document } from 'mongoose';
+import { Document, Model, startSession } from 'mongoose';
 import validator from 'validator';
 import {
   Action,
@@ -13,6 +13,7 @@ import {
   ICreateGameDetails,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { AlreadyJoinedError } from '../errors/alreadyJoined';
+import { AlreadyJoinedOtherError } from '../errors/alreadyJoinedOther';
 import { GameFullError } from '../errors/gameFull';
 import { GameInProgressError } from '../errors/gameInProgress';
 import { GamePasswordMismatchError } from '../errors/gamePasswordMismatch';
@@ -22,70 +23,114 @@ import { InvalidGamePasswordError } from '../errors/invalidGamePassword';
 import { InvalidGameParameterError } from '../errors/invalidGameParameter';
 import { InvalidUserNameError } from '../errors/invalidUserName';
 import { NotEnoughChefsError } from '../errors/notEnoughChefs';
-
-
-export const MAX_CHEFS = 8;
-export const MIN_CHEFS = 3;
-export const MIN_PASSWORD_LENGTH = 3;
-export const MAX_PASSWORD_LENGTH = 30;
-export const MIN_GAME_NAME_LENGTH = 2;
-export const MAX_GAME_NAME_LENGTH = 255;
-export const MIN_USER_NAME_LENGTH = 2;
-export const MAX_USER_NAME_LENGTH = 255;
+import { NotHostError } from '../errors/notHost';
+import { SocketManager } from '../socketManager';
+import { IDatabase } from '../interfaces/database';
+import constants from '../constants';
 
 export class GameService {
-  private readonly ActionModel = BaseModel.getModel<IAction>(ModelName.Action);
-  private readonly ChefModel = BaseModel.getModel<IChef>(ModelName.Chef);
-  private readonly GameModel = BaseModel.getModel<IGame>(ModelName.Game);
+  private readonly ActionModel: Model<IAction>;
+  private readonly ChefModel: Model<IChef>;
+  private readonly GameModel: Model<IGame>;
+  private readonly socketManager: SocketManager;
+
+  constructor(database: IDatabase, socketManager: SocketManager) {
+    this.ActionModel = database.getModel<IAction>(ModelName.Action);
+    this.ChefModel = database.getModel<IChef>(ModelName.Chef);
+    this.GameModel = database.getModel<IGame>(ModelName.Game);
+    this.socketManager = socketManager;
+  }
+
+  private generateGameCode(): string {
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    let code = '';
+    for (let i = 0; i < constants.GAME_CODE_LENGTH; i++) {
+      code += letters.charAt(Math.floor(Math.random() * letters.length));
+    }
+    return code;
+  }
+
+  public async generateNewGameCode(): Promise<string> {
+    // find a 4 letter game code that is not being used by a game
+    // codes are freed up when currentPhase is GAME_OVER
+    let code = '';
+    let game = null;
+    while (!game) {
+      code = this.generateGameCode();
+      game = await this.GameModel.findOne({ code, currentPhase: { $ne: GamePhase.GAME_OVER } });
+    }
+    return code;
+  }
 
   public async createGame(user: IUser, userName: string, gameName: string, password: string, maxChefs: number, firstChef: FirstChef): Promise<{ game: IGame & Document, chef: IChef & Document }> {
-    if (!validator.isAlphanumeric(userName) || userName.length < MIN_USER_NAME_LENGTH || userName.length > MAX_USER_NAME_LENGTH) {
+    if (this.userIsInActiveGame(user._id.toString())) {
+      throw new AlreadyJoinedOtherError();
+    }
+    if (!validator.isAlphanumeric(userName) || userName.length < constants.MIN_USER_NAME_LENGTH || userName.length > constants.MAX_USER_NAME_LENGTH) {
       throw new InvalidUserNameError();
     }
-    if (!validator.isAlphanumeric(gameName) || gameName.length < MIN_GAME_NAME_LENGTH || gameName.length > MAX_GAME_NAME_LENGTH) {
+    if (!validator.isAlphanumeric(gameName) || gameName.length < constants.MIN_GAME_NAME_LENGTH || gameName.length > constants.MAX_GAME_NAME_LENGTH) {
       throw new InvalidGameNameError();
     }
-    if (password.length > 0 && (!validator.isAlphanumeric(password) || password.length < MIN_PASSWORD_LENGTH || password.length > MAX_PASSWORD_LENGTH)) {
+    if (password.length > 0 && (!validator.isAlphanumeric(password) || password.length < constants.MIN_GAME_PASSWORD_LENGTH || password.length > constants.MAX_GAME_PASSWORD_LENGTH)) {
       throw new InvalidGamePasswordError();
     }
-    if (maxChefs < 2 || maxChefs > MAX_CHEFS) {
-      throw new InvalidGameParameterError(`Must be between 2 and ${MAX_CHEFS}.`, 'maxChefs');
+    if (maxChefs < 2 || maxChefs > constants.MAX_CHEFS) {
+      throw new InvalidGameParameterError(`Must be between 2 and ${constants.MAX_CHEFS}.`, 'maxChefs');
     }
     if (!firstChef || !Object.values(FirstChef).includes(firstChef)) {
       throw new InvalidGameParameterError('Must be a valid first chef option.', 'firstChef');
     }
-    const gameId = new ObjectId();
-    const chefId = new ObjectId();
-    const game = await this.GameModel.create({
-      _id: gameId,
-      name: gameName,
-      password,
-      maxChefs: maxChefs,
-      currentPhase: GamePhase.LOBBY,
-      currentChef: -1,
-      firstChef: firstChef,
-      chefs: [chefId],
-      turnOrder: [chefId], // will be chosen when the game is about to start
-      host: user._id,
-    });
-    const chef = await this.ChefModel.create({
-      _id: chefId,
-      gameId: gameId,
-      userId: user._id,
-      hand: [],
-      state: ChefState.LOBBY,
-      host: true,
-    });
-    const action = await this.ActionModel.create({
-      chef: chef._id,
-      type: Action.CREATE_GAME,
-      details: {},
-    });
-    return { game, chef };
+    const session = await startSession();
+    try {
+      session.startTransaction();
+      const gameId = new ObjectId();
+      const chefId = new ObjectId();
+      const gameCode = await this.generateNewGameCode();
+      const game = await this.GameModel.create({
+        _id: gameId,
+        code: gameCode,
+        name: gameName,
+        password,
+        maxChefs: maxChefs,
+        currentPhase: GamePhase.LOBBY,
+        currentChef: -1,
+        firstChef: firstChef,
+        chefIds: [chefId],
+        turnOrder: [], // will be chosen when the game is about to start
+        hostChefId: chefId,
+        hostUserId: user._id,
+      });
+      const chef = await this.ChefModel.create({
+        _id: chefId,
+        gameId: gameId,
+        userId: user._id,
+        hand: [],
+        state: ChefState.LOBBY,
+        host: true,
+      });
+      const action = await this.ActionModel.create({
+        chef: chef._id,
+        type: Action.CREATE_GAME,
+        details: {},
+      });
+      await session.commitTransaction();
+      return { game, chef };
+    }
+    catch (e) {
+      await session.abortTransaction();
+      throw e;
+    }
+    finally {
+      session.endSession();
+    }
   }
 
-  public async joinGame(gameId: string, password: string, user: IUser, userName: string): Promise<{ game: IGame & Document, chef: IChef & Document }> {
-    const game = await this.GameModel.findOne({ _id: gameId });
+  public async joinGame(gameCode: string, password: string, user: IUser, userName: string): Promise<{ game: IGame & Document, chef: IChef & Document }> {
+    if (this.userIsInActiveGame(user._id.toString())) {
+      throw new AlreadyJoinedOtherError();
+    }
+    const game = await this.GameModel.findOne({ code: gameCode, currentPhase: { $ne: GamePhase.GAME_OVER } });
     if (!game) {
       throw new InvalidGameError();
     }
@@ -95,74 +140,127 @@ export class GameService {
     if (game.currentPhase !== GamePhase.LOBBY) {
       throw new GameInProgressError();
     }
-    if (game.chefs.length >= game.maxChefs) {
+    if (game.chefIds.length >= game.maxChefs) {
       throw new GameFullError();
     }
-    if (!validator.isAlphanumeric(userName) || userName.length < MIN_USER_NAME_LENGTH || userName.length > MAX_USER_NAME_LENGTH) {
+    if (!validator.isAlphanumeric(userName) || userName.length < constants.MIN_USER_NAME_LENGTH || userName.length > constants.MAX_USER_NAME_LENGTH) {
       throw new InvalidUserNameError();
     }
-    // check if the chef is already in the game
-    const existingChef = this.ChefModel.findOne({ gameId: game._id, userId: user._id });
-    if (existingChef) {
-      throw new AlreadyJoinedError();
+    const session = await startSession();
+    try {
+      session.startTransaction();
+      // check if the chef is already in the game
+      const existingChef = this.ChefModel.findOne({ gameId: game._id, userId: user._id });
+      if (existingChef) {
+        throw new AlreadyJoinedError();
+      }
+      const chef = await this.ChefModel.create({
+        gameId: game._id,
+        userId: user._id,
+        hand: [],
+        state: ChefState.LOBBY,
+        host: false,
+      });
+      const action = await this.ActionModel.create({
+        chef: chef._id,
+        type: Action.JOIN_GAME,
+        details: {},
+      })
+      game.chefIds.push(chef._id);
+      await game.save();
+      await session.commitTransaction();
+      return { game, chef };
+    } catch (e) {
+      await session.abortTransaction();
+      throw e;
     }
-    const chef = await this.ChefModel.create({
-      gameId: game._id,
-      userId: user._id,
-      hand: [],
-      state: ChefState.LOBBY,
-      host: false,
-    });
-    const action = await this.ActionModel.create({
-      chef: chef._id,
-      type: Action.JOIN_GAME,
-      details: {},
-    })
-    game.chefs.push(chef._id);
-    await game.save();
-    return { game, chef };
+    finally {
+      session.endSession();
+    }
   }
 
-  public async createNewGameFromExisting(existingGameId: string, firstChef: FirstChef): Promise<{ game: IGame & Document, chef: IChef & Document }> {
-    const existingGame = await this.GameModel.findOne({ _id: existingGameId });
+  public async createNewGameFromExisting(
+    existingGameId: string,
+    firstChef: FirstChef
+  ): Promise<{ game: IGame & Document, chef: IChef & Document }> {
+    const existingGame = await this.GameModel.findById(existingGameId);
     if (!existingGame) {
       throw new InvalidGameError();
     }
     if (existingGame.currentPhase !== GamePhase.GAME_OVER) {
       throw new GameInProgressError();
     }
-    const gameId = new ObjectId();
-    const chefId = new ObjectId();
-    const game = await this.GameModel.create({
-      _id: gameId,
-      name: existingGame.name,
-      password: existingGame.password,
-      maxChefs: existingGame.maxChefs,
-      currentPhase: GamePhase.LOBBY,
-      currentChef: -1,
-      firstChef: firstChef,
-      chefs: [chefId],
-      turnOrder: [chefId], // will be chosen when the game is about to start
-      host: existingGame.host,
-      lastGame: existingGame._id,
-    });
-    const chef = await this.ChefModel.create({
-      _id: chefId,
-      gameId: gameId,
-      userId: existingGame.host,
-      hand: [],
-      state: ChefState.LOBBY,
-      host: true,
-    });
-    const action = await this.ActionModel.create({
-      chef: chef._id,
-      type: Action.CREATE_GAME,
-      details: {},
-    });
-    return { game, chef };
+
+    const session = await startSession();
+    try {
+      session.startTransaction();
+      const newChefIds = existingGame.chefIds.map(() => new ObjectId());
+
+      // find the existing chef id's index
+      const hostChefIndex = existingGame.chefIds.findIndex(chefId => existingGame.hostChefId.toString() == chefId.toString());
+      const newHostChefId = newChefIds[hostChefIndex];
+
+      // we need to look up the user id for all chefs in the current game
+      const existingChefs = await this.ChefModel.find({ _id: { $in: existingGame.chefIds } });
+
+      // Create the new Game document without persisting to the database yet
+      const newGame = new this.GameModel({
+        code: existingGame.code,
+        name: `${existingGame.name} - New`,
+        password: existingGame.password,
+        maxChefs: existingGame.maxChefs,
+        currentPhase: GamePhase.LOBBY,
+        currentChef: -1,
+        firstChef,
+        chefIds: newChefIds,
+        turnOrder: [], // will be chosen when the game is about to start
+        hostChefId: newChefIds[hostChefIndex],
+        hostUserId: existingGame.hostUserId,
+        lastGame: existingGame._id,
+      });
+
+      // Create new Chef documents
+      const chefCreations = newChefIds.map((newChefId, index) => {
+        return this.ChefModel.create({
+          _id: newChefId,
+          gameId: newGame._id,
+          userId: existingChefs.find(chef => chef._id.toString() == existingGame.chefIds[index].toString()).userId,
+          hand: [],
+          state: ChefState.LOBBY,
+          host: newChefId == newHostChefId,
+        });
+      });
+
+      // Execute all creations concurrently
+      const chefs = await Promise.all(chefCreations);
+
+      // Persist the new game
+      const game = await newGame.save();
+
+      // Create action for game creation - this could be moved to an event or a method to encapsulate the logic
+      const action = await this.ActionModel.create({
+        chef: newGame.chefIds[hostChefIndex],
+        type: Action.CREATE_GAME,
+        details: {},
+      });
+
+      await session.commitTransaction();
+      return { game, chef: chefs[hostChefIndex] };
+    }
+    catch (e) {
+      await session.abortTransaction();
+      throw e;
+    }
+    finally {
+      session.endSession();
+    }
   }
 
-  // Utility method to shuffle array (consider placing this in a shared utility file)
+  /**
+   * Utility method to shuffle array (consider placing this in a shared utility file)
+   * @param array
+   * @returns shuffled array
+   */
   private shuffleArray(array: any[]): any[] {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -171,42 +269,211 @@ export class GameService {
     return array;
   }
 
-  public async startGame(gameId: string, firstChefId?: string): Promise<IGame & Document> {
+  /**
+   * Starts the specified game
+   * @param gameId 
+   * @param firstChefId 
+   * @returns 
+   */
+  public async startGame(userId: string, gameId: string, firstChefId?: string): Promise<IGame & Document> {
+    if (!this.isGameHost(userId, gameId)) {
+      throw new NotHostError();
+    }
+    const session = await startSession();
+    try {
+      const game = await this.GameModel.findOne({ _id: gameId });
+      if (!game) {
+        throw new InvalidGameError();
+      }
+      if (game.currentPhase !== GamePhase.LOBBY) {
+        throw new GameInProgressError();
+      }
+      if (game.chefIds.length < constants.MIN_CHEFS) {
+        throw new NotEnoughChefsError(game.chefIds.length, constants.MIN_CHEFS);
+      }
+      game.currentPhase = GamePhase.SETUP;
+      // if a firstChefId is provided, they go first and the turn order is randomized
+      // create a random order of players
+      // turnOrder is an array of chef ids, in order
+      const chefIds = game.chefIds.map(chef => chef.toString());
+      if (firstChefId) {
+        // Verify the firstChefId is valid and part of the game
+        if (!chefIds.includes(firstChefId)) {
+          throw new InvalidGameParameterError('First chef must be one of the chefs in the game.', 'firstChefId');
+        }
+
+        // Prepare the turn order
+        const firstChefIndex = chefIds.indexOf(firstChefId);
+        const remainingChefs = [...chefIds]; // Clone the array
+        remainingChefs.splice(firstChefIndex, 1); // Remove the firstChefId
+        const shuffledRemainingChefs = this.shuffleArray(remainingChefs); // Implement or use a utility method to shuffle the array
+
+        game.turnOrder = [firstChefId, ...shuffledRemainingChefs]; // Combine the first chef with the shuffled remaining chefs
+      } else {
+        // Handle the case when no firstChefId is provided
+        // For example, shuffle all chefs and set the turn order
+        game.turnOrder = this.shuffleArray(chefIds);
+        game.currentChef = 0;
+      }
+      const savedGame = await game.save();
+      await session.commitTransaction();
+      return savedGame;
+    }
+    catch (e) {
+      await session.abortTransaction();
+      throw e;
+    }
+    finally {
+      session.endSession();
+    }
+  }
+
+  /**
+   * Gets a Game model by game ID
+   * @param gameId 
+   * @returns Game model
+   */
+  public async getGameById(gameId: string): Promise<IGame & Document> {
     const game = await this.GameModel.findOne({ _id: gameId });
     if (!game) {
       throw new InvalidGameError();
     }
-    if (game.currentPhase !== GamePhase.LOBBY) {
-      throw new GameInProgressError();
-    }
-    if (game.chefs.length < MIN_CHEFS) {
-      throw new NotEnoughChefsError(game.chefs.length, MIN_CHEFS);
-    }
-    game.currentPhase = GamePhase.SETUP;
-    // if a firstChefId is provided, they go first and the turn order is randomized
-    // create a random order of players
-    // turnOrder is an array of chef ids, in order
-    const chefIds = game.chefs.map(chef => chef.toString());
-    if (firstChefId) {
-      // Verify the firstChefId is valid and part of the game
-      if (!chefIds.includes(firstChefId)) {
-        throw new InvalidGameParameterError('First chef must be one of the chefs in the game.', 'firstChefId');
-      }
+    return game;
+  }
 
-      // Prepare the turn order
-      const firstChefIndex = chefIds.indexOf(firstChefId);
-      const remainingChefs = [...chefIds]; // Clone the array
-      remainingChefs.splice(firstChefIndex, 1); // Remove the firstChefId
-      const shuffledRemainingChefs = this.shuffleArray(remainingChefs); // Implement or use a utility method to shuffle the array
-
-      game.turnOrder = [firstChefId, ...shuffledRemainingChefs]; // Combine the first chef with the shuffled remaining chefs
-    } else {
-      // Handle the case when no firstChefId is provided
-      // For example, shuffle all chefs and set the turn order
-      game.turnOrder = this.shuffleArray(chefIds);
-      game.currentChef = 0;
+  /**
+   * Gets a Game model by game code
+   * @param gameCode 
+   * @returns Game model
+   */
+  public async getGameByCode(gameCode: string): Promise<IGame & Document> {
+    // find where not GAME_OVER
+    const game = await this.GameModel.findOne({ code: gameCode, currentPhase: { $ne: GamePhase.GAME_OVER } });
+    if (!game) {
+      throw new InvalidGameError();
     }
-    const savedGame = await game.save();
-    return savedGame;
+    return game;
+  }
+
+  /**
+   * Finds games not in GAME_OVER phase with a lastModified date older than MAX_GAME_AGE_WITHOUT_ACTIVITY_IN_MINUTES and marks them GAME_OVER
+   */
+  public async expireOldGames(): Promise<void> {
+    // find games not in GAME_OVER phase with a lastModified date older than MAX_GAME_AGE_WITHOUT_ACTIVITY_IN_MINUTES
+    // cutoffDate is now minus MAX_GAME_AGE_WITHOUT_ACTIVITY_IN_MINUTES
+    const cutoffDate = new Date();
+    cutoffDate.setMinutes(cutoffDate.getMinutes() - constants.MAX_GAME_AGE_WITHOUT_ACTIVITY_IN_MINUTES);
+    const games = await this.GameModel.find({ currentPhase: { $ne: GamePhase.GAME_OVER }, lastModified: { $lt: cutoffDate } });
+    // set currentPhase to GAME_OVER
+    for (const game of games) {
+      game.currentPhase = GamePhase.GAME_OVER;
+      await game.save();
+      // TODO: close any sockets for this game
+    }
+  }
+
+  /**
+   * Returns whether the specified user is in an active game
+   * @param userId
+   * @returns boolean
+   */
+  public async userIsInActiveGame(userId: string): Promise<boolean> {
+    try {
+      const result = await this.GameModel.aggregate([
+        {
+          $match: {
+            currentPhase: { $ne: GamePhase.GAME_OVER }
+          }
+        },
+        {
+          $lookup: {
+            from: 'chefIds',
+            localField: 'chefIds',
+            foreignField: '_id',
+            as: 'chefDetails'
+          }
+        },
+        {
+          $unwind: '$chefDetails'
+        },
+        {
+          $match: {
+            'chefDetails.userId': new ObjectId(userId)
+          }
+        },
+        {
+          $count: 'activeGamesCount'
+        }
+      ]).exec(); // exec is optional here, await will work on aggregate directly
+
+      // If the aggregation result is empty, count is 0, otherwise, it's the returned count
+      const count = result.length > 0 ? result[0].activeGamesCount : 0;
+      return count > 0;
+    } catch (err) {
+      // Handle the error appropriately
+      console.error('Error checking if user is in game:', err);
+      throw err;
+    }
+  }
+
+  /**
+   * Returns whether the user is in the specified game, regardless of game state
+   * @param userId 
+   * @param gameId 
+   * @returns boolean
+   */
+  public async userIsInGame(userId: string, gameId: string): Promise<boolean> {
+    try {
+      const result = await this.GameModel.aggregate([
+        {
+          $match: {
+            _id: new ObjectId(gameId),
+            currentPhase: { $ne: GamePhase.GAME_OVER }
+          }
+        },
+        {
+          $lookup: {
+            from: 'chefIds',
+            localField: 'chefIds',
+            foreignField: '_id',
+            as: 'chefDetails'
+          }
+        },
+        {
+          $unwind: '$chefDetails'
+        },
+        {
+          $match: {
+            'chefDetails.userId': new ObjectId(userId) // Match specific userId
+          }
+        },
+        {
+          $count: 'activeGamesCount'
+        }
+      ]).exec(); // exec is optional here, await will work on aggregate directly
+
+      // If the aggregation result is empty, count is 0, otherwise, it's the returned count
+      const count = result.length > 0 ? result[0].activeGamesCount : 0;
+      return count > 0;
+    } catch (err) {
+      // Handle the error appropriately
+      console.error('Error checking if user is in the specified game:', err);
+      throw err; // Or you might want to return false or handle this differently
+    }
+  }
+
+  /**
+ * Returns whether the specified user is the host of the specified game
+ * @param userId
+ * @param gameId
+ * @returns boolean
+ */
+  public async isGameHost(userId: string, gameId: string): Promise<boolean> {
+    const count = await this.GameModel.countDocuments({
+      _id: new ObjectId(gameId),
+      hostUserId: new ObjectId(userId)
+    }).exec();
+
+    return count > 0;
   }
 }

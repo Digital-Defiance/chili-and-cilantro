@@ -10,7 +10,7 @@ import { setupDatabase } from './setupDatabase';
 import { setupMiddlewares } from './setupMiddlewares';
 import { setupRoutes } from './setupRoutes';
 import { setupStaticReactApp } from './setupStaticReactApp';
-import { setupSockets } from './setupSockets';
+import { setupSockets, SocketManager } from './socketManager';
 
 declare global {
   namespace Express {
@@ -19,7 +19,7 @@ declare global {
 }
 export const app: Application = express();
 export let server: https.Server | Server;
-export let io: socket.Server;
+export let socketManager: SocketManager;
 
 async function configureApplication(app: Application): Promise<void> {
   await setupDatabase();
@@ -51,5 +51,5 @@ configureApplication(app).then(async () => {
       );
     });
   }
-  io = setupSockets(server);
+  socketManager = setupSockets(server);
 });

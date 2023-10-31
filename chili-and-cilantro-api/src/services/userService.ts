@@ -12,9 +12,7 @@ import { EmailExistsError } from '../errors/emailExists';
 import { UsernameExistsError } from '../errors/usernameExists';
 import { managementClient } from '../auth0';
 import { environment } from '../environment';
-
-export const MIN_PASSWORD_LENGTH = 8;
-export const MAX_PASSWORD_LENGTH = 255;
+import constants from '../constants';
 
 export class UserService {
   private readonly UserModel = BaseModel.getModel<IUser>(ModelName.User);
@@ -41,13 +39,13 @@ export class UserService {
     // and keep the previous logic for password. Adjust this logic if needed.
     if (
       !password ||
-      password.length < MIN_PASSWORD_LENGTH ||
-      password.length > MAX_PASSWORD_LENGTH ||
+      password.length < constants.MIN_PASSWORD_LENGTH ||
+      password.length > constants.MAX_PASSWORD_LENGTH ||
       !/\d/.test(password) ||
       !/[A-Za-z]/.test(password)
     ) {
       throw new InvalidPasswordError(
-        `Password must be between ${MIN_PASSWORD_LENGTH} and ${MAX_PASSWORD_LENGTH} characters long and contain both letters and numbers.`,
+        `Password must be between ${constants.MIN_PASSWORD_LENGTH} and ${constants.MAX_PASSWORD_LENGTH} characters long and contain both letters and numbers.`,
       );
     }
 

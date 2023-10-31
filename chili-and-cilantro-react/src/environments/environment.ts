@@ -8,4 +8,8 @@ export const environment: IEnvironment = {
     audience: 'http://localhost:3000/',
     callbackUrl: 'http://localhost:3000/callback',
   },
+  game: {
+    apiUrl: 'http://localhost:3000/api',
+    socketHost: 'http://localhost:3000',
+  }
 };

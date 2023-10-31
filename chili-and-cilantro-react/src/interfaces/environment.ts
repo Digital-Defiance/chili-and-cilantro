@@ -6,4 +6,8 @@ export interface IEnvironment {
     audience: string;
     callbackUrl: string;
   };
+  game: {
+    apiUrl: string;
+    socketHost: string;
+  }
 }

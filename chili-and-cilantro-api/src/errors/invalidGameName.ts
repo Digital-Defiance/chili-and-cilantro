@@ -1,8 +1,8 @@
 import { ValidationError } from "./validationError";
-import { MIN_GAME_NAME_LENGTH, MAX_GAME_NAME_LENGTH } from "../services/gameService";
+import constants from "../constants";
 
 export class InvalidGameNameError extends ValidationError {
   constructor() {
-    super(`Must be alphanumeric and between ${MIN_GAME_NAME_LENGTH} and ${MAX_GAME_NAME_LENGTH}.`, "Invalid game name.");
+    super(`Must be alphanumeric and between ${constants.MIN_GAME_NAME_LENGTH} and ${constants.MAX_GAME_NAME_LENGTH}.`, "Invalid game name.");
   }
 }
