@@ -24,8 +24,11 @@ gamesRouter.post('/create', validateAccessToken,
     const sanitizedPassword = (password as string)?.trim().toLowerCase();
     const sanitizedMaxChefs = parseInt(maxChefs, 10);
     const sanitizedFirstChef: FirstChef = firstChef as FirstChef;
-    if (!validator.isAlphanumeric(name) || sanitizedName.length < 2 || sanitizedName.length > constants.MAX_GAME_NAME_LENGTH) {
+    if (!validator.matches(sanitizedName, /^[a-z0-9 ]+$/i) || sanitizedName.length < 2 || sanitizedName.length > constants.MAX_GAME_NAME_LENGTH) {
       return res.status(400).json({ message: 'Invalid name' });
+    }
+    if (!validator.matches(sanitizedUserName, /^[a-z0-9 ]+$/i) || sanitizedUserName.length < constants.MIN_USER_NAME_LENGTH || sanitizedUserName.length > constants.MAX_USER_NAME_LENGTH) {
+      return res.status(400).json({ message: 'Invalid user name' });
     }
     if (sanitizedPassword.length > 0 && !validator.isAlphanumeric(sanitizedPassword)) {
       return res.status(400).json({ message: 'Invalid password' });
@@ -60,7 +63,7 @@ gamesRouter.post('/join', validateAccessToken,
     if (sanitizedPassword.length > 0 && !validator.isAlphanumeric(sanitizedPassword)) {
       return res.status(400).json({ message: 'Invalid password' });
     }
-    if (!validator.isAlphanumeric(sanitizedUserName)) {
+    if (!validator.matches(sanitizedUserName, /^[a-z0-9 ]+$/i) || sanitizedUserName.length < constants.MIN_USER_NAME_LENGTH || sanitizedUserName.length > constants.MAX_USER_NAME_LENGTH) {
       return res.status(400).json({ message: 'Invalid user name' });
     }
 
