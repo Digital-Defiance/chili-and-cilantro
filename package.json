@@ -16,6 +16,7 @@
     "build": "yarn build:all",
     "build:dev": "yarn build:all:dev",
     "build-serve:dev": "npx nx build chili-and-cilantro-lib --configuration development && npx nx build chili-and-cilantro-react --configuration development && npx nx serve chili-and-cilantro-api --configuration development",
+    "serve:dev": "npx nx serve chili-and-cilantro-api --configuration development",
     "npm-globals": "npm install -g yarn @nrwl/cli npx nx jest",
     "clean:all": "rm -rf node_modules dist/ ~/.cache && yarn cache clean",
     "migrate:latest": "npx nx migrate latest",

@@ -24,10 +24,10 @@ gamesRouter.post('/create', validateAccessToken,
     const sanitizedPassword = (password as string)?.trim().toLowerCase();
     const sanitizedMaxChefs = parseInt(maxChefs, 10);
     const sanitizedFirstChef: FirstChef = firstChef as FirstChef;
-    if (!validator.matches(sanitizedName, /^[a-z0-9 ]+$/i) || sanitizedName.length < 2 || sanitizedName.length > constants.MAX_GAME_NAME_LENGTH) {
+    if (!validator.matches(sanitizedName, /^[A-Za-z0-9 ]+$/i) || sanitizedName.length < 2 || sanitizedName.length > constants.MAX_GAME_NAME_LENGTH) {
       return res.status(400).json({ message: 'Invalid name' });
     }
-    if (!validator.matches(sanitizedUserName, /^[a-z0-9 ]+$/i) || sanitizedUserName.length < constants.MIN_USER_NAME_LENGTH || sanitizedUserName.length > constants.MAX_USER_NAME_LENGTH) {
+    if (!validator.matches(sanitizedUserName, /^[A-Za-z0-9 ]+$/i) || sanitizedUserName.length < constants.MIN_USER_NAME_LENGTH || sanitizedUserName.length > constants.MAX_USER_NAME_LENGTH) {
       return res.status(400).json({ message: 'Invalid user name' });
     }
     if (sanitizedPassword.length > 0 && !validator.isAlphanumeric(sanitizedPassword)) {
@@ -38,9 +38,6 @@ gamesRouter.post('/create', validateAccessToken,
     }
     if (!sanitizedFirstChef || !Object.values(FirstChef).includes(sanitizedFirstChef)) {
       return res.status(400).json({ message: 'Invalid first chef' });
-    }
-    if (!validator.isAlphanumeric(userName)) {
-      return res.status(400).json({ message: 'Invalid user name' });
     }
 
     const database = new Database();
@@ -63,7 +60,7 @@ gamesRouter.post('/join', validateAccessToken,
     if (sanitizedPassword.length > 0 && !validator.isAlphanumeric(sanitizedPassword)) {
       return res.status(400).json({ message: 'Invalid password' });
     }
-    if (!validator.matches(sanitizedUserName, /^[a-z0-9 ]+$/i) || sanitizedUserName.length < constants.MIN_USER_NAME_LENGTH || sanitizedUserName.length > constants.MAX_USER_NAME_LENGTH) {
+    if (!validator.matches(sanitizedUserName, /^[A-Za-z0-9 ]+$/i) || sanitizedUserName.length < constants.MIN_USER_NAME_LENGTH || sanitizedUserName.length > constants.MAX_USER_NAME_LENGTH) {
       return res.status(400).json({ message: 'Invalid user name' });
     }
 
