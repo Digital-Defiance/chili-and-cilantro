@@ -13,8 +13,8 @@ import { MockDatabase } from '../fixtures/database';
 import { getRandomFirstChef } from '../fixtures/firstChef';
 
 // Mock the dependencies (use jest.mock for external modules)
-jest.mock('../../socketManager'); // Mock SocketManager
-jest.mock('../../services/Database'); // Mock Database
+jest.mock('../../src/socketManager'); // Mock SocketManager
+jest.mock('../../src/services/Database'); // Mock Database
 
 describe('GameService', () => {
   let gameService: GameService;
