@@ -24,20 +24,24 @@ usersRouter.post(
   '/validate',
   validateAccessToken,
   async (req: Request, res: Response) => {
-    const jwtService = new JwtService();
-    jwtService.authenticateUser(req, res, async (user, auth0User) => {
-      if (
-        auth0User.email_verified &&
-        user.email_verified === false
-      ) {
-        user.email_verified = true;
-        await user.save();
-      }
-      res
-        .status(200)
-        .json({ message: 'User validated successfully', user: user });
-    });
-  },
-);
+    try {
+      const jwtService = new JwtService();
+      jwtService.authenticateUser(req, res, async (user, auth0User) => {
+        if (
+          auth0User.email_verified &&
+          user.email_verified === false
+        ) {
+          user.email_verified = true;
+          await user.save();
+        }
+        res
+          .status(200)
+          .json({ message: 'User validated successfully', user: user });
+      });
+    }
+    catch (error) {
+      res.status(400).json(error);
+    }
+  });
 
 export default usersRouter;
