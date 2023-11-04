@@ -1,8 +1,5 @@
 import { createServer } from 'http';
-import { Server } from 'socket.io';
 import { MockJwksClient } from '../fixtures/jwksClient';
-import { setupSockets, SocketManager } from '../../src/socketManager';
-import { io as Client } from 'socket.io-client';
 import jwt from 'jsonwebtoken';
 import { ObjectId } from 'mongodb';
 import { Types } from 'mongoose';
@@ -15,26 +12,21 @@ import { MockDatabase } from '../fixtures/database';
 import { getRandomFirstChef } from '../fixtures/firstChef';
 
 // Mock the dependencies (use jest.mock for external modules)
-jest.mock('../../src/socketManager'); // Mock SocketManager
 jest.mock('../../src/services/Database'); // Mock Database
 
 describe('GameService', () => {
   let gameService: GameService;
   let httpServer;
   let ioServer;
-  let clientSocket;
   let jwksClient;
   const GameModel = BaseModel.getModel<IGame>(ModelName.Game);
 
   beforeAll((done) => {
-    httpServer = createServer();
-    ioServer = setupSockets(httpServer);
     jwksClient = new MockJwksClient();
   });
 
   beforeEach(() => {
     const database = new MockDatabase();
-    const socketManager = new SocketManager(httpServer, jwksClient);
     gameService = new GameService(database, socketManager);
     // Reset mocks before each test
     jest.clearAllMocks();
@@ -66,7 +58,6 @@ describe('GameService', () => {
 
   describe('createGame', () => {
     it('should create a game and chef successfully', async () => {
-      // Mock necessary methods in your mock Database and SocketManager classes
       const mockCreateGame = jest.fn();
       const mockCreateChef = jest.fn();
       const mockCreateAction = jest.fn();

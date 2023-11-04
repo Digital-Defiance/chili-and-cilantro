@@ -6,7 +6,6 @@ import validator from 'validator';
 import { FirstChef } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import constants from '../constants';
 import { Database } from '../services/database';
-import { SocketManager } from '../socketManager';
 
 export const gamesRouter = Router();
 
@@ -42,7 +41,7 @@ gamesRouter.post('/create', validateAccessToken,
       }
 
       const database = new Database();
-      const gameService = new GameService(database, SocketManager.getInstance());
+      const gameService = new GameService(database);
       const { game, chef } = await gameService.createGame(user, sanitizedUserName, sanitizedName, sanitizedPassword, sanitizedMaxChefs, sanitizedFirstChef);
       res.send({ game, chef });
     }
@@ -71,7 +70,7 @@ gamesRouter.post('/join', validateAccessToken,
       }
 
       const database = new Database();
-      const gameService = new GameService(database, SocketManager.getInstance());
+      const gameService = new GameService(database);
       const { game, chef } = await gameService.joinGame(gameId, sanitizedPassword, user, sanitizedUserName);
       res.send({ game, chef });
     }

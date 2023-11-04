@@ -4,13 +4,11 @@ import express, { Application } from 'express';
 import https from 'https';
 import { Server, createServer } from "http";
 import fs from 'fs';
-import socket from 'socket.io';
 import { environment } from './environment';
 import { setupDatabase } from './setupDatabase';
 import { setupMiddlewares } from './setupMiddlewares';
 import { setupRoutes } from './setupRoutes';
 import { setupStaticReactApp } from './setupStaticReactApp';
-import { setupSockets, SocketManager } from './socketManager';
 
 declare global {
   namespace Express {
@@ -19,7 +17,6 @@ declare global {
 }
 export const app: Application = express();
 export let server: https.Server | Server;
-export let socketManager: SocketManager;
 
 async function configureApplication(app: Application): Promise<void> {
   await setupDatabase();
@@ -51,5 +48,4 @@ configureApplication(app).then(async () => {
       );
     });
   }
-  socketManager = setupSockets(server);
 });

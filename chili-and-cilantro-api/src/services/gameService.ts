@@ -24,7 +24,6 @@ import { InvalidGameParameterError } from '../errors/invalidGameParameter';
 import { InvalidUserNameError } from '../errors/invalidUserName';
 import { NotEnoughChefsError } from '../errors/notEnoughChefs';
 import { NotHostError } from '../errors/notHost';
-import { SocketManager } from '../socketManager';
 import { IDatabase } from '../interfaces/database';
 import constants from '../constants';
 
@@ -32,13 +31,11 @@ export class GameService {
   private readonly ActionModel: Model<IAction>;
   private readonly ChefModel: Model<IChef>;
   private readonly GameModel: Model<IGame>;
-  private readonly socketManager: SocketManager;
 
-  constructor(database: IDatabase, socketManager: SocketManager) {
+  constructor(database: IDatabase) {
     this.ActionModel = database.getModel<IAction>(ModelName.Action);
     this.ChefModel = database.getModel<IChef>(ModelName.Chef);
     this.GameModel = database.getModel<IGame>(ModelName.Game);
-    this.socketManager = socketManager;
   }
 
   private generateGameCode(): string {
