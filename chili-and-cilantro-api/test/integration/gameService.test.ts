@@ -5,6 +5,8 @@ import { setupSockets, SocketManager } from '../../src/socketManager';
 import { io as Client } from 'socket.io-client';
 import jwt from 'jsonwebtoken';
 import { ObjectId } from 'mongodb';
+import { Types } from 'mongoose';
+import { BaseModel, IGame, ModelName } from '@chili-and-cilantro/chili-and-cilantro-lib';
 
 import { GameService } from '../../src/services/gameService';
 import { Database } from '../../src/services/database';
@@ -22,6 +24,7 @@ describe('GameService', () => {
   let ioServer;
   let clientSocket;
   let jwksClient;
+  const GameModel = BaseModel.getModel<IGame>(ModelName.Game);
 
   beforeAll((done) => {
     httpServer = createServer();
@@ -33,6 +36,32 @@ describe('GameService', () => {
     const database = new MockDatabase();
     const socketManager = new SocketManager(httpServer, jwksClient);
     gameService = new GameService(database, socketManager);
+    // Reset mocks before each test
+    jest.clearAllMocks();
+  });
+
+  describe('userIsInActiveGame', () => {
+    it('returns false when the user is not in an active game', async () => {
+      // Spy on the aggregate function and mock its implementation to return an empty array
+      jest.spyOn(GameModel, 'aggregate').mockResolvedValue([]);
+
+      const userId = new Types.ObjectId().toString();
+      const result = await gameService.userIsInActiveGame(userId);
+
+      expect(result).toBe(false);
+      expect(GameModel.aggregate).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns true when the user is in an active game', async () => {
+      // Spy on the aggregate function and mock its implementation to return a count
+      jest.spyOn(GameModel, 'aggregate').mockResolvedValue([{ activeGamesCount: 1 }]);
+
+      const userId = new Types.ObjectId().toString();
+      const result = await gameService.userIsInActiveGame(userId);
+
+      expect(result).toBe(true);
+      expect(GameModel.aggregate).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('createGame', () => {

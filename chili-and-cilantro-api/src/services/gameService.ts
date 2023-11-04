@@ -63,7 +63,7 @@ export class GameService {
   }
 
   public async createGame(user: IUser, userName: string, gameName: string, password: string, maxChefs: number, firstChef: FirstChef): Promise<{ game: IGame & Document, chef: IChef & Document }> {
-    if (this.userIsInActiveGame(user._id.toString())) {
+    if (this.userIsInActiveGame(user)) {
       throw new AlreadyJoinedOtherError();
     }
     if (!validator.isAlphanumeric(userName) || userName.length < constants.MIN_USER_NAME_LENGTH || userName.length > constants.MAX_USER_NAME_LENGTH) {
@@ -127,7 +127,7 @@ export class GameService {
   }
 
   public async joinGame(gameCode: string, password: string, user: IUser, userName: string): Promise<{ game: IGame & Document, chef: IChef & Document }> {
-    if (this.userIsInActiveGame(user._id.toString())) {
+    if (this.userIsInActiveGame(user)) {
       throw new AlreadyJoinedOtherError();
     }
     const game = await this.GameModel.findOne({ code: gameCode, currentPhase: { $ne: GamePhase.GAME_OVER } });
@@ -377,7 +377,7 @@ export class GameService {
    * @param userId
    * @returns boolean
    */
-  public async userIsInActiveGame(userId: string): Promise<boolean> {
+  public async userIsInActiveGame(user: IUser): Promise<boolean> {
     try {
       const result = await this.GameModel.aggregate([
         {
@@ -398,7 +398,7 @@ export class GameService {
         },
         {
           $match: {
-            'chefDetails.userId': new ObjectId(userId)
+            'chefDetails.userId': user._id
           }
         },
         {
