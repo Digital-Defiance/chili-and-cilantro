@@ -43,15 +43,14 @@ export const GameSchema = new Schema<IGame>(
     },
     password: {
       type: String,
-      required: [true, 'Password field is required'],
+      required: false,
       validate: {
         validator: function (v: string) {
           return (
             v !== undefined &&
-            (v.length == 0 ||
-              (validator.matches(v, constants.MULTILINGUAL_STRING_REGEX) &&
-                v.length >= constants.MIN_GAME_PASSWORD_LENGTH &&
-                v.length <= constants.MAX_GAME_PASSWORD_LENGTH))
+            validator.matches(v, constants.MULTILINGUAL_STRING_REGEX) &&
+            v.length >= constants.MIN_GAME_PASSWORD_LENGTH &&
+            v.length <= constants.MAX_GAME_PASSWORD_LENGTH
           );
         },
         message: (props) => `${props.value} is not a valid password!`,
