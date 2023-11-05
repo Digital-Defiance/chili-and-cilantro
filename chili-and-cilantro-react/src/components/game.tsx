@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { IdToken, useAuth0 } from '@auth0/auth0-react';
 import { environment } from '../environments/environment.prod';
-import { connect, Socket } from 'socket.io-client';
+// import { connect, Socket } from 'socket.io-client';
 
 function GameComponent() {
   const { isAuthenticated, getIdTokenClaims } = useAuth0();
@@ -11,7 +11,7 @@ function GameComponent() {
   const [displayName, setDisplayName] = useState<string>('');
   const [gamePassword, setGamePassword] = useState<string>('');
   const [gameCode, setGameCode] = useState<string>('');
-  const [socket, setSocket] = useState<Socket | null>(null);
+  //const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -21,25 +21,25 @@ function GameComponent() {
         }
         const idToken = claims.__raw;
         setToken(idToken);
-        connectToSocket(idToken);
+        //connectToSocket(idToken);
       });
     }
   }, [isAuthenticated]);
 
-  const connectToSocket = (token: string) => {
-    const socketInstance = connect(environment.game.socketHost, {
-      query: { token },
-    });
-    setSocket(socketInstance);
-  };
+  // const connectToSocket = (token: string) => {
+  //   const socketInstance = connect(environment.game.socketHost, {
+  //     query: { token },
+  //   });
+  //   setSocket(socketInstance);
+  // };
 
   const handleGameResponse = async (response: Response) => {
     if (response.ok) {
       const data = await response.json();
       const gameId = data.gameId;
-      if (socket) {
-        socket.emit('lobby:join', gameId);
-      }
+      // if (socket) {
+      //   socket.emit('lobby:join', gameId);
+      // }
     }
   };
 

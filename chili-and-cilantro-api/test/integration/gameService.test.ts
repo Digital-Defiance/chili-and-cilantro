@@ -27,7 +27,7 @@ describe('GameService', () => {
 
   beforeEach(() => {
     const database = new MockDatabase();
-    gameService = new GameService(database, socketManager);
+    gameService = new GameService(database);
     // Reset mocks before each test
     jest.clearAllMocks();
   });
@@ -114,7 +114,6 @@ describe('GameService', () => {
 
   describe('joinGame', () => {
     it('should join a game successfully', async () => {
-      // Mock necessary methods in your mock Database and SocketManager classes
       const mockFindOne = jest.fn();
       const mockCreateChef = jest.fn();
       const mockCreateAction = jest.fn();
