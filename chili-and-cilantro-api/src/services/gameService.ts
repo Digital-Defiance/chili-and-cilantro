@@ -52,11 +52,16 @@ export class GameService {
     // codes are freed up when currentPhase is GAME_OVER
     let code = '';
     let game = null;
-    while (!game) {
+    let attempts = 1000;
+    while (attempts-- > 0) {
       code = this.generateGameCode();
+      // check if there is an active game with the given game code
       game = await this.GameModel.findOne({ code, currentPhase: { $ne: GamePhase.GAME_OVER } });
+      if (!game) {
+        return code;
+      }
     }
-    return code;
+    throw new Error(`Unable to generate a unique game code in ${attempts} attempts.`);
   }
 
   public async createGameAsync(user: IUser, userName: string, gameName: string, password: string, maxChefs: number, firstChef: FirstChef): Promise<{ game: IGame & Document, chef: IChef & Document }> {

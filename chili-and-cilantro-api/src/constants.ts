@@ -12,7 +12,7 @@ export const MAX_GAME_AGE_WITHOUT_ACTIVITY_IN_MINUTES = 60;
 export const MIN_PASSWORD_LENGTH = 8;
 export const MAX_PASSWORD_LENGTH = 255;
 
-export const MULTILINGUAL_STRING_REGEX = /^[\s\p{N}\p{L}-_]+$/u;
+export const MULTILINGUAL_STRING_REGEX = /^[\s\p{N}\p{L}_-]+$/u;
 
 export default {
   GAME_CODE_LENGTH,
