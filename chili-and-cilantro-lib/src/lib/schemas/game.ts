@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { constants } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import constants from '../constants';
 import { GamePhase } from '../enumerations/gamePhase';
 import ModelName from '../enumerations/modelName';
 import { FirstChef } from '../enumerations/firstChef';
