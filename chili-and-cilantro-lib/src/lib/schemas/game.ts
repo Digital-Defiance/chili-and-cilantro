@@ -19,7 +19,7 @@ export const GameSchema = new Schema<IGame>(
             v !== undefined &&
             validator.matches(v, /[A-Z]+/i) &&
             v.length == constants.GAME_CODE_LENGTH
-          )
+          );
         },
         message: (props) => `${props.value} is not a valid game code!`,
       },
@@ -48,9 +48,10 @@ export const GameSchema = new Schema<IGame>(
         validator: function (v: string) {
           return (
             v !== undefined &&
-            validator.matches(v, constants.MULTILINGUAL_STRING_REGEX) &&
-            v.length >= constants.MIN_GAME_PASSWORD_LENGTH &&
-            v.length <= constants.MAX_GAME_PASSWORD_LENGTH
+            (v.length == 0 ||
+              (validator.matches(v, constants.MULTILINGUAL_STRING_REGEX) &&
+                v.length >= constants.MIN_GAME_PASSWORD_LENGTH &&
+                v.length <= constants.MAX_GAME_PASSWORD_LENGTH))
           );
         },
         message: (props) => `${props.value} is not a valid password!`,
@@ -84,7 +85,7 @@ export const GameSchema = new Schema<IGame>(
           return v >= constants.MIN_CHEFS && v <= constants.MAX_CHEFS;
         },
         message: (props) => `${props.value} is not a valid number of chefs!`,
-      }
+      },
     },
     currentChef: {
       type: Number,
