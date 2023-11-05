@@ -1,5 +1,5 @@
 import { ValidationError } from "./validationError";
-import constants from "../constants";
+import { constants } from '@chili-and-cilantro/chili-and-cilantro-lib';
 
 export class InvalidUserNameError extends ValidationError {
   constructor() {

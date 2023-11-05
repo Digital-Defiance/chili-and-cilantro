@@ -2,6 +2,7 @@
 import { Document } from 'mongoose';
 import validator from 'validator';
 import {
+  constants,
   BaseModel,
   IUser,
   ModelName,
@@ -12,7 +13,6 @@ import { EmailExistsError } from '../errors/emailExists';
 import { UsernameExistsError } from '../errors/usernameExists';
 import { managementClient } from '../auth0';
 import { environment } from '../environment';
-import constants from '../constants';
 
 export class UserService {
   private readonly UserModel = BaseModel.getModel<IUser>(ModelName.User);

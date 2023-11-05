@@ -12,6 +12,7 @@ export const CardSchema = new Schema<ICard>({
 
 export const ChefSchema = new Schema<IChef>({
   gameId: { type: Schema.Types.ObjectId, required: true, ref: ModelName.Game },
+  name: { type: String, required: true },
   hand: [CardSchema],
   userId: { type: Schema.Types.ObjectId, required: true, ref: ModelName.User },
   state: { type: String, enum: Object.values(ChefState), required: true },

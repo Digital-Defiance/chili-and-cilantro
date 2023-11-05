@@ -24,3 +24,4 @@ export * from './lib/models/baseModel';
 export * from './lib/schema';
 export * from './lib/schemaModelData';
 export * from './lib/schemas/user';
+export * as constants from './lib/constants';

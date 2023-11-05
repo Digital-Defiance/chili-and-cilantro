@@ -2,6 +2,7 @@ import { ObjectId } from 'mongodb';
 import { Document, Model, startSession } from 'mongoose';
 import validator from 'validator';
 import {
+  constants,
   Action,
   BaseModel,
   FirstChef,
@@ -25,7 +26,6 @@ import { InvalidUserNameError } from '../errors/invalidUserName';
 import { NotEnoughChefsError } from '../errors/notEnoughChefs';
 import { NotHostError } from '../errors/notHost';
 import { IDatabase } from '../interfaces/database';
-import constants from '../constants';
 
 export class GameService {
   private readonly ActionModel: Model<IAction>;
@@ -108,6 +108,7 @@ export class GameService {
       const chef = await this.ChefModel.create({
         _id: chefId,
         gameId: gameId,
+        name: userName,
         userId: user._id,
         hand: [],
         state: ChefState.LOBBY,
@@ -161,6 +162,7 @@ export class GameService {
       const chef = await this.ChefModel.create({
         gameId: game._id,
         userId: user._id,
+        name: userName,
         hand: [],
         state: ChefState.LOBBY,
         host: false,
@@ -225,10 +227,12 @@ export class GameService {
 
       // Create new Chef documents
       const chefCreations = newChefIds.map((newChefId, index) => {
+        const existingChef = existingChefs.find(chef => chef._id.toString() == existingGame.chefIds[index].toString());
         return this.ChefModel.create({
           _id: newChefId,
           gameId: newGame._id,
-          userId: existingChefs.find(chef => chef._id.toString() == existingGame.chefIds[index].toString()).userId,
+          name: existingChef.name,
+          userId: existingChef.userId,
           hand: [],
           state: ChefState.LOBBY,
           host: newChefId == newHostChefId,
