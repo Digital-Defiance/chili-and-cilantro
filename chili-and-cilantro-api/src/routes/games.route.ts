@@ -13,7 +13,7 @@ gamesRouter.post('/create', validateAccessToken,
     try {
       const jwtService = new JwtService();
       const token = req.headers.authorization?.split(' ')[1];
-      const user = await jwtService.getUserFromValidatedToken(token);
+      const user = await jwtService.getUserFromValidatedTokenAsync(token);
       if (!user) {
         return res.status(401).json({ message: 'User not found' });
       }
@@ -43,7 +43,7 @@ gamesRouter.post('/join', validateAccessToken,
     try {
       const jwtService = new JwtService();
       const token = req.headers.authorization?.split(' ')[1];
-      const user = await jwtService.getUserFromValidatedToken(token);
+      const user = await jwtService.getUserFromValidatedTokenAsync(token);
       if (!user) {
         return res.status(401).json({ message: 'User not found' });
       }

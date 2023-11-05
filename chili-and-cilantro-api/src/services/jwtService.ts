@@ -39,7 +39,7 @@ export class JwtService {
     );
   }
 
-  async validateAccessTokenAndFetchAuth0User(
+  async validateAccessTokenAndFetchAuth0UserAsync(
     frontEndAccessToken: string,
   ): Promise<GetUsers200ResponseOneOfInner> {
     const decoded = await new Promise<JwtPayload | null>((resolve, reject) => {
@@ -70,7 +70,7 @@ export class JwtService {
     return apiResponse.data;
   }
 
-  public async authenticateUser(
+  public async authenticateUserAsync(
     req: Request,
     res: Response,
     next: (appUser: Document & IUser, auth0User: GetUsers200ResponseOneOfInner) => void,
@@ -81,7 +81,7 @@ export class JwtService {
     }
     try {
       const auth0User =
-        await this.validateAccessTokenAndFetchAuth0User(accessToken);
+        await this.validateAccessTokenAndFetchAuth0UserAsync(accessToken);
       if (!auth0User.user_id) {
         return res.status(401).json({ message: 'Unable to determine user id' });
       }
@@ -105,7 +105,7 @@ export class JwtService {
    * @param token The already validated JWT.
    * @returns The user data from MongoDB corresponding to the Auth0 user ID in the token.
    */
-  public async getUserFromValidatedToken(token: string): Promise<Document & IUser | null> {
+  public async getUserFromValidatedTokenAsync(token: string): Promise<Document & IUser | null> {
     // Decode the token (without verification)
     const decoded = await new Promise<JwtPayload | null>((resolve, reject) => {
       verify(

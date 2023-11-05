@@ -26,7 +26,7 @@ usersRouter.post(
   async (req: Request, res: Response) => {
     try {
       const jwtService = new JwtService();
-      jwtService.authenticateUser(req, res, async (user, auth0User) => {
+      jwtService.authenticateUserAsync(req, res, async (user, auth0User) => {
         if (
           auth0User.email_verified &&
           user.email_verified === false
