@@ -72,8 +72,8 @@ export class GameService {
     if (password.length > 0 && (password.length < constants.MIN_GAME_PASSWORD_LENGTH || password.length > constants.MAX_GAME_PASSWORD_LENGTH)) {
       throw new InvalidGamePasswordError();
     }
-    if (maxChefs < 2 || maxChefs > constants.MAX_CHEFS) {
-      throw new InvalidGameParameterError(`Must be between 2 and ${constants.MAX_CHEFS}.`, 'maxChefs');
+    if (maxChefs < constants.MIN_CHEFS || maxChefs > constants.MAX_CHEFS) {
+      throw new InvalidGameParameterError(`Must be between ${constants.MIN_CHEFS} and ${constants.MAX_CHEFS}.`, 'maxChefs');
     }
     if (!firstChef || !Object.values(FirstChef).includes(firstChef)) {
       throw new InvalidGameParameterError('Must be a valid first chef option.', 'firstChef');
@@ -124,20 +124,20 @@ export class GameService {
   }
 
   public async joinGameAsync(gameCode: string, password: string, user: IUser, userName: string): Promise<{ game: IGame & Document, chef: IChef & Document }> {
-    if (this.userIsInActiveGameAsync(user)) {
+    if (await this.userIsInActiveGameAsync(user)) {
       throw new AlreadyJoinedOtherError();
     }
     const game = await this.GameModel.findOne({ code: gameCode, currentPhase: { $ne: GamePhase.GAME_OVER } });
     if (!game) {
       throw new InvalidGameError();
     }
-    if (game.password !== password) {
+    if (game.password && game.password !== password) {
       throw new GamePasswordMismatchError();
     }
     if (game.currentPhase !== GamePhase.LOBBY) {
       throw new GameInProgressError();
     }
-    if (game.chefIds.length >= game.maxChefs) {
+    if (game.chefIds.length > game.maxChefs) {
       throw new GameFullError();
     }
     if (!validator.matches(userName, constants.MULTILINGUAL_STRING_REGEX) || userName.length < constants.MIN_USER_NAME_LENGTH || userName.length > constants.MAX_USER_NAME_LENGTH) {

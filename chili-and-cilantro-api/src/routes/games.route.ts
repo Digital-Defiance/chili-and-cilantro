@@ -2,10 +2,9 @@ import { Request, Response, Router } from 'express';
 import { validateAccessToken } from '../middlewares/auth0';
 import { GameService } from '../services/gameService';
 import { JwtService } from '../services/jwtService';
-import validator from 'validator';
 import { FirstChef } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import constants from '../constants';
 import { Database } from '../services/database';
+import { ValidationError } from '../errors/validationError';
 
 export const gamesRouter = Router();
 
@@ -24,21 +23,6 @@ gamesRouter.post('/create', validateAccessToken,
       const sanitizedPassword = (password as string)?.trim().toLowerCase();
       const sanitizedMaxChefs = parseInt(maxChefs, 10);
       const sanitizedFirstChef: FirstChef = firstChef as FirstChef;
-      if (!validator.matches(sanitizedName, constants.MULTILINGUAL_STRING_REGEX) || sanitizedName.length < 2 || sanitizedName.length > constants.MAX_GAME_NAME_LENGTH) {
-        return res.status(400).json({ message: 'Invalid name' });
-      }
-      if (!validator.matches(sanitizedUserName, constants.MULTILINGUAL_STRING_REGEX) || sanitizedUserName.length < constants.MIN_USER_NAME_LENGTH || sanitizedUserName.length > constants.MAX_USER_NAME_LENGTH) {
-        return res.status(400).json({ message: 'Invalid user name' });
-      }
-      if (sanitizedPassword.length > 0 && (!validator.matches(sanitizedPassword, constants.MULTILINGUAL_STRING_REGEX) || sanitizedPassword.length < constants.MIN_GAME_PASSWORD_LENGTH || sanitizedPassword.length > constants.MAX_GAME_PASSWORD_LENGTH)) {
-        return res.status(400).json({ message: 'Invalid password' });
-      }
-      if (sanitizedMaxChefs < 2 || sanitizedMaxChefs > constants.MAX_CHEFS) {
-        return res.status(400).json({ message: 'Invalid max chefs' });
-      }
-      if (!sanitizedFirstChef || !Object.values(FirstChef).includes(sanitizedFirstChef)) {
-        return res.status(400).json({ message: 'Invalid first chef' });
-      }
 
       const database = new Database();
       const gameService = new GameService(database);
@@ -46,7 +30,11 @@ gamesRouter.post('/create', validateAccessToken,
       res.send({ game, chef });
     }
     catch (error) {
-      res.status(400).json(error);
+      if (error instanceof ValidationError) {
+        res.status(400).json(error);
+      } else {
+        res.status(500).json(error);
+      }
     }
   });
 
@@ -62,12 +50,6 @@ gamesRouter.post('/join', validateAccessToken,
       const { gameId, userName, password } = req.body;
       const sanitizedUserName = (userName as string)?.trim();
       const sanitizedPassword = (password as string)?.trim().toLowerCase();
-      if (sanitizedPassword.length > 0 && !validator.matches(sanitizedPassword, constants.MULTILINGUAL_STRING_REGEX)) {
-        return res.status(400).json({ message: 'Invalid password' });
-      }
-      if (!validator.matches(sanitizedUserName, constants.MULTILINGUAL_STRING_REGEX) || sanitizedUserName.length < constants.MIN_USER_NAME_LENGTH || sanitizedUserName.length > constants.MAX_USER_NAME_LENGTH) {
-        return res.status(400).json({ message: 'Invalid user name' });
-      }
 
       const database = new Database();
       const gameService = new GameService(database);
@@ -75,6 +57,10 @@ gamesRouter.post('/join', validateAccessToken,
       res.send({ game, chef });
     }
     catch (error) {
-      res.status(400).json(error);
+      if (error instanceof ValidationError) {
+        res.status(400).json(error);
+      } else {
+        res.status(500).json(error);
+      }
     }
   });
