@@ -63,13 +63,13 @@ export class GameService {
     if (await this.userIsInActiveGameAsync(user)) {
       throw new AlreadyJoinedOtherError();
     }
-    if (!validator.isAlphanumeric(userName) || userName.length < constants.MIN_USER_NAME_LENGTH || userName.length > constants.MAX_USER_NAME_LENGTH) {
+    if (!validator.matches(userName, constants.MULTILINGUAL_STRING_REGEX) || userName.length < constants.MIN_USER_NAME_LENGTH || userName.length > constants.MAX_USER_NAME_LENGTH) {
       throw new InvalidUserNameError();
     }
-    if (!validator.isAlphanumeric(gameName) || gameName.length < constants.MIN_GAME_NAME_LENGTH || gameName.length > constants.MAX_GAME_NAME_LENGTH) {
+    if (!validator.matches(gameName, constants.MULTILINGUAL_STRING_REGEX) || gameName.length < constants.MIN_GAME_NAME_LENGTH || gameName.length > constants.MAX_GAME_NAME_LENGTH) {
       throw new InvalidGameNameError();
     }
-    if (password.length > 0 && (!validator.isAlphanumeric(password) || password.length < constants.MIN_GAME_PASSWORD_LENGTH || password.length > constants.MAX_GAME_PASSWORD_LENGTH)) {
+    if (password.length > 0 && (password.length < constants.MIN_GAME_PASSWORD_LENGTH || password.length > constants.MAX_GAME_PASSWORD_LENGTH)) {
       throw new InvalidGamePasswordError();
     }
     if (maxChefs < 2 || maxChefs > constants.MAX_CHEFS) {
@@ -140,7 +140,7 @@ export class GameService {
     if (game.chefIds.length >= game.maxChefs) {
       throw new GameFullError();
     }
-    if (!validator.isAlphanumeric(userName) || userName.length < constants.MIN_USER_NAME_LENGTH || userName.length > constants.MAX_USER_NAME_LENGTH) {
+    if (!validator.matches(userName, constants.MULTILINGUAL_STRING_REGEX) || userName.length < constants.MIN_USER_NAME_LENGTH || userName.length > constants.MAX_USER_NAME_LENGTH) {
       throw new InvalidUserNameError();
     }
     const session = await startSession();
@@ -203,7 +203,7 @@ export class GameService {
       // Create the new Game document without persisting to the database yet
       const newGame = new this.GameModel({
         code: existingGame.code,
-        name: `${existingGame.name} - New`,
+        name: existingGame.name,
         password: existingGame.password,
         maxChefs: existingGame.maxChefs,
         currentPhase: GamePhase.LOBBY,
@@ -273,7 +273,7 @@ export class GameService {
    * @returns 
    */
   public async startGameAsync(userId: string, gameId: string, firstChefId?: string): Promise<IGame & Document> {
-    if (!this.isGameHostAsync(userId, gameId)) {
+    if (!await this.isGameHostAsync(userId, gameId)) {
       throw new NotHostError();
     }
     const session = await startSession();

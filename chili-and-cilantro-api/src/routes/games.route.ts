@@ -24,13 +24,13 @@ gamesRouter.post('/create', validateAccessToken,
       const sanitizedPassword = (password as string)?.trim().toLowerCase();
       const sanitizedMaxChefs = parseInt(maxChefs, 10);
       const sanitizedFirstChef: FirstChef = firstChef as FirstChef;
-      if (!validator.matches(sanitizedName, /^[A-Za-z0-9 ]+$/i) || sanitizedName.length < 2 || sanitizedName.length > constants.MAX_GAME_NAME_LENGTH) {
+      if (!validator.matches(sanitizedName, constants.MULTILINGUAL_STRING_REGEX) || sanitizedName.length < 2 || sanitizedName.length > constants.MAX_GAME_NAME_LENGTH) {
         return res.status(400).json({ message: 'Invalid name' });
       }
-      if (!validator.matches(sanitizedUserName, /^[A-Za-z0-9 ]+$/i) || sanitizedUserName.length < constants.MIN_USER_NAME_LENGTH || sanitizedUserName.length > constants.MAX_USER_NAME_LENGTH) {
+      if (!validator.matches(sanitizedUserName, constants.MULTILINGUAL_STRING_REGEX) || sanitizedUserName.length < constants.MIN_USER_NAME_LENGTH || sanitizedUserName.length > constants.MAX_USER_NAME_LENGTH) {
         return res.status(400).json({ message: 'Invalid user name' });
       }
-      if (sanitizedPassword.length > 0 && !validator.isAlphanumeric(sanitizedPassword)) {
+      if (sanitizedPassword.length > 0 && (!validator.matches(sanitizedPassword, constants.MULTILINGUAL_STRING_REGEX) || sanitizedPassword.length < constants.MIN_GAME_PASSWORD_LENGTH || sanitizedPassword.length > constants.MAX_GAME_PASSWORD_LENGTH)) {
         return res.status(400).json({ message: 'Invalid password' });
       }
       if (sanitizedMaxChefs < 2 || sanitizedMaxChefs > constants.MAX_CHEFS) {
@@ -62,10 +62,10 @@ gamesRouter.post('/join', validateAccessToken,
       const { gameId, userName, password } = req.body;
       const sanitizedUserName = (userName as string)?.trim();
       const sanitizedPassword = (password as string)?.trim().toLowerCase();
-      if (sanitizedPassword.length > 0 && !validator.isAlphanumeric(sanitizedPassword)) {
+      if (sanitizedPassword.length > 0 && !validator.matches(sanitizedPassword, constants.MULTILINGUAL_STRING_REGEX)) {
         return res.status(400).json({ message: 'Invalid password' });
       }
-      if (!validator.matches(sanitizedUserName, /^[A-Za-z0-9 ]+$/i) || sanitizedUserName.length < constants.MIN_USER_NAME_LENGTH || sanitizedUserName.length > constants.MAX_USER_NAME_LENGTH) {
+      if (!validator.matches(sanitizedUserName, constants.MULTILINGUAL_STRING_REGEX) || sanitizedUserName.length < constants.MIN_USER_NAME_LENGTH || sanitizedUserName.length > constants.MAX_USER_NAME_LENGTH) {
         return res.status(400).json({ message: 'Invalid user name' });
       }
 
