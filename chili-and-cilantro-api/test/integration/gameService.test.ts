@@ -38,7 +38,7 @@ describe('GameService', () => {
       jest.spyOn(GameModel, 'aggregate').mockResolvedValue([]);
 
       const userId = new Types.ObjectId().toString();
-      const result = await gameService.userIsInActiveGame(userId);
+      const result = await gameService.userIsInActiveGameAsync(userId);
 
       expect(result).toBe(false);
       expect(GameModel.aggregate).toHaveBeenCalledTimes(1);
@@ -49,7 +49,7 @@ describe('GameService', () => {
       jest.spyOn(GameModel, 'aggregate').mockResolvedValue([{ activeGamesCount: 1 }]);
 
       const userId = new Types.ObjectId().toString();
-      const result = await gameService.userIsInActiveGame(userId);
+      const result = await gameService.userIsInActiveGameAsync(userId);
 
       expect(result).toBe(true);
       expect(GameModel.aggregate).toHaveBeenCalledTimes(1);
@@ -79,7 +79,7 @@ describe('GameService', () => {
       const maxChefs = 4;
       const firstChef = getRandomFirstChef();
 
-      const result = await gameService.createGame(user, userName, gameName, password, maxChefs, firstChef);
+      const result = await gameService.createGameAsync(user, userName, gameName, password, maxChefs, firstChef);
 
       // Assertions
       expect(result).toEqual(expect.objectContaining({ game: expect.any(Object), chef: expect.any(Object) }));
@@ -143,7 +143,7 @@ describe('GameService', () => {
       const user = createUser();
       const userName = 'TestUser';
 
-      const result = await gameService.joinGame(gameCode, password, user, userName);
+      const result = await gameService.joinGameAsync(gameCode, password, user, userName);
 
       // Assertions
       expect(result).toEqual(expect.objectContaining({ game: expect.any(Object), chef: expect.any(Object) }));

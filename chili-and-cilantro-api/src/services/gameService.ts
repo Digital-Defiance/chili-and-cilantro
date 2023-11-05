@@ -47,7 +47,7 @@ export class GameService {
     return code;
   }
 
-  public async generateNewGameCode(): Promise<string> {
+  public async generateNewGameCodeAsync(): Promise<string> {
     // find a 4 letter game code that is not being used by a game
     // codes are freed up when currentPhase is GAME_OVER
     let code = '';
@@ -59,8 +59,8 @@ export class GameService {
     return code;
   }
 
-  public async createGame(user: IUser, userName: string, gameName: string, password: string, maxChefs: number, firstChef: FirstChef): Promise<{ game: IGame & Document, chef: IChef & Document }> {
-    if (this.userIsInActiveGame(user)) {
+  public async createGameAsync(user: IUser, userName: string, gameName: string, password: string, maxChefs: number, firstChef: FirstChef): Promise<{ game: IGame & Document, chef: IChef & Document }> {
+    if (await this.userIsInActiveGameAsync(user)) {
       throw new AlreadyJoinedOtherError();
     }
     if (!validator.isAlphanumeric(userName) || userName.length < constants.MIN_USER_NAME_LENGTH || userName.length > constants.MAX_USER_NAME_LENGTH) {
@@ -83,7 +83,7 @@ export class GameService {
       session.startTransaction();
       const gameId = new ObjectId();
       const chefId = new ObjectId();
-      const gameCode = await this.generateNewGameCode();
+      const gameCode = await this.generateNewGameCodeAsync();
       const game = await this.GameModel.create({
         _id: gameId,
         code: gameCode,
@@ -123,8 +123,8 @@ export class GameService {
     }
   }
 
-  public async joinGame(gameCode: string, password: string, user: IUser, userName: string): Promise<{ game: IGame & Document, chef: IChef & Document }> {
-    if (this.userIsInActiveGame(user)) {
+  public async joinGameAsync(gameCode: string, password: string, user: IUser, userName: string): Promise<{ game: IGame & Document, chef: IChef & Document }> {
+    if (this.userIsInActiveGameAsync(user)) {
       throw new AlreadyJoinedOtherError();
     }
     const game = await this.GameModel.findOne({ code: gameCode, currentPhase: { $ne: GamePhase.GAME_OVER } });
@@ -176,7 +176,7 @@ export class GameService {
     }
   }
 
-  public async createNewGameFromExisting(
+  public async createNewGameFromExistingAsync(
     existingGameId: string,
     firstChef: FirstChef
   ): Promise<{ game: IGame & Document, chef: IChef & Document }> {
@@ -272,8 +272,8 @@ export class GameService {
    * @param firstChefId 
    * @returns 
    */
-  public async startGame(userId: string, gameId: string, firstChefId?: string): Promise<IGame & Document> {
-    if (!this.isGameHost(userId, gameId)) {
+  public async startGameAsync(userId: string, gameId: string, firstChefId?: string): Promise<IGame & Document> {
+    if (!this.isGameHostAsync(userId, gameId)) {
       throw new NotHostError();
     }
     const session = await startSession();
@@ -330,7 +330,7 @@ export class GameService {
    * @param gameId 
    * @returns Game model
    */
-  public async getGameById(gameId: string): Promise<IGame & Document> {
+  public async getGameByIdAsync(gameId: string): Promise<IGame & Document> {
     const game = await this.GameModel.findOne({ _id: gameId });
     if (!game) {
       throw new InvalidGameError();
@@ -343,7 +343,7 @@ export class GameService {
    * @param gameCode 
    * @returns Game model
    */
-  public async getGameByCode(gameCode: string): Promise<IGame & Document> {
+  public async getGameByCodeAsync(gameCode: string): Promise<IGame & Document> {
     // find where not GAME_OVER
     const game = await this.GameModel.findOne({ code: gameCode, currentPhase: { $ne: GamePhase.GAME_OVER } });
     if (!game) {
@@ -355,7 +355,7 @@ export class GameService {
   /**
    * Finds games not in GAME_OVER phase with a lastModified date older than MAX_GAME_AGE_WITHOUT_ACTIVITY_IN_MINUTES and marks them GAME_OVER
    */
-  public async expireOldGames(): Promise<void> {
+  public async expireOldGamesAsync(): Promise<void> {
     // find games not in GAME_OVER phase with a lastModified date older than MAX_GAME_AGE_WITHOUT_ACTIVITY_IN_MINUTES
     // cutoffDate is now minus MAX_GAME_AGE_WITHOUT_ACTIVITY_IN_MINUTES
     const cutoffDate = new Date();
@@ -374,7 +374,7 @@ export class GameService {
    * @param userId
    * @returns boolean
    */
-  public async userIsInActiveGame(user: IUser): Promise<boolean> {
+  public async userIsInActiveGameAsync(user: IUser): Promise<boolean> {
     try {
       const result = await this.GameModel.aggregate([
         {
@@ -419,7 +419,7 @@ export class GameService {
    * @param gameId 
    * @returns boolean
    */
-  public async userIsInGame(userId: string, gameId: string): Promise<boolean> {
+  public async userIsInGameAsync(userId: string, gameId: string): Promise<boolean> {
     try {
       const result = await this.GameModel.aggregate([
         {
@@ -465,7 +465,7 @@ export class GameService {
  * @param gameId
  * @returns boolean
  */
-  public async isGameHost(userId: string, gameId: string): Promise<boolean> {
+  public async isGameHostAsync(userId: string, gameId: string): Promise<boolean> {
     const count = await this.GameModel.countDocuments({
       _id: new ObjectId(gameId),
       hostUserId: new ObjectId(userId)

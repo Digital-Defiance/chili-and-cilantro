@@ -42,7 +42,7 @@ gamesRouter.post('/create', validateAccessToken,
 
       const database = new Database();
       const gameService = new GameService(database);
-      const { game, chef } = await gameService.createGame(user, sanitizedUserName, sanitizedName, sanitizedPassword, sanitizedMaxChefs, sanitizedFirstChef);
+      const { game, chef } = await gameService.createGameAsync(user, sanitizedUserName, sanitizedName, sanitizedPassword, sanitizedMaxChefs, sanitizedFirstChef);
       res.send({ game, chef });
     }
     catch (error) {
@@ -71,7 +71,7 @@ gamesRouter.post('/join', validateAccessToken,
 
       const database = new Database();
       const gameService = new GameService(database);
-      const { game, chef } = await gameService.joinGame(gameId, sanitizedPassword, user, sanitizedUserName);
+      const { game, chef } = await gameService.joinGameAsync(gameId, sanitizedPassword, user, sanitizedUserName);
       res.send({ game, chef });
     }
     catch (error) {
