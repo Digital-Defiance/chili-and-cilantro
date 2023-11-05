@@ -48,21 +48,23 @@ export class GameService {
   }
 
   public async generateNewGameCodeAsync(): Promise<string> {
-    // find a 4 letter game code that is not being used by a game
+    // find a game code that is not being used by an active game
     // codes are freed up when currentPhase is GAME_OVER
     let code = '';
-    let game = null;
+    let gameCount = 0;
     let attempts = 1000;
     while (attempts-- > 0) {
       code = this.generateGameCode();
       // check if there is an active game with the given game code
-      game = await this.GameModel.findOne({ code, currentPhase: { $ne: GamePhase.GAME_OVER } });
-      if (!game) {
+      gameCount = await this.GameModel.countDocuments({ code, currentPhase: { $ne: GamePhase.GAME_OVER } });
+      if (gameCount === 0) {
+        // If no active game has the code, it can be used for a new game
         return code;
       }
     }
-    throw new Error(`Unable to generate a unique game code in ${attempts} attempts.`);
+    throw new Error(`Unable to generate a unique game code in ${1000 - attempts} attempts.`);
   }
+
 
   public async createGameAsync(user: IUser, userName: string, gameName: string, password: string, maxChefs: number, firstChef: FirstChef): Promise<{ game: IGame & Document, chef: IChef & Document }> {
     if (await this.userIsInActiveGameAsync(user)) {
@@ -132,7 +134,7 @@ export class GameService {
     if (await this.userIsInActiveGameAsync(user)) {
       throw new AlreadyJoinedOtherError();
     }
-    const game = await this.GameModel.findOne({ code: gameCode, currentPhase: { $ne: GamePhase.GAME_OVER } });
+    const game = await this.getGameByCodeAsync(gameCode, true);
     if (!game) {
       throw new InvalidGameError();
     }
@@ -335,8 +337,9 @@ export class GameService {
    * @param gameId 
    * @returns Game model
    */
-  public async getGameByIdAsync(gameId: string): Promise<IGame & Document> {
-    const game = await this.GameModel.findOne({ _id: gameId });
+  public async getGameByIdAsync(gameId: string, active = false): Promise<IGame & Document> {
+    const search = active ? { _id: gameId, currentPhase: { $ne: GamePhase.GAME_OVER } } : { _id: gameId };
+    const game = await this.GameModel.findOne(search);
     if (!game) {
       throw new InvalidGameError();
     }
@@ -348,9 +351,16 @@ export class GameService {
    * @param gameCode 
    * @returns Game model
    */
-  public async getGameByCodeAsync(gameCode: string): Promise<IGame & Document> {
+  public async getGameByCodeAsync(gameCode: string, active = false): Promise<IGame & Document> {
     // find where not GAME_OVER
-    const game = await this.GameModel.findOne({ code: gameCode, currentPhase: { $ne: GamePhase.GAME_OVER } });
+    const search = active ? { code: gameCode, currentPhase: { $ne: GamePhase.GAME_OVER } } : { code: gameCode };
+    // Find the games with the given code, sort by updated timestamp in descending order, and get the first
+    const game = await this.GameModel.find(search)
+      .sort({ updatedAt: -1 }) // -1 for descending order
+      .limit(1) // Limit to 1 to get only the most recent game
+      .then(games => games[0]); // Extract the first element
+
+    // If no game is found, throw an error
     if (!game) {
       throw new InvalidGameError();
     }
