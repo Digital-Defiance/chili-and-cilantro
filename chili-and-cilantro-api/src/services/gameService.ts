@@ -31,6 +31,7 @@ import { InvalidGameNameError } from '../errors/invalidGameName';
 import { InvalidGamePasswordError } from '../errors/invalidGamePassword';
 import { InvalidGameParameterError } from '../errors/invalidGameParameter';
 import { InvalidUserNameError } from '../errors/invalidUserName';
+import { InvalidMessageError } from '../errors/invalidMessage';
 import { NotEnoughChefsError } from '../errors/notEnoughChefs';
 import { NotHostError } from '../errors/notHost';
 import { NotInGameError } from '../errors/notInGame';
@@ -546,6 +547,9 @@ export class GameService {
       const chef = this.ChefModel.findOne({ gameId: game._id, userId: userId });
       if (!chef) {
         throw new NotInGameError();
+      }
+      if (message.length < constants.MIN_MESSAGE_LENGTH || message.length > constants.MAX_MESSAGE_LENGTH) {
+        throw new InvalidMessageError();
       }
       const actionMessage = await this.Database.getActionModel(Action.MESSAGE).create({
         details: {
