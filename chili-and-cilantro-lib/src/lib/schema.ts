@@ -26,20 +26,20 @@ import { StartGameActionSchema } from './schemas/startGameAction';
 import { StartNewRoundActionSchema } from './schemas/startNewRoundAction';
 
 const actionModel = BaseModel.create<IAction>(ModelData[ModelName.Action]).Model;
-actionModel.discriminator(Action.CREATE_GAME, CreateGameActionSchema);
-actionModel.discriminator(Action.END_GAME, EndGameActionSchema);
-actionModel.discriminator(Action.END_ROUND, EndRoundActionSchema);
-actionModel.discriminator(Action.EXPIRE_GAME, ExpireGameActionSchema);
-actionModel.discriminator(Action.FLIP_CARD, FlipCardActionSchema);
-actionModel.discriminator(Action.JOIN_GAME, JoinGameActionSchema);
-actionModel.discriminator(Action.MAKE_BID, MakeBidActionSchema);
-actionModel.discriminator(Action.MESSAGE, MessageActionSchema);
-actionModel.discriminator(Action.PASS, PassActionSchema);
-actionModel.discriminator(Action.PLACE_CARD, PlaceCardActionSchema);
-actionModel.discriminator(Action.QUIT_GAME, QuitGameActionSchema);
-actionModel.discriminator(Action.START_BIDDING, StartBiddingActionSchema);
-actionModel.discriminator(Action.START_GAME, StartGameActionSchema);
-actionModel.discriminator(Action.START_NEW_ROUND, StartNewRoundActionSchema);
+export const CreateGameDiscriminator = actionModel.discriminator(Action.CREATE_GAME, CreateGameActionSchema);
+export const EndGameDiscriminator = actionModel.discriminator(Action.END_GAME, EndGameActionSchema);
+export const EndRoundDisriminator = actionModel.discriminator(Action.END_ROUND, EndRoundActionSchema);
+export const ExpireGameDiscriminator = actionModel.discriminator(Action.EXPIRE_GAME, ExpireGameActionSchema);
+export const FlipCardDiscriminator = actionModel.discriminator(Action.FLIP_CARD, FlipCardActionSchema);
+export const JoinGameDiscriminator = actionModel.discriminator(Action.JOIN_GAME, JoinGameActionSchema);
+export const MakeBidDiscriminator = actionModel.discriminator(Action.MAKE_BID, MakeBidActionSchema);
+export const MessageDiscriminator = actionModel.discriminator(Action.MESSAGE, MessageActionSchema);
+export const PassDiscriminator = actionModel.discriminator(Action.PASS, PassActionSchema);
+export const PlaceCardDiscriminator = actionModel.discriminator(Action.PLACE_CARD, PlaceCardActionSchema);
+export const QuitGameDiscriminator = actionModel.discriminator(Action.QUIT_GAME, QuitGameActionSchema);
+export const StartBiddingDiscriminator = actionModel.discriminator(Action.START_BIDDING, StartBiddingActionSchema);
+export const StartGameDiscriminator = actionModel.discriminator(Action.START_GAME, StartGameActionSchema);
+export const StartNewRoundDiscriminator = actionModel.discriminator(Action.START_NEW_ROUND, StartNewRoundActionSchema);
 
 export const SchemaModels: ISchemaModels = {
   Action: actionModel,

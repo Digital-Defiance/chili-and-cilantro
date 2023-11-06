@@ -18,6 +18,10 @@ import {
   IJoinGameDetails,
   IStartGameAction,
   IStartGameDetails,
+  CreateGameDiscriminator,
+  JoinGameDiscriminator,
+  StartGameDiscriminator,
+  ExpireGameDiscriminator,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { AlreadyJoinedError } from '../errors/alreadyJoined';
 import { AlreadyJoinedOtherError } from '../errors/alreadyJoinedOther';
@@ -73,7 +77,7 @@ export class GameService {
 
 
   public async createGameAsync(user: IUser, userName: string, gameName: string, password: string, maxChefs: number, firstChef: FirstChef): Promise<{ game: IGame & Document, chef: IChef & Document }> {
-    if (await this.userIsInActiveGameAsync(user)) {
+    if (await this.userIsInAnyActiveGameAsync(user)) {
       throw new AlreadyJoinedOtherError();
     }
     if (!validator.matches(userName, constants.MULTILINGUAL_STRING_REGEX) || userName.length < constants.MIN_USER_NAME_LENGTH || userName.length > constants.MAX_USER_NAME_LENGTH) {
@@ -120,7 +124,7 @@ export class GameService {
         state: ChefState.LOBBY,
         host: true,
       });
-      const action = await this.ActionModel.create({
+      await CreateGameDiscriminator.create({
         gameId: game._id,
         chefId: chef._id,
         userId: user._id,
@@ -140,7 +144,7 @@ export class GameService {
   }
 
   public async joinGameAsync(gameCode: string, password: string, user: IUser, userName: string): Promise<{ game: IGame & Document, chef: IChef & Document }> {
-    if (await this.userIsInActiveGameAsync(user)) {
+    if (await this.userIsInAnyActiveGameAsync(user)) {
       throw new AlreadyJoinedOtherError();
     }
     const game = await this.getGameByCodeAsync(gameCode, true);
@@ -175,7 +179,7 @@ export class GameService {
         state: ChefState.LOBBY,
         host: false,
       });
-      const action = await this.ActionModel.create({
+      await JoinGameDiscriminator.create({
         gameId: game._id,
         chefId: chef._id,
         userId: user._id,
@@ -256,7 +260,7 @@ export class GameService {
       const game = await newGame.save();
 
       // Create action for game creation - this could be moved to an event or a method to encapsulate the logic
-      const action = await this.ActionModel.create({
+      await CreateGameDiscriminator.create({
         gameId: existingGame._id,
         chefId: newGame.chefIds[hostChefIndex],
         userId: existingGame.hostUserId,
@@ -337,7 +341,7 @@ export class GameService {
         game.currentChef = 0;
       }
       const savedGame = await game.save();
-      await this.ActionModel.create({
+      await StartGameDiscriminator.create({
         gameId: game._id,
         chefId: game.hostChefId,
         userId: game.hostUserId,
@@ -408,7 +412,7 @@ export class GameService {
         game.currentPhase = GamePhase.GAME_OVER;
         await game.save();
         // TODO: close any sockets for this game
-        const action = this.ActionModel.create({
+        ExpireGameDiscriminator.create({
           gameId: game._id,
           chefId: game.hostChefId,
           userId: game.hostUserId,
@@ -428,11 +432,11 @@ export class GameService {
   }
 
   /**
-   * Returns whether the specified user is in an active game
+   * Returns whether the specified user is in any active game
    * @param userId
    * @returns boolean
    */
-  public async userIsInActiveGameAsync(user: IUser): Promise<boolean> {
+  public async userIsInAnyActiveGameAsync(user: IUser): Promise<boolean> {
     try {
       const result = await this.GameModel.aggregate([
         {
@@ -477,13 +481,13 @@ export class GameService {
    * @param gameId 
    * @returns boolean
    */
-  public async userIsInGameAsync(userId: string, gameId: string): Promise<boolean> {
+  public async userIsInGameAsync(userId: string, gameId: string, active = false): Promise<boolean> {
     try {
       const result = await this.GameModel.aggregate([
         {
           $match: {
             _id: new ObjectId(gameId),
-            currentPhase: { $ne: GamePhase.GAME_OVER }
+            ...active ? { currentPhase: { $ne: GamePhase.GAME_OVER } } : {}
           }
         },
         {
