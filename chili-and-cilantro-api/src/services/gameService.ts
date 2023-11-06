@@ -301,16 +301,16 @@ export class GameService {
    * @param firstChefId 
    * @returns 
    */
-  public async startGameAsync(userId: string, gameId: string, firstChefId?: string): Promise<IGame & Document> {
-    if (!await this.isGameHostAsync(userId, gameId)) {
-      throw new NotHostError();
-    }
+  public async startGameAsync(gameCode: string, userId: string, firstChefId?: string): Promise<{ game: IGame & Document, action: Document<unknown> }> {
     const session = await startSession();
     try {
       session.startTransaction();
-      const game = await this.GameModel.findOne({ _id: gameId });
+      const game = await this.getGameByCodeAsync(gameCode, true);
       if (!game) {
         throw new InvalidGameError();
+      }
+      if (!await this.isGameHostAsync(userId, game._id)) {
+        throw new NotHostError();
       }
       if (game.currentPhase !== GamePhase.LOBBY) {
         throw new GameInProgressError();
@@ -343,7 +343,7 @@ export class GameService {
         game.currentChef = 0;
       }
       const savedGame = await game.save();
-      await this.Database.getActionModel(Action.START_GAME).create({
+      const startAction = await this.Database.getActionModel(Action.START_GAME).create({
         gameId: game._id,
         chefId: game.hostChefId,
         userId: game.hostUserId,
@@ -351,7 +351,7 @@ export class GameService {
         details: {} as IStartGameDetails,
       } as IStartGameAction);
       await session.commitTransaction();
-      return savedGame;
+      return { game: savedGame, action: startAction };
     }
     catch (e) {
       await session.abortTransaction();

@@ -115,3 +115,28 @@ gamesRouter.get('/:code/actions', validateAccessToken,
       }
     }
   });
+
+gamesRouter.post('/:code/start', validateAccessToken,
+  async (req: Request, res: Response) => {
+    try {
+      const jwtService = new JwtService();
+      const token = req.headers.authorization?.split(' ')[1];
+      const user = await jwtService.getUserFromValidatedTokenAsync(token);
+      if (!user) {
+        return res.status(401).json({ message: 'User not found' });
+      }
+      const { firstChefId } = req.body;
+      const gameCode = req.params.code;
+      const database = new Database();
+      const gameService = new GameService(database);
+      const { game, action } = await gameService.startGameAsync(gameCode, user._id, firstChefId);
+      res.status(200).json({ game, action });
+    }
+    catch (e) {
+      if (e instanceof ValidationError) {
+        res.status(400).json(e);
+      } else {
+        res.status(500).json(e);
+      }
+    }
+  });
