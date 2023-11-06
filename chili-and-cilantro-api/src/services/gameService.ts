@@ -406,7 +406,7 @@ export class GameService {
           gameId: game._id,
           chefId: game.hostChefId,
           userId: game.hostUserId,
-          type: Action.EXPIRED_GAME,
+          type: Action.EXPIRE_GAME,
           details: {},
         });
       }

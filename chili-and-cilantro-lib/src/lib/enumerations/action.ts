@@ -3,7 +3,7 @@ export enum Action {
   START_GAME = 'START_GAME',       // A chef starts a game
   JOIN_GAME = 'JOIN_GAME',         // A chef joins a game
   END_GAME = 'END_GAME',           // A chef ends a game
-  EXPIRED_GAME = 'EXPIRED_GAME',   // A game ends because it has been inactive for too long
+  EXPIRE_GAME = 'EXPIRE_GAME',   // A game ends because it has been inactive for too long
   PLACE_CARD = 'PLACE_CARD',      // Chefs place a card face down
   START_BIDDING = 'START_BIDDING', // A chef decides to start bidding instead of placing a card
   MAKE_BID = 'MAKE_BID',          // Chefs state how many cards they think they can flip without revealing a 'Chili'
