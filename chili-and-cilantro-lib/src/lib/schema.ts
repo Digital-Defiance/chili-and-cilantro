@@ -43,22 +43,6 @@ export const StartNewRoundDiscriminator = actionModel.discriminator(Action.START
 
 export const SchemaModels: ISchemaModels = {
   Action: actionModel,
-  Actions: {
-    CreateGame: CreateGameDiscriminator,
-    EndGame: EndGameDiscriminator,
-    EndRound: EndRoundDiscriminator,
-    ExpireGame: ExpireGameDiscriminator,
-    FlipCard: FlipCardDiscriminator,
-    JoinGame: JoinGameDiscriminator,
-    MakeBid: MakeBidDiscriminator,
-    Message: MessageDiscriminator,
-    Pass: PassDiscriminator,
-    PlaceCard: PlaceCardDiscriminator,
-    QuitGame: QuitGameDiscriminator,
-    StartBidding: StartBiddingDiscriminator,
-    StartGame: StartGameDiscriminator,
-    StartNewRound: StartNewRoundDiscriminator,
-  },
   Chef: BaseModel.create<IChef>(ModelData[ModelName.Chef]).Model,
   Game: BaseModel.create<IGame>(ModelData[ModelName.Game]).Model,
   User: BaseModel.create<IUser>(ModelData[ModelName.User]).Model,
