@@ -18,6 +18,8 @@ import {
   IStartGameAction,
   IStartGameDetails,
   ModelData,
+  IMessageAction,
+  IMessageDetails,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { AlreadyJoinedError } from '../errors/alreadyJoined';
 import { AlreadyJoinedOtherError } from '../errors/alreadyJoinedOther';
@@ -31,6 +33,7 @@ import { InvalidGameParameterError } from '../errors/invalidGameParameter';
 import { InvalidUserNameError } from '../errors/invalidUserName';
 import { NotEnoughChefsError } from '../errors/notEnoughChefs';
 import { NotHostError } from '../errors/notHost';
+import { NotInGameError } from '../errors/notInGame';
 import { IDatabase } from '../interfaces/database';
 
 export class GameService {
@@ -530,5 +533,32 @@ export class GameService {
     }).exec();
 
     return count > 0;
+  }
+
+  public async sendMessageAsync(userId: string, gameId: string, message: string): Promise<void> {
+    const session = await startSession();
+    try {
+      session.startTransaction();
+      const game = await this.getGameByIdAsync(gameId, true);
+      if (!game) {
+        throw new InvalidGameError();
+      }
+      const chef = this.ChefModel.findOne({ gameId: game._id, userId: userId });
+      if (!chef) {
+        throw new NotInGameError();
+      }
+      const actionMessage = await this.Database.getActionModel(Action.MESSAGE).create({
+        details: {
+          message: message,
+        } as IMessageDetails
+      } as IMessageAction);
+    }
+    catch (e) {
+      await session.abortTransaction();
+      throw e;
+    }
+    finally {
+      session.endSession();
+    }
   }
 }

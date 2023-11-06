@@ -64,3 +64,27 @@ gamesRouter.post('/join', validateAccessToken,
       }
     }
   });
+
+gamesRouter.post('/message', validateAccessToken,
+  async (req: Request, res: Response) => {
+    try {
+      const jwtService = new JwtService();
+      const token = req.headers.authorization?.split(' ')[1];
+      const user = await jwtService.getUserFromValidatedTokenAsync(token);
+      if (!user) {
+        return res.status(401).json({ message: 'User not found' });
+      }
+      const { gameId, message } = req.body;
+      const sanitizedMessage = (message as string)?.trim();
+      const database = new Database();
+      const gameService = new GameService(database);
+      await gameService.sendMessageAsync(gameId, user._id, sanitizedMessage);
+    }
+    catch (e) {
+      if (e instanceof ValidationError) {
+        res.status(400).json(e);
+      } else {
+        res.status(500).json(e);
+      }
+    }
+  });
