@@ -21,3 +21,9 @@ In the root directory, there are sub-directories for the API, shared library, an
 The library has the mongoose schema and model definitions, as well as the typescript interfaces for the models. We have built a custom model framework underneath src/lib/models/BaseModel.ts and we have a custom schema class that references all of the models under src/schema.ts. The model descriptions, etc are in src/lib/schemaModelData.ts. If you add a new model, it must also be added to the ModelName enum in src/lib/enumerations/modelName.ts and src/lib/enumerations/modelNameCollection.ts which has the collection name. The model name is used to reference the model in the schema and the collection name is used to reference the collection in the database. BaseModel.getModel is then used to retrieve the model from the schema.
 
 The interfaces are in the library so that we can reference the model interfaces from the front end to deal with retrieved documents, but the front end doesn't need to know about the schema, however it made sense to leave it all together in the library. In general we have tried to put everything in the library rather than leaving them in the API server or react application.
+
+You'll want access to the Auth0 admin interface, please contact Jessica Mulein for access.
+
+You can create an account using the Register endpoint. A Postman collection is available in the root directory, and you can join the Digital Defiance team on Postman to get access to the test collection.
+
+In order to get an access token, you'll want to log in to the app on localhost:3000 and then visit [http://localhost:3000/api-access](http://localhost:3000/api-access) and copy your token from that page into the dev environment {{access_token}} variable in postman. You can then register or perform other actions on the site.
