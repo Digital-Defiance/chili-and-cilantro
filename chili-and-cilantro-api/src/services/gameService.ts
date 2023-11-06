@@ -5,7 +5,7 @@ import {
   constants,
   Action,
   FirstChef,
-  IAction, IUser, IGame, IChef,
+  IUser, IGame, IChef,
   ModelName,
   ChefState,
   GamePhase,
@@ -17,10 +17,6 @@ import {
   IJoinGameDetails,
   IStartGameAction,
   IStartGameDetails,
-  CreateGameDiscriminator,
-  JoinGameDiscriminator,
-  StartGameDiscriminator,
-  ExpireGameDiscriminator,
   ModelData,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { AlreadyJoinedError } from '../errors/alreadyJoined';
@@ -38,10 +34,12 @@ import { NotHostError } from '../errors/notHost';
 import { IDatabase } from '../interfaces/database';
 
 export class GameService {
+  private readonly Database: IDatabase;
   private readonly ChefModel: Model<IChef>;
   private readonly GameModel: Model<IGame>;
 
   constructor(database: IDatabase) {
+    this.Database = database;
     this.ChefModel = database.getModel<IChef>(ModelName.Chef);
     this.GameModel = database.getModel<IGame>(ModelName.Game);
   }
@@ -122,7 +120,7 @@ export class GameService {
         state: ChefState.LOBBY,
         host: true,
       });
-      await CreateGameDiscriminator.create({
+      await this.Database.getActionModel(Action.CREATE_GAME).create({
         gameId: game._id,
         chefId: chef._id,
         userId: user._id,
@@ -177,7 +175,7 @@ export class GameService {
         state: ChefState.LOBBY,
         host: false,
       });
-      await JoinGameDiscriminator.create({
+      await this.Database.getActionModel(Action.JOIN_GAME).create({
         gameId: game._id,
         chefId: chef._id,
         userId: user._id,
@@ -258,7 +256,7 @@ export class GameService {
       const game = await newGame.save();
 
       // Create action for game creation - this could be moved to an event or a method to encapsulate the logic
-      await CreateGameDiscriminator.create({
+      await this.Database.getActionModel(Action.CREATE_GAME).create({
         gameId: existingGame._id,
         chefId: newGame.chefIds[hostChefIndex],
         userId: existingGame.hostUserId,
@@ -339,7 +337,7 @@ export class GameService {
         game.currentChef = 0;
       }
       const savedGame = await game.save();
-      await StartGameDiscriminator.create({
+      await this.Database.getActionModel(Action.START_GAME).create({
         gameId: game._id,
         chefId: game.hostChefId,
         userId: game.hostUserId,
@@ -410,7 +408,7 @@ export class GameService {
         game.currentPhase = GamePhase.GAME_OVER;
         await game.save();
         // TODO: close any sockets for this game
-        ExpireGameDiscriminator.create({
+        this.Database.getActionModel(Action.EXPIRE_GAME).create({
           gameId: game._id,
           chefId: game.hostChefId,
           userId: game.hostUserId,

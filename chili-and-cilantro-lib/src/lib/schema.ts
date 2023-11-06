@@ -28,7 +28,7 @@ import { StartNewRoundActionSchema } from './schemas/startNewRoundAction';
 const actionModel = BaseModel.create<IAction>(ModelData[ModelName.Action]).Model;
 export const CreateGameDiscriminator = actionModel.discriminator(Action.CREATE_GAME, CreateGameActionSchema);
 export const EndGameDiscriminator = actionModel.discriminator(Action.END_GAME, EndGameActionSchema);
-export const EndRoundDisriminator = actionModel.discriminator(Action.END_ROUND, EndRoundActionSchema);
+export const EndRoundDiscriminator = actionModel.discriminator(Action.END_ROUND, EndRoundActionSchema);
 export const ExpireGameDiscriminator = actionModel.discriminator(Action.EXPIRE_GAME, ExpireGameActionSchema);
 export const FlipCardDiscriminator = actionModel.discriminator(Action.FLIP_CARD, FlipCardActionSchema);
 export const JoinGameDiscriminator = actionModel.discriminator(Action.JOIN_GAME, JoinGameActionSchema);
@@ -46,7 +46,7 @@ export const SchemaModels: ISchemaModels = {
   Actions: {
     CreateGame: CreateGameDiscriminator,
     EndGame: EndGameDiscriminator,
-    EndRound: EndRoundDisriminator,
+    EndRound: EndRoundDiscriminator,
     ExpireGame: ExpireGameDiscriminator,
     FlipCard: FlipCardDiscriminator,
     JoinGame: JoinGameDiscriminator,
