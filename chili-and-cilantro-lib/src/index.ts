@@ -23,6 +23,8 @@ export * from './lib/interfaces/expireGameAction';
 export * from './lib/interfaces/expireGameDetails';
 export * from './lib/interfaces/flipCardAction';
 export * from './lib/interfaces/flipCardDetails';
+export * from './lib/interfaces/joinGameAction';
+export * from './lib/interfaces/joinGameDetails';
 export * from './lib/interfaces/makeBidAction';
 export * from './lib/interfaces/makeBidDetails';
 export * from './lib/interfaces/messageAction';

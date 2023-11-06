@@ -12,6 +12,12 @@ import {
   GamePhase,
   ICreateGameAction,
   ICreateGameDetails,
+  IExpireGameAction,
+  IExpireGameDetails,
+  IJoinGameAction,
+  IJoinGameDetails,
+  IStartGameAction,
+  IStartGameDetails,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { AlreadyJoinedError } from '../errors/alreadyJoined';
 import { AlreadyJoinedOtherError } from '../errors/alreadyJoinedOther';
@@ -115,12 +121,12 @@ export class GameService {
         host: true,
       });
       const action = await this.ActionModel.create({
-        gameId: gameId,
-        chefId: chefId,
+        gameId: game._id,
+        chefId: chef._id,
         userId: user._id,
         type: Action.CREATE_GAME,
-        details: {},
-      });
+        details: {} as ICreateGameDetails,
+      } as ICreateGameAction);
       await session.commitTransaction();
       return { game, chef };
     }
@@ -174,8 +180,8 @@ export class GameService {
         chefId: chef._id,
         userId: user._id,
         type: Action.JOIN_GAME,
-        details: {},
-      })
+        details: {} as IJoinGameDetails,
+      } as IJoinGameAction)
       game.chefIds.push(chef._id);
       await game.save();
       await session.commitTransaction();
@@ -255,8 +261,8 @@ export class GameService {
         chefId: newGame.chefIds[hostChefIndex],
         userId: existingGame.hostUserId,
         type: Action.CREATE_GAME,
-        details: {},
-      });
+        details: {} as ICreateGameDetails,
+      } as ICreateGameAction);
 
       await session.commitTransaction();
       return { game, chef: chefs[hostChefIndex] };
@@ -336,8 +342,8 @@ export class GameService {
         chefId: game.hostChefId,
         userId: game.hostUserId,
         type: Action.START_GAME,
-        details: {},
-      });
+        details: {} as IStartGameDetails,
+      } as IStartGameAction);
       await session.commitTransaction();
       return savedGame;
     }
@@ -407,8 +413,8 @@ export class GameService {
           chefId: game.hostChefId,
           userId: game.hostUserId,
           type: Action.EXPIRE_GAME,
-          details: {},
-        });
+          details: {} as IExpireGameDetails,
+        } as IExpireGameAction);
       }
       await session.commitTransaction();
     }
