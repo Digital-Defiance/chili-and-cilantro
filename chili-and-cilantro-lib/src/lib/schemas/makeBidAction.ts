@@ -1,7 +1,12 @@
 import { Schema } from "mongoose";
 import { IMakeBidDetails } from "../interfaces/makeBidDetails";
+import { IMakeBidAction } from "../interfaces/makeBidAction";
 
-export const MakeBidActionSchema = new Schema<IMakeBidDetails>(
+export const MakeBidDetailsSchema = new Schema<IMakeBidDetails>({
+  bidNumber: { type: Number, required: true },
+}, { _id: false });
+
+export const MakeBidActionSchema = new Schema<IMakeBidAction>(
   {
-    bidNumber: { type: Number, required: true },
+    details: { type: MakeBidDetailsSchema, required: true },
   });

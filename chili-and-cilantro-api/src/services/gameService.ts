@@ -38,12 +38,10 @@ import { NotHostError } from '../errors/notHost';
 import { IDatabase } from '../interfaces/database';
 
 export class GameService {
-  private readonly ActionModel: Model<IAction>;
   private readonly ChefModel: Model<IChef>;
   private readonly GameModel: Model<IGame>;
 
   constructor(database: IDatabase) {
-    this.ActionModel = database.getModel<IAction>(ModelName.Action);
     this.ChefModel = database.getModel<IChef>(ModelName.Chef);
     this.GameModel = database.getModel<IGame>(ModelName.Game);
   }

@@ -13,4 +13,5 @@ export const ActionSchema = new Schema<IAction>(
   },
   {
     timestamps: true,
+    discriminatorKey: 'type',
   });

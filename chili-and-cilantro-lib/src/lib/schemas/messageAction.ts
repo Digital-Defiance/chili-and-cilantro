@@ -1,7 +1,12 @@
 import { Schema } from "mongoose";
 import { IMessageDetails } from "../interfaces/messageDetails";
+import { IMessageAction } from "../interfaces/messageAction";
 
-export const MessageActionSchema = new Schema<IMessageDetails>(
+export const MessageDetailsSchema = new Schema<IMessageDetails>({
+  message: { type: String, required: true },
+}, { _id: false });
+
+export const MessageActionSchema = new Schema<IMessageAction>(
   {
-    message: { type: String, required: true },
+    details: { type: MessageDetailsSchema, required: true },
   });
