@@ -115,6 +115,7 @@ export class GameService {
         host: true,
       });
       const action = await this.ActionModel.create({
+        gameId: gameId,
         chefId: chefId,
         userId: user._id,
         type: Action.CREATE_GAME,
@@ -169,6 +170,7 @@ export class GameService {
         host: false,
       });
       const action = await this.ActionModel.create({
+        gameId: game._id,
         chefId: chef._id,
         userId: user._id,
         type: Action.JOIN_GAME,
@@ -249,6 +251,7 @@ export class GameService {
 
       // Create action for game creation - this could be moved to an event or a method to encapsulate the logic
       const action = await this.ActionModel.create({
+        gameId: existingGame._id,
         chefId: newGame.chefIds[hostChefIndex],
         userId: existingGame.hostUserId,
         type: Action.CREATE_GAME,
@@ -329,6 +332,7 @@ export class GameService {
       }
       const savedGame = await game.save();
       await this.ActionModel.create({
+        gameId: game._id,
         chefId: game.hostChefId,
         userId: game.hostUserId,
         type: Action.START_GAME,
@@ -398,6 +402,13 @@ export class GameService {
         game.currentPhase = GamePhase.GAME_OVER;
         await game.save();
         // TODO: close any sockets for this game
+        const action = this.ActionModel.create({
+          gameId: game._id,
+          chefId: game.hostChefId,
+          userId: game.hostUserId,
+          type: Action.EXPIRED_GAME,
+          details: {},
+        });
       }
       await session.commitTransaction();
     }
