@@ -95,7 +95,6 @@ export class GameService {
         _id: gameId,
         code: gameCode,
         name: gameName,
-        password,
         maxChefs: maxChefs,
         currentPhase: GamePhase.LOBBY,
         currentChef: -1,
@@ -104,6 +103,7 @@ export class GameService {
         turnOrder: [], // will be chosen when the game is about to start
         hostChefId: chefId,
         hostUserId: user._id,
+        ...password ? { password: password } : {},
       });
       const chef = await this.ChefModel.create({
         _id: chefId,
