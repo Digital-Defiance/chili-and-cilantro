@@ -47,13 +47,13 @@ gamesRouter.post('/join', validateAccessToken,
       if (!user) {
         return res.status(401).json({ message: 'User not found' });
       }
-      const { gameId, userName, password } = req.body;
+      const { code, userName, password } = req.body;
       const sanitizedUserName = (userName as string)?.trim();
       const sanitizedPassword = (password as string)?.trim().toLowerCase();
 
       const database = new Database();
       const gameService = new GameService(database);
-      const { game, chef } = await gameService.joinGameAsync(gameId, sanitizedPassword, user, sanitizedUserName);
+      const { game, chef } = await gameService.joinGameAsync(code, sanitizedPassword, user, sanitizedUserName);
       res.send({ game, chef });
     }
     catch (error) {

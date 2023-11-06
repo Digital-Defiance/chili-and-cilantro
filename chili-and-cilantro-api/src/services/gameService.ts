@@ -35,6 +35,7 @@ import { InvalidMessageError } from '../errors/invalidMessage';
 import { NotEnoughChefsError } from '../errors/notEnoughChefs';
 import { NotHostError } from '../errors/notHost';
 import { NotInGameError } from '../errors/notInGame';
+import { UsernameInUseError } from '../errors/usernameInUse';
 import { IDatabase } from '../interfaces/database';
 
 export class GameService {
@@ -166,10 +167,9 @@ export class GameService {
     const session = await startSession();
     try {
       session.startTransaction();
-      // check if the chef is already in the game
-      const existingChef = this.ChefModel.findOne({ gameId: game._id, userId: user._id });
-      if (existingChef) {
-        throw new AlreadyJoinedError();
+      const chefNames = await this.getGameChefNamesAsync(game._id);
+      if (chefNames.includes(userName)) {
+        throw new UsernameInUseError();
       }
       const chef = await this.ChefModel.create({
         gameId: game._id,
@@ -569,5 +569,10 @@ export class GameService {
     finally {
       session.endSession();
     }
+  }
+
+  public async getGameChefNamesAsync(gameId: string): Promise<string[]> {
+    const chefs = await this.ChefModel.find({ gameId: new ObjectId(gameId) });
+    return chefs.map(chef => chef.name);
   }
 }

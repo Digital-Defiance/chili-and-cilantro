@@ -33,4 +33,7 @@ export const ChefSchema = new Schema<IChef>({
   userId: { type: Schema.Types.ObjectId, required: true, ref: ModelName.User },
   state: { type: String, enum: Object.values(ChefState), required: true },
   host: { type: Boolean, required: true, default: false },
-}, { timestamps: true })
+}, { timestamps: true });
+
+// Add a compound index for gameId and name to ensure uniqueness within a game
+ChefSchema.index({ gameId: 1, name: 1 }, { unique: true });
