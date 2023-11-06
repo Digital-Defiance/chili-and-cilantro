@@ -115,7 +115,8 @@ export class GameService {
         host: true,
       });
       const action = await this.ActionModel.create({
-        chef: chef._id,
+        chefId: chefId,
+        userId: user._id,
         type: Action.CREATE_GAME,
         details: {},
       });
@@ -168,7 +169,8 @@ export class GameService {
         host: false,
       });
       const action = await this.ActionModel.create({
-        chef: chef._id,
+        chefId: chef._id,
+        userId: user._id,
         type: Action.JOIN_GAME,
         details: {},
       })
@@ -247,7 +249,8 @@ export class GameService {
 
       // Create action for game creation - this could be moved to an event or a method to encapsulate the logic
       const action = await this.ActionModel.create({
-        chef: newGame.chefIds[hostChefIndex],
+        chefId: newGame.chefIds[hostChefIndex],
+        userId: existingGame.hostUserId,
         type: Action.CREATE_GAME,
         details: {},
       });
@@ -289,6 +292,7 @@ export class GameService {
     }
     const session = await startSession();
     try {
+      session.startTransaction();
       const game = await this.GameModel.findOne({ _id: gameId });
       if (!game) {
         throw new InvalidGameError();
@@ -324,6 +328,12 @@ export class GameService {
         game.currentChef = 0;
       }
       const savedGame = await game.save();
+      await this.ActionModel.create({
+        chefId: game.hostChefId,
+        userId: game.hostUserId,
+        type: Action.START_GAME,
+        details: {},
+      });
       await session.commitTransaction();
       return savedGame;
     }
@@ -377,14 +387,26 @@ export class GameService {
   public async expireOldGamesAsync(): Promise<void> {
     // find games not in GAME_OVER phase with a lastModified date older than MAX_GAME_AGE_WITHOUT_ACTIVITY_IN_MINUTES
     // cutoffDate is now minus MAX_GAME_AGE_WITHOUT_ACTIVITY_IN_MINUTES
-    const cutoffDate = new Date();
-    cutoffDate.setMinutes(cutoffDate.getMinutes() - constants.MAX_GAME_AGE_WITHOUT_ACTIVITY_IN_MINUTES);
-    const games = await this.GameModel.find({ currentPhase: { $ne: GamePhase.GAME_OVER }, lastModified: { $lt: cutoffDate } });
-    // set currentPhase to GAME_OVER
-    for (const game of games) {
-      game.currentPhase = GamePhase.GAME_OVER;
-      await game.save();
-      // TODO: close any sockets for this game
+    const session = await startSession();
+    try {
+      session.startTransaction();
+      const cutoffDate = new Date();
+      cutoffDate.setMinutes(cutoffDate.getMinutes() - constants.MAX_GAME_AGE_WITHOUT_ACTIVITY_IN_MINUTES);
+      const games = await this.GameModel.find({ currentPhase: { $ne: GamePhase.GAME_OVER }, lastModified: { $lt: cutoffDate } });
+      // set currentPhase to GAME_OVER
+      for (const game of games) {
+        game.currentPhase = GamePhase.GAME_OVER;
+        await game.save();
+        // TODO: close any sockets for this game
+      }
+      await session.commitTransaction();
+    }
+    catch (e) {
+      await session.abortTransaction();
+      throw e;
+    }
+    finally {
+      session.endSession();
     }
   }
 

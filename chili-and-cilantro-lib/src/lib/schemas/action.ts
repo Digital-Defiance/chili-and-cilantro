@@ -5,7 +5,8 @@ import ModelName from "../enumerations/modelName";
 
 export const ActionSchema = new Schema<IAction>(
   {
-    chef: { type: Schema.Types.ObjectId, required: true, ref: ModelName.Chef },
+    chefId: { type: Schema.Types.ObjectId, required: true, ref: ModelName.Chef },
+    userId: { type: Schema.Types.ObjectId, required: true, ref: ModelName.User },
     type: { type: String, enum: Object.values(Action), required: true },
     details: { type: Object, required: true },
   },
