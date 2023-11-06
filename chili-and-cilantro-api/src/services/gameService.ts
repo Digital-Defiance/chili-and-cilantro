@@ -4,7 +4,6 @@ import validator from 'validator';
 import {
   constants,
   Action,
-  BaseModel,
   FirstChef,
   IAction, IUser, IGame, IChef,
   ModelName,
@@ -22,6 +21,7 @@ import {
   JoinGameDiscriminator,
   StartGameDiscriminator,
   ExpireGameDiscriminator,
+  ModelData,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { AlreadyJoinedError } from '../errors/alreadyJoined';
 import { AlreadyJoinedOtherError } from '../errors/alreadyJoinedOther';
@@ -446,7 +446,7 @@ export class GameService {
         },
         {
           $lookup: {
-            from: 'chefIds',
+            from: ModelData.Chef.collection,
             localField: 'chefIds',
             foreignField: '_id',
             as: 'chefDetails'
@@ -492,7 +492,7 @@ export class GameService {
         },
         {
           $lookup: {
-            from: 'chefIds',
+            from: ModelData.Chef.collection,
             localField: 'chefIds',
             foreignField: '_id',
             as: 'chefDetails'
