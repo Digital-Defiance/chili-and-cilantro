@@ -4,7 +4,7 @@
 		"name": "Chili and Cilantro",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "12150153",
-		"_collection_link": "https://solar-shuttle-782726.postman.co/workspace/Chili-and-Cilantro~9b853510-72fc-48a6-914f-696ac4cff70f/collection/12150153-45ce222d-890d-4e19-b8ab-e0d61262ab8d?action=share&source=collection_link&creator=12150153"
+		"_collection_link": "https://digitaldefiance.postman.co/workspace/Chili-and-Cilantro~9b853510-72fc-48a6-914f-696ac4cff70f/collection/12150153-45ce222d-890d-4e19-b8ab-e0d61262ab8d?action=share&source=collection_link&creator=12150153"
 	},
 	"item": [
 		{
@@ -109,6 +109,185 @@
 						"api",
 						"users",
 						"validate"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Game",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "name",
+							"value": "Test Game",
+							"type": "text"
+						},
+						{
+							"key": "userName",
+							"value": "Test User",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "test123",
+							"type": "text"
+						},
+						{
+							"key": "maxChefs",
+							"value": "8",
+							"type": "text"
+						},
+						{
+							"key": "firstChef",
+							"value": "random",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{base_url}}/api/games/create",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"games",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Join Game",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "name",
+							"value": "Test Game",
+							"type": "text"
+						},
+						{
+							"key": "userName",
+							"value": "Test User 2",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "test123",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{base_url}}/api/games/{{gameCode}}/join",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"games",
+						"{{gameCode}}",
+						"join"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Send Lobby Message",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "message",
+							"value": "Test Message",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{base_url}}/api/games/{{gameCode}}/message",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"games",
+						"{{gameCode}}",
+						"message"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Actions",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/games/{{gameCode}}/actions",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"games",
+						"{{gameCode}}",
+						"actions"
 					]
 				}
 			},
