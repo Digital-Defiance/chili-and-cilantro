@@ -366,7 +366,7 @@ export class GameService {
    * @returns Game model
    */
   public async getGameByIdAsync(gameId: string, active = false): Promise<IGame & Document> {
-    const search = active ? { _id: gameId, currentPhase: { $ne: GamePhase.GAME_OVER } } : { _id: gameId };
+    const search = active ? { _id: new ObjectId(gameId), currentPhase: { $ne: GamePhase.GAME_OVER } } : { _id: new ObjectId(gameId) };
     const game = await this.GameModel.findOne(search);
     if (!game) {
       throw new InvalidGameError();
@@ -536,7 +536,7 @@ export class GameService {
     return count > 0;
   }
 
-  public async sendMessageAsync(userId: string, gameId: string, message: string): Promise<void> {
+  public async sendMessageAsync(gameId: string, userId: string, message: string): Promise<Document<IMessageAction>> {
     const session = await startSession();
     try {
       session.startTransaction();
@@ -544,7 +544,7 @@ export class GameService {
       if (!game) {
         throw new InvalidGameError();
       }
-      const chef = this.ChefModel.findOne({ gameId: game._id, userId: userId });
+      const chef = await this.ChefModel.findOne({ gameId: game._id, userId: userId });
       if (!chef) {
         throw new NotInGameError();
       }
@@ -552,10 +552,15 @@ export class GameService {
         throw new InvalidMessageError();
       }
       const actionMessage = await this.Database.getActionModel(Action.MESSAGE).create({
+        gameId: game._id,
+        chefId: chef._id,
+        userId: chef.userId,
+        type: Action.MESSAGE,
         details: {
           message: message,
         } as IMessageDetails
       } as IMessageAction);
+      return actionMessage as Document<IMessageAction>;
     }
     catch (e) {
       await session.abortTransaction();

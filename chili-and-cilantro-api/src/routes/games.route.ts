@@ -78,7 +78,8 @@ gamesRouter.post('/message', validateAccessToken,
       const sanitizedMessage = (message as string)?.trim();
       const database = new Database();
       const gameService = new GameService(database);
-      await gameService.sendMessageAsync(gameId, user._id, sanitizedMessage);
+      const messageAction = await gameService.sendMessageAsync(gameId, user._id, sanitizedMessage);
+      res.status(200).json(messageAction);
     }
     catch (e) {
       if (e instanceof ValidationError) {
