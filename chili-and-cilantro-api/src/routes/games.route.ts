@@ -38,7 +38,7 @@ gamesRouter.post('/create', validateAccessToken,
     }
   });
 
-gamesRouter.post('/join', validateAccessToken,
+gamesRouter.post('/:code/join', validateAccessToken,
   async (req: Request, res: Response) => {
     try {
       const jwtService = new JwtService();
@@ -47,13 +47,14 @@ gamesRouter.post('/join', validateAccessToken,
       if (!user) {
         return res.status(401).json({ message: 'User not found' });
       }
-      const { code, userName, password } = req.body;
+      const { userName, password } = req.body;
+      const gameCode = req.params.code;
       const sanitizedUserName = (userName as string)?.trim();
       const sanitizedPassword = (password as string)?.trim().toLowerCase();
 
       const database = new Database();
       const gameService = new GameService(database);
-      const { game, chef } = await gameService.joinGameAsync(code, sanitizedPassword, user, sanitizedUserName);
+      const { game, chef } = await gameService.joinGameAsync(gameCode, sanitizedPassword, user, sanitizedUserName);
       res.send({ game, chef });
     }
     catch (error) {
@@ -65,7 +66,7 @@ gamesRouter.post('/join', validateAccessToken,
     }
   });
 
-gamesRouter.post('/message', validateAccessToken,
+gamesRouter.post('/:code/message', validateAccessToken,
   async (req: Request, res: Response) => {
     try {
       const jwtService = new JwtService();
@@ -74,12 +75,37 @@ gamesRouter.post('/message', validateAccessToken,
       if (!user) {
         return res.status(401).json({ message: 'User not found' });
       }
-      const { gameId, message } = req.body;
+      const { message } = req.body;
+      const gameCode = req.params.code;
       const sanitizedMessage = (message as string)?.trim();
       const database = new Database();
       const gameService = new GameService(database);
-      const messageAction = await gameService.sendMessageAsync(gameId, user._id, sanitizedMessage);
+      const messageAction = await gameService.sendMessageAsync(gameCode, user._id, sanitizedMessage);
       res.status(200).json(messageAction);
+    }
+    catch (e) {
+      if (e instanceof ValidationError) {
+        res.status(400).json(e);
+      } else {
+        res.status(500).json(e);
+      }
+    }
+  });
+
+gamesRouter.get('/:code/actions', validateAccessToken,
+  async (req: Request, res: Response) => {
+    try {
+      const jwtService = new JwtService();
+      const token = req.headers.authorization?.split(' ')[1];
+      const user = await jwtService.getUserFromValidatedTokenAsync(token);
+      if (!user) {
+        return res.status(401).json({ message: 'User not found' });
+      }
+      const gameCode = req.params.code;
+      const database = new Database();
+      const gameService = new GameService(database);
+      const actions = await gameService.getGameActionsAsync(gameCode);
+      res.status(200).json(actions);
     }
     catch (e) {
       if (e instanceof ValidationError) {

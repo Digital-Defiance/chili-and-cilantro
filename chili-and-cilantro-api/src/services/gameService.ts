@@ -20,8 +20,8 @@ import {
   ModelData,
   IMessageAction,
   IMessageDetails,
+  IAction,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { AlreadyJoinedError } from '../errors/alreadyJoined';
 import { AlreadyJoinedOtherError } from '../errors/alreadyJoinedOther';
 import { GameFullError } from '../errors/gameFull';
 import { GameInProgressError } from '../errors/gameInProgress';
@@ -40,11 +40,13 @@ import { IDatabase } from '../interfaces/database';
 
 export class GameService {
   private readonly Database: IDatabase;
+  private readonly ActionModel: Model<IAction>;
   private readonly ChefModel: Model<IChef>;
   private readonly GameModel: Model<IGame>;
 
   constructor(database: IDatabase) {
     this.Database = database;
+    this.ActionModel = database.getModel<IAction>(ModelName.Action);
     this.ChefModel = database.getModel<IChef>(ModelName.Chef);
     this.GameModel = database.getModel<IGame>(ModelName.Game);
   }
@@ -536,11 +538,11 @@ export class GameService {
     return count > 0;
   }
 
-  public async sendMessageAsync(gameId: string, userId: string, message: string): Promise<Document<IMessageAction>> {
+  public async sendMessageAsync(gameCode: string, userId: string, message: string): Promise<Document<IMessageAction>> {
     const session = await startSession();
     try {
       session.startTransaction();
-      const game = await this.getGameByIdAsync(gameId, true);
+      const game = await this.getGameByCodeAsync(gameCode, true);
       if (!game) {
         throw new InvalidGameError();
       }
@@ -574,5 +576,11 @@ export class GameService {
   public async getGameChefNamesAsync(gameId: string): Promise<string[]> {
     const chefs = await this.ChefModel.find({ gameId: new ObjectId(gameId) });
     return chefs.map(chef => chef.name);
+  }
+
+  public async getGameActionsAsync(gameCode: string): Promise<IAction[]> {
+    const game = await this.getGameByCodeAsync(gameCode, true);
+    const actions = await this.ActionModel.find({ gameId: game._id }).sort({ createdAt: 1 });
+    return actions;
   }
 }
