@@ -641,6 +641,13 @@ export class GameService {
       await chef.save();
       // increment the current chef
       game.currentChef = (game.currentChef + 1) % game.chefIds.length;
+      // if all players have placed all of their cards, move from setup to bidding
+      const chefs = await this.ChefModel.find({ gameId: game._id });
+      if (chefs.every(chef => chef.placedCards.length == constants.MAX_HAND_SIZE)) {
+        game.currentPhase = GamePhase.BIDDING;
+        // TODO: create action for game phase change
+        // is the chef who is transitioning the one of just placed their last card or the next chef?
+      }
       await game.save();
       await session.commitTransaction();
       return { game, chef };
@@ -652,5 +659,16 @@ export class GameService {
     finally {
       session.endSession();
     }
+  }
+
+  /**
+   * Rather than placing a card, the current player can make a bid. This method makes a bid.
+   * The game phase will move from SETUP to BIDDING
+   * @param gameCode 
+   * @param user 
+   * @param bid 
+   */
+  public async makeBidAsync(gameCode: string, user: IUser, bid: number): Promise<{ game: IGame & Document }> {
+    throw new Error('Not implemented');
   }
 }
