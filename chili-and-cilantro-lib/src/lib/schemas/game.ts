@@ -1,12 +1,30 @@
 import mongoose from 'mongoose';
 import constants from '../constants';
 import { GamePhase } from '../enumerations/gamePhase';
+import { IRoundBids } from '../interfaces/roundBids';
 import ModelName from '../enumerations/modelName';
 import { FirstChef } from '../enumerations/firstChef';
 import { IGame } from '../interfaces/game';
 import validator from 'validator';
+import { IBid } from '../interfaces/bid';
 
 const { Schema } = mongoose;
+
+export const BidSchema = new Schema<IBid>({
+  chefId: {
+    type: Schema.Types.ObjectId,
+    ref: ModelName.Chef,
+    required: true,
+  },
+  bid: {
+    type: Number,
+    required: true,
+  },
+});
+
+export const RoundBidSchema = new Schema<IRoundBids>({
+  bids: [BidSchema],
+});
 
 export const GameSchema = new Schema<IGame>(
   {
@@ -57,14 +75,14 @@ export const GameSchema = new Schema<IGame>(
       },
       set: (v: string) => (v || '').trim().toLowerCase(),
     },
-    eliminatedChefs: [
+    chefIds: [
       {
         type: Schema.Types.ObjectId,
         ref: ModelName.Chef,
         required: true,
       },
     ],
-    chefIds: [
+    eliminatedChefs: [
       {
         type: Schema.Types.ObjectId,
         ref: ModelName.Chef,
@@ -81,6 +99,14 @@ export const GameSchema = new Schema<IGame>(
         message: (props) => `${props.value} is not a valid number of chefs!`,
       },
     },
+    cardsPlaced: {
+      type: Number,
+      required: true,
+    },
+    currentBid: {
+      type: Number,
+      required: true,
+    },
     currentChef: {
       type: Number,
       required: true,
@@ -90,10 +116,18 @@ export const GameSchema = new Schema<IGame>(
       enum: Object.values(GamePhase),
       required: true,
     },
-    roundHistory: [
+    currentRound: {
+      type: Number,
+      required: true,
+    },
+    roundBids: {
+      type: [RoundBidSchema],
+      required: true,
+    },
+    roundWinners: [
       {
         type: Schema.Types.ObjectId,
-        ref: ModelName.Action,
+        ref: ModelName.Chef,
         required: true,
       },
     ],
@@ -117,11 +151,6 @@ export const GameSchema = new Schema<IGame>(
     lastGame: {
       type: Schema.Types.ObjectId,
       ref: ModelName.Game,
-      required: false,
-    },
-    highestBidder: {
-      type: Schema.Types.ObjectId,
-      ref: ModelName.Chef,
       required: false,
     },
     winner: {

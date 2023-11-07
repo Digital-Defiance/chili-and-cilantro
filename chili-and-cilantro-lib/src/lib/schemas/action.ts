@@ -10,6 +10,7 @@ export const ActionSchema = new Schema<IAction>(
     userId: { type: Schema.Types.ObjectId, required: true, ref: ModelName.User },
     type: { type: String, enum: Object.values(Action), required: true },
     details: { type: Object, required: true },
+    round: { type: Number, required: true },
   },
   {
     timestamps: true,

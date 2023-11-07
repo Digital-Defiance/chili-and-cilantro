@@ -23,8 +23,10 @@ export const MAX_MESSAGE_LENGTH = 512;
 export const MULTILINGUAL_STRING_REGEX = /^[\s\p{N}\p{L}_-]+$/u;
 
 export const MAX_HAND_SIZE = 4;
+export const CHILI_PER_HAND = 1;
 
 export default {
+  CHILI_PER_HAND,
   GAME_CODE_LENGTH,
   MAX_CHEFS,
   MIN_CHEFS,

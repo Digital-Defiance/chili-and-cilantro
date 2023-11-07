@@ -20,6 +20,7 @@ import {
   IMessageAction,
   IMessageDetails,
   IAction,
+  TurnAction,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { AllCardsPlacedError } from '../errors/allCardsPlaced';
 import { AlreadyJoinedOtherError } from '../errors/alreadyJoinedOther';
@@ -27,6 +28,7 @@ import { GameFullError } from '../errors/gameFull';
 import { GameInProgressError } from '../errors/gameInProgress';
 import { GamePasswordMismatchError } from '../errors/gamePasswordMismatch';
 import { IncorrectGamePhaseError } from '../errors/incorrectGamePhase';
+import { InvalidActionError } from '../errors/invalidAction';
 import { InvalidGameError } from '../errors/invalidGame';
 import { InvalidGameNameError } from '../errors/invalidGameName';
 import { InvalidGamePasswordError } from '../errors/invalidGamePassword';
@@ -41,6 +43,7 @@ import { OutOfOrderError } from '../errors/outOfOrder';
 import { UsernameInUseError } from '../errors/usernameInUse';
 import { IDatabase } from '../interfaces/database';
 import { CardType } from 'chili-and-cilantro-lib/src/lib/enumerations/cardType';
+import { ICard } from 'chili-and-cilantro-lib/src/lib/interfaces/card';
 
 export class GameService {
   private readonly Database: IDatabase;
@@ -115,16 +118,20 @@ export class GameService {
       const gameCode = await this.generateNewGameCodeAsync();
       const game = await this.GameModel.create({
         _id: gameId,
-        code: gameCode,
-        name: gameName,
-        maxChefs: maxChefs,
-        currentPhase: GamePhase.LOBBY,
-        currentChef: -1,
+        cardsPlaced: 0,
         chefIds: [chefId],
-        turnOrder: [], // will be chosen when the game is about to start
+        code: gameCode,
+        currentChef: -1,
+        currentPhase: GamePhase.LOBBY,
+        currentRound: -1,
         hostChefId: chefId,
         hostUserId: user._id,
+        maxChefs: maxChefs,
+        name: gameName,
         ...password ? { password: password } : {},
+        roundBids: [],
+        roundWinners: [],
+        turnOrder: [], // will be chosen when the game is about to start
       });
       const chef = await this.ChefModel.create({
         _id: chefId,
@@ -141,6 +148,7 @@ export class GameService {
         userId: user._id,
         type: Action.CREATE_GAME,
         details: {} as ICreateGameDetails,
+        round: -1,
       } as ICreateGameAction);
       await session.commitTransaction();
       return { game, chef };
@@ -152,6 +160,20 @@ export class GameService {
     finally {
       session.endSession();
     }
+  }
+
+  public makeHand(): ICard[] {
+    const handSize = constants.MAX_HAND_SIZE;
+    const numChili = constants.CHILI_PER_HAND;
+    const numCilantro = handSize - numChili;
+    const hand: ICard[] = [];
+    for (let i = 0; i < numChili; i++) {
+      hand.push({ type: CardType.CHILI, faceUp: false });
+    }
+    for (let i = 0; i < numCilantro; i++) {
+      hand.push({ type: CardType.CILANTRO, faceUp: false });
+    }
+    return this.shuffleArray(hand);
   }
 
   /**
@@ -193,7 +215,7 @@ export class GameService {
         gameId: game._id,
         userId: user._id,
         name: userName,
-        hand: [{ type: CardType.CHILI, faceUp: false }, { type: CardType.CILANTRO, faceUp: false }, { type: CardType.CILANTRO, faceUp: false }, { type: CardType.CILANTRO, faceUp: false }],
+        hand: this.makeHand(),
         placedCards: [],
         state: ChefState.LOBBY,
         host: false,
@@ -204,6 +226,7 @@ export class GameService {
         userId: user._id,
         type: Action.JOIN_GAME,
         details: {} as IJoinGameDetails,
+        round: -1,
       } as IJoinGameAction)
       game.chefIds.push(chef._id);
       await game.save();
@@ -248,17 +271,22 @@ export class GameService {
 
       // Create the new Game document without persisting to the database yet
       const newGame = new this.GameModel({
-        code: existingGame.code,
-        name: existingGame.name,
-        password: existingGame.password,
-        maxChefs: existingGame.maxChefs,
-        currentPhase: GamePhase.LOBBY,
-        currentChef: -1,
         chefIds: newChefIds,
-        turnOrder: [], // will be chosen when the game is started
+        code: existingGame.code,
+        cardsPlaced: 0,
+        currentBid: -1,
+        currentChef: -1,
+        currentRound: -1,
+        currentPhase: GamePhase.LOBBY,
         hostChefId: newChefIds[hostChefIndex],
         hostUserId: existingGame.hostUserId,
         lastGame: existingGame._id,
+        maxChefs: existingGame.maxChefs,
+        name: existingGame.name,
+        ...existingGame.password ? { password: existingGame.password } : {},
+        roundBids: [],
+        roundWinners: [],
+        turnOrder: [], // will be chosen when the game is started
       });
 
       // Create new Chef documents
@@ -338,8 +366,14 @@ export class GameService {
       if (game.chefIds.length < constants.MIN_CHEFS) {
         throw new NotEnoughChefsError(game.chefIds.length, constants.MIN_CHEFS);
       }
+      // set the current bid to 0
+      game.currentBid = 0;
+      // set the current chef to the first player
+      game.currentChef = 0;
+      // set the game phase to SETUP
       game.currentPhase = GamePhase.SETUP;
-
+      // set the current round to 0
+      game.currentRound = 0;
       // create a random order of players
       // shuffle the chef ids
       game.turnOrder = this.shuffleArray(game.chefIds);
@@ -351,6 +385,7 @@ export class GameService {
         userId: game.hostUserId,
         type: Action.START_GAME,
         details: {} as IStartGameDetails,
+        round: game.currentRound,
       } as IStartGameAction);
       await session.commitTransaction();
       return { game: savedGame, action: startAction };
@@ -422,6 +457,7 @@ export class GameService {
           userId: game.hostUserId,
           type: Action.EXPIRE_GAME,
           details: {} as IExpireGameDetails,
+          round: game.currentRound,
         } as IExpireGameAction);
       }
       await session.commitTransaction();
@@ -569,7 +605,8 @@ export class GameService {
         type: Action.MESSAGE,
         details: {
           message: message,
-        } as IMessageDetails
+        } as IMessageDetails,
+        round: game.currentRound,
       } as IMessageAction);
       return actionMessage as Document<IMessageAction>;
     }
@@ -604,6 +641,55 @@ export class GameService {
   }
 
   /**
+   * Return whether the current chef can bid
+   * @param gameCode 
+   * @param user 
+   */
+  public canBid(game: IGame, chef: IChef): boolean {
+    // current phase must be SETUP or BIDDING
+    if (game.currentPhase !== GamePhase.BIDDING && game.currentPhase !== GamePhase.SETUP) {
+      return false;
+    }
+    // the current chef must be the user
+    if (game.turnOrder[game.currentChef].toString() !== chef._id.toString()) {
+      return false;
+    }
+    // there must not be no cards placed yet
+    if (game.cardsPlaced == 0) {
+      return false;
+    }
+    // the minimum bid is game.currentBid + 1
+    const minimumBid = game.currentBid + 1;
+    // we must be able to bid at least one card, but no more than the number of cards placed
+    if (minimumBid > game.cardsPlaced) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Return whether the given chef can place a card
+   * @param game 
+   * @param chef 
+   * @returns 
+   */
+  public canPlaceCard(game: IGame, chef: IChef): boolean {
+    // current phase must be SETUP
+    if (game.currentPhase !== GamePhase.SETUP) {
+      return false;
+    }
+    // the current chef must be the user
+    if (game.turnOrder[game.currentChef].toString() !== chef._id.toString()) {
+      return false;
+    }
+    // the chef must have cards left in their hand
+    if (chef.hand.length == 0) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
    * When the game is in setup phase, the current player can place a card or make a bid. This method places a card.
    * @param gameCode 
    * @param user 
@@ -628,8 +714,11 @@ export class GameService {
       if (game.turnOrder[game.currentChef].toString() !== chef._id.toString()) {
         throw new OutOfOrderError();
       }
-      if (chef.placedCards.length >= constants.MAX_HAND_SIZE) {
+      if (chef.placedCards.length >= constants.MAX_HAND_SIZE || chef.hand.length == 0) {
         throw new AllCardsPlacedError();
+      }
+      if (!this.canPlaceCard(game, chef)) {
+        throw new InvalidActionError(TurnAction.PlaceCard);
       }
       if (chef.hand.filter(card => card.type == ingredient).length == 0) {
         throw new OutOfIngredientError(ingredient);
@@ -669,6 +758,37 @@ export class GameService {
    * @param bid 
    */
   public async makeBidAsync(gameCode: string, user: IUser, bid: number): Promise<{ game: IGame & Document }> {
-    throw new Error('Not implemented');
+    const session = await startSession();
+    try {
+      session.startTransaction();
+      const game = await this.getGameByCodeAsync(gameCode, true);
+      if (!game) {
+        throw new InvalidGameError();
+      }
+      const chef = await this.ChefModel.findOne({ gameId: game._id, userId: user._id });
+      if (!chef) {
+        throw new NotInGameError();
+      }
+      if (!this.canBid(game, chef)) {
+        throw new InvalidActionError(TurnAction.Bid);
+      }
+      if (bid < game.currentBid + 1 || bid > game.cardsPlaced) {
+        throw new InvalidActionError(TurnAction.Bid, bid);
+      }
+      // set the current bid
+      game.currentBid = bid;
+      // increment the current chef
+      game.currentChef = (game.currentChef + 1) % game.chefIds.length;
+      await game.save();
+      await session.commitTransaction();
+      return { game };
+    }
+    catch (e) {
+      await session.abortTransaction();
+      throw e;
+    }
+    finally {
+      session.endSession();
+    }
   }
 }

@@ -27,3 +27,6 @@ You'll want access to the Auth0 admin interface, please contact Jessica Mulein f
 You can create an account using the Register endpoint. A Postman collection is available in the root directory, and you can join the Digital Defiance team on Postman to get access to the test collection.
 
 In order to get an access token, you'll want to log in to the app on localhost:3000 and then visit [http://localhost:3000/api-access](http://localhost:3000/api-access) and copy your token from that page into the dev environment {{access_token}} variable in postman. You can then register or perform other actions on the site.
+
+# Rules/flow for Chili and Cilantro
+
