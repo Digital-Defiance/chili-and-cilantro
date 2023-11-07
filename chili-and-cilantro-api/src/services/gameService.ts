@@ -717,9 +717,11 @@ export class GameService {
       if (chef.placedCards.length >= constants.MAX_HAND_SIZE || chef.hand.length == 0) {
         throw new AllCardsPlacedError();
       }
+      // can the chef place a card in general
       if (!this.canPlaceCard(game, chef)) {
         throw new InvalidActionError(TurnAction.PlaceCard);
       }
+      // can they specifically place the given card
       if (chef.hand.filter(card => card.type == ingredient).length == 0) {
         throw new OutOfIngredientError(ingredient);
       }
