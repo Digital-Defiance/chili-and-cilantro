@@ -5,6 +5,7 @@ import { JwtService } from '../services/jwtService';
 import { FirstChef } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { Database } from '../services/database';
 import { ValidationError } from '../errors/validationError';
+import { CardType } from 'chili-and-cilantro-lib/src/lib/enumerations/cardType';
 
 export const gamesRouter = Router();
 
@@ -131,6 +132,32 @@ gamesRouter.post('/:code/start', validateAccessToken,
       const gameService = new GameService(database);
       const { game, action } = await gameService.startGameAsync(gameCode, user._id, firstChefId);
       res.status(200).json({ game, action });
+    }
+    catch (e) {
+      if (e instanceof ValidationError) {
+        res.status(400).json(e);
+      } else {
+        res.status(500).json(e);
+      }
+    }
+  });
+
+gamesRouter.post('/:code/place', validateAccessToken,
+  async (req: Request, res: Response) => {
+    try {
+      const jwtService = new JwtService();
+      const token = req.headers.authorization?.split(' ')[1];
+      const user = await jwtService.getUserFromValidatedTokenAsync(token);
+      if (!user) {
+        return res.status(401).json({ message: 'User not found' });
+      }
+      const gameCode = req.params.code;
+      const { ingredient } = req.body;
+      const ingredientCard = ingredient as CardType;
+      const database = new Database();
+      const gameService = new GameService(database);
+      const { game, chef } = await gameService.placeIngredientAsync(gameCode, user, ingredientCard);
+      res.status(200).json({ game, chef });
     }
     catch (e) {
       if (e instanceof ValidationError) {

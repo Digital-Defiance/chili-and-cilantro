@@ -22,6 +22,8 @@ export const MAX_MESSAGE_LENGTH = 512;
 
 export const MULTILINGUAL_STRING_REGEX = /^[\s\p{N}\p{L}_-]+$/u;
 
+export const MAX_HAND_SIZE = 4;
+
 export default {
   GAME_CODE_LENGTH,
   MAX_CHEFS,
@@ -30,6 +32,7 @@ export default {
   MIN_GAME_PASSWORD_LENGTH,
   MAX_GAME_NAME_LENGTH,
   MIN_GAME_NAME_LENGTH,
+  MAX_HAND_SIZE,
   MAX_MESSAGE_LENGTH,
   MIN_MESSAGE_LENGTH,
   MAX_USER_NAME_LENGTH,

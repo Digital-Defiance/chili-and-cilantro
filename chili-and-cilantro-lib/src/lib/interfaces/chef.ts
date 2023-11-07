@@ -7,6 +7,7 @@ export interface IChef extends IHasID {
   gameId: Schema.Types.ObjectId;
   name: string;
   hand: ICard[];
+  placedCards: ICard[];
   userId: Schema.Types.ObjectId;
   state: ChefState;
   host: boolean;

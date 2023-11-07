@@ -22,10 +22,12 @@ import {
   IMessageDetails,
   IAction,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { AllCardsPlacedError } from '../errors/allCardsPlaced';
 import { AlreadyJoinedOtherError } from '../errors/alreadyJoinedOther';
 import { GameFullError } from '../errors/gameFull';
 import { GameInProgressError } from '../errors/gameInProgress';
 import { GamePasswordMismatchError } from '../errors/gamePasswordMismatch';
+import { IncorrectGamePhaseError } from '../errors/incorrectGamePhase';
 import { InvalidGameError } from '../errors/invalidGame';
 import { InvalidGameNameError } from '../errors/invalidGameName';
 import { InvalidGamePasswordError } from '../errors/invalidGamePassword';
@@ -35,8 +37,11 @@ import { InvalidMessageError } from '../errors/invalidMessage';
 import { NotEnoughChefsError } from '../errors/notEnoughChefs';
 import { NotHostError } from '../errors/notHost';
 import { NotInGameError } from '../errors/notInGame';
+import { OutOfIngredientError } from '../errors/outOfIngredient';
+import { OutOfOrderError } from '../errors/outOfOrder';
 import { UsernameInUseError } from '../errors/usernameInUse';
 import { IDatabase } from '../interfaces/database';
+import { CardType } from 'chili-and-cilantro-lib/src/lib/enumerations/cardType';
 
 export class GameService {
   private readonly Database: IDatabase;
@@ -177,7 +182,8 @@ export class GameService {
         gameId: game._id,
         userId: user._id,
         name: userName,
-        hand: [],
+        hand: [{ type: CardType.CHILI, faceUp: false }, { type: CardType.CILANTRO, faceUp: false }, { type: CardType.CILANTRO, faceUp: false }, { type: CardType.CILANTRO, faceUp: false }],
+        placedCards: [],
         state: ChefState.LOBBY,
         host: false,
       });
@@ -249,7 +255,8 @@ export class GameService {
           gameId: newGame._id,
           name: existingChef.name,
           userId: existingChef.userId,
-          hand: [],
+          hand: [{ type: CardType.CHILI, faceUp: false }, { type: CardType.CILANTRO, faceUp: false }, { type: CardType.CILANTRO, faceUp: false }, { type: CardType.CILANTRO, faceUp: false }],
+          placedCards: [],
           state: ChefState.LOBBY,
           host: newChefId == newHostChefId,
         });
@@ -582,5 +589,49 @@ export class GameService {
     const game = await this.getGameByCodeAsync(gameCode, true);
     const actions = await this.ActionModel.find({ gameId: game._id }).sort({ createdAt: 1 });
     return actions;
+  }
+
+  public async placeIngredientAsync(gameCode: string, user: IUser, ingredient: CardType): Promise<{ game: IGame & Document, chef: IChef & Document }> {
+    const session = await startSession();
+    try {
+      session.startTransaction();
+      const game = await this.getGameByCodeAsync(gameCode, true);
+      if (!game) {
+        throw new InvalidGameError();
+      }
+      const chef = await this.ChefModel.findOne({ gameId: game._id, userId: user._id });
+      if (!chef) {
+        throw new NotInGameError();
+      }
+      if (game.currentPhase !== GamePhase.SETUP) {
+        throw new IncorrectGamePhaseError();
+      }
+      if (game.turnOrder[game.currentChef].toString() !== chef._id.toString()) {
+        throw new OutOfOrderError();
+      }
+      if (chef.placedCards.length >= constants.MAX_HAND_SIZE) {
+        throw new AllCardsPlacedError();
+      }
+      if (chef.hand.filter(card => card.type == ingredient).length == 0) {
+        throw new OutOfIngredientError(ingredient);
+      }
+      // remove one card of the specified type from the chef's hand
+      chef.hand.splice(chef.hand.findIndex(card => card.type == ingredient), 1);
+      // add the card to the chef's placed cards
+      chef.placedCards.push({ type: ingredient, faceUp: false });
+      await chef.save();
+      // increment the current chef
+      game.currentChef = (game.currentChef + 1) % game.chefIds.length;
+      await game.save();
+      await session.commitTransaction();
+      return { game, chef };
+    }
+    catch (e) {
+      await session.abortTransaction();
+      throw e;
+    }
+    finally {
+      session.endSession();
+    }
   }
 }
