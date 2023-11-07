@@ -689,6 +689,23 @@ export class GameService {
     return true;
   }
 
+  public availableActions(game: IGame, chef: IChef): TurnAction[] {
+    const actions: TurnAction[] = [];
+    if (this.canPlaceCard(game, chef)) {
+      actions.push(TurnAction.PlaceCard);
+    }
+    const canBid = this.canBid(game, chef);
+    const existingBid = game.currentBid <= 0;
+    // if there has been at least one bid, users can increase the bid
+    if (canBid && existingBid) {
+      actions.push(TurnAction.IncreaseBid);
+      // otherwise they can make a bid
+    } else if (canBid) {
+      actions.push(TurnAction.Bid);
+    }
+    return actions;
+  }
+
   /**
    * When the game is in setup phase, the current player can place a card or make a bid. This method places a card.
    * @param gameCode 
