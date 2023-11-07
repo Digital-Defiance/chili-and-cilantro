@@ -14,7 +14,6 @@ export interface IGame extends IHasID, IHasTimestamps {
   maxChefs: number;
   currentChef: number;
   currentPhase: GamePhase;
-  firstChef: FirstChef;
   turnOrder: Schema.Types.ObjectId[];
   roundHistory: IAction[];
   hostChefId: Schema.Types.ObjectId;

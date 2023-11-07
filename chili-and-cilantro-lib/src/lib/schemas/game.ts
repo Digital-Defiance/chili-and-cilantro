@@ -71,11 +71,6 @@ export const GameSchema = new Schema<IGame>(
         required: true,
       },
     ],
-    firstChef: {
-      type: String,
-      enum: Object.values(FirstChef),
-      required: true,
-    },
     maxChefs: {
       type: Number,
       required: true,

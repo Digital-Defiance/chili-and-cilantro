@@ -18,16 +18,15 @@ gamesRouter.post('/create', validateAccessToken,
       if (!user) {
         return res.status(401).json({ message: 'User not found' });
       }
-      const { name, userName, password, maxChefs, firstChef } = req.body;
+      const { name, userName, password, maxChefs } = req.body;
       const sanitizedName = (name as string)?.trim();
       const sanitizedUserName = (userName as string)?.trim();
       const sanitizedPassword = (password as string)?.trim().toLowerCase();
       const sanitizedMaxChefs = parseInt(maxChefs, 10);
-      const sanitizedFirstChef: FirstChef = firstChef as FirstChef;
 
       const database = new Database();
       const gameService = new GameService(database);
-      const { game, chef } = await gameService.createGameAsync(user, sanitizedUserName, sanitizedName, sanitizedPassword, sanitizedMaxChefs, sanitizedFirstChef);
+      const { game, chef } = await gameService.createGameAsync(user, sanitizedUserName, sanitizedName, sanitizedPassword, sanitizedMaxChefs);
       res.send({ game, chef });
     }
     catch (error) {
@@ -81,7 +80,7 @@ gamesRouter.post('/:code/message', validateAccessToken,
       const sanitizedMessage = (message as string)?.trim();
       const database = new Database();
       const gameService = new GameService(database);
-      const messageAction = await gameService.sendMessageAsync(gameCode, user._id, sanitizedMessage);
+      const messageAction = await gameService.sendMessageAsync(gameCode, user, sanitizedMessage);
       res.status(200).json(messageAction);
     }
     catch (e) {
@@ -126,11 +125,10 @@ gamesRouter.post('/:code/start', validateAccessToken,
       if (!user) {
         return res.status(401).json({ message: 'User not found' });
       }
-      const { firstChefId } = req.body;
       const gameCode = req.params.code;
       const database = new Database();
       const gameService = new GameService(database);
-      const { game, action } = await gameService.startGameAsync(gameCode, user._id, firstChefId);
+      const { game, action } = await gameService.startGameAsync(gameCode, user._id);
       res.status(200).json({ game, action });
     }
     catch (e) {

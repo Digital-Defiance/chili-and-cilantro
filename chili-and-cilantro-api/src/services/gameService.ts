@@ -4,7 +4,6 @@ import validator from 'validator';
 import {
   constants,
   Action,
-  FirstChef,
   IUser, IGame, IChef,
   ModelName,
   ChefState,
@@ -83,8 +82,16 @@ export class GameService {
     throw new Error(`Unable to generate a unique game code in ${1000 - attempts} attempts.`);
   }
 
-
-  public async createGameAsync(user: IUser, userName: string, gameName: string, password: string, maxChefs: number, firstChef: FirstChef): Promise<{ game: IGame & Document, chef: IChef & Document }> {
+  /**
+   * Creates a new game with the specified parameters
+   * @param user The user creating the game
+   * @param userName The display name for the user
+   * @param gameName The name of the game
+   * @param password Optional password for the game. Empty string for no password.
+   * @param maxChefs The maximum number of chefs in the game. Must be between MIN_CHEFS and MAX_CHEFS.
+   * @returns 
+   */
+  public async createGameAsync(user: IUser, userName: string, gameName: string, password: string, maxChefs: number): Promise<{ game: IGame & Document, chef: IChef & Document }> {
     if (await this.userIsInAnyActiveGameAsync(user)) {
       throw new AlreadyJoinedOtherError();
     }
@@ -100,9 +107,6 @@ export class GameService {
     if (maxChefs < constants.MIN_CHEFS || maxChefs > constants.MAX_CHEFS) {
       throw new InvalidGameParameterError(`Must be between ${constants.MIN_CHEFS} and ${constants.MAX_CHEFS}.`, 'maxChefs');
     }
-    if (!firstChef || !Object.values(FirstChef).includes(firstChef)) {
-      throw new InvalidGameParameterError('Must be a valid first chef option.', 'firstChef');
-    }
     const session = await startSession();
     try {
       session.startTransaction();
@@ -116,7 +120,6 @@ export class GameService {
         maxChefs: maxChefs,
         currentPhase: GamePhase.LOBBY,
         currentChef: -1,
-        firstChef: firstChef,
         chefIds: [chefId],
         turnOrder: [], // will be chosen when the game is about to start
         hostChefId: chefId,
@@ -151,6 +154,14 @@ export class GameService {
     }
   }
 
+  /**
+   * Joins the player to the specified game and creates a chef object for them
+   * @param gameCode 
+   * @param password 
+   * @param user 
+   * @param userName 
+   * @returns 
+   */
   public async joinGameAsync(gameCode: string, password: string, user: IUser, userName: string): Promise<{ game: IGame & Document, chef: IChef & Document }> {
     if (await this.userIsInAnyActiveGameAsync(user)) {
       throw new AlreadyJoinedOtherError();
@@ -207,9 +218,13 @@ export class GameService {
     }
   }
 
+  /**
+   * Creates a new game from a completed game. The new game will have the same code, name, password, and players as the existing game.
+   * @param existingGameId The ID of the existing game
+   * @returns A tuple of the new game and chef objects
+   */
   public async createNewGameFromExistingAsync(
     existingGameId: string,
-    firstChef: FirstChef
   ): Promise<{ game: IGame & Document, chef: IChef & Document }> {
     const existingGame = await this.GameModel.findById(existingGameId);
     if (!existingGame) {
@@ -229,7 +244,7 @@ export class GameService {
       const newHostChefId = newChefIds[hostChefIndex];
 
       // we need to look up the user id for all chefs in the current game
-      const existingChefs = await this.ChefModel.find({ _id: { $in: existingGame.chefIds } });
+      const existingChefs = await this.ChefModel.find({ gameId: existingGame._id });
 
       // Create the new Game document without persisting to the database yet
       const newGame = new this.GameModel({
@@ -239,9 +254,8 @@ export class GameService {
         maxChefs: existingGame.maxChefs,
         currentPhase: GamePhase.LOBBY,
         currentChef: -1,
-        firstChef,
         chefIds: newChefIds,
-        turnOrder: [], // will be chosen when the game is about to start
+        turnOrder: [], // will be chosen when the game is started
         hostChefId: newChefIds[hostChefIndex],
         hostUserId: existingGame.hostUserId,
         lastGame: existingGame._id,
@@ -305,10 +319,9 @@ export class GameService {
   /**
    * Starts the specified game
    * @param gameId 
-   * @param firstChefId 
    * @returns 
    */
-  public async startGameAsync(gameCode: string, userId: string, firstChefId?: string): Promise<{ game: IGame & Document, action: Document<unknown> }> {
+  public async startGameAsync(gameCode: string, userId: string): Promise<{ game: IGame & Document, action: Document<unknown> }> {
     const session = await startSession();
     try {
       session.startTransaction();
@@ -326,29 +339,11 @@ export class GameService {
         throw new NotEnoughChefsError(game.chefIds.length, constants.MIN_CHEFS);
       }
       game.currentPhase = GamePhase.SETUP;
-      // if a firstChefId is provided, they go first and the turn order is randomized
+
       // create a random order of players
-      // turnOrder is an array of chef ids, in order
-      const chefIds = game.chefIds.map(chef => chef.toString());
-      if (firstChefId) {
-        // Verify the firstChefId is valid and part of the game
-        if (!chefIds.includes(firstChefId)) {
-          throw new InvalidGameParameterError('First chef must be one of the chefs in the game.', 'firstChefId');
-        }
+      // shuffle the chef ids
+      game.turnOrder = this.shuffleArray(game.chefIds);
 
-        // Prepare the turn order
-        const firstChefIndex = chefIds.indexOf(firstChefId);
-        const remainingChefs = [...chefIds]; // Clone the array
-        remainingChefs.splice(firstChefIndex, 1); // Remove the firstChefId
-        const shuffledRemainingChefs = this.shuffleArray(remainingChefs); // Implement or use a utility method to shuffle the array
-
-        game.turnOrder = [firstChefId, ...shuffledRemainingChefs]; // Combine the first chef with the shuffled remaining chefs
-      } else {
-        // Handle the case when no firstChefId is provided
-        // For example, shuffle all chefs and set the turn order
-        game.turnOrder = this.shuffleArray(chefIds);
-        game.currentChef = 0;
-      }
       const savedGame = await game.save();
       const startAction = await this.Database.getActionModel(Action.START_GAME).create({
         gameId: game._id,
@@ -545,7 +540,14 @@ export class GameService {
     return count > 0;
   }
 
-  public async sendMessageAsync(gameCode: string, userId: string, message: string): Promise<Document<IMessageAction>> {
+  /**
+   * Sends a message to all players in the specified game
+   * @param gameCode The game code of an active game
+   * @param user The user sending the message
+   * @param message The message to send
+   * @returns The message action object
+   */
+  public async sendMessageAsync(gameCode: string, user: IUser, message: string): Promise<Document<IMessageAction>> {
     const session = await startSession();
     try {
       session.startTransaction();
@@ -553,7 +555,7 @@ export class GameService {
       if (!game) {
         throw new InvalidGameError();
       }
-      const chef = await this.ChefModel.findOne({ gameId: game._id, userId: userId });
+      const chef = await this.ChefModel.findOne({ gameId: game._id, userId: user._id });
       if (!chef) {
         throw new NotInGameError();
       }
@@ -580,17 +582,34 @@ export class GameService {
     }
   }
 
+  /**
+   * Gets all chef names for the specified game
+   * @param gameId 
+   * @returns Array of chef names
+   */
   public async getGameChefNamesAsync(gameId: string): Promise<string[]> {
     const chefs = await this.ChefModel.find({ gameId: new ObjectId(gameId) });
     return chefs.map(chef => chef.name);
   }
 
+  /**
+   * Gets all actions for the specified game
+   * @param gameCode 
+   * @returns Array of actions, sorted by createdAt timestamp in ascending order
+   */
   public async getGameActionsAsync(gameCode: string): Promise<IAction[]> {
     const game = await this.getGameByCodeAsync(gameCode, true);
     const actions = await this.ActionModel.find({ gameId: game._id }).sort({ createdAt: 1 });
     return actions;
   }
 
+  /**
+   * When the game is in setup phase, the current player can place a card or make a bid. This method places a card.
+   * @param gameCode 
+   * @param user 
+   * @param ingredient 
+   * @returns A tuple of the updated game and chef objects
+   */
   public async placeIngredientAsync(gameCode: string, user: IUser, ingredient: CardType): Promise<{ game: IGame & Document, chef: IChef & Document }> {
     const session = await startSession();
     try {
