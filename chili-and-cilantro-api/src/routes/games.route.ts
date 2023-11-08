@@ -119,7 +119,8 @@ gamesRouter.get('/:code/history', validateAccessToken,
       const chefService = new ChefService(database);
       const playerService = new PlayerService(database);
       const gameService = new GameService(database, actionService, chefService, playerService);
-      const actions = await gameService.getGameActionsAsync(gameCode);
+      const game = await gameService.getGameByCodeAsync(gameCode, true);
+      const actions = await actionService.getGameHistoryAsync(game);
       res.status(200).json(actions);
     }
     catch (e) {

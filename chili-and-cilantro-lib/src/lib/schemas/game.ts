@@ -20,6 +20,10 @@ export const BidSchema = new Schema<IBid>({
     type: Number,
     required: true,
   },
+  pass: {
+    type: Boolean,
+    required: true,
+  },
 });
 
 export const RoundBidSchema = new Schema<IRoundBids>({

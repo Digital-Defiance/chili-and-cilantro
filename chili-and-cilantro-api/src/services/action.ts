@@ -1,8 +1,5 @@
-import { ObjectId } from 'mongodb';
 import { Document, Model } from 'mongoose';
 import {
-  ChefState,
-  GamePhase,
   Action,
   IAction,
   ICreateGameAction,
@@ -18,13 +15,13 @@ import {
   IChef,
   IGame,
   IUser,
-  ModelData,
   ModelName,
   IStartBiddingDetails,
   IStartBiddingAction,
+  IPassDetails,
+  IPassAction,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { IDatabase } from '../interfaces/database';
-import { UtilityService } from './utility';
 
 export class ActionService {
   private readonly Database: IDatabase;
@@ -32,6 +29,12 @@ export class ActionService {
   constructor(database: IDatabase) {
     this.Database = database;
     this.ActionModel = database.getModel<IAction>(ModelName.Action);
+  }
+  public async getGameHistoryAsync(game: IGame): Promise<IAction[]> {
+    const actions = await this.ActionModel.find({ gameId: game._id }).sort({
+      createdAt: 1,
+    });
+    return actions;
   }
   public async createGameAsync(
     game: IGame,
@@ -123,6 +126,17 @@ export class ActionService {
       } as IStartBiddingDetails,
       round: game.currentRound,
     } as IStartBiddingAction);
+    return result;
+  }
+  public async passAsync(game: IGame, chef: IChef): Promise<Document<unknown>> {
+    const result = await this.Database.getActionModel(Action.PASS).create({
+      gameId: game._id,
+      chefId: chef._id,
+      userId: chef.userId,
+      type: Action.PASS,
+      details: {} as IPassDetails,
+      round: game.currentRound,
+    } as IPassAction);
     return result;
   }
 }

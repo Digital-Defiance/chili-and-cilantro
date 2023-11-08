@@ -6,11 +6,10 @@ import {
   CardType,
   IUser, IGame, IChef,
   ModelName,
-  ChefState,
   GamePhase,
-  IAction,
   TurnAction,
   IBid,
+  ChefState,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { AllCardsPlacedError } from '../errors/allCardsPlaced';
 import { AlreadyJoinedOtherError } from '../errors/alreadyJoinedOther';
@@ -38,18 +37,12 @@ import { PlayerService } from './player';
 import { UtilityService } from './utility';
 
 export class GameService {
-  private readonly Database: IDatabase;
-  private readonly ActionModel: Model<IAction>;
-  private readonly ChefModel: Model<IChef>;
   private readonly GameModel: Model<IGame>;
   private readonly actionService: ActionService;
   private readonly chefService: ChefService;
   private readonly playerService: PlayerService;
 
   constructor(database: IDatabase, actionService: ActionService, chefService: ChefService, playerService: PlayerService) {
-    this.Database = database;
-    this.ActionModel = database.getModel<IAction>(ModelName.Action);
-    this.ChefModel = database.getModel<IChef>(ModelName.Chef);
     this.GameModel = database.getModel<IGame>(ModelName.Game);
     this.actionService = actionService;
     this.chefService = chefService;
@@ -127,7 +120,7 @@ export class GameService {
         roundWinners: [],
         turnOrder: [], // will be chosen when the game is about to start
       });
-      const chef = await this.chefService.newChefAsync(game, user, userName, chefId);
+      const chef = await this.chefService.newChefAsync(game, user, userName, true, chefId);
       await this.actionService.createGameAsync(game, chef, user);
       await session.commitTransaction();
       return { game, chef };
@@ -176,15 +169,7 @@ export class GameService {
       if (chefNames.includes(userName)) {
         throw new UsernameInUseError();
       }
-      const chef = await this.ChefModel.create({
-        gameId: game._id,
-        userId: user._id,
-        name: userName,
-        hand: UtilityService.makeHand(),
-        placedCards: [],
-        state: ChefState.LOBBY,
-        host: false,
-      });
+      const chef = await this.chefService.newChefAsync(game, user, userName, false);
       await this.actionService.joinGameAsync(game, chef, user);
       game.chefIds.push(chef._id);
       await game.save();
@@ -308,9 +293,15 @@ export class GameService {
       // create a random order of players
       // shuffle the chef ids
       game.turnOrder = UtilityService.shuffleArray(game.chefIds);
-
+      // save the game
       const savedGame = await game.save();
       const startAction = await this.actionService.startGameAsync(savedGame);
+      // mark all chefs as PLAYING
+      const chefs = await this.chefService.getChefsByGameAsync(savedGame);
+      chefs.forEach(chef => {
+        chef.state = ChefState.PLAYING;
+        chef.save();
+      });
       await session.commitTransaction();
       return { game: savedGame, action: startAction };
     }
@@ -376,6 +367,12 @@ export class GameService {
         const savedGame = await game.save();
         // TODO: close any sockets for this game
         await this.actionService.expireGameAsync(savedGame);
+        // set all chefs to EXPIRED
+        const chefs = await this.chefService.getChefsByGameAsync(savedGame);
+        chefs.forEach(chef => {
+          chef.state = ChefState.EXPIRED;
+          chef.save();
+        });
       }
       await session.commitTransaction();
     }
@@ -430,17 +427,6 @@ export class GameService {
   public async getGameChefNamesAsync(gameId: string): Promise<string[]> {
     const chefs = await this.chefService.getChefsByGameIdAsync(gameId);
     return chefs.map(chef => chef.name);
-  }
-
-  /**
-   * Gets all actions for the specified game
-   * @param gameCode 
-   * @returns Array of actions, sorted by createdAt timestamp in ascending order
-   */
-  public async getGameActionsAsync(gameCode: string): Promise<IAction[]> {
-    const game = await this.getGameByCodeAsync(gameCode, true);
-    const actions = await this.ActionModel.find({ gameId: game._id }).sort({ createdAt: 1 });
-    return actions;
   }
 
   /**
@@ -524,6 +510,9 @@ export class GameService {
        If the second player in the turn order increases the bid, we must go through the remainder of the players
        in the turn order and back through the first before moving to REVEAL phase.
     */
+    if (this.haveAllRemainingPlayersPassed(game)) {
+      return false;
+    }
     return true;
   }
 
@@ -622,6 +611,7 @@ export class GameService {
     const roundBid: IBid = {
       chefId: chef._id,
       bid: bid,
+      pass: false,
     };
     if (game.roundBids[game.currentRound] === undefined) {
       game.roundBids[game.currentRound] = [];
@@ -634,13 +624,68 @@ export class GameService {
     return { game, chef };
   }
 
+  public haveAllRemainingPlayersPassed(game: IGame): boolean {
+    // Get the bids for the current round
+    const currentRoundBids = game.roundBids[game.currentRound];
+
+    // If there are no bids in the current round, we return false because we can't have passes without bids
+    if (!currentRoundBids || currentRoundBids.length === 0) {
+      return false;
+    }
+
+    // Find the most recent non-passing bid in the current round
+    const lastNonPassingBid = currentRoundBids.slice().reverse().find(bid => !bid.pass);
+
+    // If no such bid exists, then return false since we need at least one non-passing bid
+    if (!lastNonPassingBid) {
+      return false;
+    }
+
+    // Get the index of the last non-passing bid
+    const lastNonPassingBidIndex = currentRoundBids.findIndex(bid => bid.chefId.toString() === lastNonPassingBid.chefId.toString());
+
+    // Create a list of chefIds who have made a bid since the last non-passing bid (including the chef who made it)
+    const subsequentChefIds = currentRoundBids.slice(lastNonPassingBidIndex).map(bid => bid.chefId.toString());
+
+    // Find all unique chefIds who have passed since the last non-passing bid (excluding the chef who made the bid)
+    const uniquePassingChefIds = [...new Set(subsequentChefIds.filter((chefId, index) => {
+      return currentRoundBids[lastNonPassingBidIndex + index].pass && chefId !== lastNonPassingBid.chefId.toString();
+    }))];
+
+    // Determine if all other chefs have passed since the last non-passing bid
+    const allOtherChefsHavePassed = game.chefIds.every(chefId => {
+      // The chef who made the last non-passing bid is not expected to have passed
+      return chefId.toString() === lastNonPassingBid.chefId.toString() || uniquePassingChefIds.includes(chefId.toString());
+    });
+
+    return allOtherChefsHavePassed;
+  }
+
   /**
    * A chef passes on increasing the bid
    * @param game 
    * @param chef 
    */
   public async passAsync(game: IGame & Document, chef: IChef & Document): Promise<{ game: IGame & Document, chef: IChef & Document }> {
-    throw new Error('Method not implemented.');
+    if (!this.canPass(game, chef)) {
+      throw new InvalidActionError(TurnAction.Pass);
+    }
+    // create pass event/action
+    await this.actionService.passAsync(game, chef);
+    // increment the current chef
+    game.currentChef = (game.currentChef + 1) % game.chefIds.length;
+    // create a new round bid history
+    const roundBid: IBid = {
+      chefId: chef._id,
+      bid: game.currentBid,
+      pass: true,
+    };
+    if (game.roundBids[game.currentRound] === undefined) {
+      throw new Error('Cannot pass before the first bid');
+    }
+    game.roundBids[game.currentRound].push(roundBid);
+    await game.save();
+    return { game, chef };
   }
 
   /**

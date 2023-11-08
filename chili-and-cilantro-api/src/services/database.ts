@@ -18,7 +18,7 @@ import {
   StartNewRoundDiscriminator,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { IDatabase } from '../interfaces/database';
-import { Document, IfAny, Model, Require_id } from 'mongoose';
+import { Model } from 'mongoose';
 
 export class Database implements IDatabase {
   getModel<T>(modelName: ModelName): Model<T> {

@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb';
 import { Document, Model } from 'mongoose';
-import { ChefState, GamePhase, IChef, IGame, IUser, ModelData, ModelName } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { ChefState, IChef, IGame, IUser, ModelName } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { IDatabase } from '../interfaces/database';
 import { UtilityService } from './utility';
 
@@ -11,15 +11,15 @@ export class ChefService {
     this.Database = database;
     this.ChefModel = database.getModel<IChef>(ModelName.Chef);
   }
-  public async newChefAsync(game: IGame, user: IUser, userName: string, chefId?: ObjectId): Promise<IChef & Document> {
+  public async newChefAsync(game: IGame, user: IUser, userName: string, host: boolean, chefId?: ObjectId): Promise<IChef & Document> {
     const chef = await this.ChefModel.create({
       _id: chefId ?? new ObjectId(),
       gameId: game._id,
       name: userName,
       userId: user._id,
-      hand: [],
+      hand: UtilityService.makeHand(),
       state: ChefState.LOBBY,
-      host: true,
+      host: host,
     });
     return chef;
   }
