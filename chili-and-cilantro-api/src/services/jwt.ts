@@ -10,7 +10,7 @@ import { environment } from '../environment';
 import { managementClient } from '../auth0';
 import { Document } from 'mongoose';
 import { Request, Response } from 'express';
-import { UserService } from './userService';
+import { UserService } from './user';
 import { IUser } from '@chili-and-cilantro/chili-and-cilantro-lib';
 
 export class JwtService {

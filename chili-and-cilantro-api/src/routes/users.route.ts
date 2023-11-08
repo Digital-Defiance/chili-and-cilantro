@@ -1,7 +1,7 @@
 import { Request, Response, Router } from 'express';
-import { UserService } from '../services/userService';
+import { UserService } from '../services/user';
 import { validateAccessToken } from '../middlewares/auth0';
-import { JwtService } from '../services/jwtService';
+import { JwtService } from '../services/jwt';
 
 export const usersRouter = Router();
 

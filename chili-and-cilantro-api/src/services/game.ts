@@ -45,21 +45,24 @@ import { UsernameInUseError } from '../errors/usernameInUse';
 import { IDatabase } from '../interfaces/database';
 import { CardType } from 'chili-and-cilantro-lib/src/lib/enumerations/cardType';
 import { ICard } from 'chili-and-cilantro-lib/src/lib/interfaces/card';
-import { PlayerService } from './playerService';
-import { UtilityService } from './utilityService';
+import { ChefService } from './chef';
+import { PlayerService } from './player';
+import { UtilityService } from './utility';
 
 export class GameService {
   private readonly Database: IDatabase;
   private readonly ActionModel: Model<IAction>;
   private readonly ChefModel: Model<IChef>;
   private readonly GameModel: Model<IGame>;
+  private readonly chefService: ChefService;
   private readonly playerService: PlayerService;
 
-  constructor(database: IDatabase, playerService: PlayerService) {
+  constructor(database: IDatabase, chefService: ChefService, playerService: PlayerService) {
     this.Database = database;
     this.ActionModel = database.getModel<IAction>(ModelName.Action);
     this.ChefModel = database.getModel<IChef>(ModelName.Chef);
     this.GameModel = database.getModel<IGame>(ModelName.Game);
+    this.chefService = chefService;
     this.playerService = playerService;
   }
 
@@ -134,15 +137,7 @@ export class GameService {
         roundWinners: [],
         turnOrder: [], // will be chosen when the game is about to start
       });
-      const chef = await this.ChefModel.create({
-        _id: chefId,
-        gameId: gameId,
-        name: userName,
-        userId: user._id,
-        hand: [],
-        state: ChefState.LOBBY,
-        host: true,
-      });
+      const chef = await this.chefService.newChefAsync(game, user, userName, chefId);
       await this.Database.getActionModel(Action.CREATE_GAME).create({
         gameId: game._id,
         chefId: chef._id,
@@ -254,7 +249,7 @@ export class GameService {
       const newHostChefId = newChefIds[hostChefIndex];
 
       // we need to look up the user id for all chefs in the current game
-      const existingChefs = await this.ChefModel.find({ gameId: existingGame._id });
+      const existingChefs = await this.chefService.getChefsByGameAsync(existingGame);
 
       // Create the new Game document without persisting to the database yet
       const newGame = new this.GameModel({
@@ -279,16 +274,7 @@ export class GameService {
       // Create new Chef documents
       const chefCreations = newChefIds.map((newChefId, index) => {
         const existingChef = existingChefs.find(chef => chef._id.toString() == existingGame.chefIds[index].toString());
-        return this.ChefModel.create({
-          _id: newChefId,
-          gameId: newGame._id,
-          name: existingChef.name,
-          userId: existingChef.userId,
-          hand: [{ type: CardType.CHILI, faceUp: false }, { type: CardType.CILANTRO, faceUp: false }, { type: CardType.CILANTRO, faceUp: false }, { type: CardType.CILANTRO, faceUp: false }],
-          placedCards: [],
-          state: ChefState.LOBBY,
-          host: newChefId == newHostChefId,
-        });
+        return this.chefService.newChefFromExisting(game, existingChef, newChefId);
       });
 
       // Execute all creations concurrently
@@ -460,7 +446,7 @@ export class GameService {
       if (!game) {
         throw new InvalidGameError();
       }
-      const chef = await this.ChefModel.findOne({ gameId: game._id, userId: user._id });
+      const chef = await this.chefService.getChefAsync(game, user);
       if (!chef) {
         throw new NotInGameError();
       }
@@ -494,7 +480,7 @@ export class GameService {
    * @returns Array of chef names
    */
   public async getGameChefNamesAsync(gameId: string): Promise<string[]> {
-    const chefs = await this.ChefModel.find({ gameId: new ObjectId(gameId) });
+    const chefs = await this.chefService.getChefsByGameIdAsync(gameId);
     return chefs.map(chef => chef.name);
   }
 
@@ -732,7 +718,7 @@ export class GameService {
       if (!game) {
         throw new InvalidGameError();
       }
-      const chef = await this.ChefModel.findOne({ gameId: game._id, userId: user._id });
+      const chef = await this.chefService.getChefAsync(game, user);
       if (!chef) {
         throw new NotInGameError();
       }

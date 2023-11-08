@@ -192,13 +192,8 @@
 					"mode": "urlencoded",
 					"urlencoded": [
 						{
-							"key": "name",
-							"value": "Test Game",
-							"type": "text"
-						},
-						{
 							"key": "userName",
-							"value": "Test User 2",
+							"value": "Test User 3",
 							"type": "text"
 						},
 						{
@@ -218,6 +213,47 @@
 						"games",
 						"{{gameCode}}",
 						"join"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Start Game",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "firstChefId",
+							"value": "",
+							"type": "text",
+							"disabled": true
+						}
+					]
+				},
+				"url": {
+					"raw": "{{base_url}}/api/games/{{gameCode}}/start",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"games",
+						"{{gameCode}}",
+						"start"
 					]
 				}
 			},
@@ -264,7 +300,7 @@
 			"response": []
 		},
 		{
-			"name": "Get Actions",
+			"name": "Get Game History",
 			"request": {
 				"auth": {
 					"type": "bearer",
@@ -279,7 +315,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{base_url}}/api/games/{{gameCode}}/actions",
+					"raw": "{{base_url}}/api/games/{{gameCode}}/history",
 					"host": [
 						"{{base_url}}"
 					],
@@ -287,7 +323,7 @@
 						"api",
 						"games",
 						"{{gameCode}}",
-						"actions"
+						"history"
 					]
 				}
 			},
