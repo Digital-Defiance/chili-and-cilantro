@@ -2,7 +2,7 @@ import { constants } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { CardType } from 'chili-and-cilantro-lib/src/lib/enumerations/cardType';
 import { ICard } from 'chili-and-cilantro-lib/src/lib/interfaces/card';
 
-export class UtilityService {
+export abstract class UtilityService {
   /**
    * Generates a random game code which may or may not be in use
    * @returns A random game code of the specified length
