@@ -30,3 +30,14 @@ In order to get an access token, you'll want to log in to the app on localhost:3
 
 # Rules/flow for Chili and Cilantro
 
+- A user creates a game. This user becomes the Host. They must start the game and make other decisions. This is the LOBBY phase.
+- Multiple users join the game- until MAX_CHEFS is reached- this number is 8 but it could easily be increased.
+- The Host at some point starts the game. The chef IDs up to that point are shuffled and a turn order is produced randomly. This is the SETUP phase. Starting the game is equivalent to starting the first round.
+- Chefs take turns either placing a card or bidding. The minimum bid is 1, so the first Chef must place a card before anyone can consider bidding. The maximum bid is the total number of cards placed.
+  - Cards may be placed until everyone is out of cards or someone has bid.
+  - Once everyone is out of ingredient cards, the next player must bid.
+  - Once bidding begins, players can no longer place cards and must increase the bid or pass.
+  - Once all players have bid or passed, the person with the highest bid must reveal cards.
+- Once cards are placed or a player bids, the game moves to BIDDING phase.
+- Whenever the bid is increased, all other players have the opportunity to increase it further or pass unless the bid is the maximum and we immediately move to the next phase.
+  - If the second player in the turn order increases the bid, we must go through the remainder of the players in the turn order and back through the first before moving to REVEAL phase.

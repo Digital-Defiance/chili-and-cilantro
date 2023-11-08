@@ -21,6 +21,7 @@ import {
   IMessageDetails,
   IAction,
   TurnAction,
+  IBid,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { AllCardsPlacedError } from '../errors/allCardsPlaced';
 import { AlreadyJoinedOtherError } from '../errors/alreadyJoinedOther';
@@ -44,6 +45,7 @@ import { UsernameInUseError } from '../errors/usernameInUse';
 import { IDatabase } from '../interfaces/database';
 import { CardType } from 'chili-and-cilantro-lib/src/lib/enumerations/cardType';
 import { ICard } from 'chili-and-cilantro-lib/src/lib/interfaces/card';
+import { UtilityService } from './utilityService';
 
 export class GameService {
   private readonly Database: IDatabase;
@@ -58,15 +60,11 @@ export class GameService {
     this.GameModel = database.getModel<IGame>(ModelName.Game);
   }
 
-  private generateGameCode(): string {
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    let code = '';
-    for (let i = 0; i < constants.GAME_CODE_LENGTH; i++) {
-      code += letters.charAt(Math.floor(Math.random() * letters.length));
-    }
-    return code;
-  }
-
+  /**
+   * Generates a new game code that is not being used by an active game
+   * Should be called within a transaction
+   * @returns string game code
+   */
   public async generateNewGameCodeAsync(): Promise<string> {
     // find a game code that is not being used by an active game
     // codes are freed up when currentPhase is GAME_OVER
@@ -74,7 +72,7 @@ export class GameService {
     let gameCount = 0;
     let attempts = 1000;
     while (attempts-- > 0) {
-      code = this.generateGameCode();
+      code = UtilityService.generateGameCode();
       // check if there is an active game with the given game code
       gameCount = await this.GameModel.countDocuments({ code, currentPhase: { $ne: GamePhase.GAME_OVER } });
       if (gameCount === 0) {
@@ -162,20 +160,6 @@ export class GameService {
     }
   }
 
-  public makeHand(): ICard[] {
-    const handSize = constants.MAX_HAND_SIZE;
-    const numChili = constants.CHILI_PER_HAND;
-    const numCilantro = handSize - numChili;
-    const hand: ICard[] = [];
-    for (let i = 0; i < numChili; i++) {
-      hand.push({ type: CardType.CHILI, faceUp: false });
-    }
-    for (let i = 0; i < numCilantro; i++) {
-      hand.push({ type: CardType.CILANTRO, faceUp: false });
-    }
-    return this.shuffleArray(hand);
-  }
-
   /**
    * Joins the player to the specified game and creates a chef object for them
    * @param gameCode 
@@ -215,7 +199,7 @@ export class GameService {
         gameId: game._id,
         userId: user._id,
         name: userName,
-        hand: this.makeHand(),
+        hand: UtilityService.makeHand(),
         placedCards: [],
         state: ChefState.LOBBY,
         host: false,
@@ -332,19 +316,6 @@ export class GameService {
   }
 
   /**
-   * Utility method to shuffle array (consider placing this in a shared utility file)
-   * @param array
-   * @returns shuffled array
-   */
-  private shuffleArray(array: any[]): any[] {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]]; // Swap elements
-    }
-    return array;
-  }
-
-  /**
    * Starts the specified game
    * @param gameId 
    * @returns 
@@ -376,7 +347,7 @@ export class GameService {
       game.currentRound = 0;
       // create a random order of players
       // shuffle the chef ids
-      game.turnOrder = this.shuffleArray(game.chefIds);
+      game.turnOrder = UtilityService.shuffleArray(game.chefIds);
 
       const savedGame = await game.save();
       const startAction = await this.Database.getActionModel(Action.START_GAME).create({
@@ -689,10 +660,55 @@ export class GameService {
     return true;
   }
 
+  /**
+   * Return whether the given chef can pass on bidding or increasing the bid.
+   * @param game 
+   * @param chef 
+   */
+  public canPass(game: IGame, chef: IChef): boolean {
+    // the current chef must be the user
+    if (game.turnOrder[game.currentChef].toString() !== chef._id.toString()) {
+      return false;
+    }
+    // current phase must be BIDDING
+    // the current phase being bidding eliminates the possibility of passing during the placing cards phase
+    if (game.currentPhase !== GamePhase.BIDDING) {
+      return false;
+    }
+    // if no one has bid yet, the the chef must make a bid
+    if (game.currentBid <= 0) {
+      return false;
+    }
+    /* if the previous chef bid the maximum number of cards, they automatically must reveal cards
+     * and bidding should not have moved to the next player
+     * the game phase should have moved to REVEAL
+     * therefore, the current chef cannot pass
+     */
+    if (game.currentBid == game.cardsPlaced) {
+      return false;
+    }
+    /* Whenever the bid is increased, all other players have the opportunity to increase it further or pass
+       unless the bid is the maximum and we immediately move to the next phase.
+       If the second player in the turn order increases the bid, we must go through the remainder of the players
+       in the turn order and back through the first before moving to REVEAL phase.
+    */
+    return true;
+  }
+
+  /**
+   * Returns the available actions to the current chef
+   * This will return an empty array if the chef passed in is not the current chef
+   * @param game 
+   * @param chef 
+   * @returns An array of available actions
+   */
   public availableActions(game: IGame, chef: IChef): TurnAction[] {
     const actions: TurnAction[] = [];
     if (this.canPlaceCard(game, chef)) {
       actions.push(TurnAction.PlaceCard);
+    }
+    if (this.canPass(game, chef)) {
+      actions.push(TurnAction.Pass);
     }
     const canBid = this.canBid(game, chef);
     const existingBid = game.currentBid <= 0;
@@ -740,6 +756,7 @@ export class GameService {
     game.currentChef = (game.currentChef + 1) % game.chefIds.length;
     // after placing a card we will have to perform some checks on what has to happen next
     // there may be no more cards to place and we may need to move to bidding, etc
+    // this will happen in performTurnActionAsync()
     await game.save();
     return { game, chef };
   }
@@ -766,7 +783,18 @@ export class GameService {
     // just set the current phase to bidding, even if we might have to change phases after the bid
     // eg because the bid was the same as the number of cards placed and no one else can bid
     // after each turn action, we will have to perform some checks on what has to happen next
-    game.currentPhase = GamePhase.BIDDING;
+    if (game.currentPhase == GamePhase.SETUP && firstBid) {
+      game.currentPhase = GamePhase.BIDDING;
+    }
+    // create a new round bid
+    const roundBid: IBid = {
+      chefId: chef._id,
+      bid: bid,
+    };
+    if (game.roundBids[game.currentRound] === undefined) {
+      game.roundBids[game.currentRound] = [];
+    }
+    game.roundBids[game.currentRound].push(roundBid);
     if (firstBid) {
       await this.Database.getActionModel(Action.START_BIDDING).create({
         gameId: game._id,
@@ -836,6 +864,7 @@ export class GameService {
         default:
           throw new InvalidActionError(action);
       }
+      // TODO determine next state, transition current phase, etc
       await session.commitTransaction();
       return result;
     }

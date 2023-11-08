@@ -24,6 +24,7 @@ export const MULTILINGUAL_STRING_REGEX = /^[\s\p{N}\p{L}_-]+$/u;
 
 export const MAX_HAND_SIZE = 4;
 export const CHILI_PER_HAND = 1;
+export const ROUNDS_TO_WIN = 2;
 
 export default {
   CHILI_PER_HAND,
@@ -43,4 +44,5 @@ export default {
   MAX_PASSWORD_LENGTH,
   MIN_PASSWORD_LENGTH,
   MULTILINGUAL_STRING_REGEX,
+  ROUNDS_TO_WIN,
 };
