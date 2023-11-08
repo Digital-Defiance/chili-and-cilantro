@@ -6,6 +6,7 @@ import { FirstChef, TurnAction } from '@chili-and-cilantro/chili-and-cilantro-li
 import { Database } from '../services/database';
 import { ValidationError } from '../errors/validationError';
 import { CardType } from 'chili-and-cilantro-lib/src/lib/enumerations/cardType';
+import { ActionService } from '../services/action';
 import { ChefService } from '../services/chef';
 import { PlayerService } from '../services/player';
 
@@ -27,9 +28,10 @@ gamesRouter.post('/create', validateAccessToken,
       const sanitizedMaxChefs = parseInt(maxChefs, 10);
 
       const database = new Database();
+      const actionService = new ActionService(database);
       const chefService = new ChefService(database);
       const playerService = new PlayerService(database);
-      const gameService = new GameService(database, chefService, playerService);
+      const gameService = new GameService(database, actionService, chefService, playerService);
       const { game, chef } = await gameService.createGameAsync(user, sanitizedUserName, sanitizedName, sanitizedPassword, sanitizedMaxChefs);
       res.send({ game, chef });
     }
@@ -57,9 +59,10 @@ gamesRouter.post('/:code/join', validateAccessToken,
       const sanitizedPassword = (password as string)?.trim().toLowerCase();
 
       const database = new Database();
+      const actionService = new ActionService(database);
       const chefService = new ChefService(database);
       const playerService = new PlayerService(database);
-      const gameService = new GameService(database, chefService, playerService);
+      const gameService = new GameService(database, actionService, chefService, playerService);
       const { game, chef } = await gameService.joinGameAsync(gameCode, sanitizedPassword, user, sanitizedUserName);
       res.send({ game, chef });
     }
@@ -85,9 +88,10 @@ gamesRouter.post('/:code/message', validateAccessToken,
       const gameCode = req.params.code;
       const sanitizedMessage = (message as string)?.trim();
       const database = new Database();
+      const actionService = new ActionService(database);
       const chefService = new ChefService(database);
       const playerService = new PlayerService(database);
-      const gameService = new GameService(database, chefService, playerService);
+      const gameService = new GameService(database, actionService, chefService, playerService);
       const messageAction = await gameService.sendMessageAsync(gameCode, user, sanitizedMessage);
       res.status(200).json(messageAction);
     }
@@ -111,9 +115,10 @@ gamesRouter.get('/:code/history', validateAccessToken,
       }
       const gameCode = req.params.code;
       const database = new Database();
+      const actionService = new ActionService(database);
       const chefService = new ChefService(database);
       const playerService = new PlayerService(database);
-      const gameService = new GameService(database, chefService, playerService);
+      const gameService = new GameService(database, actionService, chefService, playerService);
       const actions = await gameService.getGameActionsAsync(gameCode);
       res.status(200).json(actions);
     }
@@ -137,9 +142,10 @@ gamesRouter.post('/:code/start', validateAccessToken,
       }
       const gameCode = req.params.code;
       const database = new Database();
+      const actionService = new ActionService(database);
       const chefService = new ChefService(database);
       const playerService = new PlayerService(database);
-      const gameService = new GameService(database, chefService, playerService);
+      const gameService = new GameService(database, actionService, chefService, playerService);
       const { game, action } = await gameService.startGameAsync(gameCode, user._id);
       res.status(200).json({ game, action });
     }
@@ -166,12 +172,13 @@ gamesRouter.get('/:code/action', validateAccessToken,
       }
       const gameCode = req.params.code;
       const database = new Database();
+      const actionService = new ActionService(database);
       const chefService = new ChefService(database);
       const playerService = new PlayerService(database);
-      const gameService = new GameService(database, chefService, playerService);
+      const gameService = new GameService(database, actionService, chefService, playerService);
       const game = await gameService.getGameByCodeAsync(gameCode, true);
       const chef = await chefService.getChefAsync(game, user);
-      const actions = await gameService.availableActions(game, chef);
+      const actions = await gameService.availableTurnActions(game, chef);
       res.status(200).json(actions);
     }
     catch (e) {
@@ -199,9 +206,10 @@ gamesRouter.post('/:code/action', validateAccessToken,
       const { action, ingredient, bid } = req.body;
       const actionArgs = { ...ingredient ? { ingredient: ingredient as CardType } : {}, ...bid ? { bid: bid as number } : {} };
       const database = new Database();
+      const actionService = new ActionService(database);
       const chefService = new ChefService(database);
       const playerService = new PlayerService(database);
-      const gameService = new GameService(database, chefService, playerService);
+      const gameService = new GameService(database, actionService, chefService, playerService);
       const { game, chef } = await gameService.performTurnActionAsync(gameCode, user, action as TurnAction, actionArgs);
       res.status(200).json({ game, chef });
     }

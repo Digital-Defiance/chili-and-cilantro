@@ -3,22 +3,11 @@ import { Document, Model, startSession } from 'mongoose';
 import validator from 'validator';
 import {
   constants,
-  Action,
+  CardType,
   IUser, IGame, IChef,
   ModelName,
   ChefState,
   GamePhase,
-  ICreateGameAction,
-  ICreateGameDetails,
-  IExpireGameAction,
-  IExpireGameDetails,
-  IJoinGameAction,
-  IJoinGameDetails,
-  IStartGameAction,
-  IStartGameDetails,
-  ModelData,
-  IMessageAction,
-  IMessageDetails,
   IAction,
   TurnAction,
   IBid,
@@ -43,8 +32,7 @@ import { OutOfIngredientError } from '../errors/outOfIngredient';
 import { OutOfOrderError } from '../errors/outOfOrder';
 import { UsernameInUseError } from '../errors/usernameInUse';
 import { IDatabase } from '../interfaces/database';
-import { CardType } from 'chili-and-cilantro-lib/src/lib/enumerations/cardType';
-import { ICard } from 'chili-and-cilantro-lib/src/lib/interfaces/card';
+import { ActionService } from './action';
 import { ChefService } from './chef';
 import { PlayerService } from './player';
 import { UtilityService } from './utility';
@@ -54,14 +42,16 @@ export class GameService {
   private readonly ActionModel: Model<IAction>;
   private readonly ChefModel: Model<IChef>;
   private readonly GameModel: Model<IGame>;
+  private readonly actionService: ActionService;
   private readonly chefService: ChefService;
   private readonly playerService: PlayerService;
 
-  constructor(database: IDatabase, chefService: ChefService, playerService: PlayerService) {
+  constructor(database: IDatabase, actionService: ActionService, chefService: ChefService, playerService: PlayerService) {
     this.Database = database;
     this.ActionModel = database.getModel<IAction>(ModelName.Action);
     this.ChefModel = database.getModel<IChef>(ModelName.Chef);
     this.GameModel = database.getModel<IGame>(ModelName.Game);
+    this.actionService = actionService;
     this.chefService = chefService;
     this.playerService = playerService;
   }
@@ -138,14 +128,7 @@ export class GameService {
         turnOrder: [], // will be chosen when the game is about to start
       });
       const chef = await this.chefService.newChefAsync(game, user, userName, chefId);
-      await this.Database.getActionModel(Action.CREATE_GAME).create({
-        gameId: game._id,
-        chefId: chef._id,
-        userId: user._id,
-        type: Action.CREATE_GAME,
-        details: {} as ICreateGameDetails,
-        round: -1,
-      } as ICreateGameAction);
+      await this.actionService.createGameAsync(game, chef, user);
       await session.commitTransaction();
       return { game, chef };
     }
@@ -202,14 +185,7 @@ export class GameService {
         state: ChefState.LOBBY,
         host: false,
       });
-      await this.Database.getActionModel(Action.JOIN_GAME).create({
-        gameId: game._id,
-        chefId: chef._id,
-        userId: user._id,
-        type: Action.JOIN_GAME,
-        details: {} as IJoinGameDetails,
-        round: -1,
-      } as IJoinGameAction)
+      await this.actionService.joinGameAsync(game, chef, user);
       game.chefIds.push(chef._id);
       await game.save();
       await session.commitTransaction();
@@ -230,6 +206,7 @@ export class GameService {
    */
   public async createNewGameFromExistingAsync(
     existingGameId: string,
+    user: IUser,
   ): Promise<{ game: IGame & Document, chef: IChef & Document }> {
     const existingGame = await this.GameModel.findById(existingGameId);
     if (!existingGame) {
@@ -284,14 +261,8 @@ export class GameService {
       const game = await newGame.save();
 
       // Create action for game creation - this could be moved to an event or a method to encapsulate the logic
-      await this.Database.getActionModel(Action.CREATE_GAME).create({
-        gameId: existingGame._id,
-        chefId: newGame.chefIds[hostChefIndex],
-        userId: existingGame.hostUserId,
-        type: Action.CREATE_GAME,
-        details: {} as ICreateGameDetails,
-      } as ICreateGameAction);
-
+      const hostChef = chefs.find(chef => chef._id.toString() == newHostChefId.toString());
+      await this.actionService.createGameAsync(existingGame, hostChef, user);
       await session.commitTransaction();
       return { game, chef: chefs[hostChefIndex] };
     }
@@ -339,14 +310,7 @@ export class GameService {
       game.turnOrder = UtilityService.shuffleArray(game.chefIds);
 
       const savedGame = await game.save();
-      const startAction = await this.Database.getActionModel(Action.START_GAME).create({
-        gameId: game._id,
-        chefId: game.hostChefId,
-        userId: game.hostUserId,
-        type: Action.START_GAME,
-        details: {} as IStartGameDetails,
-        round: game.currentRound,
-      } as IStartGameAction);
+      const startAction = await this.actionService.startGameAsync(savedGame);
       await session.commitTransaction();
       return { game: savedGame, action: startAction };
     }
@@ -409,16 +373,9 @@ export class GameService {
       // set currentPhase to GAME_OVER
       for (const game of games) {
         game.currentPhase = GamePhase.GAME_OVER;
-        await game.save();
+        const savedGame = await game.save();
         // TODO: close any sockets for this game
-        this.Database.getActionModel(Action.EXPIRE_GAME).create({
-          gameId: game._id,
-          chefId: game.hostChefId,
-          userId: game.hostUserId,
-          type: Action.EXPIRE_GAME,
-          details: {} as IExpireGameDetails,
-          round: game.currentRound,
-        } as IExpireGameAction);
+        await this.actionService.expireGameAsync(savedGame);
       }
       await session.commitTransaction();
     }
@@ -438,7 +395,7 @@ export class GameService {
    * @param message The message to send
    * @returns The message action object
    */
-  public async sendMessageAsync(gameCode: string, user: IUser, message: string): Promise<Document<IMessageAction>> {
+  public async sendMessageAsync(gameCode: string, user: IUser, message: string): Promise<Document<unknown>> {
     const session = await startSession();
     try {
       session.startTransaction();
@@ -453,17 +410,8 @@ export class GameService {
       if (message.length < constants.MIN_MESSAGE_LENGTH || message.length > constants.MAX_MESSAGE_LENGTH) {
         throw new InvalidMessageError();
       }
-      const actionMessage = await this.Database.getActionModel(Action.MESSAGE).create({
-        gameId: game._id,
-        chefId: chef._id,
-        userId: chef.userId,
-        type: Action.MESSAGE,
-        details: {
-          message: message,
-        } as IMessageDetails,
-        round: game.currentRound,
-      } as IMessageAction);
-      return actionMessage as Document<IMessageAction>;
+      const actionMessage = await this.actionService.sendMessageAsync(game, chef, message);
+      return actionMessage;
     }
     catch (e) {
       await session.abortTransaction();
@@ -586,7 +534,7 @@ export class GameService {
    * @param chef 
    * @returns An array of available actions
    */
-  public availableActions(game: IGame, chef: IChef): TurnAction[] {
+  public availableTurnActions(game: IGame, chef: IChef): TurnAction[] {
     const actions: TurnAction[] = [];
     if (this.canPlaceCard(game, chef)) {
       actions.push(TurnAction.PlaceCard);
@@ -680,14 +628,7 @@ export class GameService {
     }
     game.roundBids[game.currentRound].push(roundBid);
     if (firstBid) {
-      await this.Database.getActionModel(Action.START_BIDDING).create({
-        gameId: game._id,
-        chefId: game.turnOrder[game.currentChef], // this is the new current chef after incrementing above
-        userId: chef.userId,
-        type: Action.START_BIDDING,
-        details: {} as IStartGameDetails,
-        round: game.currentRound,
-      } as IStartGameAction);
+      await this.actionService.startBiddingAsync(game, chef, bid);
     }
     await game.save();
     return { game, chef };
@@ -723,7 +664,7 @@ export class GameService {
         throw new NotInGameError();
       }
       // BID, INCREASE_BID, PASS, or PLACE_CARD
-      const availableActions = this.availableActions(game, chef);
+      const availableActions = this.availableTurnActions(game, chef);
       if (!availableActions.includes(action)) {
         throw new InvalidActionError(action, value?.bid, value?.ingredient);
       }

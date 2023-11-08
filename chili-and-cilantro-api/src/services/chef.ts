@@ -4,7 +4,6 @@ import { ChefState, GamePhase, IChef, IGame, IUser, ModelData, ModelName } from 
 import { IDatabase } from '../interfaces/database';
 import { UtilityService } from './utility';
 
-
 export class ChefService {
   private readonly ChefModel: Model<IChef>;
   private readonly Database: IDatabase;

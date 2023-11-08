@@ -1,4 +1,5 @@
 export * from './lib/enumerations/action';
+export * from './lib/enumerations/cardType';
 export * from './lib/enumerations/chefState';
 export * from './lib/enumerations/firstChef';
 export * from './lib/enumerations/modelName';
