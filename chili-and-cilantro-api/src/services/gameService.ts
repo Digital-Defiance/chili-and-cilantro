@@ -713,60 +713,35 @@ export class GameService {
    * @param ingredient 
    * @returns A tuple of the updated game and chef objects
    */
-  public async placeIngredientAsync(gameCode: string, user: IUser, ingredient: CardType): Promise<{ game: IGame & Document, chef: IChef & Document }> {
-    const session = await startSession();
-    try {
-      session.startTransaction();
-      const game = await this.getGameByCodeAsync(gameCode, true);
-      if (!game) {
-        throw new InvalidGameError();
-      }
-      const chef = await this.ChefModel.findOne({ gameId: game._id, userId: user._id });
-      if (!chef) {
-        throw new NotInGameError();
-      }
-      if (game.currentPhase !== GamePhase.SETUP) {
-        throw new IncorrectGamePhaseError();
-      }
-      if (game.turnOrder[game.currentChef].toString() !== chef._id.toString()) {
-        throw new OutOfOrderError();
-      }
-      if (chef.placedCards.length >= constants.MAX_HAND_SIZE || chef.hand.length == 0) {
-        throw new AllCardsPlacedError();
-      }
-      // can the chef place a card in general
-      if (!this.canPlaceCard(game, chef)) {
-        throw new InvalidActionError(TurnAction.PlaceCard);
-      }
-      // can they specifically place the given card
-      if (chef.hand.filter(card => card.type == ingredient).length == 0) {
-        throw new OutOfIngredientError(ingredient);
-      }
-      // remove one card of the specified type from the chef's hand
-      chef.hand.splice(chef.hand.findIndex(card => card.type == ingredient), 1);
-      // add the card to the chef's placed cards
-      chef.placedCards.push({ type: ingredient, faceUp: false });
-      await chef.save();
-      // increment the current chef
-      game.currentChef = (game.currentChef + 1) % game.chefIds.length;
-      // if all players have placed all of their cards, move from setup to bidding
-      const chefs = await this.ChefModel.find({ gameId: game._id });
-      if (chefs.every(chef => chef.placedCards.length == constants.MAX_HAND_SIZE)) {
-        game.currentPhase = GamePhase.BIDDING;
-        // TODO: create action for game phase change
-        // is the chef who is transitioning the one of just placed their last card or the next chef?
-      }
-      await game.save();
-      await session.commitTransaction();
-      return { game, chef };
+  public async placeIngredientAsync(game: IGame & Document, chef: IChef & Document, ingredient: CardType): Promise<{ game: IGame & Document, chef: IChef & Document }> {
+    if (game.currentPhase !== GamePhase.SETUP) {
+      throw new IncorrectGamePhaseError();
     }
-    catch (e) {
-      await session.abortTransaction();
-      throw e;
+    if (game.turnOrder[game.currentChef].toString() !== chef._id.toString()) {
+      throw new OutOfOrderError();
     }
-    finally {
-      session.endSession();
+    if (chef.placedCards.length >= constants.MAX_HAND_SIZE || chef.hand.length == 0) {
+      throw new AllCardsPlacedError();
     }
+    // can the chef place a card in general
+    if (!this.canPlaceCard(game, chef)) {
+      throw new InvalidActionError(TurnAction.PlaceCard);
+    }
+    // can they specifically place the given card
+    if (chef.hand.filter(card => card.type == ingredient).length == 0) {
+      throw new OutOfIngredientError(ingredient);
+    }
+    // remove one card of the specified type from the chef's hand
+    chef.hand.splice(chef.hand.findIndex(card => card.type == ingredient), 1);
+    // add the card to the chef's placed cards
+    chef.placedCards.push({ type: ingredient, faceUp: false });
+    await chef.save();
+    // increment the current chef
+    game.currentChef = (game.currentChef + 1) % game.chefIds.length;
+    // after placing a card we will have to perform some checks on what has to happen next
+    // there may be no more cards to place and we may need to move to bidding, etc
+    await game.save();
+    return { game, chef };
   }
 
   /**
@@ -776,7 +751,54 @@ export class GameService {
    * @param user 
    * @param bid 
    */
-  public async makeBidAsync(gameCode: string, user: IUser, bid: number): Promise<{ game: IGame & Document }> {
+  public async makeBidAsync(game: IGame & Document, chef: IChef & Document, bid: number): Promise<{ game: IGame & Document, chef: IChef & Document }> {
+    if (!this.canBid(game, chef)) {
+      throw new InvalidActionError(TurnAction.Bid);
+    }
+    if (bid < game.currentBid + 1 || bid > game.cardsPlaced) {
+      throw new InvalidActionError(TurnAction.Bid, bid);
+    }
+    const firstBid = game.currentBid <= 0;
+    // set the current bid
+    game.currentBid = bid;
+    // increment the current chef
+    game.currentChef = (game.currentChef + 1) % game.chefIds.length;
+    // just set the current phase to bidding, even if we might have to change phases after the bid
+    // eg because the bid was the same as the number of cards placed and no one else can bid
+    // after each turn action, we will have to perform some checks on what has to happen next
+    game.currentPhase = GamePhase.BIDDING;
+    if (firstBid) {
+      await this.Database.getActionModel(Action.START_BIDDING).create({
+        gameId: game._id,
+        chefId: game.turnOrder[game.currentChef], // this is the new current chef after incrementing above
+        userId: chef.userId,
+        type: Action.START_BIDDING,
+        details: {} as IStartGameDetails,
+        round: game.currentRound,
+      } as IStartGameAction);
+    }
+    await game.save();
+    return { game, chef };
+  }
+
+  /**
+   * A chef passes on increasing the bid
+   * @param game 
+   * @param chef 
+   */
+  public async passAsync(game: IGame & Document, chef: IChef & Document): Promise<{ game: IGame & Document, chef: IChef & Document }> {
+    throw new Error('Method not implemented.');
+  }
+
+  /**
+   * A user performs a turn action
+   * @param gameCode 
+   * @param user 
+   * @param action 
+   * @param value 
+   * @returns 
+   */
+  public async performTurnActionAsync(gameCode: string, user: IUser, action: TurnAction, value?: { bid?: number, ingredient?: CardType }): Promise<{ game: IGame & Document, chef: IChef & Document }> {
     const session = await startSession();
     try {
       session.startTransaction();
@@ -788,19 +810,34 @@ export class GameService {
       if (!chef) {
         throw new NotInGameError();
       }
-      if (!this.canBid(game, chef)) {
-        throw new InvalidActionError(TurnAction.Bid);
+      // BID, INCREASE_BID, PASS, or PLACE_CARD
+      const availableActions = this.availableActions(game, chef);
+      if (!availableActions.includes(action)) {
+        throw new InvalidActionError(action, value?.bid, value?.ingredient);
       }
-      if (bid < game.currentBid + 1 || bid > game.cardsPlaced) {
-        throw new InvalidActionError(TurnAction.Bid, bid);
+      let result: { game: IGame & Document, chef: IChef & Document } = undefined;
+      switch (action) {
+        case TurnAction.Bid:
+        case TurnAction.IncreaseBid:
+          if (!value.bid) {
+            throw new InvalidActionError(action);
+          }
+          result = await this.makeBidAsync(game, chef, value.bid);
+          break;
+        case TurnAction.PlaceCard:
+          if (!value.ingredient) {
+            throw new InvalidActionError(action);
+          }
+          result = await this.placeIngredientAsync(game, chef, value.ingredient);
+          break;
+        case TurnAction.Pass:
+          result = await this.passAsync(game, chef);
+          break;
+        default:
+          throw new InvalidActionError(action);
       }
-      // set the current bid
-      game.currentBid = bid;
-      // increment the current chef
-      game.currentChef = (game.currentChef + 1) % game.chefIds.length;
-      await game.save();
       await session.commitTransaction();
-      return { game };
+      return result;
     }
     catch (e) {
       await session.abortTransaction();
