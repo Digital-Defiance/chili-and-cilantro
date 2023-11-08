@@ -45,6 +45,7 @@ import { UsernameInUseError } from '../errors/usernameInUse';
 import { IDatabase } from '../interfaces/database';
 import { CardType } from 'chili-and-cilantro-lib/src/lib/enumerations/cardType';
 import { ICard } from 'chili-and-cilantro-lib/src/lib/interfaces/card';
+import { PlayerService } from './playerService';
 import { UtilityService } from './utilityService';
 
 export class GameService {
@@ -52,12 +53,14 @@ export class GameService {
   private readonly ActionModel: Model<IAction>;
   private readonly ChefModel: Model<IChef>;
   private readonly GameModel: Model<IGame>;
+  private readonly playerService: PlayerService;
 
-  constructor(database: IDatabase) {
+  constructor(database: IDatabase, playerService: PlayerService) {
     this.Database = database;
     this.ActionModel = database.getModel<IAction>(ModelName.Action);
     this.ChefModel = database.getModel<IChef>(ModelName.Chef);
     this.GameModel = database.getModel<IGame>(ModelName.Game);
+    this.playerService = playerService;
   }
 
   /**
@@ -93,7 +96,7 @@ export class GameService {
    * @returns 
    */
   public async createGameAsync(user: IUser, userName: string, gameName: string, password: string, maxChefs: number): Promise<{ game: IGame & Document, chef: IChef & Document }> {
-    if (await this.userIsInAnyActiveGameAsync(user)) {
+    if (await this.playerService.userIsInAnyActiveGameAsync(user)) {
       throw new AlreadyJoinedOtherError();
     }
     if (!validator.matches(userName, constants.MULTILINGUAL_STRING_REGEX) || userName.length < constants.MIN_USER_NAME_LENGTH || userName.length > constants.MAX_USER_NAME_LENGTH) {
@@ -169,7 +172,7 @@ export class GameService {
    * @returns 
    */
   public async joinGameAsync(gameCode: string, password: string, user: IUser, userName: string): Promise<{ game: IGame & Document, chef: IChef & Document }> {
-    if (await this.userIsInAnyActiveGameAsync(user)) {
+    if (await this.playerService.userIsInAnyActiveGameAsync(user)) {
       throw new AlreadyJoinedOtherError();
     }
     const game = await this.getGameByCodeAsync(gameCode, true);
@@ -328,7 +331,7 @@ export class GameService {
       if (!game) {
         throw new InvalidGameError();
       }
-      if (!await this.isGameHostAsync(userId, game._id)) {
+      if (!await this.playerService.isGameHostAsync(userId, game._id)) {
         throw new NotHostError();
       }
       if (game.currentPhase !== GamePhase.LOBBY) {
@@ -440,111 +443,6 @@ export class GameService {
     finally {
       session.endSession();
     }
-  }
-
-  /**
-   * Returns whether the specified user is in any active game
-   * @param userId
-   * @returns boolean
-   */
-  public async userIsInAnyActiveGameAsync(user: IUser): Promise<boolean> {
-    try {
-      const result = await this.GameModel.aggregate([
-        {
-          $match: {
-            currentPhase: { $ne: GamePhase.GAME_OVER }
-          }
-        },
-        {
-          $lookup: {
-            from: ModelData.Chef.collection,
-            localField: 'chefIds',
-            foreignField: '_id',
-            as: 'chefDetails'
-          }
-        },
-        {
-          $unwind: '$chefDetails'
-        },
-        {
-          $match: {
-            'chefDetails.userId': user._id
-          }
-        },
-        {
-          $count: 'activeGamesCount'
-        }
-      ]).exec(); // exec is optional here, await will work on aggregate directly
-
-      // If the aggregation result is empty, count is 0, otherwise, it's the returned count
-      const count = result.length > 0 ? result[0].activeGamesCount : 0;
-      return count > 0;
-    } catch (err) {
-      // Handle the error appropriately
-      console.error('Error checking if user is in game:', err);
-      throw err;
-    }
-  }
-
-  /**
-   * Returns whether the user is in the specified game, regardless of game state
-   * @param userId 
-   * @param gameId 
-   * @returns boolean
-   */
-  public async userIsInGameAsync(userId: string, gameId: string, active = false): Promise<boolean> {
-    try {
-      const result = await this.GameModel.aggregate([
-        {
-          $match: {
-            _id: new ObjectId(gameId),
-            ...active ? { currentPhase: { $ne: GamePhase.GAME_OVER } } : {}
-          }
-        },
-        {
-          $lookup: {
-            from: ModelData.Chef.collection,
-            localField: 'chefIds',
-            foreignField: '_id',
-            as: 'chefDetails'
-          }
-        },
-        {
-          $unwind: '$chefDetails'
-        },
-        {
-          $match: {
-            'chefDetails.userId': new ObjectId(userId) // Match specific userId
-          }
-        },
-        {
-          $count: 'activeGamesCount'
-        }
-      ]).exec(); // exec is optional here, await will work on aggregate directly
-
-      // If the aggregation result is empty, count is 0, otherwise, it's the returned count
-      const count = result.length > 0 ? result[0].activeGamesCount : 0;
-      return count > 0;
-    } catch (err) {
-      // Handle the error appropriately
-      console.error('Error checking if user is in the specified game:', err);
-      throw err; // Or you might want to return false or handle this differently
-    }
-  }
-
-  /**
- * Returns whether the specified user is the host of the specified game
- * @param userId
- * @param gameId
- * @returns boolean
- */
-  public async isGameHostAsync(userId: string, gameId: string): Promise<boolean> {
-    const count = await this.GameModel.countDocuments({
-      _id: new ObjectId(gameId),
-      hostUserId: new ObjectId(userId)
-    }).exec();
-
-    return count > 0;
   }
 
   /**
