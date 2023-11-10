@@ -118,6 +118,7 @@ export class GameService extends TransactionManager {
       cardsPlaced: 0,
       chefIds: [chefId],
       code: gameCode,
+      currentBid: -1,
       currentChef: -1,
       currentPhase: GamePhase.LOBBY,
       currentRound: -1,
@@ -337,7 +338,7 @@ export class GameService extends TransactionManager {
   public async performStartGameAsync(gameCode: string, userId: string): Promise<{ game: IGame & Document, action: Document<unknown> }> {
     return this.withTransaction(async (session) => {
       const game = await this.getGameByCodeOrThrowAsync(gameCode, true);
-      this.validateStartGameOrThrowAsync(game, userId);
+      await this.validateStartGameOrThrowAsync(game, userId);
       return this.startGameAsync(game);
     });
   }
