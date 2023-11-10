@@ -797,6 +797,9 @@ export class GameService extends TransactionManager {
   public async performTurnActionAsync(gameCode: string, user: IUser & Document, action: TurnAction, value?: { bid?: number, ingredient?: CardType }): Promise<{ game: IGame & Document, chef: IChef & Document }> {
     return this.withTransaction(async (session) => {
       const game = await this.getGameByCodeOrThrowAsync(gameCode, true);
+      if (game.chefIds[game.currentChef].toString() !== user._id.toString()) {
+        throw new OutOfOrderError();
+      }
       const chef = await this.chefService.getGameChefOrThrowAsync(game, user);
       // BID, INCREASE_BID, PASS, or PLACE_CARD
       const availableActions = this.availableTurnActions(game, chef);
