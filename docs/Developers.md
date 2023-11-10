@@ -38,7 +38,7 @@ In order to get an access token, you'll want to log in to the app on localhost:3
   - Once everyone is out of ingredient cards, the next player must bid.
   - Once bidding begins, players can no longer place cards and must increase the bid or pass.
   - Once all players have bid or passed, the person with the highest bid must reveal cards.
-- Once cards are placed or a player bids, the game moves to BIDDING phase.
+- Once all cards are placed or a player bids, the game moves to BIDDING phase.
 - Whenever the bid is increased, all other players have the opportunity to increase it further or pass unless the bid is the maximum and we immediately move to the next phase.
   - If the second player in the turn order increases the bid, we must go through the remainder of the players in the turn order and back through the first before moving to REVEAL phase.
 
