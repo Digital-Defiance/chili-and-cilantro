@@ -22,11 +22,12 @@ export abstract class UtilityService {
    * @returns shuffled array
    */
   public static shuffleArray(array: any[]): any[] {
-    for (let i = array.length - 1; i > 0; i--) {
+    const newArray = [...array];
+    for (let i = newArray.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+      [newArray[i], newArray[j]] = [newArray[j], newArray[i]]; // Swap elements
     }
-    return array;
+    return newArray;
   }
 
   /**
@@ -44,6 +45,6 @@ export abstract class UtilityService {
     for (let i = 0; i < numCilantro; i++) {
       hand.push({ type: CardType.CILANTRO, faceUp: false });
     }
-    return UtilityService.shuffleArray(hand);
+    return hand;
   }
 }
