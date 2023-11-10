@@ -1,6 +1,5 @@
-import { TurnAction } from "@chili-and-cilantro/chili-and-cilantro-lib";
+import { CardType, TurnAction } from "@chili-and-cilantro/chili-and-cilantro-lib";
 import { ValidationError } from "./validationError";
-import { CardType } from "chili-and-cilantro-lib/src/lib/enumerations/cardType";
 
 export class InvalidActionError extends ValidationError {
   constructor(action: TurnAction, amount?: number, ingredient?: CardType) {

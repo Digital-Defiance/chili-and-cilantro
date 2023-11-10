@@ -1,6 +1,4 @@
-import { constants } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { CardType } from 'chili-and-cilantro-lib/src/lib/enumerations/cardType';
-import { ICard } from 'chili-and-cilantro-lib/src/lib/interfaces/card';
+import { constants, CardType, ICard } from '@chili-and-cilantro/chili-and-cilantro-lib';
 
 export abstract class UtilityService {
   /**

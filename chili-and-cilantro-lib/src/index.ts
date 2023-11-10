@@ -6,6 +6,7 @@ export * from './lib/enumerations/modelName';
 export * from './lib/enumerations/gamePhase';
 export * from './lib/enumerations/turnAction';
 export * from './lib/interfaces/bid';
+export * from './lib/interfaces/card';
 export * from './lib/interfaces/hasCreation';
 export * from './lib/interfaces/hasCreator';
 export * from './lib/interfaces/hasDeleter';
