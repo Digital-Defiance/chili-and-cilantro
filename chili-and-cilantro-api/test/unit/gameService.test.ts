@@ -15,8 +15,8 @@ describe('GameService', () => {
     const database = new Database();
     const actionService = new ActionService(database);
     const chefService = new ChefService(database);
-    const playerService = new PlayerService(database);
     mockGameModel = BaseModel.getModel<IGame>(ModelName.Game);
+    const playerService = new PlayerService(mockGameModel);
     gameService = new GameService(mockGameModel, actionService, chefService, playerService);
   });
 

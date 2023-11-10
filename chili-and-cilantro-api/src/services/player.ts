@@ -5,8 +5,8 @@ import { IDatabase } from '../interfaces/database';
 
 export class PlayerService {
   private readonly GameModel: Model<IGame>;
-  constructor(database: IDatabase) {
-    this.GameModel = database.getModel<IGame>(ModelName.Game);
+  constructor(gameModel: Model<IGame>) {
+    this.GameModel = gameModel;
   }
 
   /**
@@ -57,7 +57,7 @@ export class PlayerService {
         {
           $count: 'activeGamesCount'
         }
-      ]).exec(); // exec is optional here, await will work on aggregate directly
+      ]);
 
       // If the aggregation result is empty, count is 0, otherwise, it's the returned count
       const count = result.length > 0 ? result[0].activeGamesCount : 0;
@@ -103,7 +103,7 @@ export class PlayerService {
         {
           $count: 'activeGamesCount'
         }
-      ]).exec(); // exec is optional here, await will work on aggregate directly
+      ]);
 
       // If the aggregation result is empty, count is 0, otherwise, it's the returned count
       const count = result.length > 0 ? result[0].activeGamesCount : 0;
