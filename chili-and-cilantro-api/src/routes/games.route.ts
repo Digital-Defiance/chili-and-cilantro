@@ -32,7 +32,7 @@ gamesRouter.post('/create', validateAccessToken,
       const chefService = new ChefService(database);
       const playerService = new PlayerService(database);
       const gameService = new GameService(database, actionService, chefService, playerService);
-      const { game, chef } = await gameService.createGameAsync(user, sanitizedUserName, sanitizedName, sanitizedPassword, sanitizedMaxChefs);
+      const { game, chef } = await gameService.performCreateGameAsync(user, sanitizedUserName, sanitizedName, sanitizedPassword, sanitizedMaxChefs);
       res.send({ game, chef });
     }
     catch (error) {
@@ -63,7 +63,7 @@ gamesRouter.post('/:code/join', validateAccessToken,
       const chefService = new ChefService(database);
       const playerService = new PlayerService(database);
       const gameService = new GameService(database, actionService, chefService, playerService);
-      const { game, chef } = await gameService.joinGameAsync(gameCode, sanitizedPassword, user, sanitizedUserName);
+      const { game, chef } = await gameService.performJoinGameAsync(gameCode, sanitizedPassword, user, sanitizedUserName);
       res.send({ game, chef });
     }
     catch (error) {
@@ -92,7 +92,7 @@ gamesRouter.post('/:code/message', validateAccessToken,
       const chefService = new ChefService(database);
       const playerService = new PlayerService(database);
       const gameService = new GameService(database, actionService, chefService, playerService);
-      const messageAction = await gameService.sendMessageAsync(gameCode, user, sanitizedMessage);
+      const messageAction = await gameService.performSendMessageAsync(gameCode, user, sanitizedMessage);
       res.status(200).json(messageAction);
     }
     catch (e) {
@@ -119,7 +119,7 @@ gamesRouter.get('/:code/history', validateAccessToken,
       const chefService = new ChefService(database);
       const playerService = new PlayerService(database);
       const gameService = new GameService(database, actionService, chefService, playerService);
-      const game = await gameService.getGameByCodeAsync(gameCode, true);
+      const game = await gameService.getGameByCodeOrThrowAsync(gameCode, true);
       const actions = await actionService.getGameHistoryAsync(game);
       res.status(200).json(actions);
     }
@@ -147,7 +147,7 @@ gamesRouter.post('/:code/start', validateAccessToken,
       const chefService = new ChefService(database);
       const playerService = new PlayerService(database);
       const gameService = new GameService(database, actionService, chefService, playerService);
-      const { game, action } = await gameService.startGameAsync(gameCode, user._id);
+      const { game, action } = await gameService.performStartGameAsync(gameCode, user._id);
       res.status(200).json({ game, action });
     }
     catch (e) {
@@ -177,8 +177,8 @@ gamesRouter.get('/:code/action', validateAccessToken,
       const chefService = new ChefService(database);
       const playerService = new PlayerService(database);
       const gameService = new GameService(database, actionService, chefService, playerService);
-      const game = await gameService.getGameByCodeAsync(gameCode, true);
-      const chef = await chefService.getChefAsync(game, user);
+      const game = await gameService.getGameByCodeOrThrowAsync(gameCode, true);
+      const chef = await chefService.getGameChefOrThrowAsync(game, user);
       const actions = await gameService.availableTurnActions(game, chef);
       res.status(200).json(actions);
     }
