@@ -5,7 +5,7 @@ import { JwtService } from '../services/jwt';
 import { FirstChef, TurnAction } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { Database } from '../services/database';
 import { ValidationError } from '../errors/validationError';
-import { CardType } from 'chili-and-cilantro-lib/src/lib/enumerations/cardType';
+import { BaseModel, CardType, IGame, ModelName } from 'chili-and-cilantro-lib/src/lib/enumerations/cardType';
 import { ActionService } from '../services/action';
 import { ChefService } from '../services/chef';
 import { PlayerService } from '../services/player';
@@ -31,7 +31,8 @@ gamesRouter.post('/create', validateAccessToken,
       const actionService = new ActionService(database);
       const chefService = new ChefService(database);
       const playerService = new PlayerService(database);
-      const gameService = new GameService(database, actionService, chefService, playerService);
+      const gameModel = BaseModel.getModel<IGame>(ModelName.Game);
+      const gameService = new GameService(gameModel, actionService, chefService, playerService);
       const { game, chef } = await gameService.performCreateGameAsync(user, sanitizedUserName, sanitizedName, sanitizedPassword, sanitizedMaxChefs);
       res.send({ game, chef });
     }
@@ -62,7 +63,8 @@ gamesRouter.post('/:code/join', validateAccessToken,
       const actionService = new ActionService(database);
       const chefService = new ChefService(database);
       const playerService = new PlayerService(database);
-      const gameService = new GameService(database, actionService, chefService, playerService);
+      const gameModel = BaseModel.getModel<IGame>(ModelName.Game);
+      const gameService = new GameService(gameModel, actionService, chefService, playerService);
       const { game, chef } = await gameService.performJoinGameAsync(gameCode, sanitizedPassword, user, sanitizedUserName);
       res.send({ game, chef });
     }
@@ -91,7 +93,8 @@ gamesRouter.post('/:code/message', validateAccessToken,
       const actionService = new ActionService(database);
       const chefService = new ChefService(database);
       const playerService = new PlayerService(database);
-      const gameService = new GameService(database, actionService, chefService, playerService);
+      const gameModel = BaseModel.getModel<IGame>(ModelName.Game);
+      const gameService = new GameService(gameModel, actionService, chefService, playerService);
       const messageAction = await gameService.performSendMessageAsync(gameCode, user, sanitizedMessage);
       res.status(200).json(messageAction);
     }
@@ -118,7 +121,8 @@ gamesRouter.get('/:code/history', validateAccessToken,
       const actionService = new ActionService(database);
       const chefService = new ChefService(database);
       const playerService = new PlayerService(database);
-      const gameService = new GameService(database, actionService, chefService, playerService);
+      const gameModel = BaseModel.getModel<IGame>(ModelName.Game);
+      const gameService = new GameService(gameModel, actionService, chefService, playerService);
       const game = await gameService.getGameByCodeOrThrowAsync(gameCode, true);
       const actions = await actionService.getGameHistoryAsync(game);
       res.status(200).json(actions);
@@ -146,7 +150,8 @@ gamesRouter.post('/:code/start', validateAccessToken,
       const actionService = new ActionService(database);
       const chefService = new ChefService(database);
       const playerService = new PlayerService(database);
-      const gameService = new GameService(database, actionService, chefService, playerService);
+      const gameModel = BaseModel.getModel<IGame>(ModelName.Game);
+      const gameService = new GameService(gameModel, actionService, chefService, playerService);
       const { game, action } = await gameService.performStartGameAsync(gameCode, user._id);
       res.status(200).json({ game, action });
     }
@@ -176,7 +181,8 @@ gamesRouter.get('/:code/action', validateAccessToken,
       const actionService = new ActionService(database);
       const chefService = new ChefService(database);
       const playerService = new PlayerService(database);
-      const gameService = new GameService(database, actionService, chefService, playerService);
+      const gameModel = BaseModel.getModel<IGame>(ModelName.Game);
+      const gameService = new GameService(gameModel, actionService, chefService, playerService);
       const game = await gameService.getGameByCodeOrThrowAsync(gameCode, true);
       const chef = await chefService.getGameChefOrThrowAsync(game, user);
       const actions = await gameService.availableTurnActions(game, chef);
@@ -210,7 +216,8 @@ gamesRouter.post('/:code/action', validateAccessToken,
       const actionService = new ActionService(database);
       const chefService = new ChefService(database);
       const playerService = new PlayerService(database);
-      const gameService = new GameService(database, actionService, chefService, playerService);
+      const gameModel = BaseModel.getModel<IGame>(ModelName.Game);
+      const gameService = new GameService(gameModel, actionService, chefService, playerService);
       const { game, chef } = await gameService.performTurnActionAsync(gameCode, user, action as TurnAction, actionArgs);
       res.status(200).json({ game, chef });
     }

@@ -42,9 +42,9 @@ export class GameService extends TransactionManager {
   private readonly chefService: ChefService;
   private readonly playerService: PlayerService;
 
-  constructor(database: IDatabase, actionService: ActionService, chefService: ChefService, playerService: PlayerService) {
+  constructor(gameModel: Model<IGame>, actionService: ActionService, chefService: ChefService, playerService: PlayerService) {
     super();
-    this.GameModel = database.getModel<IGame>(ModelName.Game);
+    this.GameModel = gameModel;
     this.actionService = actionService;
     this.chefService = chefService;
     this.playerService = playerService;
@@ -60,8 +60,9 @@ export class GameService extends TransactionManager {
     // codes are freed up when currentPhase is GAME_OVER
     let code = '';
     let gameCount = 0;
-    let attempts = 1000;
-    while (attempts-- > 0) {
+    const totalAttempts = 1000;
+    let attemptsRemaining = totalAttempts;
+    while (attemptsRemaining-- > 0) {
       code = UtilityService.generateGameCode();
       // check if there is an active game with the given game code
       gameCount = await this.GameModel.countDocuments({ code, currentPhase: { $ne: GamePhase.GAME_OVER } });
@@ -70,7 +71,7 @@ export class GameService extends TransactionManager {
         return code;
       }
     }
-    throw new Error(`Unable to generate a unique game code in ${1000 - attempts} attempts.`);
+    throw new Error(`Unable to generate a unique game code in ${totalAttempts} attempts.`);
   }
 
   /**
