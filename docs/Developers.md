@@ -41,3 +41,9 @@ In order to get an access token, you'll want to log in to the app on localhost:3
 - Once cards are placed or a player bids, the game moves to BIDDING phase.
 - Whenever the bid is increased, all other players have the opportunity to increase it further or pass unless the bid is the maximum and we immediately move to the next phase.
   - If the second player in the turn order increases the bid, we must go through the remainder of the players in the turn order and back through the first before moving to REVEAL phase.
+
+## References
+
+- [How to play Skull | Official Rules | UltraBoardGames](https://www.ultraboardgames.com/skull-and-roses/game-rules.php)
+- [Skull (card game) - Wikipedia](https://en.wikipedia.org/wiki/Skull_(card_game))
+- [Skull | Board Game | BoardGameGeek](https://boardgamegeek.com/boardgame/92415/skull)

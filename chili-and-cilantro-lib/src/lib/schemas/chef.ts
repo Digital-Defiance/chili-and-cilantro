@@ -31,6 +31,7 @@ export const ChefSchema = new Schema<IChef>({
   },
   hand: [CardSchema],
   placedCards: [CardSchema],
+  lostCards: { type: [String], enum: Object.values(CardType), required: true, default: [] },
   userId: { type: Schema.Types.ObjectId, required: true, ref: ModelName.User },
   state: { type: String, enum: Object.values(ChefState), required: true },
   host: { type: Boolean, required: true, default: false },

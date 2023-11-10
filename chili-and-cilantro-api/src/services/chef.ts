@@ -18,6 +18,8 @@ export class ChefService {
       name: userName,
       userId: user._id,
       hand: UtilityService.makeHand(),
+      placedCards: [],
+      lostCards: [],
       state: ChefState.LOBBY,
       host: host,
     });
@@ -31,6 +33,7 @@ export class ChefService {
       userId: chef.userId,
       hand: UtilityService.makeHand(),
       placedCards: [],
+      lostCards: [],
       state: ChefState.LOBBY,
       host: chef.host,
     });
