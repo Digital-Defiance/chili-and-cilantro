@@ -12,7 +12,6 @@ import { createUser } from '../fixtures/user';
 describe('GameService', () => {
   let gameService;
   let mockGameModel;
-  let countDocumentsStub;
 
   beforeAll(() => {
     const database = new Database();
@@ -23,15 +22,18 @@ describe('GameService', () => {
     gameService = new GameService(mockGameModel, actionService, chefService, playerService);
   });
 
-  beforeEach(() => {
-    countDocumentsStub = sinon.stub(mockGameModel, 'countDocuments');
-  });
-
-  afterEach(() => {
-    countDocumentsStub.restore();
-  });
 
   describe('generateNewGameCodeAsync', () => {
+    let countDocumentsStub;
+
+    beforeEach(() => {
+      countDocumentsStub = sinon.stub(mockGameModel, 'countDocuments');
+    });
+
+    afterEach(() => {
+      countDocumentsStub.restore();
+    });
+
     it('should generate a unique game code', async () => {
       countDocumentsStub.resolves(0);
       const gameCode = await gameService.generateNewGameCodeAsync();
