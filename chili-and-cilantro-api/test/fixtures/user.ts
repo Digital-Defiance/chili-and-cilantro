@@ -1,5 +1,4 @@
 import { IUser } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { ObjectId } from 'mongodb';
 import { Schema } from 'mongoose';
 import { faker } from '@faker-js/faker';
 

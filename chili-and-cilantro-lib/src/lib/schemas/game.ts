@@ -77,7 +77,7 @@ export const GameSchema = new Schema<IGame>(
         },
         message: (props) => `${props.value} is not a valid password!`,
       },
-      set: (v: string) => (v || '').trim().toLowerCase(),
+      set: (v: string) => (v || '').trim(),
     },
     chefIds: [
       {

@@ -23,7 +23,7 @@ gamesRouter.post('/create', validateAccessToken,
       const { name, userName, password, maxChefs } = req.body;
       const sanitizedName = (name as string)?.trim();
       const sanitizedUserName = (userName as string)?.trim();
-      const sanitizedPassword = (password as string)?.trim().toLowerCase();
+      const sanitizedPassword = (password as string)?.trim();
       const sanitizedMaxChefs = parseInt(maxChefs, 10);
 
       const database = new Database();
@@ -56,7 +56,7 @@ gamesRouter.post('/:code/join', validateAccessToken,
       const { userName, password } = req.body;
       const gameCode = req.params.code;
       const sanitizedUserName = (userName as string)?.trim();
-      const sanitizedPassword = (password as string)?.trim().toLowerCase();
+      const sanitizedPassword = (password as string)?.trim();
 
       const database = new Database();
       const actionService = new ActionService(database);
