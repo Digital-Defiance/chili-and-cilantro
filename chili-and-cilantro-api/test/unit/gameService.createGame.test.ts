@@ -7,10 +7,11 @@ import { PlayerService } from '../../src/services/player';
 import { constants, BaseModel, IGame, ModelName } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { AlreadyJoinedOtherError } from '../../src/errors/alreadyJoinedOther';
 import { InvalidUserNameError } from '../../src/errors/invalidUserName';
-import { createUser } from '../fixtures/user';
+import { generateUser } from '../fixtures/user';
 import { InvalidGameNameError } from 'chili-and-cilantro-api/src/errors/invalidGameName';
 import { InvalidGamePasswordError } from 'chili-and-cilantro-api/src/errors/invalidGamePassword';
 import { InvalidGameParameterError } from 'chili-and-cilantro-api/src/errors/invalidGameParameter';
+import { generateString, numberBetween } from '../fixtures/utils';
 
 describe('GameService', () => {
   let gameService;
@@ -25,50 +26,16 @@ describe('GameService', () => {
     gameService = new GameService(mockGameModel, actionService, chefService, playerService);
   });
 
-
-  describe('generateNewGameCodeAsync', () => {
-    let countDocumentsStub;
-
-    beforeEach(() => {
-      countDocumentsStub = sinon.stub(mockGameModel, 'countDocuments');
-    });
-
-    afterEach(() => {
-      countDocumentsStub.restore();
-    });
-
-    it('should generate a unique game code', async () => {
-      countDocumentsStub.resolves(0);
-      const gameCode = await gameService.generateNewGameCodeAsync();
-      expect(gameCode).toBeDefined();
-      sinon.assert.calledWith(countDocumentsStub, { code: gameCode, currentPhase: { $ne: 'GAME_OVER' } });
-    });
-
-    it('should retry generating a game code if the first one is taken', async () => {
-      countDocumentsStub.onFirstCall().resolves(1);
-      countDocumentsStub.onSecondCall().resolves(0);
-
-      const gameCode = await gameService.generateNewGameCodeAsync();
-
-      expect(gameCode).toBeDefined();
-      sinon.assert.calledTwice(countDocumentsStub);
-    });
-    it('should throw an error if it cannot generate a unique game code', async () => {
-      countDocumentsStub.resolves(1);
-      await expect(gameService.generateNewGameCodeAsync()).rejects.toThrow();
-    });
-  });
-
   describe('validateCreateGameOrThrowAsync', () => {
     let user, userName, gameName, password, maxChefs;
 
     beforeEach(() => {
       // Setup initial valid parameters
-      user = createUser();
-      userName = 'ValidUserName';
-      gameName = 'ValidGameName';
-      password = 'ValidPassword';
-      maxChefs = 5; // Assuming this is a valid number within the range
+      user = generateUser();
+      userName = generateString(constants.MIN_USER_NAME_LENGTH, constants.MAX_USER_NAME_LENGTH);
+      gameName = generateString(constants.MIN_GAME_NAME_LENGTH, constants.MAX_GAME_NAME_LENGTH);
+      password = generateString(constants.MIN_GAME_PASSWORD_LENGTH, constants.MAX_GAME_PASSWORD_LENGTH);
+      maxChefs = numberBetween(constants.MIN_CHEFS, constants.MAX_CHEFS);
     });
 
     afterEach(() => {
@@ -76,6 +43,14 @@ describe('GameService', () => {
       if (gameService.playerService.userIsInAnyActiveGameAsync.restore) {
         gameService.playerService.userIsInAnyActiveGameAsync.restore();
       }
+    });
+
+    it('should not throw an error when all parameters are valid', async () => {
+      // Mock the condition where user is not in an active game
+      sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
+
+      await expect(gameService.validateCreateGameOrThrowAsync(user, userName, gameName, password, maxChefs))
+        .resolves.not.toThrow();
     });
 
     it('throws an error if user is already in an active game', async () => {
@@ -86,7 +61,17 @@ describe('GameService', () => {
         .rejects.toThrow(AlreadyJoinedOtherError);
     });
 
-    it('throws an error for invalid username that is too short', async () => {
+    it('should throw an error for an invalid username with special characters', async () => {
+      // Mock the condition where user is not in an active game
+      sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
+
+      userName = '!'.repeat(constants.MIN_USER_NAME_LENGTH + 1); // Set an invalid username with special characters
+
+      await expect(gameService.validateCreateGameOrThrowAsync(user, userName, gameName, password, maxChefs))
+        .rejects.toThrow(InvalidUserNameError);
+    });
+
+    it('should throw an error for invalid username that is too short', async () => {
       // Mock the condition where user is not in an active game
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
 
@@ -96,7 +81,7 @@ describe('GameService', () => {
         .rejects.toThrow(InvalidUserNameError);
     });
 
-    it('throws an error for invalid username that is too long', async () => {
+    it('should throw an error for invalid username that is too long', async () => {
       // Mock the condition where user is not in an active game
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
 
@@ -106,17 +91,37 @@ describe('GameService', () => {
         .rejects.toThrow(InvalidUserNameError);
     });
 
-    it('throws an error for invalid game name format', async () => {
+    it('should throw an error for an invalid game name with special characters', async () => {
       // Mock the condition where user is not in an active game
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
 
-      gameName = ''; // Set an invalid game name
+      gameName = '!'.repeat(constants.MIN_GAME_NAME_LENGTH + 1); // Set an invalid game name with special characters
 
       await expect(gameService.validateCreateGameOrThrowAsync(user, userName, gameName, password, maxChefs))
         .rejects.toThrow(InvalidGameNameError);
     });
 
-    it('throws an error for invalid password that is too short', async () => {
+    it('should throw an error for invalid game name that is too short', async () => {
+      // Mock the condition where user is not in an active game
+      sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
+
+      gameName = 'x'.repeat(constants.MIN_GAME_NAME_LENGTH - 1); // Set an invalid game name that is too short
+
+      await expect(gameService.validateCreateGameOrThrowAsync(user, userName, gameName, password, maxChefs))
+        .rejects.toThrow(InvalidGameNameError);
+    });
+
+    it('should throw an error for invalid game name that is too long', async () => {
+      // Mock the condition where user is not in an active game
+      sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
+
+      gameName = 'x'.repeat(constants.MAX_GAME_NAME_LENGTH + 1); // Set an invalid game name that is too long
+
+      await expect(gameService.validateCreateGameOrThrowAsync(user, userName, gameName, password, maxChefs))
+        .rejects.toThrow(InvalidGameNameError);
+    });
+
+    it('should throw an error for invalid password that is too short', async () => {
       // Mock the condition where user is not in an active game
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
 
@@ -127,7 +132,7 @@ describe('GameService', () => {
         .rejects.toThrow(InvalidGamePasswordError);
     });
 
-    it('throws an error for invalid password that is too long', async () => {
+    it('should throw an error for invalid password that is too long', async () => {
       // Mock the condition where user is not in an active game
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
 
@@ -138,7 +143,7 @@ describe('GameService', () => {
         .rejects.toThrow(InvalidGamePasswordError);
     });
 
-    it('throws an error to too few chefs', async () => {
+    it('should throw an error to too few chefs', async () => {
       // Mock the condition where user is not in an active game
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
 
@@ -149,7 +154,7 @@ describe('GameService', () => {
     });
 
 
-    it('throws an error to too many chefs', async () => {
+    it('should throw an error to too many chefs', async () => {
       // Mock the condition where user is not in an active game
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
 
@@ -158,6 +163,5 @@ describe('GameService', () => {
       await expect(gameService.validateCreateGameOrThrowAsync(user, userName, gameName, password, maxChefs))
         .rejects.toThrow(InvalidGameParameterError);
     });
-    // Similar structure for password, and max chefs
   });
 });

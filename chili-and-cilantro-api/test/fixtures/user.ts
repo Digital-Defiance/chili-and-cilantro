@@ -2,7 +2,7 @@ import { IUser } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { Schema } from 'mongoose';
 import { faker } from '@faker-js/faker';
 
-export function createUser(): IUser {
+export function generateUser(): IUser {
   return {
     _id: new Schema.Types.ObjectId('aaaaaaaaaaaa'),
     auth0Id: faker.string.uuid(),
