@@ -45,5 +45,9 @@ describe('GameService', () => {
       expect(gameCode).toBeDefined();
       sinon.assert.calledTwice(countDocumentsStub);
     });
+    it('should throw an error if it cannot generate a unique game code', async () => {
+      countDocumentsStub.resolves(1);
+      await expect(gameService.generateNewGameCodeAsync()).rejects.toThrow();
+    });
   });
 });
