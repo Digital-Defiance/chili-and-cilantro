@@ -58,7 +58,7 @@ export interface IGame extends IHasID, IHasTimestamps {
   /**
    * The winning ChefIDs for each round.
    */
-  roundWinners: Schema.Types.ObjectId[];
+  roundWinners: Record<number, Schema.Types.ObjectId>;
   /**
    * The turn order for the game. ChefIDs shuffled randomly into a turn order when the game is started.
    */

@@ -129,7 +129,7 @@ export class GameService extends TransactionManager {
       ...password ? { password: password } : {},
       roundBids: [],
       roundWinners: [],
-      turnOrder: [], // will be chosen when the game is about to start
+      turnOrder: [], // will be chosen when the game is started
     });
     const chef = await this.chefService.newChefAsync(game, user, userName, true, chefId);
     await this.actionService.createGameAsync(game, chef, user);

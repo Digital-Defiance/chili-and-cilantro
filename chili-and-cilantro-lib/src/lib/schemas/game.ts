@@ -125,16 +125,19 @@ export const GameSchema = new Schema<IGame>(
       required: true,
     },
     roundBids: {
-      type: [RoundBidSchema],
+      type: Map,
+      of: [BidSchema],
       required: true,
     },
-    roundWinners: [
-      {
+    roundWinners: {
+      type: Map,
+      of: {
         type: Schema.Types.ObjectId,
         ref: ModelName.Chef,
         required: true,
       },
-    ],
+      required: true,
+    },
     turnOrder: [
       {
         type: Schema.Types.ObjectId,
