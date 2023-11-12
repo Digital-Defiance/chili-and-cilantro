@@ -9,7 +9,7 @@ usersRouter.post('/register', async (req: Request, res: Response) => {
   const { email, username, password } = req.body;
   try {
     const userService = new UserService();
-    await userService.register(email, username, password);
+    await userService.performRegister(email, username, password);
     res.status(201).json({
       message: 'User created successfully',
       email: email,

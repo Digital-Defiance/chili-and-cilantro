@@ -57,7 +57,7 @@ describe('PlayerService', () => {
       try {
 
         const result = await playerService.isGameHostAsync(userId, gameId);
-        fail('Expected isGameHostAsync to throw an error');
+        throw new Error('Expected isGameHostAsync to throw an error');
       } catch (caughtError) {
         expect(caughtError).toBe(error);
       }
@@ -105,7 +105,7 @@ describe('PlayerService', () => {
 
       try {
         await playerService.userIsInAnyActiveGameAsync({ _id: userId });
-        fail('Expected userIsInAnyActiveGameAsync to throw an error');
+        throw new Error('Expected userIsInAnyActiveGameAsync to throw an error');
       } catch (caughtError) {
         expect(caughtError).toBe(error);
       }
@@ -217,7 +217,7 @@ describe('PlayerService', () => {
       const gameId = new ObjectId('aaaaaaaaaaaa');
       try {
         await playerService.userIsInGameAsync(userId.toString(), gameId.toString());
-        fail('Expected userIsInGameAsync to throw an error');
+        throw new Error('Expected userIsInGameAsync to throw an error');
       } catch (caughtError) {
         expect(caughtError).toBe(error);
       }
