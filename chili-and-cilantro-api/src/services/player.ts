@@ -16,12 +16,17 @@ export class PlayerService {
 * @returns boolean
 */
   public async isGameHostAsync(userId: string, gameId: string): Promise<boolean> {
-    const count = await this.GameModel.countDocuments({
-      _id: new ObjectId(gameId),
-      hostUserId: new ObjectId(userId)
-    }).exec();
+    try {
+      const count = await this.GameModel.countDocuments({
+        _id: new ObjectId(gameId),
+        hostUserId: new ObjectId(userId)
+      }).exec();
 
-    return count > 0;
+      return count > 0;
+    } catch (err) {
+      console.error('Error checking if user is host of game:', err);
+      throw err;
+    }
   }
 
 

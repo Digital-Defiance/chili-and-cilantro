@@ -4,7 +4,6 @@ import { PlayerService } from '../../src/services/player';
 import { BaseModel, IGame, ModelName } from '@chili-and-cilantro/chili-and-cilantro-lib';
 
 describe('PlayerService', () => {
-
   describe("isGameHostAsync", () => {
     let countDocumentsStub;
     let mockGameModel;
@@ -13,10 +12,12 @@ describe('PlayerService', () => {
     beforeEach(() => {
       mockGameModel = BaseModel.getModel<IGame>(ModelName.Game);
       playerService = new PlayerService(mockGameModel);
+      jest.spyOn(console, 'error').mockImplementation(() => { });
     });
 
     afterEach(() => {
       countDocumentsStub.restore();
+      jest.restoreAllMocks();
     });
 
     it('should return true when the user is the host of the game', async () => {
@@ -48,6 +49,22 @@ describe('PlayerService', () => {
         hostUserId: new ObjectId(userId)
       });
     });
+    it('should log an error when the aggregate call fails', async () => {
+      const error = new Error('aggregate error');
+      countDocumentsStub = sinon.stub(mockGameModel, 'countDocuments').throws(error);
+      const gameId = 'aaaaaaaaaaaa';
+      const userId = 'bbbbbbbbbbbb';
+      try {
+
+        const result = await playerService.isGameHostAsync(userId, gameId);
+        fail('Expected isGameHostAsync to throw an error');
+      } catch (caughtError) {
+        expect(caughtError).toBe(error);
+      }
+
+      expect(console.error).toHaveBeenCalledWith('Error checking if user is host of game:', error);
+      sinon.assert.calledOnce(countDocumentsStub);
+    });
   });
 
   describe("userIsInAnyActiveGameAsync", () => {
@@ -58,10 +75,12 @@ describe('PlayerService', () => {
     beforeEach(() => {
       mockGameModel = BaseModel.getModel<IGame>(ModelName.Game);
       playerService = new PlayerService(mockGameModel);
+      jest.spyOn(console, 'error').mockImplementation(() => { });
     });
 
     afterEach(() => {
       aggregateStub.restore();
+      jest.restoreAllMocks();
     });
 
     it('should return true when the user is in any active game', async () => {
@@ -79,6 +98,21 @@ describe('PlayerService', () => {
       expect(result).toBe(false);
       sinon.assert.calledOnce(aggregateStub);
     });
+    it('should log an error when the aggregate call fails', async () => {
+      const error = new Error('aggregate error');
+      aggregateStub = sinon.stub(mockGameModel, 'aggregate').throws(error);
+      const userId = new ObjectId('bbbbbbbbbbbb');
+
+      try {
+        await playerService.userIsInAnyActiveGameAsync({ _id: userId });
+        fail('Expected userIsInAnyActiveGameAsync to throw an error');
+      } catch (caughtError) {
+        expect(caughtError).toBe(error);
+      }
+
+      expect(console.error).toHaveBeenCalledWith('Error checking if user is in game:', error);
+      sinon.assert.calledOnce(aggregateStub);
+    });
   });
 
   describe("userIsInGameAsync", () => {
@@ -89,10 +123,12 @@ describe('PlayerService', () => {
     beforeEach(() => {
       mockGameModel = BaseModel.getModel<IGame>(ModelName.Game);
       playerService = new PlayerService(mockGameModel);
+      jest.spyOn(console, 'error').mockImplementation(() => { });
     });
 
     afterEach(() => {
       aggregateStub.restore();
+      jest.restoreAllMocks();
     });
 
     it('should return true when the user is in the specified game', async () => {
@@ -102,6 +138,68 @@ describe('PlayerService', () => {
       const result = await playerService.userIsInGameAsync(userId.toString(), gameId.toString());
       expect(result).toBe(true);
       sinon.assert.calledOnce(aggregateStub);
+      sinon.assert.calledWith(aggregateStub, [
+        {
+          $match: {
+            _id: new ObjectId(gameId)
+          }
+        },
+        {
+          $lookup: {
+            from: 'chefs',
+            localField: 'chefIds',
+            foreignField: '_id',
+            as: 'chefDetails'
+          }
+        },
+        {
+          $unwind: '$chefDetails'
+        },
+        {
+          $match: {
+            'chefDetails.userId': new ObjectId(userId)
+          }
+        },
+        {
+          $count: 'activeGamesCount'
+        }
+      ]);
+    });
+
+    it('should look for the aggregate where the game is active when active is true', async () => {
+      aggregateStub = sinon.stub(mockGameModel, 'aggregate').resolves([{ activeGamesCount: 1 }]);
+      const userId = new ObjectId('bbbbbbbbbbbb');
+      const gameId = new ObjectId('aaaaaaaaaaaa');
+      const result = await playerService.userIsInGameAsync(userId.toString(), gameId.toString(), true);
+      expect(result).toBe(true);
+      sinon.assert.calledOnce(aggregateStub);
+      sinon.assert.calledWith(aggregateStub, [
+        {
+          $match: {
+            _id: new ObjectId(gameId),
+            currentPhase: { $ne: 'GAME_OVER' }
+          }
+        },
+        {
+          $lookup: {
+            from: 'chefs',
+            localField: 'chefIds',
+            foreignField: '_id',
+            as: 'chefDetails'
+          }
+        },
+        {
+          $unwind: '$chefDetails'
+        },
+        {
+          $match: {
+            'chefDetails.userId': new ObjectId(userId)
+          }
+        },
+        {
+          $count: 'activeGamesCount'
+        }
+      ]);
     });
 
     it('should return false when the user is not in the specified game', async () => {
@@ -110,6 +208,21 @@ describe('PlayerService', () => {
       const gameId = new ObjectId('aaaaaaaaaaaa');
       const result = await playerService.userIsInGameAsync(userId.toString(), gameId.toString());
       expect(result).toBe(false);
+      sinon.assert.calledOnce(aggregateStub);
+    });
+    it('should log an error when the aggregate call fails', async () => {
+      const error = new Error('aggregate error');
+      aggregateStub = sinon.stub(mockGameModel, 'aggregate').throws(error);
+      const userId = new ObjectId('bbbbbbbbbbbb');
+      const gameId = new ObjectId('aaaaaaaaaaaa');
+      try {
+        await playerService.userIsInGameAsync(userId.toString(), gameId.toString());
+        fail('Expected userIsInGameAsync to throw an error');
+      } catch (caughtError) {
+        expect(caughtError).toBe(error);
+      }
+
+      expect(console.error).toHaveBeenCalledWith('Error checking if user is in the specified game:', error);
       sinon.assert.calledOnce(aggregateStub);
     });
   });
