@@ -2,8 +2,6 @@ import { Schema } from "mongoose";
 import { IBid } from './bid';
 import { IHasID } from "./hasId";
 import { IHasTimestamps } from "./hasTimestamps";
-import { IAction } from "./action";
-import { FirstChef } from '../enumerations/firstChef';
 import { GamePhase } from "../enumerations/gamePhase";
 
 export interface IGame extends IHasID, IHasTimestamps {
@@ -18,7 +16,7 @@ export interface IGame extends IHasID, IHasTimestamps {
   /**
    * The game password.
    */
-  password: string;
+  password?: string;
   /**
    * Chef IDs in the game 
    */
@@ -26,7 +24,7 @@ export interface IGame extends IHasID, IHasTimestamps {
   /**
    * Eliminated chefs.
    */
-  eliminatedChefs: Schema.Types.ObjectId[];
+  eliminatedChefIds: Schema.Types.ObjectId[];
   /**
    * Maximum number of chefs that can join the game.
    */

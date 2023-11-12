@@ -39,7 +39,7 @@ describe('UtilityService', () => {
       expect(shuffledArrayCounts).toEqual(arrayCounts);
     });
     it('should shuffle objects in an array', () => {
-      const array = [{ name: 'a' }, { name: 'b' }, { name: 'c' }];
+      const array = [{ name: 'a' }, { name: 'b' }, { name: 'c' }, { name: 'd' }, { name: 'e' }];
       const shuffledArray = UtilityService.shuffleArray(array);
       expect(shuffledArray).not.toEqual(array);
       // the shuffled array should contain the same elements as the original array

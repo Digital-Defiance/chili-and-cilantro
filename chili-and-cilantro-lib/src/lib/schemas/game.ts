@@ -86,7 +86,7 @@ export const GameSchema = new Schema<IGame>(
         required: true,
       },
     ],
-    eliminatedChefs: [
+    eliminatedChefIds: [
       {
         type: Schema.Types.ObjectId,
         ref: ModelName.Chef,

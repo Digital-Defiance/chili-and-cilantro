@@ -109,7 +109,7 @@ export class GameService extends TransactionManager {
    * @param maxChefs The maximum number of chefs in the game. Must be between MIN_CHEFS and MAX_CHEFS.
    * @returns 
    */
-  public async createGameAsync(user: IUser & Document, userName: string, gameName: string, password: string, maxChefs: number): Promise<{ game: IGame & Document, chef: IChef & Document }> {
+  public async createGameAsync(user: IUser & Document, userName: string, gameName: string, password: string, maxChefs: number): Promise<{ game: IGame & Document, chef: IChef & Document, action: Document<unknown> }> {
     const gameId = new ObjectId();
     const chefId = new ObjectId();
     const gameCode = await this.generateNewGameCodeAsync();
@@ -132,8 +132,8 @@ export class GameService extends TransactionManager {
       turnOrder: [], // will be chosen when the game is started
     });
     const chef = await this.chefService.newChefAsync(game, user, userName, true, chefId);
-    await this.actionService.createGameAsync(game, chef, user);
-    return { game, chef };
+    const action = await this.actionService.createGameAsync(game, chef, user);
+    return { game, chef, action };
   }
 
   /**

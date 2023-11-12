@@ -1,3 +1,4 @@
+import { Schema } from 'mongoose';
 import sinon from 'sinon';
 import { Database } from '../../src/services/database';
 import { ActionService } from '../../src/services/action';
@@ -12,6 +13,9 @@ import { InvalidGameNameError } from 'chili-and-cilantro-api/src/errors/invalidG
 import { InvalidGamePasswordError } from 'chili-and-cilantro-api/src/errors/invalidGamePassword';
 import { InvalidGameParameterError } from 'chili-and-cilantro-api/src/errors/invalidGameParameter';
 import { generateString, numberBetween } from '../fixtures/utils';
+import { generateChef } from '../fixtures/chef';
+import { generateGame } from '../fixtures/game';
+import { generateCreateGameAction } from '../fixtures/action';
 
 describe('GameService', () => {
   let gameService;
@@ -162,6 +166,49 @@ describe('GameService', () => {
 
       await expect(gameService.validateCreateGameOrThrowAsync(user, userName, gameName, password, maxChefs))
         .rejects.toThrow(InvalidGameParameterError);
+    });
+  });
+
+  describe('createGameAsync', () => {
+    let mockUser, userName, gameName, password, maxChefs, mockGame, mockChef, mockCreateGameAction;
+
+    beforeEach(() => {
+      // Setup initial valid parameters
+      mockUser = generateUser();
+      userName = generateString(constants.MIN_USER_NAME_LENGTH, constants.MAX_USER_NAME_LENGTH);
+      gameName = generateString(constants.MIN_GAME_NAME_LENGTH, constants.MAX_GAME_NAME_LENGTH);
+      password = generateString(constants.MIN_GAME_PASSWORD_LENGTH, constants.MAX_GAME_PASSWORD_LENGTH);
+      maxChefs = numberBetween(constants.MIN_CHEFS, constants.MAX_CHEFS);
+
+      // Mock game and chef objects to be returned by the respective service calls
+      const gameId = new Schema.Types.ObjectId('aaaaaaaaaaaa');
+      mockChef = generateChef(true, gameId, mockUser._id);
+      mockGame = generateGame(gameId, mockUser._id, mockChef._id, true);
+      mockCreateGameAction = generateCreateGameAction(gameId, mockChef._id, mockUser._id);
+
+      // Mock dependencies
+      sinon.stub(gameService, 'generateNewGameCodeAsync').resolves(mockGame.code);
+      sinon.stub(gameService.GameModel, 'create').resolves(mockGame);
+      sinon.stub(gameService.chefService, 'newChefAsync').resolves(mockChef);
+      sinon.stub(gameService.actionService, 'createGameAsync').resolves(mockCreateGameAction);
+    });
+
+    afterEach(() => {
+      // Restore all mocks
+      sinon.restore();
+    });
+
+    it('creates a game successfully with valid parameters', async () => {
+      const result = await gameService.createGameAsync(mockUser, userName, gameName, password, maxChefs);
+
+      // Assertions
+      expect(result.game).toEqual(mockGame);
+      expect(result.chef).toEqual(mockChef);
+      expect(result.action).toEqual(mockCreateGameAction);
+      expect(gameService.generateNewGameCodeAsync.called).toBeTruthy();
+      expect(gameService.GameModel.create.calledWith(sinon.match.has('code', mockGame.code))).toBeTruthy();
+      expect(gameService.chefService.newChefAsync.calledWith(mockGame, mockUser, userName, true)).toBeTruthy();
+      expect(gameService.actionService.createGameAsync.calledWith(mockGame, mockChef, mockUser)).toBeTruthy();
     });
   });
 });
