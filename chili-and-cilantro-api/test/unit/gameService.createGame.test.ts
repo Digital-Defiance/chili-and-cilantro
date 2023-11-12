@@ -1,4 +1,5 @@
 import { Schema } from 'mongoose';
+import mongoose from 'mongoose';
 import sinon from 'sinon';
 import { Database } from '../../src/services/database';
 import { ActionService } from '../../src/services/action';
@@ -16,18 +17,37 @@ import { generateString, numberBetween } from '../fixtures/utils';
 import { generateChef } from '../fixtures/chef';
 import { generateGame } from '../fixtures/game';
 import { generateCreateGameAction } from '../fixtures/action';
+import { UtilityService } from 'chili-and-cilantro-api/src/services/utility';
+
+// Mock the session object
+const mockSession = {
+  startTransaction: jest.fn(),
+  commitTransaction: jest.fn(),
+  abortTransaction: jest.fn(),
+  endSession: jest.fn(),
+};
+
+// Mock the startSession function
+jest.mock('mongoose', () => {
+  const originalModule = jest.requireActual('mongoose');
+
+  return {
+    ...originalModule,
+    startSession: () => mockSession,
+  };
+});
 
 describe('GameService', () => {
   let gameService;
-  let mockGameModel;
+  let gameModel;
 
   beforeAll(() => {
     const database = new Database();
     const actionService = new ActionService(database);
     const chefService = new ChefService(database);
-    mockGameModel = BaseModel.getModel<IGame>(ModelName.Game);
-    const playerService = new PlayerService(mockGameModel);
-    gameService = new GameService(mockGameModel, actionService, chefService, playerService);
+    gameModel = BaseModel.getModel<IGame>(ModelName.Game);
+    const playerService = new PlayerService(gameModel);
+    gameService = new GameService(gameModel, actionService, chefService, playerService);
   });
 
   describe('validateCreateGameOrThrowAsync', () => {
@@ -209,6 +229,42 @@ describe('GameService', () => {
       expect(gameService.GameModel.create.calledWith(sinon.match.has('code', mockGame.code))).toBeTruthy();
       expect(gameService.chefService.newChefAsync.calledWith(mockGame, mockUser, userName, true)).toBeTruthy();
       expect(gameService.actionService.createGameAsync.calledWith(mockGame, mockChef, mockUser)).toBeTruthy();
+    });
+  });
+  describe('performCreateGameAsync', () => {
+    let mockUser, userName, gameName, password, maxChefs;
+    beforeEach(() => {
+      mockUser = generateUser();
+      userName = generateString(constants.MIN_USER_NAME_LENGTH, constants.MAX_USER_NAME_LENGTH);
+      gameName = generateString(constants.MIN_GAME_NAME_LENGTH, constants.MAX_GAME_NAME_LENGTH);
+      password = generateString(constants.MIN_GAME_PASSWORD_LENGTH, constants.MAX_GAME_PASSWORD_LENGTH);
+      maxChefs = numberBetween(constants.MIN_CHEFS, constants.MAX_CHEFS);
+    });
+    afterEach(() => {
+      // Restore all mocks
+      sinon.restore();
+    });
+    it('should create a game successfully', async () => {
+      // Setup your mocks
+      sinon.stub(gameService, 'validateCreateGameOrThrowAsync').resolves();
+      sinon.stub(gameService, 'generateNewGameCodeAsync').resolves(UtilityService.generateGameCode());
+      sinon.stub(gameService, 'createGameAsync').resolves({ game: {}, chef: {} });
+
+      // Perform the test
+      const result = await gameService.performCreateGameAsync(mockUser, userName, gameName, password, maxChefs);
+
+      // Assert the result
+      expect(result).toHaveProperty('game');
+      expect(result).toHaveProperty('chef');
+      // Additional assertions as needed
+    });
+
+    it('should throw an error if validation fails', async () => {
+      // Mock a validation failure
+      sinon.stub(gameService, 'validateCreateGameOrThrowAsync').throws(new Error('Validation failed'));
+
+      await expect(gameService.performCreateGameAsync(mockUser, userName, gameName, password, maxChefs))
+        .rejects.toThrow('Validation failed');
     });
   });
 });
