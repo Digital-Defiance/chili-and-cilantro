@@ -157,6 +157,36 @@ describe("userService", () => {
     });
   });
   describe("createUserAsync", () => {
+    let userModel, email, auth0User, userService;
+    beforeEach(() => {
+      userModel = BaseModel.getModel<IUser>(ModelName.User);
+      email = faker.internet.email();
+      auth0User = {
+        username: faker.internet.userName(),
+        user_id: "auth0|".concat(faker.string.uuid())
+      }
+      userService = new UserService();
+    });
+    afterEach(() => {
+      sinon.restore();
+    });
+    it("should create the user model", async () => {
+      sinon.stub(userModel, "create").resolves({
+        email: email,
+        username: auth0User.username,
+        auth0Id: auth0User.user_id,
+        shadowBan: false,
+        userHidden: true,
+      });
+      expect.assertions(5);
+      userService.createUserAsync(email, auth0User).then((result) => {
+        expect(result.email).toBe(email);
+        expect(result.username).toBe(auth0User.username);
+        expect(result.auth0Id).toBe(auth0User.user_id);
+        expect(result.shadowBan).toBe(false);
+        expect(result.userHidden).toBe(true);
+      });
+    });
   });
   describe("performRegister", () => {
   });
