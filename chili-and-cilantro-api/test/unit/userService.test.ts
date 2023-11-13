@@ -189,6 +189,55 @@ describe("userService", () => {
     });
   });
   describe("performRegister", () => {
+    let userService, auth0User, email, username, password;
+    beforeEach(() => {
+      email = faker.internet.email();
+      username = faker.internet.userName();
+      password = faker.internet.password();
+      userService = new UserService();
+      auth0User = {
+        username: username,
+        user_id: "auth0|".concat(faker.string.uuid())
+      }
+      jest.spyOn(console, 'error').mockImplementation(() => { });
+    });
+    afterEach(() => {
+      sinon.restore();
+    });
+    it("should call validateRegisterOrThrowAsync, registerAuth0UserAsync, and createUserAsync", async () => {
+      jest.spyOn(userService, "validateRegisterOrThrowAsync").mockResolvedValue(undefined);
+      sinon.stub(userService, "registerAuth0UserAsync").resolves(auth0User);
+      sinon.stub(userService, "createUserAsync").resolves({
+        _id: faker.string.uuid(),
+        email: email,
+        username: username,
+        auth0Id: auth0User.user_id,
+        shadowBan: false,
+        userHidden: true,
+      });
+      expect.assertions(6);
+      userService.performRegister(email, username, password).then((result) => {
+        expect(userService.validateRegisterOrThrowAsync).toHaveBeenCalled();
+        expect(result.email).toBe(email);
+        expect(result.username).toBe(username);
+        expect(result.auth0Id).toBe(auth0User.user_id);
+        expect(result.shadowBan).toBe(false);
+        expect(result.userHidden).toBe(true);
+      });
+    });
+    it("should throw an error if registerAuth0UserAsync throws an error", async () => {
+      const error = new Error("Error creating user in Auth0");
+      sinon.stub(userService, "validateRegisterOrThrowAsync").resolves();
+      sinon.stub(userService, "registerAuth0UserAsync").rejects(error);
+      expect.assertions(2);
+      try {
+        await userService.performRegister(email, username, password);
+        throw new Error("Expected performRegister to throw an error");
+      } catch (error) {
+        expect(error.message).toBe("Error creating user in Auth0");
+      }
+      expect(console.error).toHaveBeenCalledWith("Error registering user:", error);
+    });
   });
   describe("getUserByAuth0IdOrThrow", () => {
   });
