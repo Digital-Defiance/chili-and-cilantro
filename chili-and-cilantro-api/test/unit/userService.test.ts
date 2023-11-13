@@ -2,6 +2,7 @@ import { faker } from "@faker-js/faker";
 import sinon from "sinon";
 import { UserService } from '../../src/services/user';
 import { constants, BaseModel, ModelName, IUser } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { managementClient } from "../../src/auth0";
 
 describe("userService", () => {
   describe("validateRegisterOrThrowAsync", () => {
@@ -95,6 +96,65 @@ describe("userService", () => {
     });
   });
   describe("registerAuth0UserAsync", () => {
+    let email, password, userName, userService, userModel;
+    beforeEach(() => {
+      email = faker.internet.email();
+      password = faker.internet.password();
+      userName = faker.internet.userName();
+      userService = new UserService();
+      userModel = BaseModel.getModel<IUser>(ModelName.User);
+    });
+
+    afterEach(() => {
+      sinon.restore();
+    });
+
+    it("should throw an error if there is no auth0 response", async () => {
+      // stub the auth0 management client to return null
+      // but it is async, so we need to return a promise
+      // and resolve it with null
+      sinon.stub(managementClient.users, "create").resolves(undefined);
+      expect.assertions(1);
+      try {
+        await userService.registerAuth0UserAsync(email, userName, password);
+        throw new Error("Expected registerAuth0UserAsync to throw an error");
+      } catch (error) {
+        expect(error.message).toBe("Error creating user in Auth0: Unknown error");
+      }
+    });
+    it("should throw an error if the auth0 response status is not 201", async () => {
+      // Mock the response with the necessary properties
+      const mockResponse = {
+        status: 400,
+        statusText: "Bad Request",
+      };
+
+      // Stub the Auth0 management client to return the mock response
+      sinon.stub(managementClient.users, "create").resolves(mockResponse as any);
+
+      expect.assertions(1);
+      try {
+        await userService.registerAuth0UserAsync(email, userName, password);
+        throw new Error("Expected registerAuth0UserAsync to throw an error");
+      } catch (error) {
+        expect(error.message).toBe("Error creating user in Auth0: Bad Request");
+      }
+    });
+    it("should return the auth0 user response if the management call is successful", async () => {
+      // stub the auth0 mangement client to return a data object and expect that value
+      sinon.stub(managementClient.users, "create").resolves({
+        status: 201,
+        data: {
+          email: email,
+          username: userName,
+          user_id: faker.string.uuid()
+        }
+      } as any);
+      expect.assertions(1);
+      userService.registerAuth0UserAsync(email, userName, password).then((result) => {
+        expect(result.email).toBe(email);
+      });
+    });
   });
   describe("createUserAsync", () => {
   });

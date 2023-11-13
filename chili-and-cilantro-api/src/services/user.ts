@@ -83,8 +83,8 @@ export class UserService {
       user_metadata: {
       },
     });
-    if (!auth0UserResponse || (auth0UserResponse.status !== 201)) {
-      throw new Error('Error creating user in Auth0:' + auth0UserResponse.statusText);
+    if (!auth0UserResponse || auth0UserResponse.status !== 201) {
+      throw new Error(`Error creating user in Auth0: ${auth0UserResponse?.statusText || 'Unknown error'}`);
     }
     return auth0UserResponse.data;
   }
