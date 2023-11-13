@@ -4,14 +4,17 @@ import { PlayerService } from '../../src/services/player';
 import { BaseModel, IGame, ModelName } from '@chili-and-cilantro/chili-and-cilantro-lib';
 
 describe('PlayerService', () => {
+  let mockGameModel, playerService;
+
+  beforeAll(() => {
+    mockGameModel = BaseModel.getModel<IGame>(ModelName.Game);
+    playerService = new PlayerService(mockGameModel);
+  });
+
   describe("isGameHostAsync", () => {
     let countDocumentsStub;
-    let mockGameModel;
-    let playerService;
 
     beforeEach(() => {
-      mockGameModel = BaseModel.getModel<IGame>(ModelName.Game);
-      playerService = new PlayerService(mockGameModel);
       jest.spyOn(console, 'error').mockImplementation(() => { });
     });
 
@@ -69,12 +72,8 @@ describe('PlayerService', () => {
 
   describe("userIsInAnyActiveGameAsync", () => {
     let aggregateStub;
-    let mockGameModel;
-    let playerService;
 
     beforeEach(() => {
-      mockGameModel = BaseModel.getModel<IGame>(ModelName.Game);
-      playerService = new PlayerService(mockGameModel);
       jest.spyOn(console, 'error').mockImplementation(() => { });
     });
 
@@ -117,12 +116,8 @@ describe('PlayerService', () => {
 
   describe("userIsInGameAsync", () => {
     let aggregateStub;
-    let mockGameModel;
-    let playerService;
 
     beforeEach(() => {
-      mockGameModel = BaseModel.getModel<IGame>(ModelName.Game);
-      playerService = new PlayerService(mockGameModel);
       jest.spyOn(console, 'error').mockImplementation(() => { });
     });
 
