@@ -233,17 +233,20 @@ describe("userService", () => {
     });
   });
   describe("getUserByAuth0IdOrThrow", () => {
+    beforeEach(() => {
+      jest.spyOn(console, 'error').mockImplementation(() => { });
+    });
     it("should throw an error if the user is not found", async () => {
-      sinon.stub(userModel, "findOne").returns({
-        exec: sinon.stub().resolves(undefined)
-      });
-      expect.assertions(1);
+      const auth0Id = `auth0Id|${faker.string.uuid()}`;
+      sinon.stub(userModel, "findOne").returns(null);
+      expect.assertions(2);
       try {
-        await userService.getUserByAuth0IdOrThrow(faker.string.uuid());
+        await userService.getUserByAuth0IdOrThrow(auth0Id);
         throw new Error("Expected getUserByAuth0IdOrThrow to throw an error");
       } catch (error) {
-        expect(error.message).toBe("Expected getUserByAuth0IdOrThrow to throw an error");
+        expect(error.message).toBe(`Invalid user by auth0Id: ${auth0Id}`)
       }
+      expect(console.error).toHaveBeenCalledWith("Error fetching user by Auth0 ID:", expect.anything());
     });
     it("should return the user if the user is found", async () => {
       const auth0Id = `auth0Id|${faker.string.uuid()}`;
