@@ -3,19 +3,23 @@ import sinon from "sinon";
 import { UserService } from '../../src/services/user';
 import { constants, BaseModel, ModelName, IUser } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { managementClient } from "../../src/auth0";
+import { generateUser } from '../fixtures/user';
 
 describe("userService", () => {
+  let userService, userModel;
+  beforeAll(() => {
+    userService = new UserService();
+    userModel = BaseModel.getModel<IUser>(ModelName.User);
+  });
+  afterEach(() => {
+    sinon.restore();
+  });
   describe("validateRegisterOrThrowAsync", () => {
-    let email, password, userName, userService, userModel;
+    let email, password, userName;
     beforeEach(() => {
       email = faker.internet.email();
       password = faker.internet.password();
       userName = faker.internet.userName();
-      userService = new UserService();
-      userModel = BaseModel.getModel<IUser>(ModelName.User);
-    });
-    afterEach(() => {
-      sinon.restore();
     });
     it("should throw an error if the email is invalid", async () => {
       email = "invalid email without at symbol";
@@ -96,13 +100,11 @@ describe("userService", () => {
     });
   });
   describe("registerAuth0UserAsync", () => {
-    let email, password, userName, userService, userModel;
+    let email, password, userName;
     beforeEach(() => {
       email = faker.internet.email();
       password = faker.internet.password();
       userName = faker.internet.userName();
-      userService = new UserService();
-      userModel = BaseModel.getModel<IUser>(ModelName.User);
     });
 
     afterEach(() => {
@@ -157,18 +159,13 @@ describe("userService", () => {
     });
   });
   describe("createUserAsync", () => {
-    let userModel, email, auth0User, userService;
+    let email, auth0User;
     beforeEach(() => {
-      userModel = BaseModel.getModel<IUser>(ModelName.User);
       email = faker.internet.email();
       auth0User = {
         username: faker.internet.userName(),
         user_id: "auth0|".concat(faker.string.uuid())
       }
-      userService = new UserService();
-    });
-    afterEach(() => {
-      sinon.restore();
     });
     it("should create the user model", async () => {
       sinon.stub(userModel, "create").resolves({
@@ -189,20 +186,16 @@ describe("userService", () => {
     });
   });
   describe("performRegister", () => {
-    let userService, auth0User, email, username, password;
+    let auth0User, email, username, password;
     beforeEach(() => {
       email = faker.internet.email();
       username = faker.internet.userName();
       password = faker.internet.password();
-      userService = new UserService();
       auth0User = {
         username: username,
         user_id: "auth0|".concat(faker.string.uuid())
       }
       jest.spyOn(console, 'error').mockImplementation(() => { });
-    });
-    afterEach(() => {
-      sinon.restore();
     });
     it("should call validateRegisterOrThrowAsync, registerAuth0UserAsync, and createUserAsync", async () => {
       jest.spyOn(userService, "validateRegisterOrThrowAsync").mockResolvedValue(undefined);
@@ -240,5 +233,26 @@ describe("userService", () => {
     });
   });
   describe("getUserByAuth0IdOrThrow", () => {
+    it("should throw an error if the user is not found", async () => {
+      sinon.stub(userModel, "findOne").returns({
+        exec: sinon.stub().resolves(undefined)
+      });
+      expect.assertions(1);
+      try {
+        await userService.getUserByAuth0IdOrThrow(faker.string.uuid());
+        throw new Error("Expected getUserByAuth0IdOrThrow to throw an error");
+      } catch (error) {
+        expect(error.message).toBe("Expected getUserByAuth0IdOrThrow to throw an error");
+      }
+    });
+    it("should return the user if the user is found", async () => {
+      const auth0Id = `auth0Id|${faker.string.uuid()}`;
+      const user = generateUser(auth0Id);
+      sinon.stub(userModel, "findOne").returns(user);
+      expect.assertions(1);
+      userService.getUserByAuth0IdOrThrow(auth0Id).then((result) => {
+        expect(result).toBe(user);
+      });
+    });
   });
 });
