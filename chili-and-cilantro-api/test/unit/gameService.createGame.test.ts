@@ -1,4 +1,4 @@
-import { Schema } from 'mongoose';
+import { ClientSession, Schema } from 'mongoose';
 import mongoose from 'mongoose';
 import sinon from 'sinon';
 import { Database } from '../../src/services/database';
@@ -17,25 +17,8 @@ import { generateString, numberBetween } from '../fixtures/utils';
 import { generateChef } from '../fixtures/chef';
 import { generateGame } from '../fixtures/game';
 import { generateCreateGameAction } from '../fixtures/action';
+import { mockedWithTransactionAsync } from '../fixtures/transactionManager';
 import { UtilityService } from 'chili-and-cilantro-api/src/services/utility';
-
-// Mock the session object
-const mockSession = {
-  startTransaction: jest.fn(),
-  commitTransaction: jest.fn(),
-  abortTransaction: jest.fn(),
-  endSession: jest.fn(),
-};
-
-// Mock the startSession function
-jest.mock('mongoose', () => {
-  const originalModule = jest.requireActual('mongoose');
-
-  return {
-    ...originalModule,
-    startSession: () => mockSession,
-  };
-});
 
 describe('GameService', () => {
   let gameService;
@@ -245,7 +228,7 @@ describe('GameService', () => {
       sinon.restore();
     });
     it('should create a game successfully', async () => {
-      // Setup your mocks
+      sinon.stub(gameService, 'withTransaction').callsFake(mockedWithTransactionAsync);
       sinon.stub(gameService, 'validateCreateGameOrThrowAsync').resolves();
       sinon.stub(gameService, 'generateNewGameCodeAsync').resolves(UtilityService.generateGameCode());
       sinon.stub(gameService, 'createGameAsync').resolves({ game: {}, chef: {} });
@@ -260,6 +243,7 @@ describe('GameService', () => {
     });
 
     it('should throw an error if validation fails', async () => {
+      sinon.stub(gameService, 'withTransaction').callsFake(mockedWithTransactionAsync);
       // Mock a validation failure
       sinon.stub(gameService, 'validateCreateGameOrThrowAsync').throws(new Error('Validation failed'));
 
