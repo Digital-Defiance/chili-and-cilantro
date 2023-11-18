@@ -25,8 +25,8 @@ jest.mock('../../src/services/user', () => ({
   })),
 }));
 jest.mock('jsonwebtoken', () => ({
-  ...jest.requireActual('jsonwebtoken'), // This will preserve other functions of jsonwebtoken as is
-  verify: jest.fn(), // Only verify is mocked
+  ...jest.requireActual('jsonwebtoken'),
+  verify: jest.fn(),
 }));
 
 // jest.mock('jwks-rsa');
@@ -81,7 +81,21 @@ describe('JwtService', () => {
     });
 
     it('should throw an error for invalid token', async () => {
-      // Test error handling
+      // Mock the JWT verify to simulate an invalid token
+      jest.spyOn(jwt, 'verify').mockImplementation((token: string, getKey: jwt.Secret | jwt.GetPublicKeyOrSecret, options: jwt.VerifyOptions | undefined, callback?: jwt.VerifyCallback<string | jwt.Jwt | jwt.JwtPayload> | undefined) => {
+        const error = new jwt.JsonWebTokenError('Invalid token');
+        if (callback) {
+          callback(error, undefined);
+        }
+      }),
+
+        // Attempt to call the method with an invalid token and expect an error
+        await expect(jwtService.validateAccessTokenAndFetchAuth0UserAsync('invalid-token'))
+          .rejects
+          .toThrow('Invalid token');
+
+      // Ensure that the managementClient's get method is not called
+      expect(managementClient.users.get).not.toHaveBeenCalled();
     });
 
     // Add more test cases as needed
@@ -89,7 +103,28 @@ describe('JwtService', () => {
 
   describe('authenticateUserAsync', () => {
     it('should authenticate user and call next function', async () => {
-      // Write test logic here
+      // Mock the JWT verification process
+      const mockDecodedToken: JwtPayload = { sub: 'user-id' };
+      jest.spyOn(jwt, 'verify').mockImplementation((token: string, getKey: jwt.Secret | jwt.GetPublicKeyOrSecret, options: jwt.VerifyOptions | undefined, callback?: jwt.VerifyCallback<string | jwt.Jwt | jwt.JwtPayload> | undefined) => {
+        if (callback) {
+          callback(null, mockDecodedToken);
+        }
+      });
+
+      // Mock the managementClient to return a successful response
+      const mockAuth0User: GetUsers200ResponseOneOfInner = { user_id: 'user-id', name: 'Test User' } as any;
+      (managementClient.users.get as jest.Mock).mockResolvedValue(mockAuth0User);
+
+      // Set up mock request with authorization header
+      mockRequest.headers.authorization = 'Bearer valid-token';
+
+      // Call the authenticateUserAsync method
+      await jwtService.authenticateUserAsync(mockRequest as any, mockResponse as any, nextFunction);
+
+      // Assertions
+      expect(jwt.verify).toHaveBeenCalledWith('valid-token', expect.any(Function), expect.any(Object), expect.any(Function));
+      expect(managementClient.users.get).toHaveBeenCalledWith({ id: mockDecodedToken.sub });
+      expect(nextFunction).toHaveBeenCalled();
     });
 
     it('should return 401 for missing access token', async () => {
