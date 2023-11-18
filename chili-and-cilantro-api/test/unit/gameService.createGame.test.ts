@@ -53,120 +53,144 @@ describe('GameService', () => {
     });
 
     it('should not throw an error when all parameters are valid', async () => {
+      // arrange
       // Mock the condition where user is not in an active game
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
 
+      // act/assert
       await expect(gameService.validateCreateGameOrThrowAsync(user, userName, gameName, password, maxChefs))
         .resolves.not.toThrow();
     });
 
     it('throws an error if user is already in an active game', async () => {
+      // arrange
       // Mock the condition where user is in an active game
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(true);
 
+      // act/assert
       await expect(gameService.validateCreateGameOrThrowAsync(user, userName, gameName, password, maxChefs))
         .rejects.toThrow(AlreadyJoinedOtherError);
     });
 
     it('should throw an error for an invalid username with special characters', async () => {
+      // arrange
       // Mock the condition where user is not in an active game
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
 
       userName = '!'.repeat(constants.MIN_USER_NAME_LENGTH + 1); // Set an invalid username with special characters
 
+      // act/assert
       await expect(gameService.validateCreateGameOrThrowAsync(user, userName, gameName, password, maxChefs))
         .rejects.toThrow(InvalidUserNameError);
     });
 
     it('should throw an error for invalid username that is too short', async () => {
+      // arrange
       // Mock the condition where user is not in an active game
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
 
       userName = 'x'.repeat(constants.MIN_USER_NAME_LENGTH - 1); // Set an invalid username that is too short
 
+      // act/assert
       await expect(gameService.validateCreateGameOrThrowAsync(user, userName, gameName, password, maxChefs))
         .rejects.toThrow(InvalidUserNameError);
     });
 
     it('should throw an error for invalid username that is too long', async () => {
+      // arrange
       // Mock the condition where user is not in an active game
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
 
       userName = 'x'.repeat(constants.MAX_USER_NAME_LENGTH + 1); // Set an invalid username that is too long
 
+      // act/assert
       await expect(gameService.validateCreateGameOrThrowAsync(user, userName, gameName, password, maxChefs))
         .rejects.toThrow(InvalidUserNameError);
     });
 
     it('should throw an error for an invalid game name with special characters', async () => {
+      // arrange
       // Mock the condition where user is not in an active game
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
 
       gameName = '!'.repeat(constants.MIN_GAME_NAME_LENGTH + 1); // Set an invalid game name with special characters
 
+      // act/assert
       await expect(gameService.validateCreateGameOrThrowAsync(user, userName, gameName, password, maxChefs))
         .rejects.toThrow(InvalidGameNameError);
     });
 
     it('should throw an error for invalid game name that is too short', async () => {
+      // arrange
       // Mock the condition where user is not in an active game
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
 
       gameName = 'x'.repeat(constants.MIN_GAME_NAME_LENGTH - 1); // Set an invalid game name that is too short
 
+      // act/assert
       await expect(gameService.validateCreateGameOrThrowAsync(user, userName, gameName, password, maxChefs))
         .rejects.toThrow(InvalidGameNameError);
     });
 
     it('should throw an error for invalid game name that is too long', async () => {
+      // arrange
       // Mock the condition where user is not in an active game
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
 
       gameName = 'x'.repeat(constants.MAX_GAME_NAME_LENGTH + 1); // Set an invalid game name that is too long
 
+      // act/assert
       await expect(gameService.validateCreateGameOrThrowAsync(user, userName, gameName, password, maxChefs))
         .rejects.toThrow(InvalidGameNameError);
     });
 
     it('should throw an error for invalid password that is too short', async () => {
+      // arrange
       // Mock the condition where user is not in an active game
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
 
       // generate a string that is constants.MIN_GAME_PASSWORD_LENGTH - 1 characters long
       password = 'x'.repeat(constants.MIN_GAME_PASSWORD_LENGTH - 1);
 
+      // act/assert
       await expect(gameService.validateCreateGameOrThrowAsync(user, userName, gameName, password, maxChefs))
         .rejects.toThrow(InvalidGamePasswordError);
     });
 
     it('should throw an error for invalid password that is too long', async () => {
+      // arrange
       // Mock the condition where user is not in an active game
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
 
       // generate a string that is constants.MAX_PASSWORD_LENGTH + 1 characters long
       password = 'x'.repeat(constants.MAX_PASSWORD_LENGTH + 1);
 
+      // act/assert
       await expect(gameService.validateCreateGameOrThrowAsync(user, userName, gameName, password, maxChefs))
         .rejects.toThrow(InvalidGamePasswordError);
     });
 
     it('should throw an error to too few chefs', async () => {
+      // arrange
       // Mock the condition where user is not in an active game
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
 
       maxChefs = constants.MIN_CHEFS - 1; // Set an invalid number of chefs by 1 too few
 
+      // act/assert
       await expect(gameService.validateCreateGameOrThrowAsync(user, userName, gameName, password, maxChefs))
         .rejects.toThrow(InvalidGameParameterError);
     });
 
 
     it('should throw an error to too many chefs', async () => {
+      // arrange
       // Mock the condition where user is not in an active game
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
 
       maxChefs = constants.MAX_CHEFS + 1; // Set an invalid number of chefs by 1 too many
 
+      // act/assert
       await expect(gameService.validateCreateGameOrThrowAsync(user, userName, gameName, password, maxChefs))
         .rejects.toThrow(InvalidGameParameterError);
     });
@@ -202,9 +226,10 @@ describe('GameService', () => {
     });
 
     it('creates a game successfully with valid parameters', async () => {
+      // act
       const result = await gameService.createGameAsync(mockUser, userName, gameName, password, maxChefs);
 
-      // Assertions
+      // assert
       expect(result.game).toEqual(mockGame);
       expect(result.chef).toEqual(mockChef);
       expect(result.action).toEqual(mockCreateGameAction);
@@ -228,25 +253,30 @@ describe('GameService', () => {
       sinon.restore();
     });
     it('should create a game successfully', async () => {
+      // arrange
+      const gameId = new Schema.Types.ObjectId('aaaaaaaaaaaa');
+      const mockChef = generateChef(true, gameId, mockUser._id);
+      const mockGame = generateGame(gameId, mockUser._id, mockChef._id, true);
       sinon.stub(gameService, 'withTransaction').callsFake(mockedWithTransactionAsync);
       sinon.stub(gameService, 'validateCreateGameOrThrowAsync').resolves();
       sinon.stub(gameService, 'generateNewGameCodeAsync').resolves(UtilityService.generateGameCode());
-      sinon.stub(gameService, 'createGameAsync').resolves({ game: {}, chef: {} });
+      sinon.stub(gameService, 'createGameAsync').resolves({ game: mockGame, chef: mockChef });
 
-      // Perform the test
+      // act
       const result = await gameService.performCreateGameAsync(mockUser, userName, gameName, password, maxChefs);
 
-      // Assert the result
-      expect(result).toHaveProperty('game');
-      expect(result).toHaveProperty('chef');
-      // Additional assertions as needed
+      // assert
+      expect(result.game).toBe(mockGame);
+      expect(result.chef).toBe(mockChef);
     });
 
     it('should throw an error if validation fails', async () => {
+      // arrange
       sinon.stub(gameService, 'withTransaction').callsFake(mockedWithTransactionAsync);
       // Mock a validation failure
       sinon.stub(gameService, 'validateCreateGameOrThrowAsync').throws(new Error('Validation failed'));
 
+      // act/assert
       await expect(gameService.performCreateGameAsync(mockUser, userName, gameName, password, maxChefs))
         .rejects.toThrow('Validation failed');
     });
