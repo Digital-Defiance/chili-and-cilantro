@@ -15,12 +15,13 @@ import { IUser } from '@chili-and-cilantro/chili-and-cilantro-lib';
 
 export class JwtService {
   private readonly client: JwksClient;
-  private readonly userService: UserService = new UserService();
+  private readonly userService;
 
-  constructor() {
+  constructor(userService: UserService) {
     this.client = new JwksClient({
       jwksUri: `https://${environment.auth0.domain}/.well-known/jwks.json`,
     });
+    this.userService = userService;
   }
 
   private getKey(header: JwtHeader, callback: SigningKeyCallback): void {

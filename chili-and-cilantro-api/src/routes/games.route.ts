@@ -8,13 +8,15 @@ import { ValidationError } from '../errors/validationError';
 import { ActionService } from '../services/action';
 import { ChefService } from '../services/chef';
 import { PlayerService } from '../services/player';
+import { UserService } from '../services/user';
 
 export const gamesRouter = Router();
 
 gamesRouter.post('/create', validateAccessToken,
   async (req: Request, res: Response) => {
     try {
-      const jwtService = new JwtService();
+      const userService = new UserService();
+      const jwtService = new JwtService(userService);
       const token = req.headers.authorization?.split(' ')[1];
       const user = await jwtService.getUserFromValidatedTokenAsync(token);
       if (!user) {
@@ -47,7 +49,8 @@ gamesRouter.post('/create', validateAccessToken,
 gamesRouter.post('/:code/join', validateAccessToken,
   async (req: Request, res: Response) => {
     try {
-      const jwtService = new JwtService();
+      const userService = new UserService();
+      const jwtService = new JwtService(userService);
       const token = req.headers.authorization?.split(' ')[1];
       const user = await jwtService.getUserFromValidatedTokenAsync(token);
       if (!user) {
@@ -79,7 +82,8 @@ gamesRouter.post('/:code/join', validateAccessToken,
 gamesRouter.post('/:code/message', validateAccessToken,
   async (req: Request, res: Response) => {
     try {
-      const jwtService = new JwtService();
+      const userService = new UserService();
+      const jwtService = new JwtService(userService);
       const token = req.headers.authorization?.split(' ')[1];
       const user = await jwtService.getUserFromValidatedTokenAsync(token);
       if (!user) {
@@ -109,7 +113,8 @@ gamesRouter.post('/:code/message', validateAccessToken,
 gamesRouter.get('/:code/history', validateAccessToken,
   async (req: Request, res: Response) => {
     try {
-      const jwtService = new JwtService();
+      const userService = new UserService();
+      const jwtService = new JwtService(userService);
       const token = req.headers.authorization?.split(' ')[1];
       const user = await jwtService.getUserFromValidatedTokenAsync(token);
       if (!user) {
@@ -138,7 +143,8 @@ gamesRouter.get('/:code/history', validateAccessToken,
 gamesRouter.post('/:code/start', validateAccessToken,
   async (req: Request, res: Response) => {
     try {
-      const jwtService = new JwtService();
+      const userService = new UserService();
+      const jwtService = new JwtService(userService);
       const token = req.headers.authorization?.split(' ')[1];
       const user = await jwtService.getUserFromValidatedTokenAsync(token);
       if (!user) {
@@ -169,7 +175,8 @@ gamesRouter.post('/:code/start', validateAccessToken,
 gamesRouter.get('/:code/action', validateAccessToken,
   async (req: Request, res: Response) => {
     try {
-      const jwtService = new JwtService();
+      const userService = new UserService();
+      const jwtService = new JwtService(userService);
       const token = req.headers.authorization?.split(' ')[1];
       const user = await jwtService.getUserFromValidatedTokenAsync(token);
       if (!user) {
@@ -202,7 +209,8 @@ gamesRouter.get('/:code/action', validateAccessToken,
 gamesRouter.post('/:code/action', validateAccessToken,
   async (req: Request, res: Response) => {
     try {
-      const jwtService = new JwtService();
+      const userService = new UserService();
+      const jwtService = new JwtService(userService);
       const token = req.headers.authorization?.split(' ')[1];
       const user = await jwtService.getUserFromValidatedTokenAsync(token);
       if (!user) {

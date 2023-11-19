@@ -25,7 +25,8 @@ usersRouter.post(
   validateAccessToken,
   async (req: Request, res: Response) => {
     try {
-      const jwtService = new JwtService();
+      const userService = new UserService();
+      const jwtService = new JwtService(userService);
       jwtService.authenticateUserAsync(req, res, async (user, auth0User) => {
         if (
           auth0User.email_verified &&

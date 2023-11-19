@@ -1,9 +1,13 @@
-import { JwtService } from '../../src/services/jwt';
+import sinon from 'sinon';
+import jwt, { JwtPayload } from 'jsonwebtoken';
+import { Document } from 'mongoose';
+import { IUser } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { GetUsers200ResponseOneOfInner } from 'auth0';
 import { JwksClient, SigningKey } from 'jwks-rsa';
+import { JwtService } from '../../src/services/jwt';
 import { managementClient } from '../../src/auth0';
 import { UserService } from '../../src/services/user';
-import jwt, { JwtPayload } from 'jsonwebtoken';
-import { GetUsers200ResponseOneOfInner } from 'auth0';
+import { generateUser } from '../fixtures/user';
 
 jest.mock('jwks-rsa', () => ({
   JwksClient: jest.fn().mockImplementation(() => ({
@@ -19,11 +23,15 @@ jest.mock('../../src/auth0', () => ({
     },
   },
 }));
-jest.mock('../../src/services/user', () => ({
-  UserService: jest.fn().mockImplementation(() => ({
-    // Mock implementation or methods
-  })),
-}));
+jest.mock('../../src/services/user', () => {
+  return {
+    UserService: jest.fn().mockImplementation(() => {
+      return {
+        getUserByAuth0IdOrThrow: jest.fn(),
+      };
+    }),
+  };
+});
 jest.mock('jsonwebtoken', () => ({
   ...jest.requireActual('jsonwebtoken'),
   verify: jest.fn(),
@@ -35,12 +43,14 @@ jest.mock('jsonwebtoken', () => ({
 
 describe('JwtService', () => {
   let jwtService: JwtService;
+  let userService: jest.Mocked<UserService>;
   let mockRequest: { headers: { authorization?: string } };
   let mockResponse: { status: jest.Mock; json: jest.Mock };
   let nextFunction: jest.Mock;
 
   beforeEach(() => {
-    jwtService = new JwtService();
+    userService = new UserService() as jest.Mocked<UserService>;
+    jwtService = new JwtService(userService);
     mockRequest = { headers: { authorization: 'Bearer token' } };
     mockResponse = {
       status: jest.fn().mockReturnThis(),
@@ -48,7 +58,6 @@ describe('JwtService', () => {
     };
     nextFunction = jest.fn();
     (JwksClient as jest.Mock).mockClear();
-    (UserService as jest.Mock).mockClear();
     (managementClient.users.get as jest.Mock).mockClear();
     (jwt.verify as jest.Mock).mockClear();
   });
@@ -103,8 +112,11 @@ describe('JwtService', () => {
 
   describe('authenticateUserAsync', () => {
     it('should authenticate user and call next function', async () => {
-      // Mock the JWT verification process
+      // Mock the JWT verification and user fetching process
       const mockDecodedToken: JwtPayload = { sub: 'user-id' };
+      const mockAuth0User: GetUsers200ResponseOneOfInner = { user_id: 'user-id', name: 'Test User' } as any;
+
+      // Mocking the JWT verify callback behavior
       jest.spyOn(jwt, 'verify').mockImplementation((token: string, getKey: jwt.Secret | jwt.GetPublicKeyOrSecret, options: jwt.VerifyOptions | undefined, callback?: jwt.VerifyCallback<string | jwt.Jwt | jwt.JwtPayload> | undefined) => {
         if (callback) {
           callback(null, mockDecodedToken);
@@ -112,11 +124,22 @@ describe('JwtService', () => {
       });
 
       // Mock the managementClient to return a successful response
-      const mockAuth0User: GetUsers200ResponseOneOfInner = { user_id: 'user-id', name: 'Test User' } as any;
-      (managementClient.users.get as jest.Mock).mockResolvedValue(mockAuth0User);
+      (managementClient.users.get as jest.Mock).mockResolvedValue({
+        data: mockAuth0User,
+        status: 200,
+      });
 
       // Set up mock request with authorization header
       mockRequest.headers.authorization = 'Bearer valid-token';
+
+      // mock userservice getUserByAuth0IdOrThrow to return a mock user
+      const mockUser = generateUser(mockAuth0User.user_id);
+      const mockUserDocument = {
+        ...mockUser,
+        isModified: jest.fn().mockReturnValue(false),
+        save: jest.fn(),
+      } as any as Document & IUser;
+      userService.getUserByAuth0IdOrThrow.mockResolvedValue(mockUserDocument);
 
       // Call the authenticateUserAsync method
       await jwtService.authenticateUserAsync(mockRequest as any, mockResponse as any, nextFunction);
