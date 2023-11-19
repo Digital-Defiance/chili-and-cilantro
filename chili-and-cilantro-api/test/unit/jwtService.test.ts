@@ -151,10 +151,17 @@ describe('JwtService', () => {
     });
 
     it('should return 401 for missing access token', async () => {
-      // Test for missing token
-    });
+      // Remove the authorization header to simulate a missing token
+      delete mockRequest.headers.authorization;
 
-    // Add more test cases as needed
+      // Call the authenticateUserAsync method
+      await jwtService.authenticateUserAsync(mockRequest as any, mockResponse as any, nextFunction);
+
+      // Assertions
+      expect(mockResponse.status).toHaveBeenCalledWith(401);
+      expect(mockResponse.json).toHaveBeenCalledWith({ message: 'Access token not found' });
+      expect(nextFunction).not.toHaveBeenCalled();
+    });
   });
 
   describe('getUserFromValidatedTokenAsync', () => {
