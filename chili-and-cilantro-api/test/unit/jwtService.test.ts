@@ -166,7 +166,29 @@ describe('JwtService', () => {
 
   describe('getUserFromValidatedTokenAsync', () => {
     it('should fetch user from validated token', async () => {
-      // Write test logic here
+      // Mock the JWT verification process
+      const mockDecodedToken: JwtPayload = { sub: 'user-id' };
+      jest.spyOn(jwt, 'verify').mockImplementation((token: string, getKey: jwt.Secret | jwt.GetPublicKeyOrSecret, options: jwt.VerifyOptions | undefined, callback?: jwt.VerifyCallback<string | jwt.Jwt | jwt.JwtPayload> | undefined) => {
+        if (callback) {
+          callback(null, mockDecodedToken);
+        }
+      });
+
+      // Mock the user service to return a user
+      const mockUser = generateUser(mockDecodedToken.sub);
+      const mockUserDocument = {
+        ...mockUser,
+        isModified: jest.fn().mockReturnValue(false),
+        save: jest.fn(),
+      } as any as Document & IUser;
+      userService.getUserByAuth0IdOrThrow.mockResolvedValue(mockUserDocument);
+
+      // Call the getUserFromValidatedTokenAsync method with a mock token
+      const user = await jwtService.getUserFromValidatedTokenAsync('valid-token');
+
+      // Assertions
+      expect(user).toEqual(mockUserDocument);
+      expect(userService.getUserByAuth0IdOrThrow).toHaveBeenCalledWith(mockDecodedToken.sub);
     });
 
     it('should throw an error for invalid token', async () => {
