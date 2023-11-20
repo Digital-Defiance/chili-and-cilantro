@@ -2,7 +2,7 @@ import { Document, Model, Schema } from 'mongoose';
 import { ActionService } from '../../src/services/action';
 import { IDatabase } from '../../src/interfaces/database';
 import { generateGame } from '../fixtures/game';
-import { generateCreateGameAction, generateExpireGameAction, generateJoinGameAction, generateSendMessageAction, generateStartBiddingAction, generateStartGameAction } from '../fixtures/action';
+import { generateCreateGameAction, generateExpireGameAction, generateJoinGameAction, generatePassAction, generatePlaceCardAction, generateSendMessageAction, generateStartBiddingAction, generateStartGameAction } from '../fixtures/action';
 import {
   IAction,
   IGame,
@@ -15,6 +15,9 @@ import {
   IMessageAction,
   IExpireGameAction,
   IStartBiddingAction,
+  IPassAction,
+  CardType,
+  IPlaceCardAction,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { generateUser } from '../fixtures/user';
 import { generateChef } from '../fixtures/chef';
@@ -297,6 +300,95 @@ describe('ActionService', () => {
       expect(result.type).toEqual(mockStartBiddingAction.type);
       expect(result.details.bid).toEqual(bid);
       expect(result.round).toEqual(round);
+    });
+  });
+  describe('passAsync', () => {
+    it('should create a pass action', async () => {
+      // Arrange
+      const round = faker.number.int({ min: 0, max: 10 });
+      mockGame = generateGame(gameId, hostUser._id, hostChef._id, true, round);
+      const bid = faker.number.int({ min: 1, max: 10 });
+      const mockPassAction = generatePassAction(gameId, hostChef._id, hostUser._id, round);
+      const mockPassActionDocument = {
+        ...mockPassAction,
+        save: jest.fn(),
+        isModified: jest.fn(),
+      };
+      const mockActionModel = {
+        create: jest.fn().mockResolvedValue(mockPassActionDocument),
+      } as unknown as MockModel<IPassAction>;
+
+      const mockDatabase = {
+        getActionModel: jest.fn().mockReturnValue(mockActionModel),
+      } as unknown as IDatabase;
+
+      const actionService = new ActionService(mockDatabase);
+
+      // Act
+      const result = await actionService.passAsync(mockGame, hostChef);
+
+      // Assert
+      expect(mockActionModel.create).toHaveBeenCalledWith({
+        gameId: gameId,
+        chefId: hostChef._id,
+        userId: hostUser._id,
+        type: Action.PASS,
+        details: {},
+        round: round,
+      });
+      expect(result.gameId).toEqual(mockPassAction.gameId);
+      expect(result.chefId).toEqual(mockPassAction.chefId);
+      expect(result.userId).toEqual(mockPassAction.userId);
+      expect(result.type).toEqual(mockPassAction.type);
+      expect(result.round).toEqual(round);
+    });
+  });
+  describe('placeCardAsync', () => {
+    it('should create a place card action', async () => {
+      // Arrange
+      const round = faker.number.int({ min: 0, max: 10 });
+      mockGame = generateGame(gameId, hostUser._id, hostChef._id, true, round);
+      // pick a random CardType from the CardType enum
+      const cardType = faker.helpers.enumValue(CardType);
+      const position: number = faker.number.int({ min: 0, max: 4 });
+      const mockPlaceCardAction = generatePlaceCardAction(gameId, hostChef._id, hostUser._id, round, cardType, position);
+      const mockPlaceCardActionDocument = {
+        ...mockPlaceCardAction,
+        save: jest.fn(),
+        isModified: jest.fn(),
+      };
+      const mockActionModel = {
+        create: jest.fn().mockResolvedValue(mockPlaceCardActionDocument),
+      } as unknown as MockModel<IPlaceCardAction>;
+
+      const mockDatabase = {
+        getActionModel: jest.fn().mockReturnValue(mockActionModel),
+      } as unknown as IDatabase;
+
+      const actionService = new ActionService(mockDatabase);
+
+      // Act
+      const result = await actionService.placeCardAsync(mockGame, hostChef, cardType, position);
+
+      // Assert
+      expect(mockActionModel.create).toHaveBeenCalledWith({
+        gameId: gameId,
+        chefId: hostChef._id,
+        userId: hostUser._id,
+        type: Action.PASS,
+        details: {
+          cardType: cardType,
+          position: position,
+        },
+        round: round,
+      });
+      expect(result.gameId).toEqual(mockPlaceCardAction.gameId);
+      expect(result.chefId).toEqual(mockPlaceCardAction.chefId);
+      expect(result.userId).toEqual(mockPlaceCardAction.userId);
+      expect(result.type).toEqual(mockPlaceCardAction.type);
+      expect(result.round).toEqual(round);
+      expect(result.details.cardType).toEqual(cardType);
+      expect(result.details.position).toEqual(position);
     });
   });
 });

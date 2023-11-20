@@ -20,6 +20,9 @@ import {
   IStartBiddingAction,
   IPassDetails,
   IPassAction,
+  CardType,
+  IPlaceCardAction,
+  IPlaceCardDetails,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { IDatabase } from '../interfaces/database';
 
@@ -135,6 +138,20 @@ export class ActionService {
       details: {} as IPassDetails,
       round: game.currentRound,
     } as IPassAction);
+    return result;
+  }
+  public async placeCardAsync(game: IGame, chef: IChef, cardType: CardType, position: number): Promise<Document<Schema.Types.ObjectId, {}, IPlaceCardAction> & IPlaceCardAction> {
+    const result = await this.Database.getActionModel<IPlaceCardAction>(Action.PLACE_CARD).create({
+      gameId: game._id,
+      chefId: chef._id,
+      userId: chef.userId,
+      type: Action.PLACE_CARD,
+      details: {
+        cardType: cardType,
+        position: position,
+      } as IPlaceCardDetails,
+      round: game.currentRound,
+    } as IPlaceCardAction);
     return result;
   }
 }

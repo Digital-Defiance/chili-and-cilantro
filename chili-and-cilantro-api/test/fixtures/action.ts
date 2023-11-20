@@ -1,6 +1,6 @@
 import { Schema } from 'mongoose';
 import { faker } from '@faker-js/faker';
-import { Action, ChefState, ICreateGameAction, ICreateGameDetails, IExpireGameAction, IExpireGameDetails, IJoinGameAction, IJoinGameDetails, IMessageAction, IMessageDetails, IStartBiddingAction, IStartBiddingDetails, IStartGameAction, IStartGameDetails } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { Action, CardType, ChefState, ICreateGameAction, ICreateGameDetails, IExpireGameAction, IExpireGameDetails, IJoinGameAction, IJoinGameDetails, IMessageAction, IMessageDetails, IPassAction, IPassDetails, IPlaceCardAction, IStartBiddingAction, IStartBiddingDetails, IStartGameAction, IStartGameDetails } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { UtilityService } from '../../src/services/utility';
 
 export function generateCreateGameAction(gameId: Schema.Types.ObjectId, chefId: Schema.Types.ObjectId, userId: Schema.Types.ObjectId): ICreateGameAction {
@@ -85,6 +85,37 @@ export function generateStartBiddingAction(gameId: Schema.Types.ObjectId, chefId
     details: {
       bid: bid,
     } as IStartBiddingDetails,
+    round: round,
+    createdAt: faker.date.past(),
+    updatedAt: faker.date.past(),
+  }
+}
+
+export function generatePassAction(gameId: Schema.Types.ObjectId, chefId: Schema.Types.ObjectId, userId: Schema.Types.ObjectId, round: number): IPassAction {
+  return {
+    _id: new Schema.Types.ObjectId('aaaaaaaaaaaa'),
+    gameId: gameId,
+    chefId: chefId,
+    userId: userId,
+    type: Action.PASS,
+    details: {} as IPassDetails,
+    round: round,
+    createdAt: faker.date.past(),
+    updatedAt: faker.date.past(),
+  }
+}
+
+export function generatePlaceCardAction(gameId: Schema.Types.ObjectId, chefId: Schema.Types.ObjectId, userId: Schema.Types.ObjectId, round: number, cardType: CardType, position: number): IPlaceCardAction {
+  return {
+    _id: new Schema.Types.ObjectId('aaaaaaaaaaaa'),
+    gameId: gameId,
+    chefId: chefId,
+    userId: userId,
+    type: Action.PLACE_CARD,
+    details: {
+      cardType: cardType,
+      position: position,
+    },
     round: round,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
