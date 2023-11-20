@@ -2,7 +2,7 @@ import { Document, Model, Schema } from 'mongoose';
 import { ActionService } from '../../src/services/action';
 import { IDatabase } from '../../src/interfaces/database';
 import { generateGame } from '../fixtures/game';
-import { generateCreateGameAction, generateExpireGameAction, generateJoinGameAction, generateStartGameAction } from '../fixtures/action';
+import { generateCreateGameAction, generateExpireGameAction, generateJoinGameAction, generateSendMessageAction, generateStartBiddingAction, generateStartGameAction } from '../fixtures/action';
 import {
   IAction,
   IGame,
@@ -12,9 +12,13 @@ import {
   Action,
   ICreateGameAction,
   IStartGameAction,
+  IMessageAction,
+  IExpireGameAction,
+  IStartBiddingAction,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { generateUser } from '../fixtures/user';
 import { generateChef } from '../fixtures/chef';
+import { faker } from '@faker-js/faker';
 
 type MockModel<T = any> = Model<T> & jest.Mocked<Model<T>> & {
   sort: jest.Mock;
@@ -184,7 +188,7 @@ describe('ActionService', () => {
       };
       const mockActionModel = {
         create: jest.fn().mockResolvedValue(mockExpireGameActionDocument),
-      } as unknown as MockModel<IStartGameAction>;
+      } as unknown as MockModel<IExpireGameAction>;
 
       const mockDatabase = {
         getActionModel: jest.fn().mockReturnValue(mockActionModel),
@@ -208,6 +212,91 @@ describe('ActionService', () => {
       expect(result.chefId).toEqual(mockExpireGameAction.chefId);
       expect(result.userId).toEqual(mockExpireGameAction.userId);
       expect(result.type).toEqual(mockExpireGameAction.type);
+    });
+  });
+  describe('sendMessageAsync', () => {
+    it('should create a message action', async () => {
+      // Arrange
+      const message = faker.lorem.sentence();
+      const mockSendMessageAction = generateSendMessageAction(gameId, hostChef._id, hostUser._id, message);
+      const mockSendMessageActionDocument = {
+        ...mockSendMessageAction,
+        save: jest.fn(),
+        isModified: jest.fn(),
+      };
+      const mockActionModel = {
+        create: jest.fn().mockResolvedValue(mockSendMessageActionDocument),
+      } as unknown as MockModel<IMessageAction>;
+
+      const mockDatabase = {
+        getActionModel: jest.fn().mockReturnValue(mockActionModel),
+      } as unknown as IDatabase;
+
+      const actionService = new ActionService(mockDatabase);
+
+      // Act
+      const result = await actionService.sendMessageAsync(mockGame, hostChef, message);
+
+      // Assert
+      expect(mockActionModel.create).toHaveBeenCalledWith({
+        gameId: gameId,
+        chefId: hostChef._id,
+        userId: hostUser._id,
+        type: Action.MESSAGE,
+        details: {
+          message: message,
+        },
+        round: -1,
+      });
+      expect(result.gameId).toEqual(mockSendMessageAction.gameId);
+      expect(result.chefId).toEqual(mockSendMessageAction.chefId);
+      expect(result.userId).toEqual(mockSendMessageAction.userId);
+      expect(result.type).toEqual(mockSendMessageAction.type);
+      expect(result.details.message).toEqual(message);
+    });
+  });
+  describe('startBiddingAsync', () => {
+    it('should create a start bidding action', async () => {
+      // Arrange
+      const round = faker.number.int({ min: 0, max: 10 });
+      mockGame = generateGame(gameId, hostUser._id, hostChef._id, true, round);
+      const bid = faker.number.int({ min: 1, max: 10 });
+      const mockStartBiddingAction = generateStartBiddingAction(gameId, hostChef._id, hostUser._id, round, bid);
+      const mockStartBiddingActionDocument = {
+        ...mockStartBiddingAction,
+        save: jest.fn(),
+        isModified: jest.fn(),
+      };
+      const mockActionModel = {
+        create: jest.fn().mockResolvedValue(mockStartBiddingActionDocument),
+      } as unknown as MockModel<IStartBiddingAction>;
+
+      const mockDatabase = {
+        getActionModel: jest.fn().mockReturnValue(mockActionModel),
+      } as unknown as IDatabase;
+
+      const actionService = new ActionService(mockDatabase);
+
+      // Act
+      const result = await actionService.startBiddingAsync(mockGame, hostChef, bid);
+
+      // Assert
+      expect(mockActionModel.create).toHaveBeenCalledWith({
+        gameId: gameId,
+        chefId: hostChef._id,
+        userId: hostUser._id,
+        type: Action.START_BIDDING,
+        details: {
+          bid: bid,
+        },
+        round: round,
+      });
+      expect(result.gameId).toEqual(mockStartBiddingAction.gameId);
+      expect(result.chefId).toEqual(mockStartBiddingAction.chefId);
+      expect(result.userId).toEqual(mockStartBiddingAction.userId);
+      expect(result.type).toEqual(mockStartBiddingAction.type);
+      expect(result.details.bid).toEqual(bid);
+      expect(result.round).toEqual(round);
     });
   });
 });
