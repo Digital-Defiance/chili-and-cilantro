@@ -1,4 +1,4 @@
-import { Document, Model } from 'mongoose';
+import { Document, Model, Schema } from 'mongoose';
 import {
   Action,
   IAction,
@@ -40,8 +40,8 @@ export class ActionService {
     game: IGame,
     chef: IChef,
     user: IUser
-  ): Promise<Document<unknown>> {
-    const result = await this.Database.getActionModel(
+  ): Promise<Document<Schema.Types.ObjectId, {}, ICreateGameAction>> {
+    const result = await this.Database.getActionModel<ICreateGameAction>(
       Action.CREATE_GAME
     ).create({
       gameId: game._id,
@@ -57,8 +57,8 @@ export class ActionService {
     game: IGame,
     chef: IChef,
     user: IUser
-  ): Promise<Document<unknown>> {
-    const result = await this.Database.getActionModel(Action.JOIN_GAME).create({
+  ): Promise<Document<Schema.Types.ObjectId, {}, IJoinGameAction>> {
+    const result = await this.Database.getActionModel<IJoinGameAction>(Action.JOIN_GAME).create({
       gameId: game._id,
       chefId: chef._id,
       userId: user._id,
@@ -68,8 +68,8 @@ export class ActionService {
     } as IJoinGameAction);
     return result;
   }
-  public async startGameAsync(game: IGame): Promise<Document<unknown>> {
-    const result = await this.Database.getActionModel(Action.START_GAME).create(
+  public async startGameAsync(game: IGame): Promise<Document<Schema.Types.ObjectId, {}, IStartGameAction>> {
+    const result = await this.Database.getActionModel<IStartGameAction>(Action.START_GAME).create(
       {
         gameId: game._id,
         chefId: game.hostChefId,
@@ -81,8 +81,8 @@ export class ActionService {
     );
     return result;
   }
-  public async expireGameAsync(game: IGame): Promise<Document<unknown>> {
-    const result = this.Database.getActionModel(Action.EXPIRE_GAME).create({
+  public async expireGameAsync(game: IGame): Promise<Document<Schema.Types.ObjectId, {}, IExpireGameAction>> {
+    const result = this.Database.getActionModel<IExpireGameAction>(Action.EXPIRE_GAME).create({
       gameId: game._id,
       chefId: game.hostChefId,
       userId: game.hostUserId,
@@ -96,8 +96,8 @@ export class ActionService {
     game: IGame,
     chef: IChef,
     message: string
-  ): Promise<Document<unknown>> {
-    const result = await this.Database.getActionModel(Action.MESSAGE).create({
+  ): Promise<Document<Schema.Types.ObjectId, {}, IMessageAction>> {
+    const result = await this.Database.getActionModel<IMessageAction>(Action.MESSAGE).create({
       gameId: game._id,
       chefId: chef._id,
       userId: chef.userId,
@@ -113,8 +113,8 @@ export class ActionService {
     game: IGame,
     chef: IChef,
     bid: number
-  ): Promise<Document<unknown>> {
-    const result = await this.Database.getActionModel(
+  ): Promise<Document<Schema.Types.ObjectId, {}, IStartBiddingAction>> {
+    const result = await this.Database.getActionModel<IStartBiddingAction>(
       Action.START_BIDDING
     ).create({
       gameId: game._id,
@@ -128,8 +128,8 @@ export class ActionService {
     } as IStartBiddingAction);
     return result;
   }
-  public async passAsync(game: IGame, chef: IChef): Promise<Document<unknown>> {
-    const result = await this.Database.getActionModel(Action.PASS).create({
+  public async passAsync(game: IGame, chef: IChef): Promise<Document<Schema.Types.ObjectId, {}, IPassAction>> {
+    const result = await this.Database.getActionModel<IPassAction>(Action.PASS).create({
       gameId: game._id,
       chefId: chef._id,
       userId: chef.userId,

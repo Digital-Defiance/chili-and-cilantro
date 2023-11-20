@@ -6,6 +6,7 @@ import {
   EndRoundDiscriminator,
   ExpireGameDiscriminator,
   FlipCardDiscriminator,
+  IAction,
   JoinGameDiscriminator,
   MakeBidDiscriminator,
   MessageDiscriminator,
@@ -24,36 +25,36 @@ export class Database implements IDatabase {
   getModel<T>(modelName: ModelName): Model<T> {
     return BaseModel.getModel<T>(modelName);
   }
-  getActionModel(actionType: Action): Model<unknown> {
+  getActionModel<T extends IAction>(actionType: Action): Model<T> {
     switch (actionType) {
       case Action.CREATE_GAME:
-        return CreateGameDiscriminator;
+        return CreateGameDiscriminator as Model<T>;
       case Action.END_GAME:
-        return EndGameDiscriminator;
+        return EndGameDiscriminator as Model<T>;
       case Action.END_ROUND:
-        return EndRoundDiscriminator;
+        return EndRoundDiscriminator as Model<T>;
       case Action.EXPIRE_GAME:
-        return ExpireGameDiscriminator;
+        return ExpireGameDiscriminator as Model<T>;
       case Action.FLIP_CARD:
-        return FlipCardDiscriminator;
+        return FlipCardDiscriminator as Model<T>;
       case Action.JOIN_GAME:
-        return JoinGameDiscriminator;
+        return JoinGameDiscriminator as Model<T>;
       case Action.MAKE_BID:
-        return MakeBidDiscriminator;
+        return MakeBidDiscriminator as Model<T>;
       case Action.MESSAGE:
-        return MessageDiscriminator;
+        return MessageDiscriminator as Model<T>;
       case Action.PASS:
-        return PassDiscriminator;
+        return PassDiscriminator as Model<T>;
       case Action.PLACE_CARD:
-        return PlaceCardDiscriminator;
+        return PlaceCardDiscriminator as Model<T>;
       case Action.QUIT_GAME:
-        return QuitGameDiscriminator;
+        return QuitGameDiscriminator as Model<T>;
       case Action.START_BIDDING:
-        return StartBiddingDiscriminator;
+        return StartBiddingDiscriminator as Model<T>;
       case Action.START_GAME:
-        return StartGameDiscriminator;
+        return StartGameDiscriminator as Model<T>;
       case Action.START_NEW_ROUND:
-        return StartNewRoundDiscriminator;
+        return StartNewRoundDiscriminator as Model<T>;
     }
   }
 }
