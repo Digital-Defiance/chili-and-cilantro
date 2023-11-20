@@ -375,7 +375,7 @@ describe('ActionService', () => {
         gameId: gameId,
         chefId: hostChef._id,
         userId: hostUser._id,
-        type: Action.PASS,
+        type: Action.PLACE_CARD,
         details: {
           cardType: cardType,
           position: position,
