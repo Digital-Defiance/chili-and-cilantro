@@ -2,7 +2,7 @@ import { Document, Model, Schema } from 'mongoose';
 import { ActionService } from '../../src/services/action';
 import { IDatabase } from '../../src/interfaces/database';
 import { generateGame } from '../fixtures/game';
-import { generateCreateGameAction, generateJoinGameAction, generateStartGameAction } from '../fixtures/action';
+import { generateCreateGameAction, generateExpireGameAction, generateJoinGameAction, generateStartGameAction } from '../fixtures/action';
 import {
   IAction,
   IGame,
@@ -136,7 +136,6 @@ describe('ActionService', () => {
       expect(result.type).toEqual(mockJoinGameAction.type);
     });
   });
-
   describe('startGameAsync', () => {
     it('should create a start game action', async () => {
       // Arrange
@@ -172,6 +171,43 @@ describe('ActionService', () => {
       expect(result.chefId).toEqual(mockStartGameAction.chefId);
       expect(result.userId).toEqual(mockStartGameAction.userId);
       expect(result.type).toEqual(mockStartGameAction.type);
+    });
+  });
+  describe('expireGameAsync', () => {
+    it('should create an expire game action', async () => {
+      // Arrange
+      const mockExpireGameAction = generateExpireGameAction(gameId, hostChef._id, hostUser._id);
+      const mockExpireGameActionDocument = {
+        ...mockExpireGameAction,
+        save: jest.fn(),
+        isModified: jest.fn(),
+      };
+      const mockActionModel = {
+        create: jest.fn().mockResolvedValue(mockExpireGameActionDocument),
+      } as unknown as MockModel<IStartGameAction>;
+
+      const mockDatabase = {
+        getActionModel: jest.fn().mockReturnValue(mockActionModel),
+      } as unknown as IDatabase;
+
+      const actionService = new ActionService(mockDatabase);
+
+      // Act
+      const result = await actionService.expireGameAsync(mockGame);
+
+      // Assert
+      expect(mockActionModel.create).toHaveBeenCalledWith({
+        gameId: gameId,
+        chefId: hostChef._id,
+        userId: hostUser._id,
+        type: Action.EXPIRE_GAME,
+        details: {},
+        round: -1,
+      });
+      expect(result.gameId).toEqual(mockExpireGameAction.gameId);
+      expect(result.chefId).toEqual(mockExpireGameAction.chefId);
+      expect(result.userId).toEqual(mockExpireGameAction.userId);
+      expect(result.type).toEqual(mockExpireGameAction.type);
     });
   });
 });

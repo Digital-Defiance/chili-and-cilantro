@@ -1,6 +1,6 @@
 import { Schema } from 'mongoose';
 import { faker } from '@faker-js/faker';
-import { Action, ChefState, ICreateGameAction, ICreateGameDetails, IJoinGameAction, IJoinGameDetails, IStartGameAction, IStartGameDetails } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { Action, ChefState, ICreateGameAction, ICreateGameDetails, IExpireGameAction, IExpireGameDetails, IJoinGameAction, IJoinGameDetails, IStartGameAction, IStartGameDetails } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { UtilityService } from '../../src/services/utility';
 
 export function generateCreateGameAction(gameId: Schema.Types.ObjectId, chefId: Schema.Types.ObjectId, userId: Schema.Types.ObjectId): ICreateGameAction {
@@ -39,6 +39,20 @@ export function generateStartGameAction(gameId: Schema.Types.ObjectId, chefId: S
     userId: userId,
     type: Action.START_GAME,
     details: {} as IStartGameDetails,
+    round: -1,
+    createdAt: faker.date.past(),
+    updatedAt: faker.date.past(),
+  }
+}
+
+export function generateExpireGameAction(gameId: Schema.Types.ObjectId, chefId: Schema.Types.ObjectId, userId: Schema.Types.ObjectId): IExpireGameAction {
+  return {
+    _id: new Schema.Types.ObjectId('aaaaaaaaaaaa'),
+    gameId: gameId,
+    chefId: chefId,
+    userId: userId,
+    type: Action.EXPIRE_GAME,
+    details: {} as IExpireGameDetails,
     round: -1,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
