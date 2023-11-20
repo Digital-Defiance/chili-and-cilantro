@@ -2,12 +2,14 @@ import { Document, Model, Schema } from 'mongoose';
 import { ActionService } from '../../src/services/action';
 import { IDatabase } from '../../src/interfaces/database';
 import { generateGame } from '../fixtures/game';
-import { generateCreateGameAction } from '../fixtures/action';
+import { generateCreateGameAction, generateJoinGameAction } from '../fixtures/action';
 import {
   IAction,
   IGame,
   IChef,
   IUser,
+  IJoinGameAction,
+  Action,
   ICreateGameAction,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { generateUser } from '../fixtures/user';
@@ -70,7 +72,7 @@ describe('ActionService', () => {
         find: jest.fn().mockReturnThis(),
         sort: jest.fn().mockResolvedValue([]),
         create: jest.fn(),
-      } as unknown as MockModel<IAction>;
+      } as unknown as MockModel<ICreateGameAction>;
       mockActionModel.create.mockResolvedValue(mockCreateGameActionDocument as any);
 
       const mockDatabase = {
@@ -86,7 +88,7 @@ describe('ActionService', () => {
         gameId: gameId,
         chefId: hostChef._id,
         userId: hostUser._id,
-        type: 'CREATE_GAME',
+        type: Action.CREATE_GAME,
         details: {},
         round: -1,
       });
@@ -94,6 +96,43 @@ describe('ActionService', () => {
       expect(result.chefId).toEqual(mockCreateGameAction.chefId);
       expect(result.userId).toEqual(mockCreateGameAction.userId);
       expect(result.type).toEqual(mockCreateGameAction.type);
+    });
+  });
+  describe('joinGameAsync', () => {
+    it('should create a join game action', async () => {
+      // Arrange
+      const mockJoinGameAction = generateJoinGameAction(gameId, hostChef._id, hostUser._id);
+      const mockJoinGameActionDocument = {
+        ...mockJoinGameAction,
+        save: jest.fn(),
+        isModified: jest.fn(),
+      };
+      const mockActionModel = {
+        create: jest.fn().mockResolvedValue(mockJoinGameActionDocument),
+      } as unknown as MockModel<IJoinGameAction>;
+
+      const mockDatabase = {
+        getActionModel: jest.fn().mockReturnValue(mockActionModel),
+      } as unknown as IDatabase;
+
+      const actionService = new ActionService(mockDatabase);
+
+      // Act
+      const result = await actionService.joinGameAsync(mockGame, hostChef, hostUser);
+
+      // Assert
+      expect(mockActionModel.create).toHaveBeenCalledWith({
+        gameId: gameId,
+        chefId: hostChef._id,
+        userId: hostUser._id,
+        type: Action.JOIN_GAME,
+        details: {},
+        round: -1,
+      });
+      expect(result.gameId).toEqual(mockJoinGameAction.gameId);
+      expect(result.chefId).toEqual(mockJoinGameAction.chefId);
+      expect(result.userId).toEqual(mockJoinGameAction.userId);
+      expect(result.type).toEqual(mockJoinGameAction.type);
     });
   });
 });
