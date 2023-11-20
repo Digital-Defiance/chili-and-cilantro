@@ -38,7 +38,7 @@ export class ActionService {
     game: IGame,
     chef: IChef,
     user: IUser
-  ): Promise<Document<Schema.Types.ObjectId, {}, ICreateGameAction>> {
+  ): Promise<Document<Schema.Types.ObjectId, {}, ICreateGameAction> & ICreateGameAction> {
     const result = await this.Database.getActionModel<ICreateGameAction>(
       Action.CREATE_GAME
     ).create({
@@ -55,7 +55,7 @@ export class ActionService {
     game: IGame,
     chef: IChef,
     user: IUser
-  ): Promise<Document<Schema.Types.ObjectId, {}, IJoinGameAction>> {
+  ): Promise<Document<Schema.Types.ObjectId, {}, IJoinGameAction> & IJoinGameAction> {
     const result = await this.Database.getActionModel<IJoinGameAction>(Action.JOIN_GAME).create({
       gameId: game._id,
       chefId: chef._id,
@@ -66,7 +66,7 @@ export class ActionService {
     } as IJoinGameAction);
     return result;
   }
-  public async startGameAsync(game: IGame): Promise<Document<Schema.Types.ObjectId, {}, IStartGameAction>> {
+  public async startGameAsync(game: IGame): Promise<Document<Schema.Types.ObjectId, {}, IStartGameAction> & IStartGameAction> {
     const result = await this.Database.getActionModel<IStartGameAction>(Action.START_GAME).create(
       {
         gameId: game._id,
@@ -79,7 +79,7 @@ export class ActionService {
     );
     return result;
   }
-  public async expireGameAsync(game: IGame): Promise<Document<Schema.Types.ObjectId, {}, IExpireGameAction>> {
+  public async expireGameAsync(game: IGame): Promise<Document<Schema.Types.ObjectId, {}, IExpireGameAction> & IExpireGameAction> {
     const result = this.Database.getActionModel<IExpireGameAction>(Action.EXPIRE_GAME).create({
       gameId: game._id,
       chefId: game.hostChefId,
@@ -94,7 +94,7 @@ export class ActionService {
     game: IGame,
     chef: IChef,
     message: string
-  ): Promise<Document<Schema.Types.ObjectId, {}, IMessageAction>> {
+  ): Promise<Document<Schema.Types.ObjectId, {}, IMessageAction> & IMessageAction> {
     const result = await this.Database.getActionModel<IMessageAction>(Action.MESSAGE).create({
       gameId: game._id,
       chefId: chef._id,
@@ -111,7 +111,7 @@ export class ActionService {
     game: IGame,
     chef: IChef,
     bid: number
-  ): Promise<Document<Schema.Types.ObjectId, {}, IStartBiddingAction>> {
+  ): Promise<Document<Schema.Types.ObjectId, {}, IStartBiddingAction> & IStartBiddingAction> {
     const result = await this.Database.getActionModel<IStartBiddingAction>(
       Action.START_BIDDING
     ).create({
@@ -126,7 +126,7 @@ export class ActionService {
     } as IStartBiddingAction);
     return result;
   }
-  public async passAsync(game: IGame, chef: IChef): Promise<Document<Schema.Types.ObjectId, {}, IPassAction>> {
+  public async passAsync(game: IGame, chef: IChef): Promise<Document<Schema.Types.ObjectId, {}, IPassAction> & IPassAction> {
     const result = await this.Database.getActionModel<IPassAction>(Action.PASS).create({
       gameId: game._id,
       chefId: chef._id,
