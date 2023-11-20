@@ -321,7 +321,17 @@ describe('JwtService', () => {
         .rejects
         .toThrow('User not found in database');
     });
+    it('should throw an error if there is not a sub field in the decoded token', async () => {
+      // Mock the JWT verification to return a decoded token without 'sub'
+      (jwt.verify as jest.Mock).mockImplementation((token: string, getKey: jwt.Secret | jwt.GetPublicKeyOrSecret, options: jwt.VerifyOptions | undefined, callback?: jwt.VerifyCallback<string | jwt.Jwt | jwt.JwtPayload> | undefined) => {
+        callback(null, {}); // No 'sub' field
+      });
 
+      // Expect an error when calling getUserFromValidatedTokenAsync
+      await expect(jwtService.getUserFromValidatedTokenAsync('token'))
+        .rejects
+        .toThrow('Invalid token: unable to extract payload or user ID');
+    });
   });
   describe('getKey', () => {
     let jwtService: JwtService;
