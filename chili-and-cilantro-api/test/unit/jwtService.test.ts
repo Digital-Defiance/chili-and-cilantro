@@ -9,22 +9,13 @@ import { managementClient } from '../../src/auth0';
 import { UserService } from '../../src/services/user';
 import { generateUser } from '../fixtures/user';
 
-// jest.mock('jwks-rsa', () => ({
-//   JwksClient: jest.fn().mockImplementation(() => ({
-//     getSigningKey: jest.fn().mockImplementation((kid, callback) => {
-//       callback(null, { getPublicKey: () => 'mock-signing-key' } as unknown as SigningKey);
-//     }),
-//   })),
-// }));
-jest.mock('jwks-rsa', () => {
-  return {
-    JwksClient: jest.fn().mockImplementation(() => {
-      return {
-        getSigningKey: jest.fn()
-      };
-    })
-  };
-});
+jest.mock('jwks-rsa', () => ({
+  JwksClient: jest.fn().mockImplementation(() => ({
+    getSigningKey: jest.fn().mockImplementation((kid, callback) => {
+      callback(null, { getPublicKey: () => 'mock-signing-key' } as unknown as SigningKey);
+    }),
+  })),
+}));
 jest.mock('../../src/auth0', () => ({
   managementClient: {
     users: {
@@ -333,29 +324,48 @@ describe('JwtService', () => {
 
   });
   describe('getKey', () => {
-    it('should throw an error when KID is missing in JWT', async () => {
-      // Mock a JWT without a 'kid' in the header
-      const tokenWithoutKid = '...'; // A JWT without a 'kid' in the header
+    let jwtService: JwtService;
+    let mockJwksClient: jest.Mocked<JwksClient>;
+    let mockUserService: jest.Mocked<UserService>;
+    beforeEach(() => {
+      mockJwksClient = new JwksClient({ jwksUri: 'mockUri' }) as any;
+      mockUserService = {} as any; // Mock UserService as needed
+      jwtService = new JwtService(mockUserService);
+      (jwtService as any)['client'] = mockJwksClient;
+    });
+    it('should retrieve the signing key successfully', done => {
+      const mockKey = { getPublicKey: () => 'mockPublicKey' };
+      mockJwksClient.getSigningKey.mockImplementation((kid, callback) => {
+        callback(null, mockKey as any);
+      });
 
-      // Expect an error to be thrown when calling getKey
-      expect(() => jwtService.getKey({ alg: 'RS256' }, jest.fn())).toThrow('No KID found in JWT');
+      const header = { kid: 'testKid', alg: 'RS256' };
+      jwtService.getKey(header, (err, key) => {
+        expect(err).toBeNull();
+        expect(key).toBe('mockPublicKey');
+        done();
+      });
     });
 
-    // it('should handle error from getSigningKey', async () => {
-    //   // Mock an error from getSigningKey
-    //   const mockGetSigningKey = JwksRsa.JwksClient.prototype.getSigningKey as jest.Mock;
-    //   mockGetSigningKey.mockImplementation((kid, callback) => {
-    //     callback(new Error('Error fetching signing key'), null);
-    //   });
+    it('should handle errors from getSigningKey', done => {
+      mockJwksClient.getSigningKey.mockImplementation((kid, callback) => {
+        callback(new Error('Error fetching signing key'), undefined);
+      });
 
-    //   // Call getKey with a mock header and expect an error in the callback
-    //   jwtService.getKey({ kid: 'test-kid', alg: 'RS256' }, (err, key) => {
-    //     expect(err).toBeTruthy();
-    //     expect(key).toBeUndefined();
-    //   });
-    // });
-  });
-  describe('', () => {
+      const header = { kid: 'testKid', alg: 'RS256' };
+      jwtService.getKey(header, (err, key) => {
+        expect(err).toBeInstanceOf(Error);
+        expect(err.message).toBe('Error fetching signing key');
+        expect(key).toBeUndefined();
+        done();
+      });
+    });
 
+    it('should throw an error if no KID is found in JWT', () => {
+      const header = {}; // Missing 'kid'
+      expect(() => {
+        jwtService.getKey(header as any, jest.fn());
+      }).toThrow('No KID found in JWT');
+    });
   });
 });
