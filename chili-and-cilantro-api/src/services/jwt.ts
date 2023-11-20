@@ -24,7 +24,7 @@ export class JwtService {
     this.userService = userService;
   }
 
-  private getKey(header: JwtHeader, callback: SigningKeyCallback): void {
+  public getKey(header: JwtHeader, callback: SigningKeyCallback): void {
     if (!header.kid) throw new Error('No KID found in JWT');
 
     this.client.getSigningKey(

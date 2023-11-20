@@ -3,19 +3,28 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 import { Document } from 'mongoose';
 import { IUser } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { GetUsers200ResponseOneOfInner } from 'auth0';
-import { JwksClient, SigningKey } from 'jwks-rsa';
+import JwksRsa, { JwksClient, SigningKey } from 'jwks-rsa';
 import { JwtService } from '../../src/services/jwt';
 import { managementClient } from '../../src/auth0';
 import { UserService } from '../../src/services/user';
 import { generateUser } from '../fixtures/user';
 
-jest.mock('jwks-rsa', () => ({
-  JwksClient: jest.fn().mockImplementation(() => ({
-    getSigningKey: jest.fn().mockImplementation((kid, callback) => {
-      callback(null, { getPublicKey: () => 'mock-signing-key' } as unknown as SigningKey);
-    }),
-  })),
-}));
+// jest.mock('jwks-rsa', () => ({
+//   JwksClient: jest.fn().mockImplementation(() => ({
+//     getSigningKey: jest.fn().mockImplementation((kid, callback) => {
+//       callback(null, { getPublicKey: () => 'mock-signing-key' } as unknown as SigningKey);
+//     }),
+//   })),
+// }));
+jest.mock('jwks-rsa', () => {
+  return {
+    JwksClient: jest.fn().mockImplementation(() => {
+      return {
+        getSigningKey: jest.fn()
+      };
+    })
+  };
+});
 jest.mock('../../src/auth0', () => ({
   managementClient: {
     users: {
@@ -36,10 +45,6 @@ jest.mock('jsonwebtoken', () => ({
   ...jest.requireActual('jsonwebtoken'),
   verify: jest.fn(),
 }));
-
-// jest.mock('jwks-rsa');
-// jest.mock('../../src/auth0');
-// jest.mock('../../src/services/user');
 
 describe('JwtService', () => {
   let jwtService: JwtService;
@@ -107,7 +112,28 @@ describe('JwtService', () => {
       expect(managementClient.users.get).not.toHaveBeenCalled();
     });
 
-    // Add more test cases as needed
+    it('should throw an error for invalid decoded token', async () => {
+      // Mock verify to return a decoded token without 'sub'
+      (jwt.verify as jest.Mock).mockImplementation((token: string, getKey: jwt.Secret | jwt.GetPublicKeyOrSecret, options: jwt.VerifyOptions | undefined, callback?: jwt.VerifyCallback<string | jwt.Jwt | jwt.JwtPayload> | undefined) => {
+        callback(null, {}); // No 'sub' field
+      });
+
+      // Expect an error when calling validateAccessTokenAndFetchAuth0UserAsync
+      await expect(jwtService.validateAccessTokenAndFetchAuth0UserAsync('token')).rejects.toThrow('Invalid token');
+    });
+
+    it('should throw an error when Auth0 user is not found', async () => {
+      // Mock verify to return a valid decoded token
+      (jwt.verify as jest.Mock).mockImplementation((token: string, getKey: jwt.Secret | jwt.GetPublicKeyOrSecret, options: jwt.VerifyOptions | undefined, callback?: jwt.VerifyCallback<string | jwt.Jwt | jwt.JwtPayload> | undefined) => {
+        callback(null, { sub: 'user-id' });
+      });
+
+      // Mock managementClient to simulate user not found
+      (managementClient.users.get as jest.Mock).mockResolvedValue({ status: 404 });
+
+      // Expect an error when calling validateAccessTokenAndFetchAuth0UserAsync
+      await expect(jwtService.validateAccessTokenAndFetchAuth0UserAsync('token')).rejects.toThrow('User not found');
+    });
   });
 
   describe('authenticateUserAsync', () => {
@@ -162,6 +188,77 @@ describe('JwtService', () => {
       expect(mockResponse.json).toHaveBeenCalledWith({ message: 'Access token not found' });
       expect(nextFunction).not.toHaveBeenCalled();
     });
+    it('should return 401 if unable to determine user id', async () => {
+      // mock an auth0user without a user_id
+      const mockDecodedToken: JwtPayload = { sub: 'user-id' };
+      const mockAuth0User: GetUsers200ResponseOneOfInner = { user_id: undefined, name: 'Test User' } as any;
+
+      // Mocking the JWT verify callback behavior
+      jest.spyOn(jwt, 'verify').mockImplementation((token: string, getKey: jwt.Secret | jwt.GetPublicKeyOrSecret, options: jwt.VerifyOptions | undefined, callback?: jwt.VerifyCallback<string | jwt.Jwt | jwt.JwtPayload> | undefined) => {
+        if (callback) {
+          callback(null, mockDecodedToken);
+        }
+      });
+
+      // Mock the managementClient to return a successful response
+      (managementClient.users.get as jest.Mock).mockResolvedValue({
+        data: mockAuth0User,
+        status: 200,
+      });
+
+      // Set up mock request with authorization header
+      mockRequest.headers.authorization = 'Bearer valid-token';
+
+      // Call the authenticateUserAsync method
+      await jwtService.authenticateUserAsync(mockRequest as any, mockResponse as any, nextFunction);
+
+      // Assertions
+      expect(mockResponse.status).toHaveBeenCalledWith(401);
+      expect(mockResponse.json).toHaveBeenCalledWith({ message: 'Unable to determine user id' });
+      expect(nextFunction).not.toHaveBeenCalled();
+    });
+    it('should return 401 if user not found', async () => {
+      // Mock the JWT verification to return a valid decoded token
+      const mockDecodedToken: JwtPayload = { sub: 'user-id' };
+      const mockAuth0User: GetUsers200ResponseOneOfInner = { user_id: 'user-id', name: 'Test User' } as any;
+
+      // Mocking the JWT verify callback behavior
+      jest.spyOn(jwt, 'verify').mockImplementation((token: string, getKey: jwt.Secret | jwt.GetPublicKeyOrSecret, options: jwt.VerifyOptions | undefined, callback?: jwt.VerifyCallback<string | jwt.Jwt | jwt.JwtPayload> | undefined) => {
+        if (callback) {
+          callback(null, mockDecodedToken);
+        }
+      });
+
+      // Mock the managementClient to return a successful response
+      (managementClient.users.get as jest.Mock).mockResolvedValue({
+        data: mockAuth0User,
+        status: 200,
+      });
+      // Mock userService to simulate user not found
+      userService.getUserByAuth0IdOrThrow.mockResolvedValue(null);
+
+      // Call the authenticateUserAsync method
+      await jwtService.authenticateUserAsync(mockRequest as any, mockResponse as any, nextFunction);
+
+      // Assertions
+      expect(mockResponse.status).toHaveBeenCalledWith(401);
+      expect(mockResponse.json).toHaveBeenCalledWith({ message: 'User not found' });
+      expect(nextFunction).not.toHaveBeenCalled();
+    });
+    it('should return 401 for invalid access token', async () => {
+      // Mock the JWT verification to simulate an invalid token
+      (jwt.verify as jest.Mock).mockImplementation((token: string, getKey: jwt.Secret | jwt.GetPublicKeyOrSecret, options: jwt.VerifyOptions | undefined, callback?: jwt.VerifyCallback<string | jwt.Jwt | jwt.JwtPayload> | undefined) => {
+        callback(new jwt.JsonWebTokenError('Invalid access token'), null);
+      });
+
+      // Call the authenticateUserAsync method
+      await jwtService.authenticateUserAsync(mockRequest as any, mockResponse as any, nextFunction);
+
+      // Assertions
+      expect(mockResponse.status).toHaveBeenCalledWith(401);
+      expect(mockResponse.json).toHaveBeenCalledWith({ message: 'Invalid access token' });
+      expect(nextFunction).not.toHaveBeenCalled();
+    });
   });
 
   describe('getUserFromValidatedTokenAsync', () => {
@@ -192,11 +289,73 @@ describe('JwtService', () => {
     });
 
     it('should throw an error for invalid token', async () => {
-      // Test error handling
+      // Mock the JWT verification to simulate an invalid token
+      jest.spyOn(jwt, 'verify').mockImplementation((token: string, getKey: jwt.Secret | jwt.GetPublicKeyOrSecret, options: jwt.VerifyOptions | undefined, callback?: jwt.VerifyCallback<string | jwt.Jwt | jwt.JwtPayload> | undefined) => {
+        const error = new jwt.JsonWebTokenError('Invalid token');
+        if (callback) {
+          callback(error, undefined);
+        }
+      });
+
+      // Attempt to call the method with an invalid token and expect an error
+      await expect(jwtService.getUserFromValidatedTokenAsync('invalid-token'))
+        .rejects
+        .toThrow('Token Verification Failed: Invalid token');
+
+      // Ensure that the userService's getUserByAuth0IdOrThrow method is not called
+      expect(userService.getUserByAuth0IdOrThrow).not.toHaveBeenCalled();
+    });
+    it('should throw an error for invalid token in getUserFromValidatedTokenAsync', async () => {
+      // Mock the JWT verification to simulate an invalid token
+      (jwt.verify as jest.Mock).mockImplementation((token: string, getKey: jwt.Secret | jwt.GetPublicKeyOrSecret, options: jwt.VerifyOptions | undefined, callback?: jwt.VerifyCallback<string | jwt.Jwt | jwt.JwtPayload> | undefined) => {
+        callback(new jwt.JsonWebTokenError('Invalid token'), null);
+      });
+
+      // Expect an error when calling getUserFromValidatedTokenAsync
+      await expect(jwtService.getUserFromValidatedTokenAsync('invalid-token'))
+        .rejects
+        .toThrow('Token Verification Failed: Invalid token');
+    });
+    it('should throw an error if user not found in database in getUserFromValidatedTokenAsync', async () => {
+      // Mock the JWT verification to return a valid decoded token
+      (jwt.verify as jest.Mock).mockImplementation((token: string, getKey: jwt.Secret | jwt.GetPublicKeyOrSecret, options: jwt.VerifyOptions | undefined, callback?: jwt.VerifyCallback<string | jwt.Jwt | jwt.JwtPayload> | undefined) => {
+        callback(null, { sub: 'user-id' });
+      });
+
+      // Mock userService to simulate user not found
+      userService.getUserByAuth0IdOrThrow.mockResolvedValue(null);
+
+      // Expect an error when calling getUserFromValidatedTokenAsync
+      await expect(jwtService.getUserFromValidatedTokenAsync('valid-token'))
+        .rejects
+        .toThrow('User not found in database');
     });
 
-    // Add more test cases as needed
   });
+  describe('getKey', () => {
+    it('should throw an error when KID is missing in JWT', async () => {
+      // Mock a JWT without a 'kid' in the header
+      const tokenWithoutKid = '...'; // A JWT without a 'kid' in the header
 
-  // Add more tests for other methods and scenarios
+      // Expect an error to be thrown when calling getKey
+      expect(() => jwtService.getKey({ alg: 'RS256' }, jest.fn())).toThrow('No KID found in JWT');
+    });
+
+    // it('should handle error from getSigningKey', async () => {
+    //   // Mock an error from getSigningKey
+    //   const mockGetSigningKey = JwksRsa.JwksClient.prototype.getSigningKey as jest.Mock;
+    //   mockGetSigningKey.mockImplementation((kid, callback) => {
+    //     callback(new Error('Error fetching signing key'), null);
+    //   });
+
+    //   // Call getKey with a mock header and expect an error in the callback
+    //   jwtService.getKey({ kid: 'test-kid', alg: 'RS256' }, (err, key) => {
+    //     expect(err).toBeTruthy();
+    //     expect(key).toBeUndefined();
+    //   });
+    // });
+  });
+  describe('', () => {
+
+  });
 });
