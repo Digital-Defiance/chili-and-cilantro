@@ -25,13 +25,11 @@ import { IDatabase } from '../interfaces/database';
 
 export class ActionService {
   private readonly Database: IDatabase;
-  private readonly ActionModel: Model<IAction>;
   constructor(database: IDatabase) {
     this.Database = database;
-    this.ActionModel = database.getModel<IAction>(ModelName.Action);
   }
   public async getGameHistoryAsync(game: IGame): Promise<IAction[]> {
-    const actions = await this.ActionModel.find({ gameId: game._id }).sort({
+    const actions = await this.Database.getModel<IAction>(ModelName.Action).find({ gameId: game._id }).sort({
       createdAt: 1,
     });
     return actions;
