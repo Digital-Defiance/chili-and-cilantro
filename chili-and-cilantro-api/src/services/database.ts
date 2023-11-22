@@ -21,6 +21,10 @@ import {
 import { IDatabase } from '../interfaces/database';
 import { Model } from 'mongoose';
 
+/**
+ * Database abstraction to allow for easier testing
+ * TODO: but does it really? The only place it is being used now is ActionService I think
+ */
 export class Database implements IDatabase {
   getModel<T>(modelName: ModelName): Model<T> {
     return BaseModel.getModel<T>(modelName);

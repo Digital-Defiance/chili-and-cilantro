@@ -1,12 +1,11 @@
-import { ClientSession, Schema } from 'mongoose';
-import mongoose from 'mongoose';
+import { Schema } from 'mongoose';
 import sinon from 'sinon';
 import { Database } from '../../src/services/database';
 import { ActionService } from '../../src/services/action';
 import { ChefService } from '../../src/services/chef';
 import { GameService } from '../../src/services/game';
 import { PlayerService } from '../../src/services/player';
-import { constants, BaseModel, IGame, ModelName } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { constants, IGame, ModelName, IChef } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { AlreadyJoinedOtherError } from '../../src/errors/alreadyJoinedOther';
 import { InvalidUserNameError } from '../../src/errors/invalidUserName';
 import { generateUser } from '../fixtures/user';
@@ -21,14 +20,16 @@ import { mockedWithTransactionAsync } from '../fixtures/transactionManager';
 import { UtilityService } from 'chili-and-cilantro-api/src/services/utility';
 
 describe('GameService', () => {
-  let gameService;
+  let chefModel;
   let gameModel;
+  let gameService;
 
   beforeAll(() => {
     const database = new Database();
+    chefModel = database.getModel<IChef>(ModelName.Chef);
+    gameModel = database.getModel<IGame>(ModelName.Game);
     const actionService = new ActionService(database);
-    const chefService = new ChefService(database);
-    gameModel = BaseModel.getModel<IGame>(ModelName.Game);
+    const chefService = new ChefService(chefModel);
     const playerService = new PlayerService(gameModel);
     gameService = new GameService(gameModel, actionService, chefService, playerService);
   });

@@ -1,16 +1,13 @@
 import { ObjectId } from 'mongodb';
 import { Document, Model } from 'mongoose';
 import { ChefState, IChef, IGame, IUser, ModelName } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { IDatabase } from '../interfaces/database';
 import { UtilityService } from './utility';
 import { NotInGameError } from '../errors/notInGame';
 
 export class ChefService {
   private readonly ChefModel: Model<IChef>;
-  private readonly Database: IDatabase;
-  constructor(database: IDatabase) {
-    this.Database = database;
-    this.ChefModel = database.getModel<IChef>(ModelName.Chef);
+  constructor(chefModel: Model<IChef>) {
+    this.ChefModel = chefModel;
   }
 
   /**

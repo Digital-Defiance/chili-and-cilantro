@@ -4,24 +4,19 @@ import { ActionService } from '../../src/services/action';
 import { ChefService } from '../../src/services/chef';
 import { GameService } from '../../src/services/game';
 import { PlayerService } from '../../src/services/player';
-import { constants, BaseModel, IGame, ModelName } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { AlreadyJoinedOtherError } from '../../src/errors/alreadyJoinedOther';
-import { InvalidUserNameError } from '../../src/errors/invalidUserName';
-import { generateUser } from '../fixtures/user';
-import { InvalidGameNameError } from 'chili-and-cilantro-api/src/errors/invalidGameName';
-import { InvalidGamePasswordError } from 'chili-and-cilantro-api/src/errors/invalidGamePassword';
-import { InvalidGameParameterError } from 'chili-and-cilantro-api/src/errors/invalidGameParameter';
-import { generateString, numberBetween } from '../fixtures/utils';
+import { IGame, ModelName, IChef } from '@chili-and-cilantro/chili-and-cilantro-lib';
 
 describe('GameService', () => {
   let gameService;
+  let mockChefModel;
   let mockGameModel;
 
   beforeAll(() => {
     const database = new Database();
+    mockChefModel = database.getModel<IChef>(ModelName.Chef);
+    mockGameModel = database.getModel<IGame>(ModelName.Game);
     const actionService = new ActionService(database);
-    const chefService = new ChefService(database);
-    mockGameModel = BaseModel.getModel<IGame>(ModelName.Game);
+    const chefService = new ChefService(mockChefModel);
     const playerService = new PlayerService(mockGameModel);
     gameService = new GameService(mockGameModel, actionService, chefService, playerService);
   });
