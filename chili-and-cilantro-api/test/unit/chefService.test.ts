@@ -6,6 +6,7 @@ import { UtilityService } from '../../src/services/utility';
 import { ChefService } from '../../src/services/chef';
 import { faker } from '@faker-js/faker';
 import { ChefState } from '../../../chili-and-cilantro-lib/src';
+import { NotInGameError } from 'chili-and-cilantro-api/src/errors/notInGame';
 
 // Mocks
 jest.mock('mongoose', () => {
@@ -136,4 +137,52 @@ describe('ChefService', () => {
       expect(result.state).toEqual(ChefState.LOBBY);
     });
   });
+  describe('getGameChefOrThrowAsync', () => {
+    it('should return a chef if found', async () => {
+      // Arrange
+      const gameId = new Schema.Types.ObjectId('gameid123');
+      const userId = new Schema.Types.ObjectId('userid123');
+      const mockGame = { _id: gameId };
+      const mockUser = { _id: userId };
+      const mockChef = generateChef(true, gameId, userId);
+
+      // mock findOne to have an exec() which returns a chef
+      mockChefModel.findOne.mockImplementationOnce(() => {
+        return {
+          exec: jest.fn().mockResolvedValueOnce(mockChef),
+        };
+      });
+
+      // Act
+      const result = await chefService.getGameChefOrThrowAsync(mockGame, mockUser);
+
+      // Assert
+      expect(mockChefModel.findOne).toHaveBeenCalledWith({
+        gameId: gameId,
+        userId: userId,
+      });
+      expect(result).toBeDefined();
+      expect(result).toEqual(mockChef);
+    });
+
+    it('should throw NotInGameError if no chef is found', async () => {
+      // Arrange
+      const gameId = new Schema.Types.ObjectId('gameid123');
+      const userId = new Schema.Types.ObjectId('userid123');
+      const mockGame = { _id: gameId };
+      const mockUser = { _id: userId };
+
+      mockChefModel.findOne.mockImplementationOnce(() => {
+        return {
+          exec: jest.fn().mockResolvedValueOnce(null),
+        };
+      });
+
+      // Act & Assert
+      await expect(chefService.getGameChefOrThrowAsync(mockGame, mockUser))
+        .rejects
+        .toThrow(NotInGameError);
+    });
+  });
+
 });
