@@ -184,5 +184,47 @@ describe('ChefService', () => {
         .toThrow(NotInGameError);
     });
   });
+  describe('getGameChefsByGameIdAsync', () => {
+    it('should return an array of chefs for a given game ID', async () => {
+      // Arrange
+      const gameId = new Schema.Types.ObjectId('gameid123');
+      const mockChefs = [
+        generateChef(true, gameId, new Schema.Types.ObjectId('userid123')),
+        generateChef(false, gameId, new Schema.Types.ObjectId('userid456')),
+      ];
 
+      mockChefModel.find.mockResolvedValueOnce(mockChefs);
+
+      // Act
+      const result = await chefService.getGameChefsByGameIdAsync(gameId);
+
+      // Assert
+      expect(mockChefModel.find).toHaveBeenCalledWith({ gameId: gameId });
+      expect(result).toBeDefined();
+      expect(result).toEqual(mockChefs);
+      expect(result.length).toBe(mockChefs.length);
+    });
+  });
+  describe('getGameChefsByGameAsync', () => {
+    it('should return an array of chefs for a given game', async () => {
+      // Arrange
+      const gameId = new Schema.Types.ObjectId('gameid123');
+      const mockGame = generateGame(gameId, new Schema.Types.ObjectId('userid123'), new Schema.Types.ObjectId('chefid123'), true);
+      const mockChefs = [
+        generateChef(true, gameId, new Schema.Types.ObjectId('userid123')),
+        generateChef(false, gameId, new Schema.Types.ObjectId('userid456')),
+      ];
+
+      jest.spyOn(chefService, 'getGameChefsByGameIdAsync').mockResolvedValueOnce(mockChefs);
+
+      // Act
+      const result = await chefService.getGameChefsByGameAsync(mockGame);
+
+      // Assert
+      expect(chefService.getGameChefsByGameIdAsync).toHaveBeenCalledWith(gameId.toString());
+      expect(result).toBeDefined();
+      expect(result).toEqual(mockChefs);
+      expect(result.length).toBe(mockChefs.length);
+    });
+  });
 });
