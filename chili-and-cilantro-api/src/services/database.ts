@@ -59,6 +59,8 @@ export class Database implements IDatabase {
         return StartGameDiscriminator as Model<T>;
       case Action.START_NEW_ROUND:
         return StartNewRoundDiscriminator as Model<T>;
+      default:
+        throw new Error(`Action type ${actionType} not found`);
     }
   }
 }
