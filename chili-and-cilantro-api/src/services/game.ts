@@ -154,6 +154,7 @@ export class GameService extends TransactionManager {
 
   /**
    * Joins the player to the specified game and creates a chef object for them
+   * A password is not needed as it is validated earlier.
    * @param gameCode 
    * @param password 
    * @param user 
@@ -168,13 +169,13 @@ export class GameService extends TransactionManager {
     return { game, chef };
   }
 
-  public async validateJoinGameOrThrow(game: IGame & Document, user: IUser & Document, userName: string, password: string): Promise<void> {
-    const chefNames = await this.getGameChefNamesAsync(game._id);
-    if (chefNames.includes(userName)) {
-      throw new UsernameInUseError();
-    }
+  public async validateJoinGameOrThrowAsync(game: IGame & Document, user: IUser & Document, userName: string, password: string): Promise<void> {
     if (await this.playerService.userIsInAnyActiveGameAsync(user)) {
       throw new AlreadyJoinedOtherError();
+    }
+    const chefNames = await this.getGameChefNamesAsync(game._id.toString());
+    if (chefNames.includes(userName)) {
+      throw new UsernameInUseError();
     }
     if (game.password && game.password !== password) {
       throw new GamePasswordMismatchError();
@@ -201,7 +202,7 @@ export class GameService extends TransactionManager {
   public async performJoinGameAsync(gameCode: string, password: string, user: IUser & Document, userName: string): Promise<{ game: IGame & Document, chef: IChef & Document }> {
     return this.withTransaction(async (session) => {
       const game = await this.getGameByCodeOrThrowAsync(gameCode, true);
-      await this.validateJoinGameOrThrow(game, user, userName, password);
+      await this.validateJoinGameOrThrowAsync(game, user, userName, password);
       return this.joinGameAsync(game, user, userName);
     });
   }

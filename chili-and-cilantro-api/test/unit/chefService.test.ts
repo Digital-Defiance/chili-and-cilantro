@@ -196,7 +196,7 @@ describe('ChefService', () => {
       mockChefModel.find.mockResolvedValueOnce(mockChefs);
 
       // Act
-      const result = await chefService.getGameChefsByGameIdAsync(gameId);
+      const result = await chefService.getGameChefsByGameIdAsync(gameId.toString());
 
       // Assert
       expect(mockChefModel.find).toHaveBeenCalledWith({ gameId: gameId });
