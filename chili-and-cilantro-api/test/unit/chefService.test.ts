@@ -136,6 +136,46 @@ describe('ChefService', () => {
       expect(result.hand).toEqual(expectedHand);
       expect(result.state).toEqual(ChefState.LOBBY);
     });
+    it("should generate an id if one is not provided", async () => {
+      // Arrange
+      const gameId = new Schema.Types.ObjectId('aaaaaaaaaaa');
+      const existingChefId = new Schema.Types.ObjectId('bbbbbbbbbbbb');
+      const newChefId = new Schema.Types.ObjectId('ccccccccccc');
+      const mockUser = generateUser();
+      const existingChef = generateChef(true, gameId, mockUser._id);
+      const mockGame = generateGame(gameId, mockUser._id, existingChefId, true);
+      const expectedHand = UtilityService.makeHand();
+
+      mockChefModel.create.mockResolvedValueOnce({
+        ...existingChef,
+        _id: newChefId,
+        hand: expectedHand,
+        placedCards: [],
+        lostCards: [],
+        state: ChefState.LOBBY,
+      });
+
+      // Act
+      const result = await chefService.newChefFromExisting(mockGame, existingChef);
+
+      // Assert
+      expect(mockChefModel.create).toHaveBeenCalledWith(expect.objectContaining({
+        gameId: mockGame._id,
+        name: existingChef.name,
+        userId: existingChef.userId,
+        hand: expectedHand,
+        placedCards: [],
+        lostCards: [],
+        state: ChefState.LOBBY,
+        host: existingChef.host,
+      }));
+      expect(result).toBeDefined();
+      expect(result._id).toEqual(newChefId);
+      expect(result.gameId).toEqual(gameId);
+      expect(result.userId).toEqual(existingChef.userId);
+      expect(result.hand).toEqual(expectedHand);
+      expect(result.state).toEqual(ChefState.LOBBY);
+    });
   });
   describe('getGameChefOrThrowAsync', () => {
     it('should return a chef if found', async () => {
