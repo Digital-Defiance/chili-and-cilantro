@@ -21,6 +21,7 @@ import { UtilityService } from '../../src/services/utility';
 import { GameFullError } from '../../src/errors/gameFull';
 import { faker } from '@faker-js/faker';
 import { GamePasswordMismatchError } from 'chili-and-cilantro-api/src/errors/gamePasswordMismatch';
+import { UsernameInUseError } from 'chili-and-cilantro-api/src/errors/usernameInUse';
 
 describe('GameService', () => {
   let chefModel;
@@ -78,7 +79,16 @@ describe('GameService', () => {
       await expect(gameService.validateJoinGameOrThrowAsync(game, user, userName, game.password))
         .rejects.toThrow(AlreadyJoinedOtherError);
     });
+    it('should throw an error when the chef name is already in the specified game', async () => {
+      // arrange
+      // Mock the condition where user is not in an active game
+      sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
+      sinon.stub(gameService, 'getGameChefNamesAsync').resolves([chef.name]);
 
+      // act/assert
+      await expect(gameService.validateJoinGameOrThrowAsync(game, user, chef.name, game.password))
+        .rejects.toThrow(UsernameInUseError);
+    });
     it('should throw an error for an invalid username with special characters', async () => {
       // arrange
       // Mock the condition where user is not in an active game
