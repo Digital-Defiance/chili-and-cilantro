@@ -199,7 +199,7 @@ describe('ChefService', () => {
       const result = await chefService.getGameChefsByGameIdAsync(gameId.toString());
 
       // Assert
-      expect(mockChefModel.find).toHaveBeenCalledWith({ gameId: gameId });
+      expect(mockChefModel.find).toHaveBeenCalledWith({ gameId: gameId.toString() });
       expect(result).toBeDefined();
       expect(result).toEqual(mockChefs);
       expect(result.length).toBe(mockChefs.length);
