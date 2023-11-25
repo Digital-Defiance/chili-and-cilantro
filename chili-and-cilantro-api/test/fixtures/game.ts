@@ -4,7 +4,7 @@ import { constants, ChefState, GamePhase, IGame } from '@chili-and-cilantro/chil
 import { UtilityService } from '../../src/services/utility';
 import { numberBetween } from '../fixtures/utils';
 
-export function generateGame(gameId: Schema.Types.ObjectId, hostUserId: Schema.Types.ObjectId, hostChefId: Schema.Types.ObjectId, withPassword: boolean, round?: number): IGame {
+export function generateGame(gameId: Schema.Types.ObjectId, hostUserId: Schema.Types.ObjectId, hostChefId: Schema.Types.ObjectId, withPassword: boolean, overrides?: Object): IGame {
   return {
     _id: gameId,
     code: UtilityService.generateGameCode(),
@@ -17,7 +17,7 @@ export function generateGame(gameId: Schema.Types.ObjectId, hostUserId: Schema.T
     currentBid: -1,
     currentChef: -1,
     currentPhase: GamePhase.LOBBY,
-    currentRound: round ?? -1,
+    currentRound: -1,
     roundBids: {},
     roundWinners: {},
     turnOrder: [],
@@ -25,5 +25,6 @@ export function generateGame(gameId: Schema.Types.ObjectId, hostUserId: Schema.T
     hostUserId: hostUserId,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
+    ...overrides ? overrides : {}
   };
 }

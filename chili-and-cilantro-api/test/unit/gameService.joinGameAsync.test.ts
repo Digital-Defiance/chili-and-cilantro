@@ -5,23 +5,20 @@ import { ActionService } from '../../src/services/action';
 import { ChefService } from '../../src/services/chef';
 import { GameService } from '../../src/services/game';
 import { PlayerService } from '../../src/services/player';
-import { constants, IGame, ModelName, IChef } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { constants, IGame, ModelName, IChef, GamePhase } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { AlreadyJoinedOtherError } from '../../src/errors/alreadyJoinedOther';
 import { InvalidUserNameError } from '../../src/errors/invalidUserName';
 import { generateUser } from '../fixtures/user';
-import { InvalidGameNameError } from '../../src/errors/invalidGameName';
-import { InvalidGamePasswordError } from '../../src/errors/invalidGamePassword';
-import { InvalidGameParameterError } from '../../src/errors/invalidGameParameter';
-import { generateString, numberBetween } from '../fixtures/utils';
+import { generateString } from '../fixtures/utils';
 import { generateChef } from '../fixtures/chef';
 import { generateGame } from '../fixtures/game';
-import { generateJoinGameAction } from '../fixtures/action';
 import { mockedWithTransactionAsync } from '../fixtures/transactionManager';
 import { UtilityService } from '../../src/services/utility';
 import { GameFullError } from '../../src/errors/gameFull';
 import { faker } from '@faker-js/faker';
-import { GamePasswordMismatchError } from 'chili-and-cilantro-api/src/errors/gamePasswordMismatch';
-import { UsernameInUseError } from 'chili-and-cilantro-api/src/errors/usernameInUse';
+import { GamePasswordMismatchError } from '../../src/errors/gamePasswordMismatch';
+import { UsernameInUseError } from '../../src/errors/usernameInUse';
+import { GameInProgressError } from '../../src/errors/gameInProgress';
 
 describe('GameService', () => {
   let chefModel;
@@ -88,6 +85,16 @@ describe('GameService', () => {
       // act/assert
       await expect(gameService.validateJoinGameOrThrowAsync(game, user, chef.name, game.password))
         .rejects.toThrow(UsernameInUseError);
+    });
+    it('should throw an error when the game is already in progress', () => {
+      // arrange
+      sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
+      sinon.stub(gameService, 'getGameChefNamesAsync').resolves([chef.name]);
+      game = generateGame(gameId, user._id, chef._id, true, { currentPhase: GamePhase.SETUP });
+
+      // act/assert
+      expect(gameService.validateJoinGameOrThrowAsync(game, user, userName, game.password))
+        .rejects.toThrow(GameInProgressError);
     });
     it('should throw an error for an invalid username with special characters', async () => {
       // arrange

@@ -262,7 +262,7 @@ describe('ActionService', () => {
     it('should create a start bidding action', async () => {
       // Arrange
       const round = faker.number.int({ min: 0, max: 10 });
-      mockGame = generateGame(gameId, hostUser._id, hostChef._id, true, round);
+      mockGame = generateGame(gameId, hostUser._id, hostChef._id, true, { currentRound: round });
       const bid = faker.number.int({ min: 1, max: 10 });
       const mockStartBiddingAction = generateStartBiddingAction(gameId, hostChef._id, hostUser._id, round, bid);
       const mockStartBiddingActionDocument = {
@@ -306,7 +306,7 @@ describe('ActionService', () => {
     it('should create a pass action', async () => {
       // Arrange
       const round = faker.number.int({ min: 0, max: 10 });
-      mockGame = generateGame(gameId, hostUser._id, hostChef._id, true, round);
+      mockGame = generateGame(gameId, hostUser._id, hostChef._id, true, { currentRound: round });
       const bid = faker.number.int({ min: 1, max: 10 });
       const mockPassAction = generatePassAction(gameId, hostChef._id, hostUser._id, round);
       const mockPassActionDocument = {
@@ -347,7 +347,7 @@ describe('ActionService', () => {
     it('should create a place card action', async () => {
       // Arrange
       const round = faker.number.int({ min: 0, max: 10 });
-      mockGame = generateGame(gameId, hostUser._id, hostChef._id, true, round);
+      mockGame = generateGame(gameId, hostUser._id, hostChef._id, true, { currentRound: round });
       // pick a random CardType from the CardType enum
       const cardType = faker.helpers.enumValue(CardType);
       const position: number = faker.number.int({ min: 0, max: 4 });
