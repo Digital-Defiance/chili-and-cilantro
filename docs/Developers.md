@@ -4,7 +4,7 @@
 
 This game is best developed using the included Visual Studio Code DevContainer. This will ensure that all dependencies are installed and configured correctly.
 
-Open the project in Visual Studio Code, and you should be prompted to open the project in a DevContainer- Don't do this right away if you haven't yet configured your .env for the devcontainer. Under .devcontainer, copy .env.example to .env and update the values to suit your needs. You can run ```npm run new:secret``` to generate a new database secret. You'll want to copy the other .env.example file under chili-and-cilantro-api with matching values. Once you have modified the environment configuration files, you can open the command palette and search for "Reopen in Container". (control+shift+p)
+Open the project in Visual Studio Code, and you should be prompted to open the project in a DevContainer- Don't do this right away if you haven't yet configured your .env for the devcontainer. Under .devcontainer, copy .env.example to .env and update the values to suit your needs. You can run ```npm run new:secret``` to generate a new database secret. You'll want to copy the other .env.example file under chili-and-cilantro-api with matching values. Once you have modified the environment configuration files, you can open the command palette and search for "Reopen in Container". (control+shift+p) You'll need access to auth0 in order to get the secrets necessary for the application .env file.
 
  If you wish to change the database password later, you'll need to delete the mongo volume in Docker Desktop and restart the container.
 
@@ -42,6 +42,10 @@ After creating an account, in order to get an access token, you'll want to log i
 - Whenever the bid is increased, all other players have the opportunity to increase it further or pass unless the bid is the maximum and we immediately move to the next phase.
   - If the second player in the turn order increases the bid, we must go through the remainder of the players in the turn order and back through the first before moving to REVEAL phase.
 - Once bidding is settled and we move to the REVEAL phase, the chef must turn over all of their own cards first, and may then select from other chef's ingredients in any order.
+
+# Bootstrapping Auth0
+
+Chili and Cilantro was built with [Project Albatross](https://github.com/Digital-Defiance/project-albatross#readme). Please follow the relevant parts of those instructions for configuring Auth0. You'll create a tenant, a react application, and a machine to machine API.
 
 ## References
 
