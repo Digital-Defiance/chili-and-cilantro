@@ -6,7 +6,7 @@ This game is best developed using the included Visual Studio Code DevContainer. 
 
 Open the project in Visual Studio Code, and you should be prompted to open the project in a DevContainer- Don't do this right away if you haven't yet configured your .env for the devcontainer. Under .devcontainer, copy .env.example to .env and update the values to suit your needs. You can run ```npm run new:secret``` to generate a new database secret. You'll want to copy the other .env.example file under chili-and-cilantro-api with matching values. Once you have modified the environment configuration files, you can open the command palette and search for "Reopen in Container". (control+shift+p)
 
-  If you wish to change the database password later, you'll need to delete the mongo volume in Docker Desktop and restart the container.
+ If you wish to change the database password later, you'll need to delete the mongo volume in Docker Desktop and restart the container.
 
 Once you have reopened the project in the DevContainer, you'll have a running mongo instance available on localhost:27017 and your application will be able to use it. The DevContainer will automatically run yarn install for you and this will take a few minutes the first time you load the container. Once it is done you can run ```yarn build-serve:dev``` to build the shared library, react app, and run the node api server in development mode. The application will be available at localhost:3000.
 
@@ -14,9 +14,9 @@ See the root package.json for additional commands available to you. ```yarn serv
 
 ## Application Structure
 
-This project is an [NX](https://nx.dev) monorepo. The root package.json contains scripts for building and serving the shared library, react app, and node api server. The shared library is a collection of common types and functions that are used by both the react app and the node api server. The react app is a standard create-react-app application. The node api server is a standard express application.
+This project is an [NX](https://nx.dev) monorepo. The root package.json contains scripts for building and serving the shared library, react app, and node api server. The shared library, 'chili-and-cilantro-lib', is a collection of common types and functions that are used by both the react app and the node api server. The react app, 'chili-and-cilantro-react', is a standard create-react-app application. The node api server, 'chili-and-cilantro-api', is a standard express application.
 
-In the root directory, there are sub-directories for the API, shared library, and react application under chili-and-cilantro-api, chili-and-cilantro-lib, and chili-and-cilantro-react, respectively. Additionally there are -e2e variants of the api and react application intended for end-to-end testing. These are not currently used.
+In the root directory, there are sub-directories for the API, shared library, and react application. Additionally there are -e2e variants of the api and react application intended for end-to-end testing. These are not currently used.
 
 The library has the mongoose schema and model definitions, as well as the typescript interfaces for the models. We have built a custom model framework underneath src/lib/models/BaseModel.ts and we have a custom schema class that references all of the models under src/schema.ts. The model descriptions, etc are in src/lib/schemaModelData.ts. If you add a new model, it must also be added to the ModelName enum in src/lib/enumerations/modelName.ts and src/lib/enumerations/modelNameCollection.ts which has the collection name. The model name is used to reference the model in the schema and the collection name is used to reference the collection in the database. BaseModel.getModel is then used to retrieve the model from the schema.
 
@@ -24,9 +24,9 @@ The interfaces are in the library so that we can reference the model interfaces 
 
 You'll want access to the Auth0 admin interface, please contact Jessica Mulein for access.
 
-You can create an account using the Register endpoint. A Postman collection is available in the root directory, and you can join the Digital Defiance team on Postman to get access to the test collection.
+You can create an account using the Register endpoint. A Postman collection is available in the root directory, and you can join the Digital Defiance team on Postman to get access to the test collection. There is a registration page that is incomplete.
 
-In order to get an access token, you'll want to log in to the app on localhost:3000 and then visit [http://localhost:3000/api-access](http://localhost:3000/api-access) and copy your token from that page into the dev environment {{access_token}} variable in postman. You can then register or perform other actions on the site.
+After creating an account, in order to get an access token, you'll want to log in to the app on localhost:3000 and then visit [http://localhost:3000/api-access](http://localhost:3000/api-access) and copy your token from that page into the dev environment {{access_token}} variable in postman. You can then register or perform other actions on the site.
 
 # Rules/flow for Chili and Cilantro
 
@@ -41,6 +41,7 @@ In order to get an access token, you'll want to log in to the app on localhost:3
 - Once all cards are placed or a player bids, the game moves to BIDDING phase.
 - Whenever the bid is increased, all other players have the opportunity to increase it further or pass unless the bid is the maximum and we immediately move to the next phase.
   - If the second player in the turn order increases the bid, we must go through the remainder of the players in the turn order and back through the first before moving to REVEAL phase.
+- Once bidding is settled and we move to the REVEAL phase, the chef must turn over all of their own cards first, and may then select from other chef's ingredients in any order.
 
 ## References
 
