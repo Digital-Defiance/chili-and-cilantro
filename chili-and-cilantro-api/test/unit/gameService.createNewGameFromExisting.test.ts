@@ -80,7 +80,7 @@ describe('GameService', () => {
       const database = new Database();
       mockGameModel = database.getModel<IGame>(ModelName.Game);
       mockGameModel.prototype.save = jest.fn().mockResolvedValue(generateGame(gameId, user._id, newChef._id, true));
-      gameService = new GameService(mockGameModel, mockChefService, mockActionService, mockPlayerService);
+      gameService = new GameService(mockGameModel, mockActionService, mockChefService, mockPlayerService);
     });
 
     it('should create a new game from an existing game', async () => {

@@ -15,6 +15,16 @@ export abstract class UtilityService {
   }
 
   /**
+   * Swaps two elements in an array. Included only as a means to inspect the swap count in tests.
+   * @param array The array to swap elements in
+   * @param index1 The first index to swap
+   * @param index2 The second index to swap
+   */
+  public static swapElements(array: any[], index1: number, index2: number): void {
+    [array[index1], array[index2]] = [array[index2], array[index1]];
+  }
+
+  /**
    * Utility method to shuffle array (consider placing this in a shared utility file)
    * @param array
    * @returns shuffled array
@@ -23,7 +33,7 @@ export abstract class UtilityService {
     const newArray = [...array];
     for (let i = newArray.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [newArray[i], newArray[j]] = [newArray[j], newArray[i]]; // Swap elements
+      UtilityService.swapElements(newArray, i, j);
     }
     return newArray;
   }

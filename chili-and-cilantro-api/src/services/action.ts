@@ -1,5 +1,6 @@
 import { Document, Model, Schema } from 'mongoose';
 import {
+  constants,
   Action,
   IAction,
   ICreateGameAction,
@@ -50,7 +51,7 @@ export class ActionService {
       userId: user._id,
       type: Action.CREATE_GAME,
       details: {} as ICreateGameDetails,
-      round: -1,
+      round: constants.NONE,
     } as ICreateGameAction);
     return result;
   }
@@ -65,7 +66,7 @@ export class ActionService {
       userId: user._id,
       type: Action.JOIN_GAME,
       details: {} as IJoinGameDetails,
-      round: -1,
+      round: constants.NONE,
     } as IJoinGameAction);
     return result;
   }

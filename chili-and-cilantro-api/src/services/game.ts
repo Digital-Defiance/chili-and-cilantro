@@ -118,10 +118,10 @@ export class GameService extends TransactionManager {
       cardsPlaced: 0,
       chefIds: [chefId],
       code: gameCode,
-      currentBid: -1,
-      currentChef: -1,
+      currentBid: constants.NONE,
+      currentChef: constants.NONE,
       currentPhase: GamePhase.LOBBY,
-      currentRound: -1,
+      currentRound: constants.NONE,
       hostChefId: chefId,
       hostUserId: user._id,
       maxChefs: maxChefs,
@@ -226,9 +226,9 @@ export class GameService extends TransactionManager {
       chefIds: newChefIds,
       code: existingGame.code,
       cardsPlaced: 0,
-      currentBid: -1,
-      currentChef: -1,
-      currentRound: -1,
+      currentBid: constants.NONE,
+      currentChef: constants.NONE,
+      currentRound: constants.NONE,
       currentPhase: GamePhase.LOBBY,
       hostChefId: newChefIds[hostChefIndex],
       hostUserId: existingGame.hostUserId,
@@ -244,19 +244,19 @@ export class GameService extends TransactionManager {
     // Create new Chef documents
     const chefCreations = newChefIds.map((newChefId, index) => {
       const existingChef = existingChefs.find(chef => chef._id.toString() == existingGame.chefIds[index].toString());
-      return this.chefService.newChefFromExisting(game, existingChef, newChefId);
+      return this.chefService.newChefFromExisting(newGame, existingChef, newChefId);
     });
 
     // Execute all creations concurrently
     const chefs = await Promise.all(chefCreations);
 
     // Persist the new game
-    const game = await newGame.save();
+    const savedNewGame = await newGame.save();
 
     // Create action for game creation - this could be moved to an event or a method to encapsulate the logic
     const hostChef = chefs.find(chef => chef._id.toString() == newHostChefId.toString());
-    await this.actionService.createGameAsync(existingGame, hostChef, user);
-    return { game, chef: chefs[hostChefIndex] };
+    await this.actionService.createGameAsync(savedNewGame, hostChef, user);
+    return { game: savedNewGame, chef: chefs[hostChefIndex] };
   }
 
   /**

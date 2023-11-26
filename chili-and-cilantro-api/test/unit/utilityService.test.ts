@@ -47,6 +47,35 @@ describe('UtilityService', () => {
       expect(shuffledArray.every((element) => array.includes(element))).toBe(true);
       expect(array.every((element) => shuffledArray.includes(element))).toBe(true);
     });
+    it('should call swap the correct number of times when shuffling an array', () => {
+      const testArray = [1, 2, 3, 4, 5];
+      const swapSpy = jest.spyOn(UtilityService, 'swapElements');
+
+      UtilityService.shuffleArray(testArray);
+
+      // The number of swaps should be equal to the length of the array - 1
+      expect(swapSpy).toHaveBeenCalledTimes(testArray.length - 1);
+
+      swapSpy.mockRestore();
+    });
+  });
+  describe('swapElements', () => {
+    it('should swap elements in-place', () => {
+      const testArray = [1, 2, 3, 4, 5];
+      const originalArray = [...testArray]; // Copy to compare later
+
+      // Swap two elements
+      UtilityService.swapElements(testArray, 0, 4); // Swapping first and last elements
+
+      // Check if the swap was in-place
+      expect(testArray[0]).toBe(originalArray[4]);
+      expect(testArray[4]).toBe(originalArray[0]);
+
+      // Check if other elements remain unchanged
+      for (let i = 1; i < testArray.length - 1; i++) {
+        expect(testArray[i]).toBe(originalArray[i]);
+      }
+    });
   });
   describe('makeHand', () => {
     it('should make a hand with the correct number of each type of card', () => {

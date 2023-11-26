@@ -1,6 +1,6 @@
 import { Schema } from 'mongoose';
 import { faker } from '@faker-js/faker';
-import { Action, CardType, ChefState, ICreateGameAction, ICreateGameDetails, IExpireGameAction, IExpireGameDetails, IJoinGameAction, IJoinGameDetails, IMessageAction, IMessageDetails, IPassAction, IPassDetails, IPlaceCardAction, IStartBiddingAction, IStartBiddingDetails, IStartGameAction, IStartGameDetails } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { constants, Action, CardType, ChefState, ICreateGameAction, ICreateGameDetails, IExpireGameAction, IExpireGameDetails, IJoinGameAction, IJoinGameDetails, IMessageAction, IMessageDetails, IPassAction, IPassDetails, IPlaceCardAction, IStartBiddingAction, IStartBiddingDetails, IStartGameAction, IStartGameDetails } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { UtilityService } from '../../src/services/utility';
 
 export function generateCreateGameAction(gameId: Schema.Types.ObjectId, chefId: Schema.Types.ObjectId, userId: Schema.Types.ObjectId): ICreateGameAction {
@@ -11,7 +11,7 @@ export function generateCreateGameAction(gameId: Schema.Types.ObjectId, chefId: 
     userId: userId,
     type: Action.CREATE_GAME,
     details: {} as ICreateGameDetails,
-    round: -1,
+    round: constants.NONE,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
   }
@@ -25,7 +25,7 @@ export function generateJoinGameAction(gameId: Schema.Types.ObjectId, chefId: Sc
     userId: userId,
     type: Action.JOIN_GAME,
     details: {} as IJoinGameDetails,
-    round: -1,
+    round: constants.NONE,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
   }
@@ -39,7 +39,7 @@ export function generateStartGameAction(gameId: Schema.Types.ObjectId, chefId: S
     userId: userId,
     type: Action.START_GAME,
     details: {} as IStartGameDetails,
-    round: -1,
+    round: constants.NONE,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
   }
@@ -53,7 +53,7 @@ export function generateExpireGameAction(gameId: Schema.Types.ObjectId, chefId: 
     userId: userId,
     type: Action.EXPIRE_GAME,
     details: {} as IExpireGameDetails,
-    round: -1,
+    round: constants.NONE,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
   }
@@ -69,7 +69,7 @@ export function generateSendMessageAction(gameId: Schema.Types.ObjectId, chefId:
     details: {
       message: message,
     } as IMessageDetails,
-    round: -1,
+    round: constants.NONE,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
   }

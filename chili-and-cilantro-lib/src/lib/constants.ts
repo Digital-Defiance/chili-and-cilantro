@@ -26,6 +26,8 @@ export const MAX_HAND_SIZE = 4;
 export const CHILI_PER_HAND = 1;
 export const ROUNDS_TO_WIN = 2;
 
+export const NONE = -1;
+
 export default {
   CHILI_PER_HAND,
   GAME_CODE_LENGTH,
@@ -45,4 +47,5 @@ export default {
   MIN_PASSWORD_LENGTH,
   MULTILINGUAL_STRING_REGEX,
   ROUNDS_TO_WIN,
+  NONE: NONE,
 };

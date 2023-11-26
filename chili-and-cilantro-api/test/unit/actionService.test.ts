@@ -4,6 +4,7 @@ import { IDatabase } from '../../src/interfaces/database';
 import { generateGame } from '../fixtures/game';
 import { generateCreateGameAction, generateExpireGameAction, generateJoinGameAction, generatePassAction, generatePlaceCardAction, generateSendMessageAction, generateStartBiddingAction, generateStartGameAction } from '../fixtures/action';
 import {
+  constants,
   IAction,
   IGame,
   IChef,
@@ -98,7 +99,7 @@ describe('ActionService', () => {
         userId: hostUser._id,
         type: Action.CREATE_GAME,
         details: {},
-        round: -1,
+        round: constants.NONE,
       });
       expect(result.gameId).toEqual(mockCreateGameAction.gameId);
       expect(result.chefId).toEqual(mockCreateGameAction.chefId);
@@ -135,7 +136,7 @@ describe('ActionService', () => {
         userId: hostUser._id,
         type: Action.JOIN_GAME,
         details: {},
-        round: -1,
+        round: constants.NONE,
       });
       expect(result.gameId).toEqual(mockJoinGameAction.gameId);
       expect(result.chefId).toEqual(mockJoinGameAction.chefId);
@@ -172,7 +173,7 @@ describe('ActionService', () => {
         userId: hostUser._id,
         type: Action.START_GAME,
         details: {},
-        round: -1,
+        round: constants.NONE,
       });
       expect(result.gameId).toEqual(mockStartGameAction.gameId);
       expect(result.chefId).toEqual(mockStartGameAction.chefId);
@@ -209,7 +210,7 @@ describe('ActionService', () => {
         userId: hostUser._id,
         type: Action.EXPIRE_GAME,
         details: {},
-        round: -1,
+        round: constants.NONE,
       });
       expect(result.gameId).toEqual(mockExpireGameAction.gameId);
       expect(result.chefId).toEqual(mockExpireGameAction.chefId);
@@ -249,7 +250,7 @@ describe('ActionService', () => {
         details: {
           message: message,
         },
-        round: -1,
+        round: constants.NONE,
       });
       expect(result.gameId).toEqual(mockSendMessageAction.gameId);
       expect(result.chefId).toEqual(mockSendMessageAction.chefId);
