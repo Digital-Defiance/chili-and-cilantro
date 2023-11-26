@@ -56,20 +56,23 @@ describe('GameService', () => {
     let mockPlayerService;
     let mockGameModel;
     let existingGame;
+    let newGameId;
+    let newGame;
     let user;
     let chef;
     let mockChefs;
 
     beforeEach(() => {
       gameId = new Schema.Types.ObjectId('aaaaaaaaaaa');
+      newGameId = new Schema.Types.ObjectId('bbbbbbbbbbb');
       user = generateUser();
       chef = generateChef(true, gameId, user._id);
-      existingGame = generateGame(gameId, user._id, chef._id, true);
       mockChefs = [
         chef,
         generateChef(false, gameId),
         generateChef(false, gameId),
       ];
+      existingGame = generateGame(gameId, user._id, chef._id, true, { chefIds: mockChefs.map((c) => c._id) });
       const newChef = generateChef(true, gameId, user._id);
       mockChefService = {
         getGameChefsByGameAsync: jest.fn().mockResolvedValue(mockChefs),
@@ -77,23 +80,20 @@ describe('GameService', () => {
       };
       mockActionService = { createGameAsync: jest.fn() };
       mockPlayerService = {};
+      newGame = generateGame(newGameId, user._id, newChef._id, true);
       const database = new Database();
       mockGameModel = database.getModel<IGame>(ModelName.Game);
-      mockGameModel.prototype.save = jest.fn().mockResolvedValue(generateGame(gameId, user._id, newChef._id, true));
+      mockGameModel.prototype.save = jest.fn().mockResolvedValue(newGame);
       gameService = new GameService(mockGameModel, mockActionService, mockChefService, mockPlayerService);
     });
 
     it('should create a new game from an existing game', async () => {
-
-      // Setup mocks and spies
-      mockGameModel.prototype.save.mockResolvedValue(/* new game object */);
-
       // Call the method
       const result = await gameService.createNewGameFromExistingAsync(existingGame, user);
 
       // Assertions
       expect(mockChefService.getGameChefsByGameAsync).toHaveBeenCalledWith(existingGame);
-      expect(mockChefService.newChefFromExisting).toHaveBeenCalledTimes(mockChefs.length);
+      expect(mockChefService.newChefFromExisting).toHaveBeenCalledTimes(existingGame.chefIds.length);
       expect(mockGameModel.prototype.save).toHaveBeenCalled();
       expect(result).toHaveProperty('game');
       expect(result).toHaveProperty('chef');
@@ -118,7 +118,7 @@ describe('GameService', () => {
       sinon.restore();
     });
 
-    it('should create a new game from an existing game successfully', async () => {
+    it('should be able to perform the create game from existing game actions within a transaction', async () => {
       // arrange
       sinon.stub(gameService, 'getGameByIdOrThrowAsync').resolves(mockExistingGame);
       sinon.stub(gameService, 'withTransaction').callsFake(mockedWithTransactionAsync);
