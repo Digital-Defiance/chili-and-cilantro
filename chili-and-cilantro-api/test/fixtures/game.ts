@@ -1,12 +1,17 @@
 import { Schema } from 'mongoose';
 import { faker } from '@faker-js/faker';
-import { constants, ChefState, GamePhase, IGame } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { constants, ChefState, GamePhase, IGame, IUser, IChef } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { UtilityService } from '../../src/services/utility';
 import { numberBetween } from '../fixtures/utils';
+import { generateUser } from './user';
+import { generateChef } from './chef';
+import { generateObjectId } from './objectId';
 
-export function generateGame(gameId: Schema.Types.ObjectId, hostUserId: Schema.Types.ObjectId, hostChefId: Schema.Types.ObjectId, withPassword: boolean, overrides?: Object): IGame {
+export function generateGame(withPassword: boolean, overrides?: Object): IGame {
+  const hostChefId = generateObjectId();
+  const hostUserId = generateObjectId();
   return {
-    _id: gameId,
+    _id: generateObjectId(),
     code: UtilityService.generateGameCode(),
     name: faker.lorem.words(3),
     ...withPassword ? { password: faker.internet.password() } : {},
@@ -27,4 +32,20 @@ export function generateGame(gameId: Schema.Types.ObjectId, hostUserId: Schema.T
     updatedAt: faker.date.past(),
     ...overrides ? overrides : {}
   };
+}
+
+export function generateChefGameUser(withPassword: boolean, numAdditionalChefs = 0, overrides?: { user?: Object, chef?: Object, game?: Object }): { user: IUser, chef: IChef, game: IGame, additionalChefs: IChef[] } {
+  const gameId = generateObjectId();
+  const user = generateUser(overrides?.user);
+  const chef = generateChef({ gameId, host: true, userId: user._id, ...overrides?.chef });
+  const additionalChefs = Array.from({ length: numAdditionalChefs }, () => generateChef({ gameId, userId: user._id }));
+  const chefIds = [chef._id, ...additionalChefs.map(c => c._id)];
+  const game = generateGame(withPassword, {
+    _id: gameId,
+    hostUserId: user._id,
+    hostChefId: chef._id,
+    chefIds: chefIds,
+    ...overrides?.game
+  });
+  return { user, chef, game, additionalChefs };
 }

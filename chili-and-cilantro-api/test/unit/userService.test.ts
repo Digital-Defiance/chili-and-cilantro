@@ -250,7 +250,7 @@ describe("userService", () => {
     });
     it("should return the user if the user is found", async () => {
       const auth0Id = `auth0Id|${faker.string.uuid()}`;
-      const user = generateUser(auth0Id);
+      const user = generateUser({ auth0Id });
       sinon.stub(userModel, "findOne").returns(user);
       expect.assertions(1);
       userService.getUserByAuth0IdOrThrow(auth0Id).then((result) => {

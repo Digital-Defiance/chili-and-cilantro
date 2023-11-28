@@ -11,7 +11,8 @@ import { InvalidUserNameError } from '../../src/errors/invalidUserName';
 import { generateUser } from '../fixtures/user';
 import { generateString } from '../fixtures/utils';
 import { generateChef } from '../fixtures/chef';
-import { generateGame } from '../fixtures/game';
+import { generateChefGameUser, generateGame } from '../fixtures/game';
+import { generateObjectId } from '../fixtures/objectId';
 import { mockedWithTransactionAsync } from '../fixtures/transactionManager';
 import { UtilityService } from '../../src/services/utility';
 import { GameFullError } from '../../src/errors/gameFull';
@@ -40,10 +41,11 @@ describe('GameService', () => {
 
     beforeEach(() => {
       // Setup initial valid parameters
-      gameId = new Schema.Types.ObjectId('aaaaaaaaaaaa');
-      user = generateUser();
-      chef = generateChef(true, gameId, user._id);
-      game = generateGame(gameId, user._id, chef._id, true);
+      gameId = generateObjectId();
+      const generated = generateChefGameUser(true);
+      user = generated.user;
+      chef = generated.chef;
+      game = generated.game;
       userName = generateString(constants.MIN_USER_NAME_LENGTH, constants.MAX_USER_NAME_LENGTH);
     });
 
@@ -90,7 +92,7 @@ describe('GameService', () => {
       // arrange
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
       sinon.stub(gameService, 'getGameChefNamesAsync').resolves([chef.name]);
-      game = generateGame(gameId, user._id, chef._id, true, { currentPhase: GamePhase.SETUP });
+      game = generateGame(true, { gameId, hostUserId: user._id, hostChefId: chef._id, currentPhase: GamePhase.SETUP });
 
       // act/assert
       expect(gameService.validateJoinGameOrThrowAsync(game, user, userName, game.password))
@@ -153,7 +155,7 @@ describe('GameService', () => {
       sinon.stub(gameService, 'getGameChefNamesAsync').resolves([chef.name]);
 
       for (let i = 1; i <= constants.MAX_CHEFS; i++) {
-        game.chefIds.push(new Schema.Types.ObjectId(faker.string.uuid()));
+        game.chefIds.push(generateObjectId());
       }
       // act/assert
       await expect(gameService.validateJoinGameOrThrowAsync(game, user, userName, game.password))
@@ -179,18 +181,18 @@ describe('GameService', () => {
       mockActionService = { joinGameAsync: jest.fn() };
       mockPlayerService = {};
       gameService = new GameService(gameModel, mockActionService, mockChefService, mockPlayerService);
-      gameId = new Schema.Types.ObjectId('aaaaaaaaaaaa');
-      user = generateUser();
-      chef = generateChef(true, gameId, user._id);
-      game = generateGame(gameId, user._id, chef._id, true);
+      gameId = generateObjectId();
+      const generated = generateChefGameUser(true);
+      user = generated.user;
+      chef = generated.chef;
+      game = generated.game;
       userName = "testUser";
     });
 
     it('should successfully join a game', async () => {
       // Setup mocks
-      const mockChef = { _id: 'chef123', /* other chef properties */ };
+      const mockChef = generateChef({ host: false, gameId, userId: user._id });
       mockChefService.newChefAsync.mockResolvedValue(mockChef);
-      game.chefIds = [];
       game.save = jest.fn().mockResolvedValue(game);
 
       // Call the method
@@ -207,11 +209,11 @@ describe('GameService', () => {
   describe('performJoinGameAsync', () => {
     let gameId, mockChef, mockGame, mockUser, userName;
     beforeEach(() => {
-      gameId = new Schema.Types.ObjectId('aaaaaaaaaaaa');
+      gameId = generateObjectId();
+      const generated = generateChefGameUser(true);
       mockUser = generateUser();
-      mockChef = generateChef(true, gameId, mockUser._id);
-      mockGame = generateGame(gameId, mockUser._id, mockChef._id, true);
-      userName = generateString(constants.MIN_USER_NAME_LENGTH, constants.MAX_USER_NAME_LENGTH);
+      mockChef = generated.chef;
+      mockGame = generated.game;
     });
     afterEach(() => {
       // Restore all mocks
@@ -226,7 +228,7 @@ describe('GameService', () => {
       sinon.stub(gameService, 'joinGameAsync').resolves({ game: mockGame, chef: mockChef });
 
       // act
-      const result = await gameService.performJoinGameAsync(mockGame.code, mockGame.password, mockUser, userName);
+      const result = await gameService.performJoinGameAsync(mockGame.code, mockGame.password, mockUser, mockUser.userName);
 
       // assert
       expect(result.game).toBe(mockGame);

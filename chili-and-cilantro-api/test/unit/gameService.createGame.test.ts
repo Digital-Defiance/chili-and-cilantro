@@ -9,12 +9,13 @@ import { constants, IGame, ModelName, IChef } from '@chili-and-cilantro/chili-an
 import { AlreadyJoinedOtherError } from '../../src/errors/alreadyJoinedOther';
 import { InvalidUserNameError } from '../../src/errors/invalidUserName';
 import { generateUser } from '../fixtures/user';
+import { generateObjectId } from '../fixtures/objectId';
 import { InvalidGameNameError } from 'chili-and-cilantro-api/src/errors/invalidGameName';
 import { InvalidGamePasswordError } from 'chili-and-cilantro-api/src/errors/invalidGamePassword';
 import { InvalidGameParameterError } from 'chili-and-cilantro-api/src/errors/invalidGameParameter';
 import { generateString, numberBetween } from '../fixtures/utils';
 import { generateChef } from '../fixtures/chef';
-import { generateGame } from '../fixtures/game';
+import { generateGame, generateChefGameUser } from '../fixtures/game';
 import { generateCreateGameAction } from '../fixtures/action';
 import { mockedWithTransactionAsync } from '../fixtures/transactionManager';
 import { UtilityService } from 'chili-and-cilantro-api/src/services/utility';
@@ -198,21 +199,21 @@ describe('GameService', () => {
   });
 
   describe('createGameAsync', () => {
-    let mockUser, userName, gameName, password, maxChefs, mockGame, mockChef, mockCreateGameAction;
+    let mockUser, gameUserName, gameName, password, maxChefs, mockGame, mockChef, mockCreateGameAction;
 
     beforeEach(() => {
       // Setup initial valid parameters
-      mockUser = generateUser();
-      userName = generateString(constants.MIN_USER_NAME_LENGTH, constants.MAX_USER_NAME_LENGTH);
+      gameUserName = generateString(constants.MIN_USER_NAME_LENGTH, constants.MAX_USER_NAME_LENGTH);
       gameName = generateString(constants.MIN_GAME_NAME_LENGTH, constants.MAX_GAME_NAME_LENGTH);
       password = generateString(constants.MIN_GAME_PASSWORD_LENGTH, constants.MAX_GAME_PASSWORD_LENGTH);
       maxChefs = numberBetween(constants.MIN_CHEFS, constants.MAX_CHEFS);
 
       // Mock game and chef objects to be returned by the respective service calls
-      const gameId = new Schema.Types.ObjectId('aaaaaaaaaaaa');
-      mockChef = generateChef(true, gameId, mockUser._id);
-      mockGame = generateGame(gameId, mockUser._id, mockChef._id, true);
-      mockCreateGameAction = generateCreateGameAction(gameId, mockChef._id, mockUser._id);
+      const generated = generateChefGameUser(true);
+      mockGame = generated.game;
+      mockChef = generated.chef;
+      mockUser = generated.user;
+      mockCreateGameAction = generateCreateGameAction(mockGame._id, mockChef._id, mockUser._id);
 
       // Mock dependencies
       sinon.stub(gameService, 'generateNewGameCodeAsync').resolves(mockGame.code);
@@ -228,7 +229,7 @@ describe('GameService', () => {
 
     it('creates a game successfully with valid parameters', async () => {
       // act
-      const result = await gameService.createGameAsync(mockUser, userName, gameName, password, maxChefs);
+      const result = await gameService.createGameAsync(mockUser, gameUserName, gameName, password, maxChefs);
 
       // assert
       expect(result.game).toEqual(mockGame);
@@ -236,7 +237,7 @@ describe('GameService', () => {
       expect(result.action).toEqual(mockCreateGameAction);
       expect(gameService.generateNewGameCodeAsync.called).toBeTruthy();
       expect(gameService.GameModel.create.calledWith(sinon.match.has('code', mockGame.code))).toBeTruthy();
-      expect(gameService.chefService.newChefAsync.calledWith(mockGame, mockUser, userName, true)).toBeTruthy();
+      expect(gameService.chefService.newChefAsync.calledWith(mockGame, mockUser, gameUserName, true)).toBeTruthy();
       expect(gameService.actionService.createGameAsync.calledWith(mockGame, mockChef, mockUser)).toBeTruthy();
     });
   });
@@ -255,9 +256,7 @@ describe('GameService', () => {
     });
     it('should create a game successfully', async () => {
       // arrange
-      const gameId = new Schema.Types.ObjectId('aaaaaaaaaaaa');
-      const mockChef = generateChef(true, gameId, mockUser._id);
-      const mockGame = generateGame(gameId, mockUser._id, mockChef._id, true);
+      const { game: mockGame, chef: mockChef, user: mockUser } = generateChefGameUser(true);
       sinon.stub(gameService, 'withTransaction').callsFake(mockedWithTransactionAsync);
       sinon.stub(gameService, 'validateCreateGameOrThrowAsync').resolves();
       sinon.stub(gameService, 'generateNewGameCodeAsync').resolves(UtilityService.generateGameCode());

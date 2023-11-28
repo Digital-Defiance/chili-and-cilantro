@@ -2,17 +2,19 @@ import { Schema } from 'mongoose';
 import { faker } from '@faker-js/faker';
 import { ChefState, IChef } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { UtilityService } from '../../src/services/utility';
+import { generateObjectId } from './objectId';
 
-export function generateChef(host: boolean, gameId?: Schema.Types.ObjectId, userId?: Schema.Types.ObjectId): IChef {
+export function generateChef(overrides?: Object): IChef {
   return {
-    _id: new Schema.Types.ObjectId('aaaaaaaaaaaa'),
-    gameId: gameId ?? new Schema.Types.ObjectId('bbbbbbbbbbbb'),
+    _id: generateObjectId(),
+    gameId: generateObjectId(),
     name: faker.person.firstName(),
     hand: UtilityService.makeHand(),
     placedCards: [],
     lostCards: [],
-    userId: userId ?? new Schema.Types.ObjectId('cccccccccccc'),
+    userId: generateObjectId(),
     state: ChefState.LOBBY,
-    host: host,
+    host: false,
+    ...overrides,
   };
 }

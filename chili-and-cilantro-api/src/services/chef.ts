@@ -36,22 +36,22 @@ export class ChefService {
 
   /**
    * Creates a new chef in a new game from an existing chef in a previous game
-   * @param game The game the chef is joining
-   * @param chef The chef to copy
+   * @param newGame The game the chef is joining
+   * @param existingChef The chef to copy
    * @param newChefId The id of the chef to create. If not provided, a new id will be generated
    * @returns A new chef document
    */
-  public async newChefFromExisting(game: IGame & Document, chef: IChef & Document, newChefId?: ObjectId): Promise<IChef & Document> {
+  public async newChefFromExisting(newGame: IGame & Document, existingChef: IChef & Document, newChefId?: ObjectId): Promise<IChef & Document> {
     const newChef = await this.ChefModel.create({
       _id: newChefId ?? new ObjectId(),
-      gameId: game._id,
-      name: chef.name,
-      userId: chef.userId,
+      gameId: newGame._id,
+      name: existingChef.name,
+      userId: existingChef.userId,
       hand: UtilityService.makeHand(),
       placedCards: [],
       lostCards: [],
       state: ChefState.LOBBY,
-      host: chef.host,
+      host: existingChef.host,
     });
     return newChef;
   }

@@ -150,7 +150,7 @@ describe('JwtService', () => {
       mockRequest.headers.authorization = 'Bearer valid-token';
 
       // mock userservice getUserByAuth0IdOrThrow to return a mock user
-      const mockUser = generateUser(mockAuth0User.user_id);
+      const mockUser = generateUser({ auth0Id: mockAuth0User.user_id });
       const mockUserDocument = {
         ...mockUser,
         isModified: jest.fn().mockReturnValue(false),
@@ -263,7 +263,7 @@ describe('JwtService', () => {
       });
 
       // Mock the user service to return a user
-      const mockUser = generateUser(mockDecodedToken.sub);
+      const mockUser = generateUser({ auth0Id: mockDecodedToken.sub });
       const mockUserDocument = {
         ...mockUser,
         isModified: jest.fn().mockReturnValue(false),

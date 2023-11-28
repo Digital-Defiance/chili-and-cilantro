@@ -1,12 +1,14 @@
 import mongoose, { Schema } from 'mongoose';
+import { generateObjectId } from '../fixtures/objectId';
 import { generateChef } from '../fixtures/chef';
-import { generateGame } from '../fixtures/game';
+import { generateGame, generateChefGameUser } from '../fixtures/game';
 import { generateUser } from '../fixtures/user';
 import { UtilityService } from '../../src/services/utility';
 import { ChefService } from '../../src/services/chef';
 import { faker } from '@faker-js/faker';
 import { ChefState } from '../../../chili-and-cilantro-lib/src';
 import { NotInGameError } from 'chili-and-cilantro-api/src/errors/notInGame';
+import constants from 'chili-and-cilantro-lib/src/lib/constants';
 
 // Mocks
 jest.mock('mongoose', () => {
@@ -35,10 +37,11 @@ describe('ChefService', () => {
   describe('newChefAsync', () => {
     it('should create a new chef with a hand of cards', async () => {
       // Arrange
-      const gameId = new Schema.Types.ObjectId('aaaaaaaaaaa');
-      const mockUser = generateUser();
-      const mockChef = generateChef(true, gameId, mockUser._id);
-      const mockGame = generateGame(gameId, mockUser._id, mockChef._id, true);
+      const {
+        game: mockGame,
+        user: mockUser,
+        chef: mockChef,
+      } = generateChefGameUser(true);
       const userName = faker.internet.userName();
       const host = true;
 
@@ -46,7 +49,13 @@ describe('ChefService', () => {
       mockChefModel.create.mockResolvedValueOnce(mockChef);
 
       // Act
-      const result = await chefService.newChefAsync(mockGame, mockUser, userName, host, mockChef._id);
+      const result = await chefService.newChefAsync(
+        mockGame,
+        mockUser,
+        userName,
+        host,
+        mockChef._id
+      );
 
       // Assert
       expect(mockChefModel.create).toHaveBeenCalledWith({
@@ -63,12 +72,13 @@ describe('ChefService', () => {
       expect(result).toBeDefined();
       // Add more assertions as needed
     });
-    it('should generate an id if one is not provided', async () => {
+    it('should generate a new chef id if one is not provided', async () => {
       // Arrange
-      const gameId = new Schema.Types.ObjectId('aaaaaaaaaaa');
-      const mockUser = generateUser();
-      const mockChef = generateChef(true, gameId, mockUser._id);
-      const mockGame = generateGame(gameId, mockUser._id, mockChef._id, true);
+      const {
+        user: mockUser,
+        chef: mockChef,
+        game: mockGame,
+      } = generateChefGameUser(true);
       const userName = faker.internet.userName();
       const host = true;
 
@@ -76,19 +86,26 @@ describe('ChefService', () => {
       mockChefModel.create.mockResolvedValueOnce(mockChef);
 
       // Act
-      const result = await chefService.newChefAsync(mockGame, mockUser, userName, host);
+      const result = await chefService.newChefAsync(
+        mockGame,
+        mockUser,
+        userName,
+        host
+      );
 
       // Assert
-      expect(mockChefModel.create).toHaveBeenCalledWith(expect.objectContaining({
-        gameId: mockGame._id,
-        name: userName,
-        userId: mockUser._id,
-        hand: expectedHand,
-        placedCards: [],
-        lostCards: [],
-        state: ChefState.LOBBY,
-        host: host,
-      }));
+      expect(mockChefModel.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          gameId: mockGame._id,
+          name: userName,
+          userId: mockUser._id,
+          hand: expectedHand,
+          placedCards: [],
+          lostCards: [],
+          state: ChefState.LOBBY,
+          host: host,
+        })
+      );
       expect(result).toBeDefined();
       expect(result._id).toBeDefined();
       expect(result._id).toBeInstanceOf(Schema.Types.ObjectId);
@@ -97,30 +114,33 @@ describe('ChefService', () => {
   describe('newChefFromExisting', () => {
     it('should create a new chef from an existing chef', async () => {
       // Arrange
-      const gameId = new Schema.Types.ObjectId('aaaaaaaaaaa');
-      const existingChefId = new Schema.Types.ObjectId('bbbbbbbbbbbb');
-      const newChefId = new Schema.Types.ObjectId('ccccccccccc');
-      const mockUser = generateUser();
-      const existingChef = generateChef(true, gameId, mockUser._id);
-      const mockGame = generateGame(gameId, mockUser._id, existingChefId, true);
+      const {
+        chef: existingChef,
+        game: existingGame,
+        user: existingUser,
+      } = generateChefGameUser(true);
       const expectedHand = UtilityService.makeHand();
-
-      mockChefModel.create.mockResolvedValueOnce({
-        ...existingChef,
-        _id: newChefId,
-        hand: expectedHand,
-        placedCards: [],
-        lostCards: [],
-        state: ChefState.LOBBY,
+      const { chef: newChef, game: newGame } = generateChefGameUser(true, 0, {
+        chef: {
+          userId: existingUser._id,
+          name: existingChef.name,
+          hand: expectedHand,
+        },
       });
 
+      mockChefModel.create.mockResolvedValueOnce(newChef);
+
       // Act
-      const result = await chefService.newChefFromExisting(mockGame, existingChef, newChefId);
+      const result = await chefService.newChefFromExisting(
+        newGame,
+        existingChef,
+        newChef._id
+      );
 
       // Assert
       expect(mockChefModel.create).toHaveBeenCalledWith({
-        _id: newChefId,
-        gameId: mockGame._id,
+        _id: newChef._id,
+        gameId: newGame._id,
         name: existingChef.name,
         userId: existingChef.userId,
         hand: expectedHand,
@@ -130,48 +150,53 @@ describe('ChefService', () => {
         host: existingChef.host,
       });
       expect(result).toBeDefined();
-      expect(result._id).toEqual(newChefId);
-      expect(result.gameId).toEqual(gameId);
+      expect(result._id).toEqual(newChef._id);
+      expect(result.gameId).toEqual(newGame._id);
       expect(result.userId).toEqual(existingChef.userId);
       expect(result.hand).toEqual(expectedHand);
       expect(result.state).toEqual(ChefState.LOBBY);
     });
-    it("should generate an id if one is not provided", async () => {
+    it('should make a new chef from existing and generate an id if one is not provided', async () => {
       // Arrange
-      const gameId = new Schema.Types.ObjectId('aaaaaaaaaaa');
-      const existingChefId = new Schema.Types.ObjectId('bbbbbbbbbbbb');
-      const newChefId = new Schema.Types.ObjectId('ccccccccccc');
-      const mockUser = generateUser();
-      const existingChef = generateChef(true, gameId, mockUser._id);
-      const mockGame = generateGame(gameId, mockUser._id, existingChefId, true);
+      const {
+        chef: existingChef,
+        game: existingGame,
+        user: existingUser,
+      } = generateChefGameUser(true);
       const expectedHand = UtilityService.makeHand();
-
-      mockChefModel.create.mockResolvedValueOnce({
-        ...existingChef,
-        _id: newChefId,
-        hand: expectedHand,
-        placedCards: [],
-        lostCards: [],
-        state: ChefState.LOBBY,
+      const { chef: newChef, game: newGame } = generateChefGameUser(true, 0, {
+        chef: {
+          userId: existingUser._id,
+          name: existingChef.name,
+          hand: expectedHand,
+        },
       });
 
+      mockChefModel.create.mockResolvedValueOnce(newChef);
+
       // Act
-      const result = await chefService.newChefFromExisting(mockGame, existingChef);
+      const result = await chefService.newChefFromExisting(
+        newGame,
+        existingChef
+      );
 
       // Assert
-      expect(mockChefModel.create).toHaveBeenCalledWith(expect.objectContaining({
-        gameId: mockGame._id,
-        name: existingChef.name,
-        userId: existingChef.userId,
-        hand: expectedHand,
-        placedCards: [],
-        lostCards: [],
-        state: ChefState.LOBBY,
-        host: existingChef.host,
-      }));
+      expect(mockChefModel.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          gameId: newGame._id,
+          name: existingChef.name,
+          userId: existingChef.userId,
+          hand: expectedHand,
+          placedCards: [],
+          lostCards: [],
+          state: ChefState.LOBBY,
+          host: existingChef.host,
+        })
+      );
       expect(result).toBeDefined();
-      expect(result._id).toEqual(newChefId);
-      expect(result.gameId).toEqual(gameId);
+      expect(result._id).toEqual(newChef._id);
+      expect(result._id).toBeInstanceOf(Schema.Types.ObjectId);
+      expect(result.gameId).toEqual(newGame._id);
       expect(result.userId).toEqual(existingChef.userId);
       expect(result.hand).toEqual(expectedHand);
       expect(result.state).toEqual(ChefState.LOBBY);
@@ -180,11 +205,11 @@ describe('ChefService', () => {
   describe('getGameChefOrThrowAsync', () => {
     it('should return a chef if found', async () => {
       // Arrange
-      const gameId = new Schema.Types.ObjectId('gameid123');
-      const userId = new Schema.Types.ObjectId('userid123');
-      const mockGame = { _id: gameId };
-      const mockUser = { _id: userId };
-      const mockChef = generateChef(true, gameId, userId);
+      const {
+        chef: mockChef,
+        game: mockGame,
+        user: mockUser,
+      } = generateChefGameUser(true);
 
       // mock findOne to have an exec() which returns a chef
       mockChefModel.findOne.mockImplementationOnce(() => {
@@ -194,12 +219,15 @@ describe('ChefService', () => {
       });
 
       // Act
-      const result = await chefService.getGameChefOrThrowAsync(mockGame, mockUser);
+      const result = await chefService.getGameChefOrThrowAsync(
+        mockGame,
+        mockUser
+      );
 
       // Assert
       expect(mockChefModel.findOne).toHaveBeenCalledWith({
-        gameId: gameId,
-        userId: userId,
+        gameId: mockGame._id,
+        userId: mockUser._id,
       });
       expect(result).toBeDefined();
       expect(result).toEqual(mockChef);
@@ -207,8 +235,8 @@ describe('ChefService', () => {
 
     it('should throw NotInGameError if no chef is found', async () => {
       // Arrange
-      const gameId = new Schema.Types.ObjectId('gameid123');
-      const userId = new Schema.Types.ObjectId('userid123');
+      const gameId = generateObjectId();
+      const userId = generateObjectId();
       const mockGame = { _id: gameId };
       const mockUser = { _id: userId };
 
@@ -219,27 +247,31 @@ describe('ChefService', () => {
       });
 
       // Act & Assert
-      await expect(chefService.getGameChefOrThrowAsync(mockGame, mockUser))
-        .rejects
-        .toThrow(NotInGameError);
+      await expect(
+        chefService.getGameChefOrThrowAsync(mockGame, mockUser)
+      ).rejects.toThrow(NotInGameError);
     });
   });
   describe('getGameChefsByGameIdAsync', () => {
     it('should return an array of chefs for a given game ID', async () => {
       // Arrange
-      const gameId = new Schema.Types.ObjectId('gameid123');
+      const gameId = generateObjectId();
       const mockChefs = [
-        generateChef(true, gameId, new Schema.Types.ObjectId('userid123')),
-        generateChef(false, gameId, new Schema.Types.ObjectId('userid456')),
+        generateChef({ host: true, gameId, userId: generateObjectId() }),
+        generateChef({ gameId, userId: generateObjectId() }),
       ];
 
       mockChefModel.find.mockResolvedValueOnce(mockChefs);
 
       // Act
-      const result = await chefService.getGameChefsByGameIdAsync(gameId.toString());
+      const result = await chefService.getGameChefsByGameIdAsync(
+        gameId.toString()
+      );
 
       // Assert
-      expect(mockChefModel.find).toHaveBeenCalledWith({ gameId: gameId.toString() });
+      expect(mockChefModel.find).toHaveBeenCalledWith({
+        gameId: gameId.toString(),
+      });
       expect(result).toBeDefined();
       expect(result).toEqual(mockChefs);
       expect(result.length).toBe(mockChefs.length);
@@ -248,20 +280,25 @@ describe('ChefService', () => {
   describe('getGameChefsByGameAsync', () => {
     it('should return an array of chefs for a given game', async () => {
       // Arrange
-      const gameId = new Schema.Types.ObjectId('gameid123');
-      const mockGame = generateGame(gameId, new Schema.Types.ObjectId('userid123'), new Schema.Types.ObjectId('chefid123'), true);
-      const mockChefs = [
-        generateChef(true, gameId, new Schema.Types.ObjectId('userid123')),
-        generateChef(false, gameId, new Schema.Types.ObjectId('userid456')),
-      ];
+      const {
+        game: mockGame,
+        user: mockUser,
+        chef: mockChef,
+        additionalChefs,
+      } = generateChefGameUser(true, constants.MIN_CHEFS - 1);
+      const mockChefs = [mockChef, ...additionalChefs];
 
-      jest.spyOn(chefService, 'getGameChefsByGameIdAsync').mockResolvedValueOnce(mockChefs);
+      jest
+        .spyOn(chefService, 'getGameChefsByGameIdAsync')
+        .mockResolvedValueOnce(mockChefs);
 
       // Act
       const result = await chefService.getGameChefsByGameAsync(mockGame);
 
       // Assert
-      expect(chefService.getGameChefsByGameIdAsync).toHaveBeenCalledWith(gameId.toString());
+      expect(chefService.getGameChefsByGameIdAsync).toHaveBeenCalledWith(
+        mockGame._id.toString()
+      );
       expect(result).toBeDefined();
       expect(result).toEqual(mockChefs);
       expect(result.length).toBe(mockChefs.length);
