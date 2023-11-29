@@ -77,7 +77,7 @@ describe('GameService', () => {
       ];
       const newChef = generateChef({ host: true, gameId: newGameId, userId: user._id });
       mockChefService = {
-        getGameChefsByGameAsync: jest.fn().mockResolvedValue(mockChefs),
+        getGameChefsByGameOrIdAsync: jest.fn().mockResolvedValue(mockChefs),
         newChefFromExisting: jest.fn().mockResolvedValue(newChef)
       };
       mockActionService = { createGameAsync: jest.fn() };
@@ -94,7 +94,7 @@ describe('GameService', () => {
       const result = await gameService.createNewGameFromExistingAsync(existingGame, user);
 
       // Assertions
-      expect(mockChefService.getGameChefsByGameAsync).toHaveBeenCalledWith(existingGame);
+      expect(mockChefService.getGameChefsByGameOrIdAsync).toHaveBeenCalledWith(existingGame);
       expect(mockChefService.newChefFromExisting).toHaveBeenCalledTimes(existingGame.chefIds.length);
       expect(mockGameModel.prototype.save).toHaveBeenCalled();
       expect(result).toHaveProperty('game');

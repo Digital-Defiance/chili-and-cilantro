@@ -219,7 +219,7 @@ export class GameService extends TransactionManager {
     const newHostChefId = newChefIds[hostChefIndex];
 
     // we need to look up the user id for all chefs in the current game
-    const existingChefs = await this.chefService.getGameChefsByGameAsync(existingGame);
+    const existingChefs = await this.chefService.getGameChefsByGameOrIdAsync(existingGame);
 
     // Create the new Game document without persisting to the database yet
     const newGame = new this.GameModel({
@@ -306,7 +306,7 @@ export class GameService extends TransactionManager {
     const savedGame = await game.save();
     const startAction = await this.actionService.startGameAsync(savedGame);
     // mark all chefs as PLAYING
-    const chefs = await this.chefService.getGameChefsByGameAsync(savedGame);
+    const chefs = await this.chefService.getGameChefsByGameOrIdAsync(savedGame);
     chefs.forEach(chef => {
       chef.state = ChefState.PLAYING;
       chef.save();
@@ -393,7 +393,7 @@ export class GameService extends TransactionManager {
       // TODO: close any sockets for this game
       await this.actionService.expireGameAsync(savedGame);
       // set all chefs to EXPIRED
-      const chefs = await this.chefService.getGameChefsByGameAsync(savedGame);
+      const chefs = await this.chefService.getGameChefsByGameOrIdAsync(savedGame);
       chefs.forEach(chef => {
         chef.state = ChefState.EXPIRED;
         chef.save();
@@ -458,7 +458,7 @@ export class GameService extends TransactionManager {
    * @returns Array of chef names
    */
   public async getGameChefNamesAsync(gameId: string): Promise<string[]> {
-    const chefs = await this.chefService.getGameChefsByGameIdAsync(gameId);
+    const chefs = await this.chefService.getGameChefsByGameOrIdAsync(gameId);
     return chefs.map(chef => chef.name);
   }
 

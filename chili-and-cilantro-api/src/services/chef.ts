@@ -75,22 +75,16 @@ export class ChefService {
 
   /**
    * Gets all chefs in a game
-   * @param gameId The id of the game the chef is in
+   * @param gameOrId The game or id of the game the chef is in
    * @returns An array of chef documents
    */
-  public async getGameChefsByGameIdAsync(gameId: string): Promise<(IChef & Document)[]> {
+  public async getGameChefsByGameOrIdAsync(gameOrId: string | IGame): Promise<(IChef & Document)[]> {
+    // verify that gameOrId is either a string or an IGame by checking whether there's an _id property
+    const hasId = (obj: any): obj is IGame => {
+      return obj._id !== undefined;
+    }
+    const gameId = hasId(gameOrId) ? gameOrId._id.toString() : gameOrId;
     const chefs = await this.ChefModel.find({ gameId: gameId });
-    return chefs;
-
-  }
-
-  /**
-   * Gets all chefs in a game
-   * @param game The game the chef is in
-   * @returns An array of chef documents
-   */
-  public async getGameChefsByGameAsync(game: IGame): Promise<(IChef & Document)[]> {
-    const chefs = await this.getGameChefsByGameIdAsync(game._id.toString());
     return chefs;
   }
 }

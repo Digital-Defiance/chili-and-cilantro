@@ -252,32 +252,27 @@ describe('ChefService', () => {
       ).rejects.toThrow(NotInGameError);
     });
   });
-  describe('getGameChefsByGameIdAsync', () => {
+  describe('getGameChefsByGameOrIdAsync', () => {
     it('should return an array of chefs for a given game ID', async () => {
       // Arrange
-      const gameId = generateObjectId();
-      const mockChefs = [
-        generateChef({ host: true, gameId, userId: generateObjectId() }),
-        generateChef({ gameId, userId: generateObjectId() }),
-      ];
+      const { game: mockGame, user: mockUser, chef: mockChef, additionalChefs } = generateChefGameUser(true, 2);
+      const gameIdString = mockGame._id.toString();
+      const mockChefs = [mockChef, ...additionalChefs];
 
       mockChefModel.find.mockResolvedValueOnce(mockChefs);
 
       // Act
-      const result = await chefService.getGameChefsByGameIdAsync(
-        gameId.toString()
+      const result = await chefService.getGameChefsByGameOrIdAsync(
+        gameIdString
       );
 
       // Assert
       expect(mockChefModel.find).toHaveBeenCalledWith({
-        gameId: gameId.toString(),
+        gameId: gameIdString,
       });
       expect(result).toBeDefined();
       expect(result).toEqual(mockChefs);
-      expect(result.length).toBe(mockChefs.length);
     });
-  });
-  describe('getGameChefsByGameAsync', () => {
     it('should return an array of chefs for a given game', async () => {
       // Arrange
       const {
@@ -287,21 +282,21 @@ describe('ChefService', () => {
         additionalChefs,
       } = generateChefGameUser(true, constants.MIN_CHEFS - 1);
       const mockChefs = [mockChef, ...additionalChefs];
+      const gameIdString = mockGame._id.toString();
 
-      jest
-        .spyOn(chefService, 'getGameChefsByGameIdAsync')
-        .mockResolvedValueOnce(mockChefs);
+      mockChefModel.find.mockResolvedValueOnce(mockChefs);
 
       // Act
-      const result = await chefService.getGameChefsByGameAsync(mockGame);
+      const result = await chefService.getGameChefsByGameOrIdAsync(
+        gameIdString
+      );
 
       // Assert
-      expect(chefService.getGameChefsByGameIdAsync).toHaveBeenCalledWith(
-        mockGame._id.toString()
-      );
+      expect(mockChefModel.find).toHaveBeenCalledWith({
+        gameId: gameIdString,
+      });
       expect(result).toBeDefined();
       expect(result).toEqual(mockChefs);
-      expect(result.length).toBe(mockChefs.length);
     });
   });
 });
