@@ -7,7 +7,7 @@ import { generateUser } from './user';
 import { generateChef } from './chef';
 import { generateObjectId } from './objectId';
 
-export function generateGame(withPassword: boolean, overrides?: Object): IGame {
+export function generateGame(withPassword: boolean, overrides?: Object): IGame & { save: jest.Mock } {
   const hostChefId = generateObjectId();
   const hostUserId = generateObjectId();
   const game = {

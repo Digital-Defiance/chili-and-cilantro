@@ -3,7 +3,7 @@ import { Schema } from 'mongoose';
 import { faker } from '@faker-js/faker';
 import { generateObjectId } from './objectId';
 
-export function generateUser(overrides?: Object): IUser {
+export function generateUser(overrides?: Object): IUser & { save: jest.Mock } {
   const id = generateObjectId();
   const user = {
     _id: id,

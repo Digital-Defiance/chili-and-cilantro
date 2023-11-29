@@ -4,7 +4,7 @@ import { ChefState, IChef } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { UtilityService } from '../../src/services/utility';
 import { generateObjectId } from './objectId';
 
-export function generateChef(overrides?: Object): IChef {
+export function generateChef(overrides?: Object): IChef & { save: jest.Mock } {
   const chef = {
     _id: generateObjectId(),
     gameId: generateObjectId(),

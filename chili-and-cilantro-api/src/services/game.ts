@@ -413,7 +413,9 @@ export class GameService extends TransactionManager {
       const cutoffDate = new Date();
       cutoffDate.setMinutes(cutoffDate.getMinutes() - constants.MAX_GAME_AGE_WITHOUT_ACTIVITY_IN_MINUTES);
       const games = await this.GameModel.find({ currentPhase: { $ne: GamePhase.GAME_OVER }, lastModified: { $lt: cutoffDate } });
-      this.expireGamesOrThrowAsync(games);
+      if (games && games.length > 0) {
+        this.expireGamesOrThrowAsync(games);
+      }
     });
   }
 
