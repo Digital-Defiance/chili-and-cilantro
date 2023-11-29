@@ -1,26 +1,13 @@
-import { Schema } from 'mongoose';
-import sinon from 'sinon';
 import { Database } from '../../src/services/database';
-import { ActionService } from '../../src/services/action';
-import { ChefService } from '../../src/services/chef';
 import { GameService } from '../../src/services/game';
-import { PlayerService } from '../../src/services/player';
-import { constants, IGame, ModelName, IChef, GamePhase } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { AlreadyJoinedOtherError } from '../../src/errors/alreadyJoinedOther';
-import { InvalidUserNameError } from '../../src/errors/invalidUserName';
+import { IGame, ModelName, GamePhase } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { generateStartGameAction } from '../fixtures/action';
-import { generateUser } from '../fixtures/user';
-import { generateString } from '../fixtures/utils';
-import { generateChef } from '../fixtures/chef';
 import { generateChefGameUser, generateGame } from '../fixtures/game';
 import { generateObjectId } from '../fixtures/objectId';
 import { mockedWithTransactionAsync } from '../fixtures/transactionManager';
-import { UtilityService } from '../../src/services/utility';
-import { GameFullError } from '../../src/errors/gameFull';
-import { faker } from '@faker-js/faker';
-import { GamePasswordMismatchError } from '../../src/errors/gamePasswordMismatch';
-import { UsernameInUseError } from '../../src/errors/usernameInUse';
 import { GameInProgressError } from '../../src/errors/gameInProgress';
+import { NotHostError } from '../../src/errors/notHost';
+import { NotEnoughChefsError } from '../../src/errors/notEnoughChefs';
 
 describe("gameService startGame", () => {
   describe('performStartGameAsync', () => {
@@ -67,7 +54,7 @@ describe("gameService startGame", () => {
     });
   });
   describe('validateStartGameOrThrowAsync', () => {
-    let gameModel, gameService, gameId, game, chef, user, userId, gameCode, mockActionService, mockChefService, mockPlayerService;
+    let gameModel, gameService, gameId, game, chef, user, additionalChefs, userId, gameCode, mockActionService, mockChefService, mockPlayerService;
 
     beforeEach(() => {
       const database = new Database();
@@ -79,20 +66,37 @@ describe("gameService startGame", () => {
       mockChefService = {};
       gameService = new GameService(gameModel, mockActionService, mockChefService, mockPlayerService);
       gameId = generateObjectId();
-      const generated = generateChefGameUser(true);
+      const generated = generateChefGameUser(true, 2);
       user = generated.user;
       chef = generated.chef;
       game = generated.game;
+      additionalChefs = generated.additionalChefs;
       userId = user._id;
       gameCode = game.code;
     });
-
     it('should validate successfully for a valid game start', async () => {
       game.currentPhase = GamePhase.LOBBY;
-      game.chefIds = [chef._id, generateObjectId(), generateObjectId(), generateObjectId()];
 
       await expect(gameService.validateStartGameOrThrowAsync(game, userId))
         .resolves.not.toThrow();
+    });
+    it('should throw if the user is not the host', async () => {
+      mockPlayerService.isGameHostAsync.mockResolvedValueOnce(false);
+
+      await expect(gameService.validateStartGameOrThrowAsync(game, userId))
+        .rejects.toThrow(NotHostError);
+    });
+    it('should throw if the game phase is not LOBBY', async () => {
+      game.currentPhase = GamePhase.SETUP;
+
+      await expect(gameService.validateStartGameOrThrowAsync(game, userId))
+        .rejects.toThrow(GameInProgressError);
+    });
+    it('should throw if there are not enough chefs', async () => {
+      game.chefIds = [chef._id];
+
+      await expect(gameService.validateStartGameOrThrowAsync(game, userId))
+        .rejects.toThrow(NotEnoughChefsError);
     });
   });
   describe('startGameAsync', () => {
