@@ -5,7 +5,7 @@ import { generateObjectId } from './objectId';
 
 export function generateUser(overrides?: Object): IUser {
   const id = generateObjectId();
-  return {
+  const user = {
     _id: id,
     auth0Id: faker.string.uuid(),
     username: faker.internet.userName(),
@@ -19,6 +19,9 @@ export function generateUser(overrides?: Object): IUser {
     updatedAt: faker.date.past(),
     createdBy: id,
     updatedBy: id,
+    save: jest.fn(),
     ...overrides,
   };
+  user.save.mockImplementation(() => Promise.resolve(user));
+  return user;
 }

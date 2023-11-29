@@ -10,7 +10,7 @@ import { generateObjectId } from './objectId';
 export function generateGame(withPassword: boolean, overrides?: Object): IGame {
   const hostChefId = generateObjectId();
   const hostUserId = generateObjectId();
-  return {
+  const game = {
     _id: generateObjectId(),
     code: UtilityService.generateGameCode(),
     name: faker.lorem.words(3),
@@ -30,8 +30,11 @@ export function generateGame(withPassword: boolean, overrides?: Object): IGame {
     hostUserId: hostUserId,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
+    save: jest.fn(),
     ...overrides ? overrides : {}
   };
+  game.save.mockImplementation(() => Promise.resolve(game));
+  return game;
 }
 
 export function generateChefGameUser(withPassword: boolean, numAdditionalChefs = 0, overrides?: { user?: Object, chef?: Object, game?: Object }): { user: IUser, chef: IChef, game: IGame, additionalChefs: IChef[] } {

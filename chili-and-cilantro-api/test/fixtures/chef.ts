@@ -5,7 +5,7 @@ import { UtilityService } from '../../src/services/utility';
 import { generateObjectId } from './objectId';
 
 export function generateChef(overrides?: Object): IChef {
-  return {
+  const chef = {
     _id: generateObjectId(),
     gameId: generateObjectId(),
     name: faker.person.firstName(),
@@ -15,6 +15,9 @@ export function generateChef(overrides?: Object): IChef {
     userId: generateObjectId(),
     state: ChefState.LOBBY,
     host: false,
+    save: jest.fn(),
     ...overrides,
   };
+  chef.save.mockImplementation(() => Promise.resolve(chef));
+  return chef;
 }
