@@ -364,19 +364,21 @@ export class GameService extends TransactionManager {
    * @returns Game model
    */
   public async getGameByCodeOrThrowAsync(gameCode: string, active = false): Promise<IGame & Document> {
-    // find where not GAME_OVER
+    // Construct the search criteria
     const search = active ? { code: gameCode, currentPhase: { $ne: GamePhase.GAME_OVER } } : { code: gameCode };
-    // Find the games with the given code, sort by updated timestamp in descending order, and get the first
-    const game = await this.GameModel.find(search)
-      .sort({ updatedAt: -1 }) // -1 for descending order
-      .limit(1) // Limit to 1 to get only the most recent game
-      .then(games => games[0]); // Extract the first element
 
-    // If no game is found, throw an error
-    if (!game) {
+    // Create the query
+    const query = this.GameModel.find(search).sort({ updatedAt: -1 }).limit(1);
+
+    // Execute the query and get the results
+    const games = await query.exec();
+
+    if (!games || games.length == 0) {
       throw new InvalidGameError();
     }
-    return game;
+
+    // return the first game
+    return games[0];
   }
 
   /**

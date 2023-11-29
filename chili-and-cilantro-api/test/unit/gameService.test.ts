@@ -56,30 +56,39 @@ describe('GameService', () => {
   describe('getGameByCodeOrThrowAsync', () => {
     it('should return the most recent game when found by code', async () => {
       const mockGame = generateGame(true);
-      const findMock = jest.fn().mockReturnValue({
-        sort: jest.fn().mockReturnValue({
-          limit: jest.fn().mockReturnValue({
-            then: jest.fn().mockResolvedValue(mockGame),
-          }),
-        }),
-      });
-      jest.spyOn(mockGameModel, 'find').mockImplementation(findMock);
+      const mockQuery = {
+        sort: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        exec: jest.fn().mockResolvedValue([mockGame]),
+      };
+      jest.spyOn(mockGameModel, 'find').mockReturnValue(mockQuery);
 
-      const gameCode = 'testCode';
+      const gameCode = mockGame.code;
       const result = await gameService.getGameByCodeOrThrowAsync(gameCode);
 
       expect(result).toBe(mockGame);
       expect(mockGameModel.find).toHaveBeenCalledWith({ code: gameCode });
+      expect(mockQuery.exec).toHaveBeenCalled();
     });
-    it('should throw InvalidGameError when no game is found', async () => {
-      const findMock = jest.fn().mockReturnValue({
-        sort: jest.fn().mockReturnValue({
-          limit: jest.fn().mockReturnValue({
-            then: jest.fn().mockResolvedValue(null),
-          }),
-        }),
-      });
-      jest.spyOn(mockGameModel, 'find').mockImplementation(findMock);
+    it('should throw InvalidGameError when no game is found, returning null', async () => {
+      const mockQuery = {
+        sort: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        exec: jest.fn().mockResolvedValue(null),
+      };
+      jest.spyOn(mockGameModel, 'find').mockReturnValue(mockQuery);
+
+      const gameCode = 'testCode';
+
+      await expect(gameService.getGameByCodeOrThrowAsync(gameCode)).rejects.toThrow(InvalidGameError);
+    });
+    it('should throw InvalidGameError when no game is found, returning empty array', async () => {
+      const mockQuery = {
+        sort: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        exec: jest.fn().mockResolvedValue([]),
+      };
+      jest.spyOn(mockGameModel, 'find').mockReturnValue(mockQuery);
 
       const gameCode = 'testCode';
 
@@ -87,22 +96,35 @@ describe('GameService', () => {
     });
     it('should search for active games when active parameter is true', async () => {
       const mockGame = generateGame(true);
-      const findMock = jest.fn().mockReturnValue({
-        sort: jest.fn().mockReturnValue({
-          limit: jest.fn().mockReturnValue({
-            then: jest.fn().mockResolvedValue(mockGame),
-          }),
-        }),
-      });
-      jest.spyOn(mockGameModel, 'find').mockImplementation(findMock);
+      const mockQuery = {
+        sort: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        exec: jest.fn().mockResolvedValue([mockGame]),
+      };
+      jest.spyOn(mockGameModel, 'find').mockReturnValue(mockQuery);
 
-      const gameCode = 'testCode';
+      const gameCode = mockGame.code;
       await gameService.getGameByCodeOrThrowAsync(gameCode, true);
 
       expect(mockGameModel.find).toHaveBeenCalledWith({
         code: gameCode,
         currentPhase: { $ne: GamePhase.GAME_OVER },
       });
+      expect(mockQuery.exec).toHaveBeenCalled();
+    });
+    it('should return the most recent game when multiple games are found', async () => {
+      const gameOne = generateGame(true);
+      const mockQuery = {
+        sort: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        exec: jest.fn().mockResolvedValue([gameOne]),
+      };
+      jest.spyOn(mockGameModel, 'find').mockReturnValue(mockQuery);
+
+      const result = await gameService.getGameByCodeOrThrowAsync(gameOne.code);
+
+      expect(result).toBe(gameOne);
+      expect(mockQuery.exec).toHaveBeenCalled();
     });
   });
 });
