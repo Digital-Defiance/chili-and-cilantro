@@ -13,7 +13,7 @@ import { generateObjectId } from './objectId';
  * @param overrides Any values to override the generated values
  * @returns 
  */
-export function generateGame(withPassword: boolean, overrides?: Object): IGame & { save: jest.Mock } {
+export function generateGame(withPassword = true, overrides?: Object): IGame & { save: jest.Mock } {
   const hostChefId = generateObjectId();
   const hostUserId = generateObjectId();
   const game = {

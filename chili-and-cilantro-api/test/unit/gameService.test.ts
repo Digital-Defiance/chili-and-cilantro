@@ -26,7 +26,7 @@ describe('GameService', () => {
   });
   describe("getGameByIdOrThrowAsync", () => {
     it('should return a game when found', async () => {
-      const mockGame = generateGame(true);
+      const mockGame = generateGame();
       jest.spyOn(mockGameModel, 'findOne').mockResolvedValue(mockGame);
 
       const gameId = new mongoose.Types.ObjectId().toString();
@@ -45,7 +45,7 @@ describe('GameService', () => {
     });
 
     it('should search for active games when active parameter is true', async () => {
-      const mockGame = generateGame(true);
+      const mockGame = generateGame();
       jest.spyOn(mockGameModel, 'findOne').mockResolvedValue(mockGame);
 
       const gameId = new mongoose.Types.ObjectId().toString();
@@ -59,7 +59,7 @@ describe('GameService', () => {
   });
   describe('getGameByCodeOrThrowAsync', () => {
     it('should return the most recent game when found by code', async () => {
-      const mockGame = generateGame(true);
+      const mockGame = generateGame();
       const mockQuery = {
         sort: jest.fn().mockReturnThis(),
         limit: jest.fn().mockReturnThis(),
@@ -99,7 +99,7 @@ describe('GameService', () => {
       await expect(gameService.getGameByCodeOrThrowAsync(gameCode)).rejects.toThrow(InvalidGameError);
     });
     it('should search for active games when active parameter is true', async () => {
-      const mockGame = generateGame(true);
+      const mockGame = generateGame();
       const mockQuery = {
         sort: jest.fn().mockReturnThis(),
         limit: jest.fn().mockReturnThis(),
@@ -117,7 +117,7 @@ describe('GameService', () => {
       expect(mockQuery.exec).toHaveBeenCalled();
     });
     it('should return the most recent game when multiple games are found', async () => {
-      const gameOne = generateGame(true);
+      const gameOne = generateGame();
       const mockQuery = {
         sort: jest.fn().mockReturnThis(),
         limit: jest.fn().mockReturnThis(),
@@ -273,7 +273,7 @@ describe('GameService', () => {
       gameService.canPass.mockReturnValue(false);
       gameService.canBid.mockReturnValue(false);
 
-      const game = generateGame(true);
+      const game = generateGame();
       const chef = generateChef();
       expect(gameService.availableTurnActions(game, chef)).toContain(TurnAction.PlaceCard);
     });
@@ -283,7 +283,7 @@ describe('GameService', () => {
       gameService.canPass.mockReturnValue(true);
       gameService.canBid.mockReturnValue(false);
 
-      const game = generateGame(true);
+      const game = generateGame();
       const chef = generateChef();
       expect(gameService.availableTurnActions(game, chef)).toContain(TurnAction.Pass);
     });
@@ -313,9 +313,66 @@ describe('GameService', () => {
       gameService.canPass.mockReturnValue(false);
       gameService.canBid.mockReturnValue(false);
 
-      const game = generateGame(true);
+      const game = generateGame();
       const chef = generateChef();
       expect(gameService.availableTurnActions(game, chef)).toEqual([]);
+    });
+  });
+  describe('haveAllRemainingPlayersPassed', () => {
+    it('should return false when there are no bids in the current round', () => {
+      const chef1 = generateChef();
+      const chef2 = generateChef();
+      const game = generateGame(true, {
+        currentRound: 1,
+        roundBids: { 1: [] },
+        chefIds: [chef1._id, chef2._id]
+      });
+      expect(gameService.haveAllRemainingPlayersPassed(game)).toBe(false);
+    });
+
+    it('should return false when there are no non-passing bids', () => {
+      const chef1 = generateChef();
+      const chef2 = generateChef();
+      const game = {
+        currentRound: 0,
+        roundBids: { 0: [{ chefId: chef1._id, pass: true }] },
+        chefIds: [chef1._id, chef2._id]
+      };
+      expect(gameService.haveAllRemainingPlayersPassed(game)).toBe(false);
+    });
+
+    it('should return true when last non-passing bid is followed by passes from all other chefs', () => {
+      const chef1 = generateChef();
+      const chef2 = generateChef();
+      const game = generateGame(true, {
+        currentRound: 0,
+        roundBids: { 0: [{ chefId: chef1._id, pass: false }, { chefId: chef2._id, pass: true }] },
+        chefIds: [chef1._id, chef2._id]
+      });
+      expect(gameService.haveAllRemainingPlayersPassed(game)).toBe(true);
+    });
+
+    it('should return false when last non-passing bid is not followed by passes from all other chefs', () => {
+      const chef1 = generateChef();
+      const chef2 = generateChef();
+      const game = generateGame(true, {
+        currentRound: 0,
+        roundBids: { 0: [{ chefId: chef1._id, pass: false }, { chefId: chef2._id, pass: false }] },
+        chefIds: [chef1._id, chef2._id]
+      });
+      expect(gameService.haveAllRemainingPlayersPassed(game)).toBe(false);
+    });
+
+    it('should handle multiple non-passing bids correctly', () => {
+      const chef1 = generateChef();
+      const chef2 = generateChef();
+      const chef3 = generateChef();
+      const game = generateGame(true, {
+        currentRound: 0,
+        roundBids: { 0: [{ chefId: chef1._id, pass: false }, { chefId: chef2._id, pass: false }, { chefId: chef3._id, pass: true }] },
+        chefIds: [chef1._id, chef2._id, chef3._id]
+      });
+      expect(gameService.haveAllRemainingPlayersPassed(game)).toBe(false);
     });
   });
 });

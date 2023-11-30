@@ -161,6 +161,40 @@ describe('GameService', () => {
       await expect(gameService.validateJoinGameOrThrowAsync(game, user, userName, game.password))
         .rejects.toThrow(GameFullError);
     });
+    it('should allow a user to join a game with no password as long as none is provided', async () => {
+      const game = generateGame(false); // Game with no password required
+      const user = generateUser();
+      const userName = generateString(constants.MIN_USER_NAME_LENGTH, constants.MAX_USER_NAME_LENGTH);
+
+      sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
+      sinon.stub(gameService, 'getGameChefNamesByGameIdAsync').resolves([]);
+
+      await expect(gameService.validateJoinGameOrThrowAsync(game, user, userName, ''))
+        .resolves.not.toThrow();
+    });
+    it('should throw an error if a user tries to join a game with a password when none is required', async () => {
+      const game = generateGame(false); // Game with no password required
+      const user = generateUser();
+      const userName = generateString(constants.MIN_USER_NAME_LENGTH, constants.MAX_USER_NAME_LENGTH);
+      const unnecessaryPassword = 'somePassword';
+
+      sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
+      sinon.stub(gameService, 'getGameChefNamesByGameIdAsync').resolves([]);
+
+      await expect(gameService.validateJoinGameOrThrowAsync(game, user, userName, unnecessaryPassword))
+        .rejects.toThrow(GamePasswordMismatchError);
+    });
+    it('should throw an error if a user tries to join a game and does not supply a password when one is required', async () => {
+      const game = generateGame(); // Game with a password required
+      const user = generateUser();
+      const userName = generateString(constants.MIN_USER_NAME_LENGTH, constants.MAX_USER_NAME_LENGTH);
+
+      sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
+      sinon.stub(gameService, 'getGameChefNamesByGameIdAsync').resolves([]);
+
+      await expect(gameService.validateJoinGameOrThrowAsync(game, user, userName, ''))
+        .rejects.toThrow(GamePasswordMismatchError);
+    });
   });
 
   describe('joinGameAsync', () => {

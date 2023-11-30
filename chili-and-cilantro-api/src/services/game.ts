@@ -177,7 +177,7 @@ export class GameService extends TransactionManager {
     if (chefNames.includes(userName)) {
       throw new UsernameInUseError();
     }
-    if (game.password && game.password !== password) {
+    if ((game.password && game.password !== password) || (password && !game.password)) {
       throw new GamePasswordMismatchError();
     }
     if (game.currentPhase !== GamePhase.LOBBY) {
