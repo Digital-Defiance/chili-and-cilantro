@@ -3,6 +3,11 @@ import { Schema } from 'mongoose';
 import { faker } from '@faker-js/faker';
 import { generateObjectId } from './objectId';
 
+/**
+ * Generate a user with random values, and a save method to emulate mongoose Document
+ * @param overrides Any values to override the generated values
+ * @returns 
+ */
 export function generateUser(overrides?: Object): IUser & { save: jest.Mock } {
   const id = generateObjectId();
   const user = {

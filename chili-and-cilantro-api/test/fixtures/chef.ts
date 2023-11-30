@@ -4,6 +4,11 @@ import { ChefState, IChef } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { UtilityService } from '../../src/services/utility';
 import { generateObjectId } from './objectId';
 
+/**
+ * Generate a chef with random values, and a save method to emulate mongoose Document
+ * @param overrides Any values to override the generated values
+ * @returns 
+ */
 export function generateChef(overrides?: Object): IChef & { save: jest.Mock } {
   const chef = {
     _id: generateObjectId(),

@@ -2,7 +2,7 @@ import { Request, Response, Router } from 'express';
 import { validateAccessToken } from '../middlewares/auth0';
 import { GameService } from '../services/game';
 import { JwtService } from '../services/jwt';
-import { FirstChef, TurnAction, BaseModel, CardType, IGame, ModelName, IChef } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { TurnAction, CardType, IGame, ModelName, IChef } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { Database } from '../services/database';
 import { ValidationError } from '../errors/validationError';
 import { ActionService } from '../services/action';

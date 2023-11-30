@@ -7,6 +7,12 @@ import { generateUser } from './user';
 import { generateChef } from './chef';
 import { generateObjectId } from './objectId';
 
+/**
+ * Generate a game with random values, and a save method to emulate mongoose Document
+ * @param withPassword Whether the game should have a password
+ * @param overrides Any values to override the generated values
+ * @returns 
+ */
 export function generateGame(withPassword: boolean, overrides?: Object): IGame & { save: jest.Mock } {
   const hostChefId = generateObjectId();
   const hostUserId = generateObjectId();

@@ -3,7 +3,6 @@ import constants from '../constants';
 import { GamePhase } from '../enumerations/gamePhase';
 import { IRoundBids } from '../interfaces/roundBids';
 import ModelName from '../enumerations/modelName';
-import { FirstChef } from '../enumerations/firstChef';
 import { IGame } from '../interfaces/game';
 import validator from 'validator';
 import { IBid } from '../interfaces/bid';
