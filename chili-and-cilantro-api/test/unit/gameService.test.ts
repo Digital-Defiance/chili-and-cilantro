@@ -1,6 +1,6 @@
 import { Database } from '../../src/services/database';
 import { GameService } from '../../src/services/game';
-import { GamePhase, IGame, ModelName } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { GamePhase, IGame, ModelName, TurnAction } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { InvalidGameError } from '../../src/errors/invalidGame';
 import { generateGame } from '../fixtures/game';
 import mongoose from 'mongoose';
@@ -190,7 +190,7 @@ describe('GameService', () => {
 
     it('should return true when the chef can bid', () => {
       const chef = generateChef();
-      const game = { currentPhase: GamePhase.BIDDING, turnOrder: [chef._id], currentChef: 0, cardsPlaced: 3, currentBid: 1 };
+      const game = generateGame(true, { currentPhase: GamePhase.BIDDING, turnOrder: [chef._id], currentChef: 0, cardsPlaced: 3, currentBid: 1 });
       expect(gameService.canBid(game, chef)).toBe(true);
     });
   });
@@ -210,14 +210,112 @@ describe('GameService', () => {
 
     it('should return false if the chef has no cards left in their hand', () => {
       const chef = generateChef({ hand: [] });
-      const game = { currentPhase: GamePhase.SETUP, turnOrder: [chef._id], currentChef: 0 };
+      const game = generateGame(true, { currentPhase: GamePhase.SETUP, turnOrder: [chef._id], currentChef: 0 });
       expect(gameService.canPlaceCard(game, chef)).toBe(false);
     });
 
     it('should return true when the chef can place a card', () => {
       const chef = generateChef();
-      const game = { currentPhase: GamePhase.SETUP, turnOrder: [chef._id], currentChef: 0 };
+      const game = generateGame(true, { currentPhase: GamePhase.SETUP, turnOrder: [chef._id], currentChef: 0 });
       expect(gameService.canPlaceCard(game, chef)).toBe(true);
+    });
+  });
+  describe('canPass', () => {
+    it('should return false if the current chef is not the user', () => {
+      const chef = generateChef();
+      const chef2 = generateChef();
+      const game = generateGame(true, { currentPhase: GamePhase.BIDDING, turnOrder: [chef._id, chef2._id], currentChef: 1 });
+      expect(gameService.canPass(game, chef)).toBe(false);
+    });
+
+    it('should return false if the current phase is not BIDDING', () => {
+      const chef = generateChef();
+      const game = generateGame(true, { currentPhase: GamePhase.SETUP, turnOrder: [chef._id], currentChef: 0 });
+      expect(gameService.canPass(game, chef)).toBe(false);
+    });
+
+    it('should return false if no one has bid yet', () => {
+      const chef = generateChef();
+      const game = generateGame(true, { currentPhase: GamePhase.BIDDING, turnOrder: [chef._id], currentChef: 0, currentBid: 0 });
+      expect(gameService.canPass(game, chef)).toBe(false);
+    });
+
+    it('should return false if the previous chef bid the maximum number of cards', () => {
+      const chef = generateChef();
+      const game = generateGame(true, { currentPhase: GamePhase.BIDDING, turnOrder: [chef._id], currentChef: 0, currentBid: 5, cardsPlaced: 5 });
+      expect(gameService.canPass(game, chef)).toBe(false);
+    });
+
+    it('should return false if all remaining players have passed', () => {
+      // Mock the haveAllRemainingPlayersPassed function to return true
+      gameService.haveAllRemainingPlayersPassed = jest.fn().mockReturnValue(true);
+      const chef = generateChef();
+      const game = generateGame(true, { currentPhase: GamePhase.BIDDING, turnOrder: [chef._id], currentChef: 0, currentBid: 1 });
+      expect(gameService.canPass(game, chef)).toBe(false);
+    });
+
+    it('should return true when the chef can pass', () => {
+      // Mock the haveAllRemainingPlayersPassed function to return false
+      gameService.haveAllRemainingPlayersPassed = jest.fn().mockReturnValue(false);
+      const chef = generateChef();
+      const game = generateGame(true, { currentPhase: GamePhase.BIDDING, turnOrder: [chef._id], currentChef: 0, currentBid: 1 });
+      expect(gameService.canPass(game, chef)).toBe(true);
+    });
+  });
+  describe('availableTurnActions', () => {
+    beforeEach(() => {
+      gameService.canPlaceCard = jest.fn();
+      gameService.canPass = jest.fn();
+      gameService.canBid = jest.fn();
+    });
+    it('should include PlaceCard when the chef can place a card', () => {
+      gameService.canPlaceCard.mockReturnValue(true);
+      gameService.canPass.mockReturnValue(false);
+      gameService.canBid.mockReturnValue(false);
+
+      const game = {};
+      const chef = {};
+      expect(gameService.availableTurnActions(game, chef)).toContain(TurnAction.PlaceCard);
+    });
+
+    it('should include Pass when the chef can pass', () => {
+      gameService.canPlaceCard.mockReturnValue(false);
+      gameService.canPass.mockReturnValue(true);
+      gameService.canBid.mockReturnValue(false);
+
+      const game = {};
+      const chef = {};
+      expect(gameService.availableTurnActions(game, chef)).toContain(TurnAction.Pass);
+    });
+
+    it('should include IncreaseBid when the chef can increase the bid', () => {
+      gameService.canPlaceCard.mockReturnValue(false);
+      gameService.canPass.mockReturnValue(false);
+      gameService.canBid.mockReturnValue(true);
+
+      const game = { currentBid: 1 };
+      const chef = {};
+      expect(gameService.availableTurnActions(game, chef)).toContain(TurnAction.IncreaseBid);
+    });
+
+    it('should include Bid when the chef can make a bid', () => {
+      gameService.canPlaceCard.mockReturnValue(false);
+      gameService.canPass.mockReturnValue(false);
+      gameService.canBid.mockReturnValue(true);
+
+      const game = { currentBid: 0 };
+      const chef = {};
+      expect(gameService.availableTurnActions(game, chef)).toContain(TurnAction.Bid);
+    });
+
+    it('should return an empty array when the chef has no available actions', () => {
+      gameService.canPlaceCard.mockReturnValue(false);
+      gameService.canPass.mockReturnValue(false);
+      gameService.canBid.mockReturnValue(false);
+
+      const game = {};
+      const chef = {};
+      expect(gameService.availableTurnActions(game, chef)).toEqual([]);
     });
   });
 });
