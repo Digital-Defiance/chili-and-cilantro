@@ -171,7 +171,8 @@ describe('GameService', () => {
 
     it('should return false if the current chef is not the user', () => {
       const chef = generateChef();
-      const game = generateGame(true, { currentPhase: GamePhase.BIDDING, turnOrder: [chef._id], currentChef: 0, cardsPlaced: 1, currentBid: 0 });
+      const chef2 = generateChef();
+      const game = generateGame(true, { currentPhase: GamePhase.BIDDING, turnOrder: [chef._id, chef2._id], currentChef: 1, cardsPlaced: 1, currentBid: 0 });
       expect(gameService.canBid(game, chef)).toBe(false);
     });
 
@@ -191,6 +192,32 @@ describe('GameService', () => {
       const chef = generateChef();
       const game = { currentPhase: GamePhase.BIDDING, turnOrder: [chef._id], currentChef: 0, cardsPlaced: 3, currentBid: 1 };
       expect(gameService.canBid(game, chef)).toBe(true);
+    });
+  });
+  describe('canPlaceCard', () => {
+    it('should return false if the current phase is not SETUP', () => {
+      const chef = generateChef();
+      const game = generateGame(true, { currentPhase: GamePhase.BIDDING, turnOrder: [chef._id], currentChef: 0 });
+      expect(gameService.canPlaceCard(game, chef)).toBe(false);
+    });
+
+    it('should return false if the current chef is not the user', () => {
+      const chef = generateChef();
+      const chef2 = generateChef();
+      const game = { currentPhase: GamePhase.SETUP, turnOrder: [chef._id, chef2._id], currentChef: 1 };
+      expect(gameService.canPlaceCard(game, chef)).toBe(false);
+    });
+
+    it('should return false if the chef has no cards left in their hand', () => {
+      const chef = generateChef({ hand: [] });
+      const game = { currentPhase: GamePhase.SETUP, turnOrder: [chef._id], currentChef: 0 };
+      expect(gameService.canPlaceCard(game, chef)).toBe(false);
+    });
+
+    it('should return true when the chef can place a card', () => {
+      const chef = generateChef();
+      const game = { currentPhase: GamePhase.SETUP, turnOrder: [chef._id], currentChef: 0 };
+      expect(gameService.canPlaceCard(game, chef)).toBe(true);
     });
   });
 });
