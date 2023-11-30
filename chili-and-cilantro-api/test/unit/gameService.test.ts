@@ -273,8 +273,8 @@ describe('GameService', () => {
       gameService.canPass.mockReturnValue(false);
       gameService.canBid.mockReturnValue(false);
 
-      const game = {};
-      const chef = {};
+      const game = generateGame(true);
+      const chef = generateChef();
       expect(gameService.availableTurnActions(game, chef)).toContain(TurnAction.PlaceCard);
     });
 
@@ -283,8 +283,8 @@ describe('GameService', () => {
       gameService.canPass.mockReturnValue(true);
       gameService.canBid.mockReturnValue(false);
 
-      const game = {};
-      const chef = {};
+      const game = generateGame(true);
+      const chef = generateChef();
       expect(gameService.availableTurnActions(game, chef)).toContain(TurnAction.Pass);
     });
 
@@ -293,8 +293,8 @@ describe('GameService', () => {
       gameService.canPass.mockReturnValue(false);
       gameService.canBid.mockReturnValue(true);
 
-      const game = { currentBid: 1 };
-      const chef = {};
+      const chef = generateChef();
+      const game = generateGame(true, { currentBid: 1 });
       expect(gameService.availableTurnActions(game, chef)).toContain(TurnAction.IncreaseBid);
     });
 
@@ -303,8 +303,8 @@ describe('GameService', () => {
       gameService.canPass.mockReturnValue(false);
       gameService.canBid.mockReturnValue(true);
 
-      const game = { currentBid: 0 };
-      const chef = {};
+      const game = generateGame(true, { currentBid: 0 });
+      const chef = generateChef();
       expect(gameService.availableTurnActions(game, chef)).toContain(TurnAction.Bid);
     });
 
@@ -313,8 +313,8 @@ describe('GameService', () => {
       gameService.canPass.mockReturnValue(false);
       gameService.canBid.mockReturnValue(false);
 
-      const game = {};
-      const chef = {};
+      const game = generateGame(true);
+      const chef = generateChef();
       expect(gameService.availableTurnActions(game, chef)).toEqual([]);
     });
   });

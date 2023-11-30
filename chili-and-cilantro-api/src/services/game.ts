@@ -569,7 +569,7 @@ export class GameService extends TransactionManager {
       actions.push(TurnAction.Pass);
     }
     const canBid = this.canBid(game, chef);
-    const existingBid = game.currentBid <= 0;
+    const existingBid = game.currentBid > 0;
     // if there has been at least one bid, users can increase the bid
     if (canBid && existingBid) {
       actions.push(TurnAction.IncreaseBid);
