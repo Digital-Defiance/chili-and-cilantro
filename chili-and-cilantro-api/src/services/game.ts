@@ -173,7 +173,7 @@ export class GameService extends TransactionManager {
     if (await this.playerService.userIsInAnyActiveGameAsync(user)) {
       throw new AlreadyJoinedOtherError();
     }
-    const chefNames = await this.getGameChefNamesAsync(game._id.toString());
+    const chefNames = await this.getGameChefNamesByGameIdAsync(game._id.toString());
     if (chefNames.includes(userName)) {
       throw new UsernameInUseError();
     }
@@ -385,11 +385,11 @@ export class GameService extends TransactionManager {
    * Expires the specified games
    * @param games A collection of games to expire
    */
-  public async expireGamesOrThrowAsync(games: (Document<unknown, {}, IGame> & IGame & Required<{
+  public async expireGamesOrThrowAsync(games: Array<Document<unknown, {}, IGame> & IGame & Required<{
     _id: Schema.Types.ObjectId;
-  }>)[]): Promise<void> {
-    // set currentPhase to GAME_OVER
+  }>>): Promise<void> {
     for (const game of games) {
+      // set currentPhase to GAME_OVER
       game.currentPhase = GamePhase.GAME_OVER;
       const savedGame = await game.save();
       // TODO: close any sockets for this game
@@ -461,7 +461,7 @@ export class GameService extends TransactionManager {
    * @param gameId 
    * @returns Array of chef names
    */
-  public async getGameChefNamesAsync(gameId: string): Promise<string[]> {
+  public async getGameChefNamesByGameIdAsync(gameId: string): Promise<string[]> {
     const chefs = await this.chefService.getGameChefsByGameOrIdAsync(gameId);
     return chefs.map(chef => chef.name);
   }

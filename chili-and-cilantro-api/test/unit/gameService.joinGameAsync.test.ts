@@ -61,7 +61,7 @@ describe('GameService', () => {
       // arrange
       // Mock the condition where user is not in an active game
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
-      sinon.stub(gameService, 'getGameChefNamesAsync').resolves([chef.name]);
+      sinon.stub(gameService, 'getGameChefNamesByGameIdAsync').resolves([chef.name]);
 
       // act/assert
       await expect(gameService.validateJoinGameOrThrowAsync(game, user, userName, game.password))
@@ -72,7 +72,7 @@ describe('GameService', () => {
       // arrange
       // Mock the condition where user is in an active game
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(true);
-      sinon.stub(gameService, 'getGameChefNamesAsync').resolves([chef.name]);
+      sinon.stub(gameService, 'getGameChefNamesByGameIdAsync').resolves([chef.name]);
 
       // act/assert
       await expect(gameService.validateJoinGameOrThrowAsync(game, user, userName, game.password))
@@ -82,7 +82,7 @@ describe('GameService', () => {
       // arrange
       // Mock the condition where user is not in an active game
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
-      sinon.stub(gameService, 'getGameChefNamesAsync').resolves([chef.name]);
+      sinon.stub(gameService, 'getGameChefNamesByGameIdAsync').resolves([chef.name]);
 
       // act/assert
       await expect(gameService.validateJoinGameOrThrowAsync(game, user, chef.name, game.password))
@@ -91,7 +91,7 @@ describe('GameService', () => {
     it('should throw an error when the game is already in progress', () => {
       // arrange
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
-      sinon.stub(gameService, 'getGameChefNamesAsync').resolves([chef.name]);
+      sinon.stub(gameService, 'getGameChefNamesByGameIdAsync').resolves([chef.name]);
       game = generateGame(true, { gameId, hostUserId: user._id, hostChefId: chef._id, currentPhase: GamePhase.SETUP });
 
       // act/assert
@@ -102,7 +102,7 @@ describe('GameService', () => {
       // arrange
       // Mock the condition where user is not in an active game
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
-      sinon.stub(gameService, 'getGameChefNamesAsync').resolves([chef.name]);
+      sinon.stub(gameService, 'getGameChefNamesByGameIdAsync').resolves([chef.name]);
 
       userName = '!'.repeat(constants.MIN_USER_NAME_LENGTH + 1); // Set an invalid username with special characters
 
@@ -115,7 +115,7 @@ describe('GameService', () => {
       // arrange
       // Mock the condition where user is not in an active game
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
-      sinon.stub(gameService, 'getGameChefNamesAsync').resolves([chef.name]);
+      sinon.stub(gameService, 'getGameChefNamesByGameIdAsync').resolves([chef.name]);
 
       userName = 'x'.repeat(constants.MIN_USER_NAME_LENGTH - 1); // Set an invalid username that is too short
 
@@ -128,7 +128,7 @@ describe('GameService', () => {
       // arrange
       // Mock the condition where user is not in an active game
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
-      sinon.stub(gameService, 'getGameChefNamesAsync').resolves([chef.name]);
+      sinon.stub(gameService, 'getGameChefNamesByGameIdAsync').resolves([chef.name]);
 
       userName = 'x'.repeat(constants.MAX_USER_NAME_LENGTH + 1); // Set an invalid username that is too long
 
@@ -141,7 +141,7 @@ describe('GameService', () => {
       // arrange
       // Mock the condition where user is not in an active game
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
-      sinon.stub(gameService, 'getGameChefNamesAsync').resolves([chef.name]);
+      sinon.stub(gameService, 'getGameChefNamesByGameIdAsync').resolves([chef.name]);
 
       // act/assert
       await expect(gameService.validateJoinGameOrThrowAsync(game, user, userName, 'xxxx'))
@@ -152,7 +152,7 @@ describe('GameService', () => {
       // arrange
       // Mock the condition where user is not in an active game
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
-      sinon.stub(gameService, 'getGameChefNamesAsync').resolves([chef.name]);
+      sinon.stub(gameService, 'getGameChefNamesByGameIdAsync').resolves([chef.name]);
 
       for (let i = 1; i <= constants.MAX_CHEFS; i++) {
         game.chefIds.push(generateObjectId());

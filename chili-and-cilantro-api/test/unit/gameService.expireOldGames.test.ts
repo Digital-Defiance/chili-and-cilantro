@@ -1,10 +1,11 @@
 import { Database } from '../../src/services/database';
 import { GameService } from '../../src/services/game';
-import { constants, GamePhase, IGame, ModelName } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { constants, ChefState, GamePhase, IChef, IGame, ModelName } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { mockedWithTransactionAsync } from '../fixtures/transactionManager';
 import { InvalidGameError } from '../../src/errors/invalidGame';
 import { generateGame } from '../fixtures/game';
 import mongoose from 'mongoose';
+import { generateChef } from '../fixtures/chef';
 
 
 describe('GameService', () => {
@@ -32,7 +33,15 @@ describe('GameService', () => {
 
       // Mock dependencies
       gameService.actionService.expireGameAsync = jest.fn();
-      gameService.chefService.getGameChefsByGameOrIdAsync = jest.fn().mockResolvedValue([]);
+      // mock getGameChefsByGameOrIdAsync to return an array of chefs and insert them into the map
+      const mockChefs: Map<string, IChef & { save: jest.Mock }> = new Map();
+      gameService.chefService.getGameChefsByGameOrIdAsync = jest.fn().mockImplementation(async (game) => {
+        return Array.from({ length: constants.MIN_CHEFS }).map(() => {
+          const chef = generateChef({ gameId: game._id })
+          mockChefs.set(chef._id.toString(), chef);
+          return chef;
+        });
+      });
 
       // Call the method
       await gameService.expireGamesOrThrowAsync(mockGames);
@@ -41,6 +50,12 @@ describe('GameService', () => {
       mockGames.forEach(mockGame => {
         expect(mockGame.currentPhase).toBe(GamePhase.GAME_OVER);
         expect(mockGame.save).toHaveBeenCalled();
+      });
+
+      // assert that each chef's state is set to ChefState.EXPIRED and save is called
+      mockChefs.forEach(mockChef => {
+        expect(mockChef.state).toBe(ChefState.EXPIRED);
+        expect(mockChef.save).toHaveBeenCalled();
       });
 
       // Assert that actionService.expireGameAsync is called for each game
