@@ -7,7 +7,7 @@ import { GameService } from '../../src/services/game';
 import { PlayerService } from '../../src/services/player';
 import { constants, IGame, ModelName, IChef, GamePhase } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { AlreadyJoinedOtherError } from '../../src/errors/alreadyJoinedOther';
-import { InvalidUserNameError } from '../../src/errors/invalidUserName';
+import { InvalidUserDisplayNameError } from '../../src/errors/invalidUserDisplayName';
 import { generateUser } from '../fixtures/user';
 import { generateString } from '../fixtures/utils';
 import { generateChef } from '../fixtures/chef';
@@ -37,7 +37,7 @@ describe('GameService', () => {
   });
 
   describe('validateJoinGameOrThrowAsync', () => {
-    let gameId, game, chef, user, userName;
+    let gameId, game, chef, user, userDisplayName;
 
     beforeEach(() => {
       // Setup initial valid parameters
@@ -46,7 +46,7 @@ describe('GameService', () => {
       user = generated.user;
       chef = generated.chef;
       game = generated.game;
-      userName = generateString(constants.MIN_USER_NAME_LENGTH, constants.MAX_USER_NAME_LENGTH);
+      userDisplayName = generateString(constants.MIN_USER_DISPLAY_NAME_LENGTH, constants.MAX_USER_DISPLAY_NAME_LENGTH);
     });
 
     afterEach(() => {
@@ -64,7 +64,7 @@ describe('GameService', () => {
       sinon.stub(gameService, 'getGameChefNamesByGameIdAsync').resolves([chef.name]);
 
       // act/assert
-      await expect(gameService.validateJoinGameOrThrowAsync(game, user, userName, game.password))
+      await expect(gameService.validateJoinGameOrThrowAsync(game, user, userDisplayName, game.password))
         .resolves.not.toThrow();
     });
 
@@ -75,7 +75,7 @@ describe('GameService', () => {
       sinon.stub(gameService, 'getGameChefNamesByGameIdAsync').resolves([chef.name]);
 
       // act/assert
-      await expect(gameService.validateJoinGameOrThrowAsync(game, user, userName, game.password))
+      await expect(gameService.validateJoinGameOrThrowAsync(game, user, userDisplayName, game.password))
         .rejects.toThrow(AlreadyJoinedOtherError);
     });
     it('should throw an error when the chef name is already in the specified game', async () => {
@@ -95,7 +95,7 @@ describe('GameService', () => {
       game = generateGame(true, { gameId, hostUserId: user._id, hostChefId: chef._id, currentPhase: GamePhase.SETUP });
 
       // act/assert
-      expect(gameService.validateJoinGameOrThrowAsync(game, user, userName, game.password))
+      expect(gameService.validateJoinGameOrThrowAsync(game, user, userDisplayName, game.password))
         .rejects.toThrow(GameInProgressError);
     });
     it('should throw an error for an invalid username with special characters', async () => {
@@ -104,11 +104,11 @@ describe('GameService', () => {
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
       sinon.stub(gameService, 'getGameChefNamesByGameIdAsync').resolves([chef.name]);
 
-      userName = '!'.repeat(constants.MIN_USER_NAME_LENGTH + 1); // Set an invalid username with special characters
+      userDisplayName = '!'.repeat(constants.MIN_USER_DISPLAY_NAME_LENGTH + 1); // Set an invalid username with special characters
 
       // act/assert
-      await expect(gameService.validateJoinGameOrThrowAsync(game, user, userName, game.password))
-        .rejects.toThrow(InvalidUserNameError);
+      await expect(gameService.validateJoinGameOrThrowAsync(game, user, userDisplayName, game.password))
+        .rejects.toThrow(InvalidUserDisplayNameError);
     });
 
     it('should throw an error for invalid username that is too short', async () => {
@@ -117,11 +117,11 @@ describe('GameService', () => {
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
       sinon.stub(gameService, 'getGameChefNamesByGameIdAsync').resolves([chef.name]);
 
-      userName = 'x'.repeat(constants.MIN_USER_NAME_LENGTH - 1); // Set an invalid username that is too short
+      userDisplayName = 'x'.repeat(constants.MIN_USER_DISPLAY_NAME_LENGTH - 1); // Set an invalid username that is too short
 
       // act/assert
-      await expect(gameService.validateJoinGameOrThrowAsync(game, user, userName, game.password))
-        .rejects.toThrow(InvalidUserNameError);
+      await expect(gameService.validateJoinGameOrThrowAsync(game, user, userDisplayName, game.password))
+        .rejects.toThrow(InvalidUserDisplayNameError);
     });
 
     it('should throw an error for invalid username that is too long', async () => {
@@ -130,11 +130,11 @@ describe('GameService', () => {
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
       sinon.stub(gameService, 'getGameChefNamesByGameIdAsync').resolves([chef.name]);
 
-      userName = 'x'.repeat(constants.MAX_USER_NAME_LENGTH + 1); // Set an invalid username that is too long
+      userDisplayName = 'x'.repeat(constants.MAX_USER_DISPLAY_NAME_LENGTH + 1); // Set an invalid username that is too long
 
       // act/assert
-      await expect(gameService.validateJoinGameOrThrowAsync(game, user, userName, game.password))
-        .rejects.toThrow(InvalidUserNameError);
+      await expect(gameService.validateJoinGameOrThrowAsync(game, user, userDisplayName, game.password))
+        .rejects.toThrow(InvalidUserDisplayNameError);
     });
 
     it('should throw an error for incorrect password', async () => {
@@ -144,7 +144,7 @@ describe('GameService', () => {
       sinon.stub(gameService, 'getGameChefNamesByGameIdAsync').resolves([chef.name]);
 
       // act/assert
-      await expect(gameService.validateJoinGameOrThrowAsync(game, user, userName, 'xxxx'))
+      await expect(gameService.validateJoinGameOrThrowAsync(game, user, userDisplayName, 'xxxx'))
         .rejects.toThrow(GamePasswordMismatchError);
     });
 
@@ -158,13 +158,13 @@ describe('GameService', () => {
         game.chefIds.push(generateObjectId());
       }
       // act/assert
-      await expect(gameService.validateJoinGameOrThrowAsync(game, user, userName, game.password))
+      await expect(gameService.validateJoinGameOrThrowAsync(game, user, userDisplayName, game.password))
         .rejects.toThrow(GameFullError);
     });
     it('should allow a user to join a game with no password as long as none is provided', async () => {
       const game = generateGame(false); // Game with no password required
       const user = generateUser();
-      const userName = generateString(constants.MIN_USER_NAME_LENGTH, constants.MAX_USER_NAME_LENGTH);
+      const userName = generateString(constants.MIN_USER_DISPLAY_NAME_LENGTH, constants.MAX_USER_DISPLAY_NAME_LENGTH);
 
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
       sinon.stub(gameService, 'getGameChefNamesByGameIdAsync').resolves([]);
@@ -175,7 +175,7 @@ describe('GameService', () => {
     it('should throw an error if a user tries to join a game with a password when none is required', async () => {
       const game = generateGame(false); // Game with no password required
       const user = generateUser();
-      const userName = generateString(constants.MIN_USER_NAME_LENGTH, constants.MAX_USER_NAME_LENGTH);
+      const userName = generateString(constants.MIN_USER_DISPLAY_NAME_LENGTH, constants.MAX_USER_DISPLAY_NAME_LENGTH);
       const unnecessaryPassword = 'somePassword';
 
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
@@ -187,7 +187,7 @@ describe('GameService', () => {
     it('should throw an error if a user tries to join a game and does not supply a password when one is required', async () => {
       const game = generateGame(); // Game with a password required
       const user = generateUser();
-      const userName = generateString(constants.MIN_USER_NAME_LENGTH, constants.MAX_USER_NAME_LENGTH);
+      const userName = generateString(constants.MIN_USER_DISPLAY_NAME_LENGTH, constants.MAX_USER_DISPLAY_NAME_LENGTH);
 
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
       sinon.stub(gameService, 'getGameChefNamesByGameIdAsync').resolves([]);

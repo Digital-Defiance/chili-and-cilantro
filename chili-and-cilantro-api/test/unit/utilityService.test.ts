@@ -82,9 +82,9 @@ describe('UtilityService', () => {
       const hand = UtilityService.makeHand();
       const chiliCount = hand.filter((card) => card.type === CardType.CHILI).length;
       const cilantroCount = hand.filter((card) => card.type === CardType.CILANTRO).length;
-      expect(hand.length).toEqual(constants.MAX_HAND_SIZE);
+      expect(hand.length).toEqual(constants.HAND_SIZE);
       expect(chiliCount).toEqual(constants.CHILI_PER_HAND);
-      expect(cilantroCount).toEqual(constants.MAX_HAND_SIZE - constants.CHILI_PER_HAND);
+      expect(cilantroCount).toEqual(constants.HAND_SIZE - constants.CHILI_PER_HAND);
     });
   });
 });

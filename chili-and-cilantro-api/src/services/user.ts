@@ -15,6 +15,7 @@ import { EmailExistsError } from '../errors/emailExists';
 import { UsernameExistsError } from '../errors/usernameExists';
 import { managementClient } from '../auth0';
 import { environment } from '../environment';
+import { InvalidUsernameError } from '../errors/invalidUsername';
 
 export class UserService {
   private readonly UserModel = BaseModel.getModel<IUser>(ModelName.User);
@@ -45,6 +46,10 @@ export class UserService {
 
     if (await this.UserModel.findOne({ username: username })) {
       throw new UsernameExistsError(username);
+    }
+
+    if (username.length < constants.MIN_USERNAME_LENGTH || username.length > constants.MAX_USERNAME_LENGTH) {
+      throw new InvalidUsernameError(username);
     }
 
     // Password validation: Here, we'll use validator.js for the email,

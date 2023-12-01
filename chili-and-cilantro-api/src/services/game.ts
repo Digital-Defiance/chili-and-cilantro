@@ -22,7 +22,7 @@ import { InvalidGameError } from '../errors/invalidGame';
 import { InvalidGameNameError } from '../errors/invalidGameName';
 import { InvalidGamePasswordError } from '../errors/invalidGamePassword';
 import { InvalidGameParameterError } from '../errors/invalidGameParameter';
-import { InvalidUserNameError } from '../errors/invalidUserName';
+import { InvalidUserDisplayNameError } from '../errors/invalidUserDisplayName';
 import { InvalidMessageError } from '../errors/invalidMessage';
 import { NotEnoughChefsError } from '../errors/notEnoughChefs';
 import { NotHostError } from '../errors/notHost';
@@ -77,17 +77,17 @@ export class GameService extends TransactionManager {
   /**
    * Validates the parameters before creating a game or throws a validation error
    * @param user The user creating the game
-   * @param userName The display name for the user
+   * @param userDisplayName The display name for the user
    * @param gameName The name of the game
    * @param password Optional password for the game. Empty string for no password.
    * @param maxChefs The maximum number of chefs in the game. Must be between MIN_CHEFS and MAX_CHEFS.
    */
-  public async validateCreateGameOrThrowAsync(user: IUser & Document, userName: string, gameName: string, password: string, maxChefs: number): Promise<void> {
+  public async validateCreateGameOrThrowAsync(user: IUser & Document, userDisplayName: string, gameName: string, password: string, maxChefs: number): Promise<void> {
     if (await this.playerService.userIsInAnyActiveGameAsync(user)) {
       throw new AlreadyJoinedOtherError();
     }
-    if (!validator.matches(userName, constants.MULTILINGUAL_STRING_REGEX) || userName.length < constants.MIN_USER_NAME_LENGTH || userName.length > constants.MAX_USER_NAME_LENGTH) {
-      throw new InvalidUserNameError();
+    if (!validator.matches(userDisplayName, constants.MULTILINGUAL_STRING_REGEX) || userDisplayName.length < constants.MIN_USER_DISPLAY_NAME_LENGTH || userDisplayName.length > constants.MAX_USER_DISPLAY_NAME_LENGTH) {
+      throw new InvalidUserDisplayNameError(userDisplayName);
     }
     if (!validator.matches(gameName, constants.MULTILINGUAL_STRING_REGEX) || gameName.length < constants.MIN_GAME_NAME_LENGTH || gameName.length > constants.MAX_GAME_NAME_LENGTH) {
       throw new InvalidGameNameError();
@@ -169,12 +169,12 @@ export class GameService extends TransactionManager {
     return { game, chef };
   }
 
-  public async validateJoinGameOrThrowAsync(game: IGame & Document, user: IUser & Document, userName: string, password: string): Promise<void> {
+  public async validateJoinGameOrThrowAsync(game: IGame & Document, user: IUser & Document, userDisplayName: string, password: string): Promise<void> {
     if (await this.playerService.userIsInAnyActiveGameAsync(user)) {
       throw new AlreadyJoinedOtherError();
     }
     const chefNames = await this.getGameChefNamesByGameIdAsync(game._id.toString());
-    if (chefNames.includes(userName)) {
+    if (chefNames.includes(userDisplayName)) {
       throw new UsernameInUseError();
     }
     if ((game.password && game.password !== password) || (password && !game.password)) {
@@ -186,8 +186,8 @@ export class GameService extends TransactionManager {
     if (game.chefIds.length > game.maxChefs) {
       throw new GameFullError();
     }
-    if (!validator.matches(userName, constants.MULTILINGUAL_STRING_REGEX) || userName.length < constants.MIN_USER_NAME_LENGTH || userName.length > constants.MAX_USER_NAME_LENGTH) {
-      throw new InvalidUserNameError();
+    if (!validator.matches(userDisplayName, constants.MULTILINGUAL_STRING_REGEX) || userDisplayName.length < constants.MIN_USER_DISPLAY_NAME_LENGTH || userDisplayName.length > constants.MAX_USER_DISPLAY_NAME_LENGTH) {
+      throw new InvalidUserDisplayNameError(userDisplayName);
     }
   }
 
@@ -593,7 +593,7 @@ export class GameService extends TransactionManager {
     if (game.turnOrder[game.currentChef].toString() !== chef._id.toString()) {
       throw new OutOfOrderError();
     }
-    if (chef.placedCards.length >= constants.MAX_HAND_SIZE || chef.hand.length == 0) {
+    if (chef.placedCards.length >= constants.HAND_SIZE || chef.hand.length == 0) {
       throw new AllCardsPlacedError();
     }
     // can the chef place a card in general

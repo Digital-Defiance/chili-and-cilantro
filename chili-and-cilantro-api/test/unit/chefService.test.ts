@@ -2,7 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 import { generateObjectId } from '../fixtures/objectId';
 import { generateChef } from '../fixtures/chef';
 import { generateGame, generateChefGameUser } from '../fixtures/game';
-import { generateUser } from '../fixtures/user';
+import { generateUser, generateUsername } from '../fixtures/user';
 import { UtilityService } from '../../src/services/utility';
 import { ChefService } from '../../src/services/chef';
 import { faker } from '@faker-js/faker';
@@ -42,7 +42,7 @@ describe('ChefService', () => {
         user: mockUser,
         chef: mockChef,
       } = generateChefGameUser(true);
-      const userName = faker.internet.userName();
+      const username = generateUsername();
       const host = true;
 
       const expectedHand = UtilityService.makeHand();
@@ -52,7 +52,7 @@ describe('ChefService', () => {
       const result = await chefService.newChefAsync(
         mockGame,
         mockUser,
-        userName,
+        username,
         host,
         mockChef._id
       );
@@ -61,7 +61,7 @@ describe('ChefService', () => {
       expect(mockChefModel.create).toHaveBeenCalledWith({
         _id: mockChef._id,
         gameId: mockGame._id,
-        name: userName,
+        name: username,
         userId: mockUser._id,
         hand: expectedHand,
         placedCards: [],
@@ -79,7 +79,7 @@ describe('ChefService', () => {
         chef: mockChef,
         game: mockGame,
       } = generateChefGameUser(true);
-      const userName = faker.internet.userName();
+      const username = generateUsername();
       const host = true;
 
       const expectedHand = UtilityService.makeHand();
@@ -89,7 +89,7 @@ describe('ChefService', () => {
       const result = await chefService.newChefAsync(
         mockGame,
         mockUser,
-        userName,
+        username,
         host
       );
 
@@ -97,7 +97,7 @@ describe('ChefService', () => {
       expect(mockChefModel.create).toHaveBeenCalledWith(
         expect.objectContaining({
           gameId: mockGame._id,
-          name: userName,
+          name: username,
           userId: mockUser._id,
           hand: expectedHand,
           placedCards: [],

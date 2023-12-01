@@ -7,6 +7,14 @@ import { generateUser } from './user';
 import { generateChef } from './chef';
 import { generateObjectId } from './objectId';
 
+export function generateGamePassword(): string {
+  let generatedPassword = '';
+  while (generatedPassword.length < constants.MIN_GAME_PASSWORD_LENGTH || generatedPassword.length > constants.MAX_GAME_PASSWORD_LENGTH) {
+    generatedPassword = faker.internet.password();
+  }
+  return generatedPassword;
+}
+
 /**
  * Generate a game with random values, and a save method to emulate mongoose Document
  * @param withPassword Whether the game should have a password
@@ -20,7 +28,7 @@ export function generateGame(withPassword = true, overrides?: Object): IGame & {
     _id: generateObjectId(),
     code: UtilityService.generateGameCode(),
     name: faker.lorem.words(3),
-    ...withPassword ? { password: faker.internet.password() } : {},
+    ...withPassword ? { password: generateGamePassword() } : {},
     chefIds: [hostChefId],
     eliminatedChefIds: [],
     maxChefs: numberBetween(constants.MIN_CHEFS, constants.MAX_CHEFS),

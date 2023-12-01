@@ -21,8 +21,8 @@ export const ChefSchema = new Schema<IChef>({
         return (
           v !== undefined &&
           validator.matches(v, constants.MULTILINGUAL_STRING_REGEX) &&
-          v.length >= constants.MIN_USER_NAME_LENGTH &&
-          v.length <= constants.MAX_USER_NAME_LENGTH
+          v.length >= constants.MIN_USER_DISPLAY_NAME_LENGTH &&
+          v.length <= constants.MAX_USER_DISPLAY_NAME_LENGTH
         );
       },
       message: (props) => `${props.value} is not a valid chef name!`,

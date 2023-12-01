@@ -43,7 +43,7 @@ export abstract class UtilityService {
    * @returns An array of ICards, all face down
    */
   public static makeHand(): ICard[] {
-    const handSize = constants.MAX_HAND_SIZE;
+    const handSize = constants.HAND_SIZE;
     const numChili = constants.CHILI_PER_HAND;
     const numCilantro = handSize - numChili;
     const hand: ICard[] = [];

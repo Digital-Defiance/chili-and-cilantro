@@ -7,7 +7,7 @@ import { GameService } from '../../src/services/game';
 import { PlayerService } from '../../src/services/player';
 import { constants, IGame, ModelName, IChef } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { AlreadyJoinedOtherError } from '../../src/errors/alreadyJoinedOther';
-import { InvalidUserNameError } from '../../src/errors/invalidUserName';
+import { InvalidUserDisplayNameError } from '../../src/errors/invalidUserDisplayName';
 import { generateUser } from '../fixtures/user';
 import { generateObjectId } from '../fixtures/objectId';
 import { InvalidGameNameError } from 'chili-and-cilantro-api/src/errors/invalidGameName';
@@ -41,7 +41,7 @@ describe('GameService', () => {
     beforeEach(() => {
       // Setup initial valid parameters
       user = generateUser();
-      userName = generateString(constants.MIN_USER_NAME_LENGTH, constants.MAX_USER_NAME_LENGTH);
+      userName = generateString(constants.MIN_USER_DISPLAY_NAME_LENGTH, constants.MAX_USER_DISPLAY_NAME_LENGTH);
       gameName = generateString(constants.MIN_GAME_NAME_LENGTH, constants.MAX_GAME_NAME_LENGTH);
       password = generateString(constants.MIN_GAME_PASSWORD_LENGTH, constants.MAX_GAME_PASSWORD_LENGTH);
       maxChefs = numberBetween(constants.MIN_CHEFS, constants.MAX_CHEFS);
@@ -79,11 +79,11 @@ describe('GameService', () => {
       // Mock the condition where user is not in an active game
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
 
-      userName = '!'.repeat(constants.MIN_USER_NAME_LENGTH + 1); // Set an invalid username with special characters
+      userName = '!'.repeat(constants.MIN_USER_DISPLAY_NAME_LENGTH + 1); // Set an invalid username with special characters
 
       // act/assert
       await expect(gameService.validateCreateGameOrThrowAsync(user, userName, gameName, password, maxChefs))
-        .rejects.toThrow(InvalidUserNameError);
+        .rejects.toThrow(InvalidUserDisplayNameError);
     });
 
     it('should throw an error for invalid username that is too short', async () => {
@@ -91,11 +91,11 @@ describe('GameService', () => {
       // Mock the condition where user is not in an active game
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
 
-      userName = 'x'.repeat(constants.MIN_USER_NAME_LENGTH - 1); // Set an invalid username that is too short
+      userName = 'x'.repeat(constants.MIN_USER_DISPLAY_NAME_LENGTH - 1); // Set an invalid username that is too short
 
       // act/assert
       await expect(gameService.validateCreateGameOrThrowAsync(user, userName, gameName, password, maxChefs))
-        .rejects.toThrow(InvalidUserNameError);
+        .rejects.toThrow(InvalidUserDisplayNameError);
     });
 
     it('should throw an error for invalid username that is too long', async () => {
@@ -103,11 +103,11 @@ describe('GameService', () => {
       // Mock the condition where user is not in an active game
       sinon.stub(gameService.playerService, 'userIsInAnyActiveGameAsync').resolves(false);
 
-      userName = 'x'.repeat(constants.MAX_USER_NAME_LENGTH + 1); // Set an invalid username that is too long
+      userName = 'x'.repeat(constants.MAX_USER_DISPLAY_NAME_LENGTH + 1); // Set an invalid username that is too long
 
       // act/assert
       await expect(gameService.validateCreateGameOrThrowAsync(user, userName, gameName, password, maxChefs))
-        .rejects.toThrow(InvalidUserNameError);
+        .rejects.toThrow(InvalidUserDisplayNameError);
     });
 
     it('should throw an error for an invalid game name with special characters', async () => {
@@ -203,7 +203,7 @@ describe('GameService', () => {
 
     beforeEach(() => {
       // Setup initial valid parameters
-      gameUserName = generateString(constants.MIN_USER_NAME_LENGTH, constants.MAX_USER_NAME_LENGTH);
+      gameUserName = generateString(constants.MIN_USER_DISPLAY_NAME_LENGTH, constants.MAX_USER_DISPLAY_NAME_LENGTH);
       gameName = generateString(constants.MIN_GAME_NAME_LENGTH, constants.MAX_GAME_NAME_LENGTH);
       password = generateString(constants.MIN_GAME_PASSWORD_LENGTH, constants.MAX_GAME_PASSWORD_LENGTH);
       maxChefs = numberBetween(constants.MIN_CHEFS, constants.MAX_CHEFS);
@@ -245,7 +245,7 @@ describe('GameService', () => {
     let mockUser, userName, gameName, password, maxChefs;
     beforeEach(() => {
       mockUser = generateUser();
-      userName = generateString(constants.MIN_USER_NAME_LENGTH, constants.MAX_USER_NAME_LENGTH);
+      userName = generateString(constants.MIN_USER_DISPLAY_NAME_LENGTH, constants.MAX_USER_DISPLAY_NAME_LENGTH);
       gameName = generateString(constants.MIN_GAME_NAME_LENGTH, constants.MAX_GAME_NAME_LENGTH);
       password = generateString(constants.MIN_GAME_PASSWORD_LENGTH, constants.MAX_GAME_PASSWORD_LENGTH);
       maxChefs = numberBetween(constants.MIN_CHEFS, constants.MAX_CHEFS);
