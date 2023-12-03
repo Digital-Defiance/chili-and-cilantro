@@ -10,6 +10,9 @@ import {
   TurnAction,
   IBid,
   ChefState,
+  IMessageAction,
+  ICreateGameAction,
+  IStartGameAction,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { AllCardsPlacedError } from '../errors/allCardsPlaced';
 import { AlreadyJoinedOtherError } from '../errors/alreadyJoinedOther';
@@ -109,7 +112,7 @@ export class GameService extends TransactionManager {
    * @param maxChefs The maximum number of chefs in the game. Must be between MIN_CHEFS and MAX_CHEFS.
    * @returns 
    */
-  public async createGameAsync(user: IUser & Document, userName: string, gameName: string, password: string, maxChefs: number): Promise<{ game: IGame & Document, chef: IChef & Document, action: Document<unknown> }> {
+  public async createGameAsync(user: IUser & Document, userName: string, gameName: string, password: string, maxChefs: number): Promise<{ game: IGame & Document, chef: IChef & Document, action: Document<Schema.Types.ObjectId, {}, ICreateGameAction> & ICreateGameAction }> {
     const gameId = new ObjectId();
     const chefId = new ObjectId();
     const gameCode = await this.generateNewGameCodeAsync();
@@ -290,7 +293,7 @@ export class GameService extends TransactionManager {
    * @param game The game to start
    * @returns A tuple of the game and the start game action
    */
-  public async startGameAsync(game: IGame & Document): Promise<{ game: IGame & Document, action: Document<unknown> }> {
+  public async startGameAsync(game: IGame & Document): Promise<{ game: IGame & Document, action: Document<Schema.Types.ObjectId, {}, IStartGameAction> & IStartGameAction }> {
     // set the current bid to 0
     game.currentBid = 0;
     // set the current chef to the first player
@@ -336,7 +339,7 @@ export class GameService extends TransactionManager {
    * @param gameId 
    * @returns 
    */
-  public async performStartGameAsync(gameCode: string, userId: string): Promise<{ game: IGame & Document, action: Document<unknown> }> {
+  public async performStartGameAsync(gameCode: string, userId: string): Promise<{ game: IGame & Document, action: Document<Schema.Types.ObjectId, {}, IStartGameAction> & IStartGameAction }> {
     return this.withTransaction(async (session) => {
       const game = await this.getGameByCodeOrThrowAsync(gameCode, true);
       await this.validateStartGameOrThrowAsync(game, userId);
@@ -436,7 +439,7 @@ export class GameService extends TransactionManager {
    * @param message The message to send
    * @returns The message action object
    */
-  public async sendMessageAsync(game: IGame, chef: IChef, message: string): Promise<Document<unknown>> {
+  public async sendMessageAsync(game: IGame, chef: IChef, message: string): Promise<Document<Schema.Types.ObjectId, {}, IMessageAction> & IMessageAction> {
     return this.actionService.sendMessageAsync(game, chef, message);
   }
 
@@ -447,11 +450,11 @@ export class GameService extends TransactionManager {
    * @param message The message to send
    * @returns The message action object
    */
-  public async performSendMessageAsync(gameCode: string, user: IUser & Document, message: string): Promise<Document<unknown>> {
+  public async performSendMessageAsync(gameCode: string, user: IUser & Document, message: string): Promise<Document<Schema.Types.ObjectId, {}, IMessageAction> & IMessageAction> {
+    this.validateSendMessageOrThrow(message);
     return this.withTransaction(async (session) => {
       const game = await this.getGameByCodeOrThrowAsync(gameCode, true);
       const chef = await this.chefService.getGameChefOrThrowAsync(game, user);
-      this.validateSendMessageOrThrow(message);
       return this.sendMessageAsync(game, chef, message);
     });
   }
@@ -668,7 +671,9 @@ export class GameService extends TransactionManager {
    */
   public async performPlaceIngredientAsync(game: IGame & Document, chef: IChef & Document, ingredient: CardType): Promise<{ game: IGame & Document, chef: IChef & Document }> {
     this.validatePlaceIngredientOrThrow(game, chef, ingredient);
-    return this.placeIngredientAsync(game, chef, ingredient);
+    return this.withTransaction(async (session) => {
+      return this.placeIngredientAsync(game, chef, ingredient);
+    });
   }
 
   /**

@@ -1,14 +1,10 @@
-import { Schema } from 'mongoose';
-import sinon from 'sinon';
 import { GameService } from '../../src/services/game';
 import { Database } from '../../src/services/database';
 import { generateGame, generateChefGameUser } from '../fixtures/game';
-import { generateUser } from '../fixtures/user';
 import { generateChef } from '../fixtures/chef';
 import { generateObjectId } from '../fixtures/objectId';
 import { mockedWithTransactionAsync } from '../fixtures/transactionManager';
 import { constants, IGame, ModelName, GamePhase, CardType, TurnAction } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { GameInProgressError } from '../../src/errors/gameInProgress';
 import { IncorrectGamePhaseError } from '../../src/errors/incorrectGamePhase';
 import { OutOfOrderError } from '../../src/errors/outOfOrder';
 import { InvalidActionError } from '../../src/errors/invalidAction';
@@ -146,6 +142,7 @@ describe('GameService', () => {
       const ingredient = CardType.CHILI;
       jest.spyOn(gameService, 'validatePlaceIngredientOrThrow').mockImplementation(() => { });
       jest.spyOn(gameService, 'placeIngredientAsync').mockResolvedValue({ game, chef });
+      jest.spyOn(gameService, 'withTransaction').mockImplementation(mockedWithTransactionAsync);
 
       const result = await gameService.performPlaceIngredientAsync(game, chef, ingredient);
 
@@ -166,6 +163,7 @@ describe('GameService', () => {
 
     it('should throw an error if placement fails', async () => {
       const ingredient = CardType.CHILI;
+      jest.spyOn(gameService, 'withTransaction').mockImplementation(mockedWithTransactionAsync);
       jest.spyOn(gameService, 'validatePlaceIngredientOrThrow').mockImplementation(() => { });
       jest.spyOn(gameService, 'placeIngredientAsync').mockImplementation(() => {
         throw new Error('Placement failed');
