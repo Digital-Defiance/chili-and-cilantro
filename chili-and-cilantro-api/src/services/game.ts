@@ -583,11 +583,27 @@ export class GameService extends TransactionManager {
     return actions;
   }
 
+  /**
+   * Gets the current chef ID from the current game
+   * @param game The game being evaluated
+   * @throws Error if currentChef is invalid
+   * @returns ObjectID of the current chef
+   */
   public getGameCurrentChefId(game: IGame): Schema.Types.ObjectId {
     if (game.currentChef < 0 || game.currentChef >= game.turnOrder.length) {
       throw new Error(`Invalid current chef index: ${game.currentChef}`);
     }
     return game.turnOrder[game.currentChef];
+  }
+
+  /**
+   * Returns whether the given chef has at least one card of the specified ingredient.
+   * @param chef The chef being tested
+   * @param ingredient The ingredient being searched for
+   * @returns boolean with whether the card was found
+   */
+  public hasIngredientInHand(chef: IChef, ingredient: CardType): boolean {
+    return (chef.hand.filter(card => card.type == ingredient).length > 0);
   }
 
   /**
@@ -612,7 +628,7 @@ export class GameService extends TransactionManager {
       throw new InvalidActionError(TurnAction.PlaceCard);
     }
     // can they specifically place the given card
-    if (chef.hand.filter(card => card.type == ingredient).length == 0) {
+    if (!this.hasIngredientInHand(chef, ingredient)) {
       throw new OutOfIngredientError(ingredient);
     }
   }
@@ -626,7 +642,11 @@ export class GameService extends TransactionManager {
    */
   public async placeIngredientAsync(game: IGame & Document, chef: IChef & Document, ingredient: CardType): Promise<{ game: IGame & Document, chef: IChef & Document }> {
     // remove one card of the specified type from the chef's hand
-    chef.hand.splice(chef.hand.findIndex(card => card.type == ingredient), 1);
+    const ingredientIndex = chef.hand.findIndex(card => card.type == ingredient);
+    if (ingredientIndex < 0) {
+      throw new OutOfIngredientError(ingredient);
+    }
+    chef.hand.splice(ingredientIndex, 1);
     // add the card to the chef's placed cards
     chef.placedCards.push({ type: ingredient, faceUp: false });
     const savedChef = await chef.save();

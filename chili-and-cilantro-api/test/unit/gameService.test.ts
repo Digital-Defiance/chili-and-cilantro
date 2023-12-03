@@ -1,6 +1,6 @@
 import { Database } from '../../src/services/database';
 import { GameService } from '../../src/services/game';
-import { GamePhase, IGame, ModelName, TurnAction } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { CardType, GamePhase, IGame, ModelName, TurnAction } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { InvalidGameError } from '../../src/errors/invalidGame';
 import { generateGame } from '../fixtures/game';
 import mongoose from 'mongoose';
@@ -400,6 +400,31 @@ describe('GameService', () => {
 
       expect(() => gameService.getGameCurrentChefId(game))
         .toThrow(`Invalid current chef index: ${game.currentChef}`);
+    });
+  });
+  describe('hasIngredientInHand', () => {
+    it('should return true if the chef has the ingredient in hand', () => {
+      const chef = generateChef({ hand: [{ type: CardType.CHILI, faceUp: false }, { type: CardType.CILANTRO, faceUp: false }] });
+      const ingredient = CardType.CHILI;
+
+      const result = gameService.hasIngredientInHand(chef, ingredient);
+      expect(result).toBe(true);
+    });
+
+    it('should return false if the chef does not have the ingredient in hand', () => {
+      const chef = generateChef({ hand: [{ type: CardType.CILANTRO, faceUp: false }] });
+      const ingredient = CardType.CHILI;
+
+      const result = gameService.hasIngredientInHand(chef, ingredient);
+      expect(result).toBe(false);
+    });
+
+    it('should return false if the chef\'s hand is empty', () => {
+      const chef = generateChef({ hand: [] });
+      const ingredient = CardType.CHILI;
+
+      const result = gameService.hasIngredientInHand(chef, ingredient);
+      expect(result).toBe(false);
     });
   });
 });
