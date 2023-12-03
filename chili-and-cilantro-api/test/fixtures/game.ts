@@ -39,7 +39,7 @@ export function generateGame(withPassword = true, overrides?: Object): IGame & {
     currentRound: constants.NONE,
     roundBids: {},
     roundWinners: {},
-    turnOrder: [],
+    turnOrder: [hostChefId],
     hostChefId: hostChefId,
     hostUserId: hostUserId,
     createdAt: faker.date.past(),
@@ -62,6 +62,7 @@ export function generateChefGameUser(withPassword: boolean, numAdditionalChefs =
     hostUserId: user._id,
     hostChefId: chef._id,
     chefIds: chefIds,
+    turnOrder: chefIds,
     ...overrides?.game
   });
   return { user, chef, game, additionalChefs };

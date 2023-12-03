@@ -477,7 +477,8 @@ export class GameService extends TransactionManager {
       return false;
     }
     // the current chef must be the user
-    if (game.turnOrder[game.currentChef].toString() !== chef._id.toString()) {
+    const currentChefId = this.getGameCurrentChefId(game);
+    if (currentChefId.toString() !== chef._id.toString()) {
       return false;
     }
     // there must not be no cards placed yet
@@ -505,7 +506,8 @@ export class GameService extends TransactionManager {
       return false;
     }
     // the current chef must be the user
-    if (game.turnOrder[game.currentChef].toString() !== chef._id.toString()) {
+    const currentChefId = this.getGameCurrentChefId(game);
+    if (currentChefId.toString() !== chef._id.toString()) {
       return false;
     }
     // the chef must have cards left in their hand
@@ -522,7 +524,8 @@ export class GameService extends TransactionManager {
    */
   public canPass(game: IGame, chef: IChef): boolean {
     // the current chef must be the user
-    if (game.turnOrder[game.currentChef].toString() !== chef._id.toString()) {
+    const currentChefId = this.getGameCurrentChefId(game);
+    if (currentChefId.toString() !== chef._id.toString()) {
       return false;
     }
     // current phase must be BIDDING
@@ -580,6 +583,13 @@ export class GameService extends TransactionManager {
     return actions;
   }
 
+  public getGameCurrentChefId(game: IGame): Schema.Types.ObjectId {
+    if (game.currentChef < 0 || game.currentChef >= game.turnOrder.length) {
+      throw new Error(`Invalid current chef index: ${game.currentChef}`);
+    }
+    return game.turnOrder[game.currentChef];
+  }
+
   /**
    * Validates that the specified chef can place a card or throws a validation error
    * @param game The game to validate
@@ -590,7 +600,8 @@ export class GameService extends TransactionManager {
     if (game.currentPhase !== GamePhase.SETUP) {
       throw new IncorrectGamePhaseError();
     }
-    if (game.turnOrder[game.currentChef].toString() !== chef._id.toString()) {
+    const currentChefId = this.getGameCurrentChefId(game);
+    if (currentChefId.toString() !== chef._id.toString()) {
       throw new OutOfOrderError();
     }
     if (chef.placedCards.length >= constants.HAND_SIZE || chef.hand.length == 0) {

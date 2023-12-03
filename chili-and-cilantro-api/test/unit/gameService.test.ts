@@ -375,4 +375,31 @@ describe('GameService', () => {
       expect(gameService.haveAllRemainingPlayersPassed(game)).toBe(false);
     });
   });
+  describe('getGameCurrentChefId', () => {
+    let game;
+    beforeEach(() => {
+      game = generateGame(true);
+    });
+    it('should return the current chef ID when the index is valid', () => {
+      const chefIds = [generateObjectId(), generateObjectId()];
+      game = generateGame(true, { currentChef: 0, turnOrder: chefIds });
+
+      const currentChefId = gameService.getGameCurrentChefId(game);
+      expect(currentChefId).toEqual(chefIds[0]);
+    });
+
+    it('should throw an error if the current chef index is negative', () => {
+      game = generateGame(true, { currentChef: -1, turnOrder: [generateObjectId()] });
+
+      expect(() => gameService.getGameCurrentChefId(game))
+        .toThrow(`Invalid current chef index: ${game.currentChef}`);
+    });
+
+    it('should throw an error if the current chef index exceeds the turn order length', () => {
+      game = generateGame(true, { currentChef: 2, turnOrder: [generateObjectId(), generateObjectId()] });
+
+      expect(() => gameService.getGameCurrentChefId(game))
+        .toThrow(`Invalid current chef index: ${game.currentChef}`);
+    });
+  });
 });
