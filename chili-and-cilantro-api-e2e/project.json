@@ -1,23 +1,18 @@
 {
   "name": "chili-and-cilantro-api-e2e",
   "$schema": "../node_modules/nx/schemas/project-schema.json",
-  "implicitDependencies": ["chili-and-cilantro-api"],
   "projectType": "application",
+  "implicitDependencies": ["chili-and-cilantro-api"],
   "targets": {
     "e2e": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{e2eProjectRoot}"],
       "options": {
-        "jestConfig": "chili-and-cilantro-api-e2e/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "chili-and-cilantro-api-e2e/jest.config.ts"
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["chili-and-cilantro-api-e2e/**/*.{js,ts}"]
-      }
+      "executor": "@nx/eslint:lint"
     }
   }
 }
