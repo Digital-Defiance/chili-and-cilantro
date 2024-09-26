@@ -4,7 +4,8 @@
     "default": {
       "runner": "nx/tasks-runners/default",
       "options": {
-        "cacheableOperations": ["build", "lint", "test", "e2e"]
+        "cacheableOperations": ["build", "lint", "test", "e2e"],
+        "accessToken": "YzRmYzM5ZDctZjgyNy00OWEzLTllZWItMjM5MjY1NDRmMGUwfHJlYWQtd3JpdGU="
       }
     }
   },
@@ -24,9 +25,7 @@
         "{workspaceRoot}/eslint.config.js"
       ]
     },
-    "e2e": {
-      "inputs": ["default", "^production"]
-    }
+    "e2e": { "inputs": ["default", "^production"] }
   },
   "namedInputs": {
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
@@ -50,13 +49,8 @@
         "bundler": "webpack",
         "babel": true
       },
-      "component": {
-        "style": "css"
-      },
-      "library": {
-        "style": "css",
-        "linter": "eslint"
-      }
+      "component": { "style": "css" },
+      "library": { "style": "css", "linter": "eslint" }
     }
   }
 }
