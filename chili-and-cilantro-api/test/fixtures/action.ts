@@ -1,10 +1,34 @@
 import { Schema } from 'mongoose';
 import { faker } from '@faker-js/faker';
-import { constants, Action, CardType, ChefState, ICreateGameAction, ICreateGameDetails, IExpireGameAction, IExpireGameDetails, IJoinGameAction, IJoinGameDetails, IMessageAction, IMessageDetails, IPassAction, IPassDetails, IPlaceCardAction, IStartBiddingAction, IStartBiddingDetails, IStartGameAction, IStartGameDetails } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import {
+  constants,
+  Action,
+  CardType,
+  ChefState,
+  ICreateGameAction,
+  ICreateGameDetails,
+  IExpireGameAction,
+  IExpireGameDetails,
+  IJoinGameAction,
+  IJoinGameDetails,
+  IMessageAction,
+  IMessageDetails,
+  IPassAction,
+  IPassDetails,
+  IPlaceCardAction,
+  IStartBiddingAction,
+  IStartBiddingDetails,
+  IStartGameAction,
+  IStartGameDetails,
+} from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { UtilityService } from '../../src/services/utility';
 import { generateObjectId } from '../fixtures/objectId';
 
-export function generateCreateGameAction(gameId: Schema.Types.ObjectId, chefId: Schema.Types.ObjectId, userId: Schema.Types.ObjectId): ICreateGameAction {
+export function generateCreateGameAction(
+  gameId: Schema.Types.ObjectId,
+  chefId: Schema.Types.ObjectId,
+  userId: Schema.Types.ObjectId
+): ICreateGameAction {
   return {
     _id: generateObjectId(),
     gameId: gameId,
@@ -15,10 +39,14 @@ export function generateCreateGameAction(gameId: Schema.Types.ObjectId, chefId: 
     round: constants.NONE,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
-  }
+  };
 }
 
-export function generateJoinGameAction(gameId: Schema.Types.ObjectId, chefId: Schema.Types.ObjectId, userId: Schema.Types.ObjectId): IJoinGameAction {
+export function generateJoinGameAction(
+  gameId: Schema.Types.ObjectId,
+  chefId: Schema.Types.ObjectId,
+  userId: Schema.Types.ObjectId
+): IJoinGameAction {
   return {
     _id: generateObjectId(),
     gameId: gameId,
@@ -29,10 +57,14 @@ export function generateJoinGameAction(gameId: Schema.Types.ObjectId, chefId: Sc
     round: constants.NONE,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
-  }
+  };
 }
 
-export function generateStartGameAction(gameId: Schema.Types.ObjectId, chefId: Schema.Types.ObjectId, userId: Schema.Types.ObjectId): IStartGameAction {
+export function generateStartGameAction(
+  gameId: Schema.Types.ObjectId,
+  chefId: Schema.Types.ObjectId,
+  userId: Schema.Types.ObjectId
+): IStartGameAction {
   return {
     _id: generateObjectId(),
     gameId: gameId,
@@ -43,10 +75,14 @@ export function generateStartGameAction(gameId: Schema.Types.ObjectId, chefId: S
     round: constants.NONE,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
-  }
+  };
 }
 
-export function generateExpireGameAction(gameId: Schema.Types.ObjectId, chefId: Schema.Types.ObjectId, userId: Schema.Types.ObjectId): IExpireGameAction {
+export function generateExpireGameAction(
+  gameId: Schema.Types.ObjectId,
+  chefId: Schema.Types.ObjectId,
+  userId: Schema.Types.ObjectId
+): IExpireGameAction {
   return {
     _id: generateObjectId(),
     gameId: gameId,
@@ -57,10 +93,15 @@ export function generateExpireGameAction(gameId: Schema.Types.ObjectId, chefId: 
     round: constants.NONE,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
-  }
+  };
 }
 
-export function generateSendMessageAction(gameId: Schema.Types.ObjectId, chefId: Schema.Types.ObjectId, userId: Schema.Types.ObjectId, message: string): IMessageAction {
+export function generateSendMessageAction(
+  gameId: Schema.Types.ObjectId,
+  chefId: Schema.Types.ObjectId,
+  userId: Schema.Types.ObjectId,
+  message: string
+): IMessageAction {
   return {
     _id: generateObjectId(),
     gameId: gameId,
@@ -73,10 +114,16 @@ export function generateSendMessageAction(gameId: Schema.Types.ObjectId, chefId:
     round: constants.NONE,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
-  }
+  };
 }
 
-export function generateStartBiddingAction(gameId: Schema.Types.ObjectId, chefId: Schema.Types.ObjectId, userId: Schema.Types.ObjectId, round: number, bid: number): IStartBiddingAction {
+export function generateStartBiddingAction(
+  gameId: Schema.Types.ObjectId,
+  chefId: Schema.Types.ObjectId,
+  userId: Schema.Types.ObjectId,
+  round: number,
+  bid: number
+): IStartBiddingAction {
   return {
     _id: generateObjectId(),
     gameId: gameId,
@@ -89,10 +136,15 @@ export function generateStartBiddingAction(gameId: Schema.Types.ObjectId, chefId
     round: round,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
-  }
+  };
 }
 
-export function generatePassAction(gameId: Schema.Types.ObjectId, chefId: Schema.Types.ObjectId, userId: Schema.Types.ObjectId, round: number): IPassAction {
+export function generatePassAction(
+  gameId: Schema.Types.ObjectId,
+  chefId: Schema.Types.ObjectId,
+  userId: Schema.Types.ObjectId,
+  round: number
+): IPassAction {
   return {
     _id: generateObjectId(),
     gameId: gameId,
@@ -103,10 +155,17 @@ export function generatePassAction(gameId: Schema.Types.ObjectId, chefId: Schema
     round: round,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
-  }
+  };
 }
 
-export function generatePlaceCardAction(gameId: Schema.Types.ObjectId, chefId: Schema.Types.ObjectId, userId: Schema.Types.ObjectId, round: number, cardType: CardType, position: number): IPlaceCardAction {
+export function generatePlaceCardAction(
+  gameId: Schema.Types.ObjectId,
+  chefId: Schema.Types.ObjectId,
+  userId: Schema.Types.ObjectId,
+  round: number,
+  cardType: CardType,
+  position: number
+): IPlaceCardAction {
   return {
     _id: generateObjectId(),
     gameId: gameId,
@@ -120,5 +179,5 @@ export function generatePlaceCardAction(gameId: Schema.Types.ObjectId, chefId: S
     round: round,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
-  }
+  };
 }

@@ -1,1 +1,1 @@
-export interface IExpireGameDetails { }
+export interface IExpireGameDetails {}

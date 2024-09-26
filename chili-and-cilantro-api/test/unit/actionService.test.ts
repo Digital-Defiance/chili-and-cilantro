@@ -3,7 +3,16 @@ import { ActionService } from '../../src/services/action';
 import { IDatabase } from '../../src/interfaces/database';
 import { generateGame, generateChefGameUser } from '../fixtures/game';
 import { generateObjectId } from '../fixtures/objectId';
-import { generateCreateGameAction, generateExpireGameAction, generateJoinGameAction, generatePassAction, generatePlaceCardAction, generateSendMessageAction, generateStartBiddingAction, generateStartGameAction } from '../fixtures/action';
+import {
+  generateCreateGameAction,
+  generateExpireGameAction,
+  generateJoinGameAction,
+  generatePassAction,
+  generatePlaceCardAction,
+  generateSendMessageAction,
+  generateStartBiddingAction,
+  generateStartGameAction,
+} from '../fixtures/action';
 import {
   constants,
   IAction,
@@ -25,9 +34,10 @@ import { generateUser } from '../fixtures/user';
 import { generateChef } from '../fixtures/chef';
 import { faker } from '@faker-js/faker';
 
-type MockModel<T = any> = Model<T> & jest.Mocked<Model<T>> & {
-  sort: jest.Mock;
-};
+type MockModel<T = any> = Model<T> &
+  jest.Mocked<Model<T>> & {
+    sort: jest.Mock;
+  };
 
 describe('ActionService', () => {
   let gameId: Schema.Types.ObjectId;
@@ -46,7 +56,9 @@ describe('ActionService', () => {
   describe('getGameHistoryAsync', () => {
     it('should retrieve game history', async () => {
       // Arrange
-      const mockActions = [generateCreateGameAction(gameId, hostChef._id, hostUser._id)];
+      const mockActions = [
+        generateCreateGameAction(gameId, hostChef._id, hostUser._id),
+      ];
 
       const mockActionModel = {
         find: jest.fn().mockReturnThis(), // Mock find to return 'this', enabling chaining
@@ -73,7 +85,11 @@ describe('ActionService', () => {
 
   describe('createGameAsync', () => {
     it('should create a game action', async () => {
-      const mockCreateGameAction = generateCreateGameAction(gameId, hostChef._id, hostUser._id);
+      const mockCreateGameAction = generateCreateGameAction(
+        gameId,
+        hostChef._id,
+        hostUser._id
+      );
       const mockCreateGameActionDocument = {
         ...mockCreateGameAction,
         save: jest.fn(),
@@ -84,7 +100,9 @@ describe('ActionService', () => {
         sort: jest.fn().mockResolvedValue([]),
         create: jest.fn(),
       } as unknown as MockModel<ICreateGameAction>;
-      mockActionModel.create.mockResolvedValue(mockCreateGameActionDocument as any);
+      mockActionModel.create.mockResolvedValue(
+        mockCreateGameActionDocument as any
+      );
 
       const mockDatabase = {
         getModel: jest.fn().mockReturnValue(mockActionModel),
@@ -93,7 +111,11 @@ describe('ActionService', () => {
 
       const actionService = new ActionService(mockDatabase);
 
-      const result = await actionService.createGameAsync(mockGame, hostChef, hostUser);
+      const result = await actionService.createGameAsync(
+        mockGame,
+        hostChef,
+        hostUser
+      );
 
       expect(mockActionModel.create).toHaveBeenCalledWith({
         gameId: gameId,
@@ -112,7 +134,11 @@ describe('ActionService', () => {
   describe('joinGameAsync', () => {
     it('should create a join game action', async () => {
       // Arrange
-      const mockJoinGameAction = generateJoinGameAction(gameId, hostChef._id, hostUser._id);
+      const mockJoinGameAction = generateJoinGameAction(
+        gameId,
+        hostChef._id,
+        hostUser._id
+      );
       const mockJoinGameActionDocument = {
         ...mockJoinGameAction,
         save: jest.fn(),
@@ -129,7 +155,11 @@ describe('ActionService', () => {
       const actionService = new ActionService(mockDatabase);
 
       // Act
-      const result = await actionService.joinGameAsync(mockGame, hostChef, hostUser);
+      const result = await actionService.joinGameAsync(
+        mockGame,
+        hostChef,
+        hostUser
+      );
 
       // Assert
       expect(mockActionModel.create).toHaveBeenCalledWith({
@@ -149,7 +179,11 @@ describe('ActionService', () => {
   describe('startGameAsync', () => {
     it('should create a start game action', async () => {
       // Arrange
-      const mockStartGameAction = generateStartGameAction(gameId, hostChef._id, hostUser._id);
+      const mockStartGameAction = generateStartGameAction(
+        gameId,
+        hostChef._id,
+        hostUser._id
+      );
       const mockStartGameActionDocument = {
         ...mockStartGameAction,
         save: jest.fn(),
@@ -186,7 +220,11 @@ describe('ActionService', () => {
   describe('expireGameAsync', () => {
     it('should create an expire game action', async () => {
       // Arrange
-      const mockExpireGameAction = generateExpireGameAction(gameId, hostChef._id, hostUser._id);
+      const mockExpireGameAction = generateExpireGameAction(
+        gameId,
+        hostChef._id,
+        hostUser._id
+      );
       const mockExpireGameActionDocument = {
         ...mockExpireGameAction,
         save: jest.fn(),
@@ -224,7 +262,12 @@ describe('ActionService', () => {
     it('should create a message action', async () => {
       // Arrange
       const message = faker.lorem.sentence();
-      const mockSendMessageAction = generateSendMessageAction(gameId, hostChef._id, hostUser._id, message);
+      const mockSendMessageAction = generateSendMessageAction(
+        gameId,
+        hostChef._id,
+        hostUser._id,
+        message
+      );
       const mockSendMessageActionDocument = {
         ...mockSendMessageAction,
         save: jest.fn(),
@@ -241,7 +284,11 @@ describe('ActionService', () => {
       const actionService = new ActionService(mockDatabase);
 
       // Act
-      const result = await actionService.sendMessageAsync(mockGame, hostChef, message);
+      const result = await actionService.sendMessageAsync(
+        mockGame,
+        hostChef,
+        message
+      );
 
       // Assert
       expect(mockActionModel.create).toHaveBeenCalledWith({
@@ -265,9 +312,21 @@ describe('ActionService', () => {
     it('should create a start bidding action', async () => {
       // Arrange
       const round = faker.number.int({ min: 0, max: 10 });
-      mockGame = generateGame(true, { _id: gameId, hostUserId: hostUser._id, hostChefId: hostChef._id, currentRound: round, chefIds: [hostChef._id] });
+      mockGame = generateGame(true, {
+        _id: gameId,
+        hostUserId: hostUser._id,
+        hostChefId: hostChef._id,
+        currentRound: round,
+        chefIds: [hostChef._id],
+      });
       const bid = faker.number.int({ min: 1, max: 10 });
-      const mockStartBiddingAction = generateStartBiddingAction(gameId, hostChef._id, hostUser._id, round, bid);
+      const mockStartBiddingAction = generateStartBiddingAction(
+        gameId,
+        hostChef._id,
+        hostUser._id,
+        round,
+        bid
+      );
       const mockStartBiddingActionDocument = {
         ...mockStartBiddingAction,
         save: jest.fn(),
@@ -284,7 +343,11 @@ describe('ActionService', () => {
       const actionService = new ActionService(mockDatabase);
 
       // Act
-      const result = await actionService.startBiddingAsync(mockGame, hostChef, bid);
+      const result = await actionService.startBiddingAsync(
+        mockGame,
+        hostChef,
+        bid
+      );
 
       // Assert
       expect(mockActionModel.create).toHaveBeenCalledWith({
@@ -310,8 +373,20 @@ describe('ActionService', () => {
       // Arrange
       const round = faker.number.int({ min: 0, max: 10 });
       const bid = faker.number.int({ min: 1, max: 10 });
-      mockGame = generateGame(true, { _id: gameId, hostUserId: hostUser._id, hostChefId: hostChef._id, currentRound: round, currentBid: bid, chefIds: [hostChef._id] });
-      const mockPassAction = generatePassAction(gameId, hostChef._id, hostUser._id, round);
+      mockGame = generateGame(true, {
+        _id: gameId,
+        hostUserId: hostUser._id,
+        hostChefId: hostChef._id,
+        currentRound: round,
+        currentBid: bid,
+        chefIds: [hostChef._id],
+      });
+      const mockPassAction = generatePassAction(
+        gameId,
+        hostChef._id,
+        hostUser._id,
+        round
+      );
       const mockPassActionDocument = {
         ...mockPassAction,
         save: jest.fn(),
@@ -350,11 +425,24 @@ describe('ActionService', () => {
     it('should create a place card action', async () => {
       // Arrange
       const round = faker.number.int({ min: 0, max: 10 });
-      mockGame = generateGame(true, { _id: gameId, hostUserId: hostUser._id, hostChefId: hostChef._id, currentRound: round, chefIds: [hostChef._id] });
+      mockGame = generateGame(true, {
+        _id: gameId,
+        hostUserId: hostUser._id,
+        hostChefId: hostChef._id,
+        currentRound: round,
+        chefIds: [hostChef._id],
+      });
       // pick a random CardType from the CardType enum
       const cardType = faker.helpers.enumValue(CardType);
       const position: number = faker.number.int({ min: 0, max: 4 });
-      const mockPlaceCardAction = generatePlaceCardAction(gameId, hostChef._id, hostUser._id, round, cardType, position);
+      const mockPlaceCardAction = generatePlaceCardAction(
+        gameId,
+        hostChef._id,
+        hostUser._id,
+        round,
+        cardType,
+        position
+      );
       const mockPlaceCardActionDocument = {
         ...mockPlaceCardAction,
         save: jest.fn(),
@@ -371,7 +459,12 @@ describe('ActionService', () => {
       const actionService = new ActionService(mockDatabase);
 
       // Act
-      const result = await actionService.placeCardAsync(mockGame, hostChef, cardType, position);
+      const result = await actionService.placeCardAsync(
+        mockGame,
+        hostChef,
+        cardType,
+        position
+      );
 
       // Assert
       expect(mockActionModel.create).toHaveBeenCalledWith({

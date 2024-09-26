@@ -1,7 +1,9 @@
-import { ClientSession, startSession } from "mongoose";
+import { ClientSession, startSession } from 'mongoose';
 
 export abstract class TransactionManager {
-  protected async withTransaction<TResult>(work: (session: ClientSession) => Promise<TResult>): Promise<TResult> {
+  protected async withTransaction<TResult>(
+    work: (session: ClientSession) => Promise<TResult>
+  ): Promise<TResult> {
     const session = await startSession();
     try {
       session.startTransaction();

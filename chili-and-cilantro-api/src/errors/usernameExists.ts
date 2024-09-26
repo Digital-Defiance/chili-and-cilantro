@@ -1,5 +1,5 @@
-import { BaseError } from "./baseError";
-import { ValidationError } from "./validationError";
+import { BaseError } from './baseError';
+import { ValidationError } from './validationError';
 export class UsernameExistsError extends ValidationError {
   public readonly username: string;
   constructor(username: string) {

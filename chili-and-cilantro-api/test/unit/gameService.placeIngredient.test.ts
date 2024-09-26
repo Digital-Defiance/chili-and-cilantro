@@ -4,7 +4,14 @@ import { generateGame, generateChefGameUser } from '../fixtures/game';
 import { generateChef } from '../fixtures/chef';
 import { generateObjectId } from '../fixtures/objectId';
 import { mockedWithTransactionAsync } from '../fixtures/transactionManager';
-import { constants, IGame, ModelName, GamePhase, CardType, TurnAction } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import {
+  constants,
+  IGame,
+  ModelName,
+  GamePhase,
+  CardType,
+  TurnAction,
+} from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { IncorrectGamePhaseError } from '../../src/errors/incorrectGamePhase';
 import { OutOfOrderError } from '../../src/errors/outOfOrder';
 import { InvalidActionError } from '../../src/errors/invalidAction';
@@ -28,43 +35,58 @@ describe('GameService', () => {
       actionService = {};
       chefService = {};
       playerService = {};
-      gameService = new GameService(gameModel, actionService, chefService, playerService);
-      const generated = generateChefGameUser(true, 2, { game: { currentPhase: GamePhase.SETUP, currentChef: 0 } });
+      gameService = new GameService(
+        gameModel,
+        actionService,
+        chefService,
+        playerService
+      );
+      const generated = generateChefGameUser(true, 2, {
+        game: { currentPhase: GamePhase.SETUP, currentChef: 0 },
+      });
       game = generated.game;
       chef = generated.chef;
       user = generated.user;
     });
     it('should throw an error if the game phase is incorrect', () => {
       game.currentPhase = GamePhase.BIDDING;
-      expect(() => gameService.validatePlaceIngredientOrThrow(game, chef, CardType.CHILI))
-        .toThrow(IncorrectGamePhaseError);
+      expect(() =>
+        gameService.validatePlaceIngredientOrThrow(game, chef, CardType.CHILI)
+      ).toThrow(IncorrectGamePhaseError);
     });
 
     it('should throw an error if the chef is out of order', () => {
       game.turnOrder = [generateObjectId(), chef._id]; // Chef is not the current chef
       game.currentChef = 0;
-      expect(() => gameService.validatePlaceIngredientOrThrow(game, chef, CardType.CHILI))
-        .toThrow(OutOfOrderError);
+      expect(() =>
+        gameService.validatePlaceIngredientOrThrow(game, chef, CardType.CHILI)
+      ).toThrow(OutOfOrderError);
     });
 
     it('should throw an error if the chef has placed all cards or has no cards left', () => {
-      chef.placedCards = new Array(constants.HAND_SIZE).fill({ type: CardType.CHILI, faceUp: false });
+      chef.placedCards = new Array(constants.HAND_SIZE).fill({
+        type: CardType.CHILI,
+        faceUp: false,
+      });
       chef.hand = [];
-      expect(() => gameService.validatePlaceIngredientOrThrow(game, chef, CardType.CHILI))
-        .toThrow(AllCardsPlacedError);
+      expect(() =>
+        gameService.validatePlaceIngredientOrThrow(game, chef, CardType.CHILI)
+      ).toThrow(AllCardsPlacedError);
     });
 
     it('should throw an error if the chef cannot place a card', () => {
       // Mock canPlaceCard to return false
       jest.spyOn(gameService, 'canPlaceCard').mockReturnValue(false);
-      expect(() => gameService.validatePlaceIngredientOrThrow(game, chef, CardType.CHILI))
-        .toThrow(InvalidActionError);
+      expect(() =>
+        gameService.validatePlaceIngredientOrThrow(game, chef, CardType.CHILI)
+      ).toThrow(InvalidActionError);
     });
 
     it('should throw an error if the chef does not have the specified ingredient', () => {
       chef.hand = [{ type: 'Cilantro', faceUp: false }]; // Chef does not have 'Chili'
-      expect(() => gameService.validatePlaceIngredientOrThrow(game, chef, CardType.CHILI))
-        .toThrow(OutOfIngredientError);
+      expect(() =>
+        gameService.validatePlaceIngredientOrThrow(game, chef, CardType.CHILI)
+      ).toThrow(OutOfIngredientError);
     });
   });
 
@@ -83,8 +105,15 @@ describe('GameService', () => {
       actionService = {};
       chefService = {};
       playerService = {};
-      gameService = new GameService(gameModel, actionService, chefService, playerService);
-      const generated = generateChefGameUser(true, 2, { game: { currentPhase: GamePhase.SETUP, currentChef: 0 } });
+      gameService = new GameService(
+        gameModel,
+        actionService,
+        chefService,
+        playerService
+      );
+      const generated = generateChefGameUser(true, 2, {
+        game: { currentPhase: GamePhase.SETUP, currentChef: 0 },
+      });
       game = generated.game;
       chef = generated.chef;
     });
@@ -92,10 +121,20 @@ describe('GameService', () => {
       game.currentChef = 0; // Chef is the current chef
       const ingredient = CardType.CHILI;
 
-      const result = await gameService.placeIngredientAsync(game, chef, ingredient);
+      const result = await gameService.placeIngredientAsync(
+        game,
+        chef,
+        ingredient
+      );
 
-      expect(result.chef.placedCards).toContainEqual({ type: ingredient, faceUp: false });
-      expect(result.chef.hand).not.toContainEqual({ type: ingredient, faceUp: false });
+      expect(result.chef.placedCards).toContainEqual({
+        type: ingredient,
+        faceUp: false,
+      });
+      expect(result.chef.hand).not.toContainEqual({
+        type: ingredient,
+        faceUp: false,
+      });
       expect(game.save).toHaveBeenCalled();
       expect(result.game.currentChef).toBe(1); // Check if currentChef index is incremented
     });
@@ -104,7 +143,11 @@ describe('GameService', () => {
       game.currentChef = game.chefIds.length - 1; // Chef is the last in the turn order
       const ingredient = CardType.CHILI;
 
-      const result = await gameService.placeIngredientAsync(game, chef, ingredient);
+      const result = await gameService.placeIngredientAsync(
+        game,
+        chef,
+        ingredient
+      );
 
       expect(game.save).toHaveBeenCalled();
       expect(result.game.currentChef).toBe(0); // Check if currentChef index wraps around
@@ -114,8 +157,9 @@ describe('GameService', () => {
       chef.hand = [{ type: CardType.CILANTRO, faceUp: false }]; // Chef does not have 'Chili'
       const ingredient = CardType.CHILI;
 
-      await expect(gameService.placeIngredientAsync(game, chef, ingredient))
-        .rejects.toThrow(OutOfIngredientError);
+      await expect(
+        gameService.placeIngredientAsync(game, chef, ingredient)
+      ).rejects.toThrow(OutOfIngredientError);
     });
   });
 
@@ -134,43 +178,74 @@ describe('GameService', () => {
       actionService = {};
       chefService = {};
       playerService = {};
-      gameService = new GameService(gameModel, actionService, chefService, playerService);
+      gameService = new GameService(
+        gameModel,
+        actionService,
+        chefService,
+        playerService
+      );
       game = generateGame(true, { currentPhase: GamePhase.SETUP });
       chef = generateChef({ hand: [{ type: CardType.CHILI, faceUp: false }] });
     });
     it('should successfully perform card placement', async () => {
       const ingredient = CardType.CHILI;
-      jest.spyOn(gameService, 'validatePlaceIngredientOrThrow').mockImplementation(() => { });
-      jest.spyOn(gameService, 'placeIngredientAsync').mockResolvedValue({ game, chef });
-      jest.spyOn(gameService, 'withTransaction').mockImplementation(mockedWithTransactionAsync);
+      jest
+        .spyOn(gameService, 'validatePlaceIngredientOrThrow')
+        .mockImplementation(() => {});
+      jest
+        .spyOn(gameService, 'placeIngredientAsync')
+        .mockResolvedValue({ game, chef });
+      jest
+        .spyOn(gameService, 'withTransaction')
+        .mockImplementation(mockedWithTransactionAsync);
 
-      const result = await gameService.performPlaceIngredientAsync(game, chef, ingredient);
+      const result = await gameService.performPlaceIngredientAsync(
+        game,
+        chef,
+        ingredient
+      );
 
-      expect(gameService.validatePlaceIngredientOrThrow).toHaveBeenCalledWith(game, chef, ingredient);
-      expect(gameService.placeIngredientAsync).toHaveBeenCalledWith(game, chef, ingredient);
+      expect(gameService.validatePlaceIngredientOrThrow).toHaveBeenCalledWith(
+        game,
+        chef,
+        ingredient
+      );
+      expect(gameService.placeIngredientAsync).toHaveBeenCalledWith(
+        game,
+        chef,
+        ingredient
+      );
       expect(result).toEqual({ game, chef });
     });
 
     it('should throw an error if validation fails', async () => {
       const ingredient = CardType.CHILI;
-      jest.spyOn(gameService, 'validatePlaceIngredientOrThrow').mockImplementation(() => {
-        throw new InvalidActionError(TurnAction.PlaceCard);
-      });
+      jest
+        .spyOn(gameService, 'validatePlaceIngredientOrThrow')
+        .mockImplementation(() => {
+          throw new InvalidActionError(TurnAction.PlaceCard);
+        });
 
-      await expect(gameService.performPlaceIngredientAsync(game, chef, ingredient))
-        .rejects.toThrow(InvalidActionError);
+      await expect(
+        gameService.performPlaceIngredientAsync(game, chef, ingredient)
+      ).rejects.toThrow(InvalidActionError);
     });
 
     it('should throw an error if placement fails', async () => {
       const ingredient = CardType.CHILI;
-      jest.spyOn(gameService, 'withTransaction').mockImplementation(mockedWithTransactionAsync);
-      jest.spyOn(gameService, 'validatePlaceIngredientOrThrow').mockImplementation(() => { });
+      jest
+        .spyOn(gameService, 'withTransaction')
+        .mockImplementation(mockedWithTransactionAsync);
+      jest
+        .spyOn(gameService, 'validatePlaceIngredientOrThrow')
+        .mockImplementation(() => {});
       jest.spyOn(gameService, 'placeIngredientAsync').mockImplementation(() => {
         throw new Error('Placement failed');
       });
 
-      await expect(gameService.performPlaceIngredientAsync(game, chef, ingredient))
-        .rejects.toThrow('Placement failed');
+      await expect(
+        gameService.performPlaceIngredientAsync(game, chef, ingredient)
+      ).rejects.toThrow('Placement failed');
     });
 
     // Additional test cases...

@@ -26,14 +26,14 @@ export class UserService {
    * @throws InvalidPasswordError
    * @throws EmailExistsError
    * @throws UsernameExistsError
-   * @param email 
-   * @param username 
-   * @param password 
+   * @param email
+   * @param username
+   * @param password
    */
   public async validateRegisterOrThrowAsync(
     email: string,
     username: string,
-    password: string,
+    password: string
   ): Promise<void> {
     // Email validation using validator.js
     if (!validator.isEmail(email)) {
@@ -48,7 +48,10 @@ export class UserService {
       throw new UsernameExistsError(username);
     }
 
-    if (username.length < constants.MIN_USERNAME_LENGTH || username.length > constants.MAX_USERNAME_LENGTH) {
+    if (
+      username.length < constants.MIN_USERNAME_LENGTH ||
+      username.length > constants.MAX_USERNAME_LENGTH
+    ) {
       throw new InvalidUsernameError(username);
     }
 
@@ -62,7 +65,7 @@ export class UserService {
       !/[A-Za-z]/.test(password)
     ) {
       throw new InvalidPasswordError(
-        `Password must be between ${constants.MIN_PASSWORD_LENGTH} and ${constants.MAX_PASSWORD_LENGTH} characters long and contain both letters and numbers.`,
+        `Password must be between ${constants.MIN_PASSWORD_LENGTH} and ${constants.MAX_PASSWORD_LENGTH} characters long and contain both letters and numbers.`
       );
     }
   }
@@ -72,12 +75,12 @@ export class UserService {
    * @param email The user's email address
    * @param username The user's username
    * @param password The user's password
-   * @returns 
+   * @returns
    */
   public async registerAuth0UserAsync(
     email: string,
     username: string,
-    password: string,
+    password: string
   ): Promise<GetUsers200ResponseOneOfInner> {
     // Register user in Auth0
     const auth0UserResponse = await managementClient.users.create({
@@ -85,11 +88,14 @@ export class UserService {
       email: email,
       username: username,
       password: password,
-      user_metadata: {
-      },
+      user_metadata: {},
     });
     if (!auth0UserResponse || auth0UserResponse.status !== 201) {
-      throw new Error(`Error creating user in Auth0: ${auth0UserResponse?.statusText || 'Unknown error'}`);
+      throw new Error(
+        `Error creating user in Auth0: ${
+          auth0UserResponse?.statusText || 'Unknown error'
+        }`
+      );
     }
     return auth0UserResponse.data;
   }
@@ -102,7 +108,7 @@ export class UserService {
    */
   public async createUserAsync(
     email: string,
-    auth0User: GetUsers200ResponseOneOfInner,
+    auth0User: GetUsers200ResponseOneOfInner
   ): Promise<IUser & Document> {
     return this.UserModel.create({
       email: email,
@@ -123,12 +129,16 @@ export class UserService {
   public async performRegister(
     email: string,
     username: string,
-    password: string,
+    password: string
   ): Promise<Document<unknown, object, IUser>> {
     await this.validateRegisterOrThrowAsync(email, username, password);
 
     try {
-      const auth0User = await this.registerAuth0UserAsync(email, username, password);
+      const auth0User = await this.registerAuth0UserAsync(
+        email,
+        username,
+        password
+      );
       return this.createUserAsync(email, auth0User);
     } catch (error) {
       console.error('Error registering user:', error);
@@ -142,7 +152,7 @@ export class UserService {
    * @returns The user
    */
   public async getUserByAuth0IdOrThrow(
-    auth0Id: string,
+    auth0Id: string
   ): Promise<Document & IUser> {
     try {
       const user = await this.UserModel.findOne({ auth0Id: auth0Id });

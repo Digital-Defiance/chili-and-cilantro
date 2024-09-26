@@ -7,7 +7,11 @@ import { generateUser } from '../fixtures/user';
 import { generateChef } from '../fixtures/chef';
 import { generateObjectId } from '../fixtures/objectId';
 import { mockedWithTransactionAsync } from '../fixtures/transactionManager';
-import { IGame, ModelName, GamePhase } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import {
+  IGame,
+  ModelName,
+  GamePhase,
+} from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { GameInProgressError } from '../../src/errors/gameInProgress';
 
 describe('GameService', () => {
@@ -28,8 +32,15 @@ describe('GameService', () => {
       actionService = {};
       chefService = {};
       playerService = {};
-      gameService = new GameService(gameModel, actionService, chefService, playerService);
-      const generated = generateChefGameUser(true, 0, { game: { currentPhase: GamePhase.GAME_OVER } });
+      gameService = new GameService(
+        gameModel,
+        actionService,
+        chefService,
+        playerService
+      );
+      const generated = generateChefGameUser(true, 0, {
+        game: { currentPhase: GamePhase.GAME_OVER },
+      });
       gameId = generated.game._id;
       existingGame = generated.game;
       chef = generated.chef;
@@ -66,43 +77,69 @@ describe('GameService', () => {
 
     beforeEach(() => {
       newGameId = generateObjectId();
-      const generated = generateChefGameUser(true, 2)
+      const generated = generateChefGameUser(true, 2);
       gameId = generated.game._id;
       user = generated.user;
       chef = generated.chef;
       existingGame = generated.game;
-      mockChefs = [
-        chef,
-        ...generated.additionalChefs
-      ];
-      const newChef = generateChef({ host: true, gameId: newGameId, userId: user._id });
+      mockChefs = [chef, ...generated.additionalChefs];
+      const newChef = generateChef({
+        host: true,
+        gameId: newGameId,
+        userId: user._id,
+      });
       mockChefService = {
         getGameChefsByGameOrIdAsync: jest.fn().mockResolvedValue(mockChefs),
-        newChefFromExisting: jest.fn().mockResolvedValue(newChef)
+        newChefFromExisting: jest.fn().mockResolvedValue(newChef),
       };
       mockActionService = { createGameAsync: jest.fn() };
       mockPlayerService = {};
-      newGame = generateGame(true, { gameId: newGameId, hostUserId: user._id, hostChefId: newChef._id });
+      newGame = generateGame(true, {
+        gameId: newGameId,
+        hostUserId: user._id,
+        hostChefId: newChef._id,
+      });
       const database = new Database();
       mockGameModel = database.getModel<IGame>(ModelName.Game);
       mockGameModel.prototype.save = jest.fn().mockResolvedValue(newGame);
-      gameService = new GameService(mockGameModel, mockActionService, mockChefService, mockPlayerService);
+      gameService = new GameService(
+        mockGameModel,
+        mockActionService,
+        mockChefService,
+        mockPlayerService
+      );
     });
 
     it('should create a new game from an existing game', async () => {
       // Call the method
-      const result = await gameService.createNewGameFromExistingAsync(existingGame, user);
+      const result = await gameService.createNewGameFromExistingAsync(
+        existingGame,
+        user
+      );
 
       // Assertions
-      expect(mockChefService.getGameChefsByGameOrIdAsync).toHaveBeenCalledWith(existingGame);
-      expect(mockChefService.newChefFromExisting).toHaveBeenCalledTimes(existingGame.chefIds.length);
+      expect(mockChefService.getGameChefsByGameOrIdAsync).toHaveBeenCalledWith(
+        existingGame
+      );
+      expect(mockChefService.newChefFromExisting).toHaveBeenCalledTimes(
+        existingGame.chefIds.length
+      );
       expect(mockGameModel.prototype.save).toHaveBeenCalled();
       expect(result).toHaveProperty('game');
       expect(result).toHaveProperty('chef');
     });
   });
   describe('performCreateNewGameFromExistingAsync', () => {
-    let existingGameId, mockUser, mockExistingGame, mockNewGame, mockExistingChef, mockNewChef, gameService, actionService, chefService, playerService;
+    let existingGameId,
+      mockUser,
+      mockExistingGame,
+      mockNewGame,
+      mockExistingChef,
+      mockNewChef,
+      gameService,
+      actionService,
+      chefService,
+      playerService;
     beforeEach(() => {
       const database = new Database();
       const gameModel = database.getModel<IGame>(ModelName.Game);
@@ -111,11 +148,20 @@ describe('GameService', () => {
       mockExistingChef = generated.chef;
       mockUser = generated.user;
       mockNewGame = generateGame();
-      mockNewChef = generateChef({ host: true, gameId: mockNewGame._id, userId: mockUser._id });
+      mockNewChef = generateChef({
+        host: true,
+        gameId: mockNewGame._id,
+        userId: mockUser._id,
+      });
       actionService = {};
       chefService = {};
       playerService = {};
-      gameService = new GameService(gameModel, actionService, chefService, playerService);
+      gameService = new GameService(
+        gameModel,
+        actionService,
+        chefService,
+        playerService
+      );
     });
     afterEach(() => {
       sinon.restore();
@@ -123,13 +169,24 @@ describe('GameService', () => {
 
     it('should be able to perform the create game from existing game actions within a transaction', async () => {
       // arrange
-      sinon.stub(gameService, 'getGameByIdOrThrowAsync').resolves(mockExistingGame);
-      sinon.stub(gameService, 'withTransaction').callsFake(mockedWithTransactionAsync);
-      sinon.stub(gameService, 'validateCreateNewGameFromExistingOrThrow').resolves();
-      sinon.stub(gameService, 'createNewGameFromExistingAsync').resolves({ game: mockNewGame, chef: mockNewChef });
+      sinon
+        .stub(gameService, 'getGameByIdOrThrowAsync')
+        .resolves(mockExistingGame);
+      sinon
+        .stub(gameService, 'withTransaction')
+        .callsFake(mockedWithTransactionAsync);
+      sinon
+        .stub(gameService, 'validateCreateNewGameFromExistingOrThrow')
+        .resolves();
+      sinon
+        .stub(gameService, 'createNewGameFromExistingAsync')
+        .resolves({ game: mockNewGame, chef: mockNewChef });
 
       // act
-      const result = await gameService.performCreateNewGameFromExistingAsync(existingGameId, mockUser);
+      const result = await gameService.performCreateNewGameFromExistingAsync(
+        existingGameId,
+        mockUser
+      );
 
       // assert
       expect(result.game).toBe(mockNewGame);
@@ -138,14 +195,24 @@ describe('GameService', () => {
 
     it('should throw an error if validation fails', async () => {
       // arrange
-      sinon.stub(gameService, 'withTransaction').callsFake(mockedWithTransactionAsync);
-      sinon.stub(gameService, 'getGameByIdOrThrowAsync').resolves(mockExistingGame);
+      sinon
+        .stub(gameService, 'withTransaction')
+        .callsFake(mockedWithTransactionAsync);
+      sinon
+        .stub(gameService, 'getGameByIdOrThrowAsync')
+        .resolves(mockExistingGame);
       // Mock a validation failure
-      sinon.stub(gameService, 'validateCreateNewGameFromExistingOrThrow').throws(new Error('Validation failed'));
+      sinon
+        .stub(gameService, 'validateCreateNewGameFromExistingOrThrow')
+        .throws(new Error('Validation failed'));
 
       // act/assert
-      await expect(gameService.performCreateNewGameFromExistingAsync(existingGameId, mockUser))
-        .rejects.toThrow('Validation failed');
+      await expect(
+        gameService.performCreateNewGameFromExistingAsync(
+          existingGameId,
+          mockUser
+        )
+      ).rejects.toThrow('Validation failed');
     });
   });
 });

@@ -1,1 +1,1 @@
-export interface ICreateGameDetails { }
+export interface ICreateGameDetails {}

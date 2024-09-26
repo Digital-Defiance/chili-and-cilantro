@@ -1,2 +1,1 @@
-export interface IStartGameDetails {
-}
+export interface IStartGameDetails {}

@@ -1,2 +1,1 @@
-export interface IJoinGameDetails {
-}
+export interface IJoinGameDetails {}

@@ -9,5 +9,5 @@ export interface IEnvironment {
   game: {
     apiUrl: string;
     socketHost: string;
-  }
+  };
 }

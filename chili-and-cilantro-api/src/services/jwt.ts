@@ -36,12 +36,12 @@ export class JwtService {
           const signingKey = key?.getPublicKey();
           callback(null, signingKey);
         }
-      },
+      }
     );
   }
 
   async validateAccessTokenAndFetchAuth0UserAsync(
-    frontEndAccessToken: string,
+    frontEndAccessToken: string
   ): Promise<GetUsers200ResponseOneOfInner> {
     const decoded = await new Promise<JwtPayload | null>((resolve, reject) => {
       verify(
@@ -54,7 +54,7 @@ export class JwtService {
           } else {
             resolve(decoded as JwtPayload);
           }
-        },
+        }
       );
     });
 
@@ -64,7 +64,7 @@ export class JwtService {
 
     const apiResponse = await managementClient.users.get({ id: decoded.sub });
 
-    if (!apiResponse || (apiResponse.status !== 200)) {
+    if (!apiResponse || apiResponse.status !== 200) {
       throw new Error('User not found');
     }
 
@@ -74,27 +74,32 @@ export class JwtService {
   public async authenticateUserAsync(
     req: Request,
     res: Response,
-    next: (appUser: Document & IUser, auth0User: GetUsers200ResponseOneOfInner) => void,
+    next: (
+      appUser: Document & IUser,
+      auth0User: GetUsers200ResponseOneOfInner
+    ) => void
   ) {
     const accessToken = req.headers.authorization?.split(' ')[1];
     if (!accessToken) {
       return res.status(401).json({ message: 'Access token not found' });
     }
     try {
-      const auth0User =
-        await this.validateAccessTokenAndFetchAuth0UserAsync(accessToken);
+      const auth0User = await this.validateAccessTokenAndFetchAuth0UserAsync(
+        accessToken
+      );
       if (!auth0User.user_id) {
         return res.status(401).json({ message: 'Unable to determine user id' });
       }
 
-      const user = await this.userService.getUserByAuth0IdOrThrow(auth0User.user_id);
+      const user = await this.userService.getUserByAuth0IdOrThrow(
+        auth0User.user_id
+      );
       if (!user) {
         return res.status(401).json({ message: 'User not found' });
       }
 
       next(user, auth0User);
-    }
-    catch (ex) {
+    } catch (ex) {
       return res.status(401).json({ message: 'Invalid access token' });
     }
   }
@@ -102,11 +107,13 @@ export class JwtService {
   /**
    * Decodes the provided JWT, extracts the Auth0 user ID, and fetches the corresponding user from MongoDB.
    * This function assumes the JWT has already been validated.
-   * 
+   *
    * @param token The already validated JWT.
    * @returns The user data from MongoDB corresponding to the Auth0 user ID in the token.
    */
-  public async getUserFromValidatedTokenAsync(token: string): Promise<Document & IUser | null> {
+  public async getUserFromValidatedTokenAsync(
+    token: string
+  ): Promise<(Document & IUser) | null> {
     // Decode the token (without verification)
     const decoded = await new Promise<JwtPayload | null>((resolve, reject) => {
       verify(
@@ -119,7 +126,7 @@ export class JwtService {
           } else {
             resolve(decoded as JwtPayload);
           }
-        },
+        }
       );
     });
 

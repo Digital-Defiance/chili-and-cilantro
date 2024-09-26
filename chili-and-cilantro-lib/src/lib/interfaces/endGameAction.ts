@@ -1,5 +1,5 @@
-import { IAction } from "./action";
-import { IEndGameDetails } from "./endGameDetails";
+import { IAction } from './action';
+import { IEndGameDetails } from './endGameDetails';
 
 export interface IEndGameAction extends IAction {
   details: IEndGameDetails;

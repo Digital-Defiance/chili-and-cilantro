@@ -9,10 +9,10 @@ import { IHasDeleter } from './hasDeleter';
 
 export interface IUser
   extends IHasID,
-  IHasTimestamps,
-  IHasTimestampOwners,
-  IHasSoftDelete,
-  IHasDeleter {
+    IHasTimestamps,
+    IHasTimestampOwners,
+    IHasSoftDelete,
+    IHasDeleter {
   _id?: ObjectId;
   auth0Id: string;
   username: string;

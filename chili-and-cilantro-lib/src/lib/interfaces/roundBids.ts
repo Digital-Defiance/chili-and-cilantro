@@ -1,4 +1,4 @@
-import { IBid } from "./bid";
+import { IBid } from './bid';
 
 export interface IRoundBids {
   bids: IBid[];

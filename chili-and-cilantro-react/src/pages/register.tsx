@@ -45,14 +45,19 @@ const RegistrationForm: React.FC = () => {
 
       if (response.status === 201) {
         // Registration was successful
-        setMessage("Registration successful! Please check your email for a verification link.");
+        setMessage(
+          'Registration successful! Please check your email for a verification link.'
+        );
         setIsError(false);
       }
     } catch (error: any) {
       // Handle errors from the server
       if (error.response && error.response.status === 400) {
         // Assuming the server responds with a message in case of an error
-        setMessage(error.response.data.message || 'An error occurred during registration.');
+        setMessage(
+          error.response.data.message ||
+            'An error occurred during registration.'
+        );
         setIsError(true);
       } else {
         setMessage('An unexpected error occurred. Please try again later.');
@@ -68,24 +73,48 @@ const RegistrationForm: React.FC = () => {
       <h2>Registration Form</h2>
       {/* Display a message if it exists (whether it's an error or success) */}
       {message && (
-        <div style={{color: isError ? 'red' : 'green'}}>{message}</div>
+        <div style={{ color: isError ? 'red' : 'green' }}>{message}</div>
       )}
       <form onSubmit={handleSubmit}>
         <div>
           <label>Username:</label>
-          <input type="text" name="username" value={formData.username} onChange={handleChange} required />
+          <input
+            type="text"
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+            required
+          />
         </div>
         <div>
           <label>Email:</label>
-          <input type="email" name="email" value={formData.email} onChange={handleChange} required />
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
         </div>
         <div>
           <label>Password:</label>
-          <input type="password" name="password" value={formData.password} onChange={handleChange} required />
+          <input
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
         </div>
         <div>
           <label>Confirm Password:</label>
-          <input type="password" name="passwordConfirm" value={formData.passwordConfirm} onChange={handleChange} required />
+          <input
+            type="password"
+            name="passwordConfirm"
+            value={formData.passwordConfirm}
+            onChange={handleChange}
+            required
+          />
         </div>
         <div>
           <button type="submit" disabled={isLoading}>
@@ -95,6 +124,6 @@ const RegistrationForm: React.FC = () => {
       </form>
     </div>
   );
-}
+};
 
 export default RegistrationForm;

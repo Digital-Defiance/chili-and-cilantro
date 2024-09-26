@@ -5,7 +5,10 @@ import { generateObjectId } from './objectId';
 
 export function generateUserPassword(): string {
   let generatedPassword = '';
-  while (generatedPassword.length < constants.MIN_PASSWORD_LENGTH || generatedPassword.length > constants.MAX_PASSWORD_LENGTH) {
+  while (
+    generatedPassword.length < constants.MIN_PASSWORD_LENGTH ||
+    generatedPassword.length > constants.MAX_PASSWORD_LENGTH
+  ) {
     generatedPassword = faker.internet.password();
   }
   return generatedPassword;
@@ -13,7 +16,10 @@ export function generateUserPassword(): string {
 
 export function generateUsername(): string {
   let generatedUsername = '';
-  while (generatedUsername.length < constants.MIN_USERNAME_LENGTH || generatedUsername.length > constants.MAX_USERNAME_LENGTH) {
+  while (
+    generatedUsername.length < constants.MIN_USERNAME_LENGTH ||
+    generatedUsername.length > constants.MAX_USERNAME_LENGTH
+  ) {
     generatedUsername = faker.internet.userName();
   }
   return generatedUsername;
@@ -21,7 +27,10 @@ export function generateUsername(): string {
 
 export function generateUserDisplayName(): string {
   let generatedDisplayName = '';
-  while (generatedDisplayName.length < constants.MIN_USER_DISPLAY_NAME_LENGTH || generatedDisplayName.length > constants.MAX_USER_DISPLAY_NAME_LENGTH) {
+  while (
+    generatedDisplayName.length < constants.MIN_USER_DISPLAY_NAME_LENGTH ||
+    generatedDisplayName.length > constants.MAX_USER_DISPLAY_NAME_LENGTH
+  ) {
     generatedDisplayName = faker.internet.displayName();
   }
   return generatedDisplayName;
@@ -30,7 +39,7 @@ export function generateUserDisplayName(): string {
 /**
  * Generate a user with random values, and a save method to emulate mongoose Document
  * @param overrides Any values to override the generated values
- * @returns 
+ * @returns
  */
 export function generateUser(overrides?: Object): IUser & { save: jest.Mock } {
   const id = generateObjectId();

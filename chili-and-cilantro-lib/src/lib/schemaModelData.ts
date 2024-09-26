@@ -7,7 +7,7 @@ import { ISchemaModelData } from './interfaces/schemaModelData';
 import { GameSchema } from './schemas/game';
 
 function modelNameCollectionToPath(
-  modelNameCollection: ModelNameCollection,
+  modelNameCollection: ModelNameCollection
 ): string {
   return `/${modelNameCollection as string}`;
 }

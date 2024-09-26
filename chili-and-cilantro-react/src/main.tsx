@@ -17,7 +17,7 @@ const providerConfig: Auth0ProviderOptions = {
 };
 
 const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement,
+  document.getElementById('root') as HTMLElement
 );
 root.render(
   <StrictMode>
@@ -26,5 +26,5 @@ root.render(
         <App />
       </Auth0Provider>
     </BrowserRouter>
-  </StrictMode>,
+  </StrictMode>
 );

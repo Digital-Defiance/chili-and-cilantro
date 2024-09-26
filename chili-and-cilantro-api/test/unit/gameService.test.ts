@@ -1,6 +1,12 @@
 import { Database } from '../../src/services/database';
 import { GameService } from '../../src/services/game';
-import { CardType, GamePhase, IGame, ModelName, TurnAction } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import {
+  CardType,
+  GamePhase,
+  IGame,
+  ModelName,
+  TurnAction,
+} from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { InvalidGameError } from '../../src/errors/invalidGame';
 import { generateGame } from '../fixtures/game';
 import mongoose from 'mongoose';
@@ -22,9 +28,14 @@ describe('GameService', () => {
       getGameChefsByGameOrIdAsync: jest.fn(),
     };
     mockPlayerService = {};
-    gameService = new GameService(mockGameModel, mockActionService, mockChefService, mockPlayerService);
+    gameService = new GameService(
+      mockGameModel,
+      mockActionService,
+      mockChefService,
+      mockPlayerService
+    );
   });
-  describe("getGameByIdOrThrowAsync", () => {
+  describe('getGameByIdOrThrowAsync', () => {
     it('should return a game when found', async () => {
       const mockGame = generateGame();
       jest.spyOn(mockGameModel, 'findOne').mockResolvedValue(mockGame);
@@ -33,7 +44,9 @@ describe('GameService', () => {
       const result = await gameService.getGameByIdOrThrowAsync(gameId);
 
       expect(result).toBe(mockGame);
-      expect(mockGameModel.findOne).toHaveBeenCalledWith({ _id: new mongoose.Types.ObjectId(gameId) });
+      expect(mockGameModel.findOne).toHaveBeenCalledWith({
+        _id: new mongoose.Types.ObjectId(gameId),
+      });
     });
 
     it('should throw InvalidGameError when game is not found', async () => {
@@ -41,7 +54,9 @@ describe('GameService', () => {
 
       const gameId = new mongoose.Types.ObjectId().toString();
 
-      await expect(gameService.getGameByIdOrThrowAsync(gameId)).rejects.toThrow(InvalidGameError);
+      await expect(gameService.getGameByIdOrThrowAsync(gameId)).rejects.toThrow(
+        InvalidGameError
+      );
     });
 
     it('should search for active games when active parameter is true', async () => {
@@ -84,7 +99,9 @@ describe('GameService', () => {
 
       const gameCode = 'testCode';
 
-      await expect(gameService.getGameByCodeOrThrowAsync(gameCode)).rejects.toThrow(InvalidGameError);
+      await expect(
+        gameService.getGameByCodeOrThrowAsync(gameCode)
+      ).rejects.toThrow(InvalidGameError);
     });
     it('should throw InvalidGameError when no game is found, returning empty array', async () => {
       const mockQuery = {
@@ -96,7 +113,9 @@ describe('GameService', () => {
 
       const gameCode = 'testCode';
 
-      await expect(gameService.getGameByCodeOrThrowAsync(gameCode)).rejects.toThrow(InvalidGameError);
+      await expect(
+        gameService.getGameByCodeOrThrowAsync(gameCode)
+      ).rejects.toThrow(InvalidGameError);
     });
     it('should search for active games when active parameter is true', async () => {
       const mockGame = generateGame();
@@ -135,10 +154,7 @@ describe('GameService', () => {
     it('should return chef names when chefs are found for the game', async () => {
       // Arrange
       const gameId = generateObjectId().toString();
-      const mockChefs = [
-        { name: 'Chef A' },
-        { name: 'Chef B' }
-      ];
+      const mockChefs = [{ name: 'Chef A' }, { name: 'Chef B' }];
       mockChefService.getGameChefsByGameOrIdAsync.mockResolvedValue(mockChefs);
 
       // Act
@@ -146,7 +162,9 @@ describe('GameService', () => {
 
       // Assert
       expect(result).toEqual(['Chef A', 'Chef B']);
-      expect(mockChefService.getGameChefsByGameOrIdAsync).toHaveBeenCalledWith(gameId);
+      expect(mockChefService.getGameChefsByGameOrIdAsync).toHaveBeenCalledWith(
+        gameId
+      );
     });
 
     it('should return an empty array when no chefs are found for the game', async () => {
@@ -159,64 +177,111 @@ describe('GameService', () => {
 
       // Assert
       expect(result).toEqual([]);
-      expect(mockChefService.getGameChefsByGameOrIdAsync).toHaveBeenCalledWith(gameId);
+      expect(mockChefService.getGameChefsByGameOrIdAsync).toHaveBeenCalledWith(
+        gameId
+      );
     });
   });
   describe('canBid', () => {
     it('should return false if the current phase is not SETUP or BIDDING', () => {
       const chef = generateChef();
-      const game = generateGame(true, { turnOrder: [chef._id], currentChef: 0, cardsPlaced: 1, currentBid: 0 });
+      const game = generateGame(true, {
+        turnOrder: [chef._id],
+        currentChef: 0,
+        cardsPlaced: 1,
+        currentBid: 0,
+      });
       expect(gameService.canBid(game, chef)).toBe(false);
     });
 
     it('should return false if the current chef is not the user', () => {
       const chef = generateChef();
       const chef2 = generateChef();
-      const game = generateGame(true, { currentPhase: GamePhase.BIDDING, turnOrder: [chef._id, chef2._id], currentChef: 1, cardsPlaced: 1, currentBid: 0 });
+      const game = generateGame(true, {
+        currentPhase: GamePhase.BIDDING,
+        turnOrder: [chef._id, chef2._id],
+        currentChef: 1,
+        cardsPlaced: 1,
+        currentBid: 0,
+      });
       expect(gameService.canBid(game, chef)).toBe(false);
     });
 
     it('should return false if no cards are placed yet', () => {
       const chef = generateChef();
-      const game = generateGame(true, { currentPhase: GamePhase.BIDDING, turnOrder: [chef._id], currentChef: 0, cardsPlaced: 0, currentBid: 0 });
+      const game = generateGame(true, {
+        currentPhase: GamePhase.BIDDING,
+        turnOrder: [chef._id],
+        currentChef: 0,
+        cardsPlaced: 0,
+        currentBid: 0,
+      });
       expect(gameService.canBid(game, chef)).toBe(false);
     });
 
     it('should return false if the minimum bid is more than the number of cards placed', () => {
       const chef = generateChef();
-      const game = generateGame(true, { currentPhase: GamePhase.BIDDING, turnOrder: [chef._id], currentChef: 0, cardsPlaced: 1, currentBid: 2 });
+      const game = generateGame(true, {
+        currentPhase: GamePhase.BIDDING,
+        turnOrder: [chef._id],
+        currentChef: 0,
+        cardsPlaced: 1,
+        currentBid: 2,
+      });
       expect(gameService.canBid(game, chef)).toBe(false);
     });
 
     it('should return true when the chef can bid', () => {
       const chef = generateChef();
-      const game = generateGame(true, { currentPhase: GamePhase.BIDDING, turnOrder: [chef._id], currentChef: 0, cardsPlaced: 3, currentBid: 1 });
+      const game = generateGame(true, {
+        currentPhase: GamePhase.BIDDING,
+        turnOrder: [chef._id],
+        currentChef: 0,
+        cardsPlaced: 3,
+        currentBid: 1,
+      });
       expect(gameService.canBid(game, chef)).toBe(true);
     });
   });
   describe('canPlaceCard', () => {
     it('should return false if the current phase is not SETUP', () => {
       const chef = generateChef();
-      const game = generateGame(true, { currentPhase: GamePhase.BIDDING, turnOrder: [chef._id], currentChef: 0 });
+      const game = generateGame(true, {
+        currentPhase: GamePhase.BIDDING,
+        turnOrder: [chef._id],
+        currentChef: 0,
+      });
       expect(gameService.canPlaceCard(game, chef)).toBe(false);
     });
 
     it('should return false if the current chef is not the user', () => {
       const chef = generateChef();
       const chef2 = generateChef();
-      const game = { currentPhase: GamePhase.SETUP, turnOrder: [chef._id, chef2._id], currentChef: 1 };
+      const game = {
+        currentPhase: GamePhase.SETUP,
+        turnOrder: [chef._id, chef2._id],
+        currentChef: 1,
+      };
       expect(gameService.canPlaceCard(game, chef)).toBe(false);
     });
 
     it('should return false if the chef has no cards left in their hand', () => {
       const chef = generateChef({ hand: [] });
-      const game = generateGame(true, { currentPhase: GamePhase.SETUP, turnOrder: [chef._id], currentChef: 0 });
+      const game = generateGame(true, {
+        currentPhase: GamePhase.SETUP,
+        turnOrder: [chef._id],
+        currentChef: 0,
+      });
       expect(gameService.canPlaceCard(game, chef)).toBe(false);
     });
 
     it('should return true when the chef can place a card', () => {
       const chef = generateChef();
-      const game = generateGame(true, { currentPhase: GamePhase.SETUP, turnOrder: [chef._id], currentChef: 0 });
+      const game = generateGame(true, {
+        currentPhase: GamePhase.SETUP,
+        turnOrder: [chef._id],
+        currentChef: 0,
+      });
       expect(gameService.canPlaceCard(game, chef)).toBe(true);
     });
   });
@@ -224,41 +289,74 @@ describe('GameService', () => {
     it('should return false if the current chef is not the user', () => {
       const chef = generateChef();
       const chef2 = generateChef();
-      const game = generateGame(true, { currentPhase: GamePhase.BIDDING, turnOrder: [chef._id, chef2._id], currentChef: 1 });
+      const game = generateGame(true, {
+        currentPhase: GamePhase.BIDDING,
+        turnOrder: [chef._id, chef2._id],
+        currentChef: 1,
+      });
       expect(gameService.canPass(game, chef)).toBe(false);
     });
 
     it('should return false if the current phase is not BIDDING', () => {
       const chef = generateChef();
-      const game = generateGame(true, { currentPhase: GamePhase.SETUP, turnOrder: [chef._id], currentChef: 0 });
+      const game = generateGame(true, {
+        currentPhase: GamePhase.SETUP,
+        turnOrder: [chef._id],
+        currentChef: 0,
+      });
       expect(gameService.canPass(game, chef)).toBe(false);
     });
 
     it('should return false if no one has bid yet', () => {
       const chef = generateChef();
-      const game = generateGame(true, { currentPhase: GamePhase.BIDDING, turnOrder: [chef._id], currentChef: 0, currentBid: 0 });
+      const game = generateGame(true, {
+        currentPhase: GamePhase.BIDDING,
+        turnOrder: [chef._id],
+        currentChef: 0,
+        currentBid: 0,
+      });
       expect(gameService.canPass(game, chef)).toBe(false);
     });
 
     it('should return false if the previous chef bid the maximum number of cards', () => {
       const chef = generateChef();
-      const game = generateGame(true, { currentPhase: GamePhase.BIDDING, turnOrder: [chef._id], currentChef: 0, currentBid: 5, cardsPlaced: 5 });
+      const game = generateGame(true, {
+        currentPhase: GamePhase.BIDDING,
+        turnOrder: [chef._id],
+        currentChef: 0,
+        currentBid: 5,
+        cardsPlaced: 5,
+      });
       expect(gameService.canPass(game, chef)).toBe(false);
     });
 
     it('should return false if all remaining players have passed', () => {
       // Mock the haveAllRemainingPlayersPassed function to return true
-      gameService.haveAllRemainingPlayersPassed = jest.fn().mockReturnValue(true);
+      gameService.haveAllRemainingPlayersPassed = jest
+        .fn()
+        .mockReturnValue(true);
       const chef = generateChef();
-      const game = generateGame(true, { currentPhase: GamePhase.BIDDING, turnOrder: [chef._id], currentChef: 0, currentBid: 1 });
+      const game = generateGame(true, {
+        currentPhase: GamePhase.BIDDING,
+        turnOrder: [chef._id],
+        currentChef: 0,
+        currentBid: 1,
+      });
       expect(gameService.canPass(game, chef)).toBe(false);
     });
 
     it('should return true when the chef can pass', () => {
       // Mock the haveAllRemainingPlayersPassed function to return false
-      gameService.haveAllRemainingPlayersPassed = jest.fn().mockReturnValue(false);
+      gameService.haveAllRemainingPlayersPassed = jest
+        .fn()
+        .mockReturnValue(false);
       const chef = generateChef();
-      const game = generateGame(true, { currentPhase: GamePhase.BIDDING, turnOrder: [chef._id], currentChef: 0, currentBid: 1 });
+      const game = generateGame(true, {
+        currentPhase: GamePhase.BIDDING,
+        turnOrder: [chef._id],
+        currentChef: 0,
+        currentBid: 1,
+      });
       expect(gameService.canPass(game, chef)).toBe(true);
     });
   });
@@ -275,7 +373,9 @@ describe('GameService', () => {
 
       const game = generateGame();
       const chef = generateChef();
-      expect(gameService.availableTurnActions(game, chef)).toContain(TurnAction.PlaceCard);
+      expect(gameService.availableTurnActions(game, chef)).toContain(
+        TurnAction.PlaceCard
+      );
     });
 
     it('should include Pass when the chef can pass', () => {
@@ -285,7 +385,9 @@ describe('GameService', () => {
 
       const game = generateGame();
       const chef = generateChef();
-      expect(gameService.availableTurnActions(game, chef)).toContain(TurnAction.Pass);
+      expect(gameService.availableTurnActions(game, chef)).toContain(
+        TurnAction.Pass
+      );
     });
 
     it('should include IncreaseBid when the chef can increase the bid', () => {
@@ -295,7 +397,9 @@ describe('GameService', () => {
 
       const chef = generateChef();
       const game = generateGame(true, { currentBid: 1 });
-      expect(gameService.availableTurnActions(game, chef)).toContain(TurnAction.IncreaseBid);
+      expect(gameService.availableTurnActions(game, chef)).toContain(
+        TurnAction.IncreaseBid
+      );
     });
 
     it('should include Bid when the chef can make a bid', () => {
@@ -305,7 +409,9 @@ describe('GameService', () => {
 
       const game = generateGame(true, { currentBid: 0 });
       const chef = generateChef();
-      expect(gameService.availableTurnActions(game, chef)).toContain(TurnAction.Bid);
+      expect(gameService.availableTurnActions(game, chef)).toContain(
+        TurnAction.Bid
+      );
     });
 
     it('should return an empty array when the chef has no available actions', () => {
@@ -325,7 +431,7 @@ describe('GameService', () => {
       const game = generateGame(true, {
         currentRound: 1,
         roundBids: { 1: [] },
-        chefIds: [chef1._id, chef2._id]
+        chefIds: [chef1._id, chef2._id],
       });
       expect(gameService.haveAllRemainingPlayersPassed(game)).toBe(false);
     });
@@ -336,7 +442,7 @@ describe('GameService', () => {
       const game = {
         currentRound: 0,
         roundBids: { 0: [{ chefId: chef1._id, pass: true }] },
-        chefIds: [chef1._id, chef2._id]
+        chefIds: [chef1._id, chef2._id],
       };
       expect(gameService.haveAllRemainingPlayersPassed(game)).toBe(false);
     });
@@ -346,8 +452,13 @@ describe('GameService', () => {
       const chef2 = generateChef();
       const game = generateGame(true, {
         currentRound: 0,
-        roundBids: { 0: [{ chefId: chef1._id, pass: false }, { chefId: chef2._id, pass: true }] },
-        chefIds: [chef1._id, chef2._id]
+        roundBids: {
+          0: [
+            { chefId: chef1._id, pass: false },
+            { chefId: chef2._id, pass: true },
+          ],
+        },
+        chefIds: [chef1._id, chef2._id],
       });
       expect(gameService.haveAllRemainingPlayersPassed(game)).toBe(true);
     });
@@ -357,8 +468,13 @@ describe('GameService', () => {
       const chef2 = generateChef();
       const game = generateGame(true, {
         currentRound: 0,
-        roundBids: { 0: [{ chefId: chef1._id, pass: false }, { chefId: chef2._id, pass: false }] },
-        chefIds: [chef1._id, chef2._id]
+        roundBids: {
+          0: [
+            { chefId: chef1._id, pass: false },
+            { chefId: chef2._id, pass: false },
+          ],
+        },
+        chefIds: [chef1._id, chef2._id],
       });
       expect(gameService.haveAllRemainingPlayersPassed(game)).toBe(false);
     });
@@ -369,8 +485,14 @@ describe('GameService', () => {
       const chef3 = generateChef();
       const game = generateGame(true, {
         currentRound: 0,
-        roundBids: { 0: [{ chefId: chef1._id, pass: false }, { chefId: chef2._id, pass: false }, { chefId: chef3._id, pass: true }] },
-        chefIds: [chef1._id, chef2._id, chef3._id]
+        roundBids: {
+          0: [
+            { chefId: chef1._id, pass: false },
+            { chefId: chef2._id, pass: false },
+            { chefId: chef3._id, pass: true },
+          ],
+        },
+        chefIds: [chef1._id, chef2._id, chef3._id],
       });
       expect(gameService.haveAllRemainingPlayersPassed(game)).toBe(false);
     });
@@ -389,22 +511,35 @@ describe('GameService', () => {
     });
 
     it('should throw an error if the current chef index is negative', () => {
-      game = generateGame(true, { currentChef: -1, turnOrder: [generateObjectId()] });
+      game = generateGame(true, {
+        currentChef: -1,
+        turnOrder: [generateObjectId()],
+      });
 
-      expect(() => gameService.getGameCurrentChefId(game))
-        .toThrow(`Invalid current chef index: ${game.currentChef}`);
+      expect(() => gameService.getGameCurrentChefId(game)).toThrow(
+        `Invalid current chef index: ${game.currentChef}`
+      );
     });
 
     it('should throw an error if the current chef index exceeds the turn order length', () => {
-      game = generateGame(true, { currentChef: 2, turnOrder: [generateObjectId(), generateObjectId()] });
+      game = generateGame(true, {
+        currentChef: 2,
+        turnOrder: [generateObjectId(), generateObjectId()],
+      });
 
-      expect(() => gameService.getGameCurrentChefId(game))
-        .toThrow(`Invalid current chef index: ${game.currentChef}`);
+      expect(() => gameService.getGameCurrentChefId(game)).toThrow(
+        `Invalid current chef index: ${game.currentChef}`
+      );
     });
   });
   describe('hasIngredientInHand', () => {
     it('should return true if the chef has the ingredient in hand', () => {
-      const chef = generateChef({ hand: [{ type: CardType.CHILI, faceUp: false }, { type: CardType.CILANTRO, faceUp: false }] });
+      const chef = generateChef({
+        hand: [
+          { type: CardType.CHILI, faceUp: false },
+          { type: CardType.CILANTRO, faceUp: false },
+        ],
+      });
       const ingredient = CardType.CHILI;
 
       const result = gameService.hasIngredientInHand(chef, ingredient);
@@ -412,14 +547,16 @@ describe('GameService', () => {
     });
 
     it('should return false if the chef does not have the ingredient in hand', () => {
-      const chef = generateChef({ hand: [{ type: CardType.CILANTRO, faceUp: false }] });
+      const chef = generateChef({
+        hand: [{ type: CardType.CILANTRO, faceUp: false }],
+      });
       const ingredient = CardType.CHILI;
 
       const result = gameService.hasIngredientInHand(chef, ingredient);
       expect(result).toBe(false);
     });
 
-    it('should return false if the chef\'s hand is empty', () => {
+    it("should return false if the chef's hand is empty", () => {
       const chef = generateChef({ hand: [] });
       const ingredient = CardType.CHILI;
 

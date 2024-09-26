@@ -9,7 +9,7 @@ export const errorHandler = (
   error: any,
   request: Request,
   response: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   if (error instanceof InsufficientScopeError) {
     const message = 'Permission denied';

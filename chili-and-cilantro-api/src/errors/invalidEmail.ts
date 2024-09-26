@@ -1,4 +1,4 @@
-import { ValidationError } from "./validationError";
+import { ValidationError } from './validationError';
 
 export class InvalidEmailError extends ValidationError {
   public readonly email: string;

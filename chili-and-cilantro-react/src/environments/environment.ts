@@ -11,5 +11,5 @@ export const environment: IEnvironment = {
   game: {
     apiUrl: 'http://localhost:3000/api',
     socketHost: 'http://localhost:3000',
-  }
+  },
 };

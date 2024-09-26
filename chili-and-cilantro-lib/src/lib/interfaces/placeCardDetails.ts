@@ -1,4 +1,4 @@
-import { CardType } from "../enumerations/cardType";
+import { CardType } from '../enumerations/cardType';
 
 export interface IPlaceCardDetails {
   /**

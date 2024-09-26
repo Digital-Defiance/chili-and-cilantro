@@ -1,2 +1,1 @@
-export interface IPassDetails {
-}
+export interface IPassDetails {}

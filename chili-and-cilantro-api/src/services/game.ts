@@ -4,7 +4,9 @@ import validator from 'validator';
 import {
   constants,
   CardType,
-  IUser, IGame, IChef,
+  IUser,
+  IGame,
+  IChef,
   ModelName,
   GamePhase,
   TurnAction,
@@ -45,7 +47,12 @@ export class GameService extends TransactionManager {
   private readonly chefService: ChefService;
   private readonly playerService: PlayerService;
 
-  constructor(gameModel: Model<IGame>, actionService: ActionService, chefService: ChefService, playerService: PlayerService) {
+  constructor(
+    gameModel: Model<IGame>,
+    actionService: ActionService,
+    chefService: ChefService,
+    playerService: PlayerService
+  ) {
     super();
     this.GameModel = gameModel;
     this.actionService = actionService;
@@ -68,13 +75,18 @@ export class GameService extends TransactionManager {
     while (attemptsRemaining-- > 0) {
       code = UtilityService.generateGameCode();
       // check if there is an active game with the given game code
-      gameCount = await this.GameModel.countDocuments({ code, currentPhase: { $ne: GamePhase.GAME_OVER } });
+      gameCount = await this.GameModel.countDocuments({
+        code,
+        currentPhase: { $ne: GamePhase.GAME_OVER },
+      });
       if (gameCount === 0) {
         // If no active game has the code, it can be used for a new game
         return code;
       }
     }
-    throw new Error(`Unable to generate a unique game code in ${totalAttempts} attempts.`);
+    throw new Error(
+      `Unable to generate a unique game code in ${totalAttempts} attempts.`
+    );
   }
 
   /**
@@ -85,21 +97,45 @@ export class GameService extends TransactionManager {
    * @param password Optional password for the game. Empty string for no password.
    * @param maxChefs The maximum number of chefs in the game. Must be between MIN_CHEFS and MAX_CHEFS.
    */
-  public async validateCreateGameOrThrowAsync(user: IUser & Document, userDisplayName: string, gameName: string, password: string, maxChefs: number): Promise<void> {
+  public async validateCreateGameOrThrowAsync(
+    user: IUser & Document,
+    userDisplayName: string,
+    gameName: string,
+    password: string,
+    maxChefs: number
+  ): Promise<void> {
     if (await this.playerService.userIsInAnyActiveGameAsync(user)) {
       throw new AlreadyJoinedOtherError();
     }
-    if (!validator.matches(userDisplayName, constants.MULTILINGUAL_STRING_REGEX) || userDisplayName.length < constants.MIN_USER_DISPLAY_NAME_LENGTH || userDisplayName.length > constants.MAX_USER_DISPLAY_NAME_LENGTH) {
+    if (
+      !validator.matches(
+        userDisplayName,
+        constants.MULTILINGUAL_STRING_REGEX
+      ) ||
+      userDisplayName.length < constants.MIN_USER_DISPLAY_NAME_LENGTH ||
+      userDisplayName.length > constants.MAX_USER_DISPLAY_NAME_LENGTH
+    ) {
       throw new InvalidUserDisplayNameError(userDisplayName);
     }
-    if (!validator.matches(gameName, constants.MULTILINGUAL_STRING_REGEX) || gameName.length < constants.MIN_GAME_NAME_LENGTH || gameName.length > constants.MAX_GAME_NAME_LENGTH) {
+    if (
+      !validator.matches(gameName, constants.MULTILINGUAL_STRING_REGEX) ||
+      gameName.length < constants.MIN_GAME_NAME_LENGTH ||
+      gameName.length > constants.MAX_GAME_NAME_LENGTH
+    ) {
       throw new InvalidGameNameError();
     }
-    if (password.length > 0 && (password.length < constants.MIN_GAME_PASSWORD_LENGTH || password.length > constants.MAX_GAME_PASSWORD_LENGTH)) {
+    if (
+      password.length > 0 &&
+      (password.length < constants.MIN_GAME_PASSWORD_LENGTH ||
+        password.length > constants.MAX_GAME_PASSWORD_LENGTH)
+    ) {
       throw new InvalidGamePasswordError();
     }
     if (maxChefs < constants.MIN_CHEFS || maxChefs > constants.MAX_CHEFS) {
-      throw new InvalidGameParameterError(`Must be between ${constants.MIN_CHEFS} and ${constants.MAX_CHEFS}.`, 'maxChefs');
+      throw new InvalidGameParameterError(
+        `Must be between ${constants.MIN_CHEFS} and ${constants.MAX_CHEFS}.`,
+        'maxChefs'
+      );
     }
   }
 
@@ -110,9 +146,20 @@ export class GameService extends TransactionManager {
    * @param gameName The name of the game
    * @param password Optional password for the game. Empty string for no password.
    * @param maxChefs The maximum number of chefs in the game. Must be between MIN_CHEFS and MAX_CHEFS.
-   * @returns 
+   * @returns
    */
-  public async createGameAsync(user: IUser & Document, userName: string, gameName: string, password: string, maxChefs: number): Promise<{ game: IGame & Document, chef: IChef & Document, action: Document<Schema.Types.ObjectId, {}, ICreateGameAction> & ICreateGameAction }> {
+  public async createGameAsync(
+    user: IUser & Document,
+    userName: string,
+    gameName: string,
+    password: string,
+    maxChefs: number
+  ): Promise<{
+    game: IGame & Document;
+    chef: IChef & Document;
+    action: Document<Schema.Types.ObjectId, {}, ICreateGameAction> &
+      ICreateGameAction;
+  }> {
     const gameId = new ObjectId();
     const chefId = new ObjectId();
     const gameCode = await this.generateNewGameCodeAsync();
@@ -129,12 +176,18 @@ export class GameService extends TransactionManager {
       hostUserId: user._id,
       maxChefs: maxChefs,
       name: gameName,
-      ...password ? { password: password } : {},
+      ...(password ? { password: password } : {}),
       roundBids: [],
       roundWinners: [],
       turnOrder: [], // will be chosen when the game is started
     });
-    const chef = await this.chefService.newChefAsync(game, user, userName, true, chefId);
+    const chef = await this.chefService.newChefAsync(
+      game,
+      user,
+      userName,
+      true,
+      chefId
+    );
     const action = await this.actionService.createGameAsync(game, chef, user);
     return { game, chef, action };
   }
@@ -146,11 +199,23 @@ export class GameService extends TransactionManager {
    * @param gameName The name of the game
    * @param password Optional password for the game. Empty string for no password.
    * @param maxChefs The maximum number of chefs in the game. Must be between MIN_CHEFS and MAX_CHEFS.
-   * @returns 
+   * @returns
    */
-  public async performCreateGameAsync(user: IUser & Document, userName: string, gameName: string, password: string, maxChefs: number): Promise<{ game: IGame & Document, chef: IChef & Document }> {
+  public async performCreateGameAsync(
+    user: IUser & Document,
+    userName: string,
+    gameName: string,
+    password: string,
+    maxChefs: number
+  ): Promise<{ game: IGame & Document; chef: IChef & Document }> {
     return this.withTransaction(async (session) => {
-      await this.validateCreateGameOrThrowAsync(user, userName, gameName, password, maxChefs);
+      await this.validateCreateGameOrThrowAsync(
+        user,
+        userName,
+        gameName,
+        password,
+        maxChefs
+      );
       return this.createGameAsync(user, userName, gameName, password, maxChefs);
     });
   }
@@ -158,29 +223,48 @@ export class GameService extends TransactionManager {
   /**
    * Joins the player to the specified game and creates a chef object for them
    * A password is not needed as it is validated earlier.
-   * @param gameCode 
-   * @param password 
-   * @param user 
-   * @param userName 
-   * @returns 
+   * @param gameCode
+   * @param password
+   * @param user
+   * @param userName
+   * @returns
    */
-  public async joinGameAsync(game: IGame & Document, user: IUser & Document, userName: string): Promise<{ game: IGame & Document, chef: IChef & Document }> {
-    const chef = await this.chefService.newChefAsync(game, user, userName, false);
+  public async joinGameAsync(
+    game: IGame & Document,
+    user: IUser & Document,
+    userName: string
+  ): Promise<{ game: IGame & Document; chef: IChef & Document }> {
+    const chef = await this.chefService.newChefAsync(
+      game,
+      user,
+      userName,
+      false
+    );
     await this.actionService.joinGameAsync(game, chef, user);
     game.chefIds.push(chef._id);
     await game.save();
     return { game, chef };
   }
 
-  public async validateJoinGameOrThrowAsync(game: IGame & Document, user: IUser & Document, userDisplayName: string, password: string): Promise<void> {
+  public async validateJoinGameOrThrowAsync(
+    game: IGame & Document,
+    user: IUser & Document,
+    userDisplayName: string,
+    password: string
+  ): Promise<void> {
     if (await this.playerService.userIsInAnyActiveGameAsync(user)) {
       throw new AlreadyJoinedOtherError();
     }
-    const chefNames = await this.getGameChefNamesByGameIdAsync(game._id.toString());
+    const chefNames = await this.getGameChefNamesByGameIdAsync(
+      game._id.toString()
+    );
     if (chefNames.includes(userDisplayName)) {
       throw new UsernameInUseError();
     }
-    if ((game.password && game.password !== password) || (password && !game.password)) {
+    if (
+      (game.password && game.password !== password) ||
+      (password && !game.password)
+    ) {
       throw new GamePasswordMismatchError();
     }
     if (game.currentPhase !== GamePhase.LOBBY) {
@@ -189,20 +273,32 @@ export class GameService extends TransactionManager {
     if (game.chefIds.length > game.maxChefs) {
       throw new GameFullError();
     }
-    if (!validator.matches(userDisplayName, constants.MULTILINGUAL_STRING_REGEX) || userDisplayName.length < constants.MIN_USER_DISPLAY_NAME_LENGTH || userDisplayName.length > constants.MAX_USER_DISPLAY_NAME_LENGTH) {
+    if (
+      !validator.matches(
+        userDisplayName,
+        constants.MULTILINGUAL_STRING_REGEX
+      ) ||
+      userDisplayName.length < constants.MIN_USER_DISPLAY_NAME_LENGTH ||
+      userDisplayName.length > constants.MAX_USER_DISPLAY_NAME_LENGTH
+    ) {
       throw new InvalidUserDisplayNameError(userDisplayName);
     }
   }
 
   /**
    * Joins the player to the specified game and creates a chef object for them
-   * @param gameCode 
-   * @param password 
-   * @param user 
-   * @param userName 
-   * @returns 
+   * @param gameCode
+   * @param password
+   * @param user
+   * @param userName
+   * @returns
    */
-  public async performJoinGameAsync(gameCode: string, password: string, user: IUser & Document, userName: string): Promise<{ game: IGame & Document, chef: IChef & Document }> {
+  public async performJoinGameAsync(
+    gameCode: string,
+    password: string,
+    user: IUser & Document,
+    userName: string
+  ): Promise<{ game: IGame & Document; chef: IChef & Document }> {
     return this.withTransaction(async (session) => {
       const game = await this.getGameByCodeOrThrowAsync(gameCode, true);
       await this.validateJoinGameOrThrowAsync(game, user, userName, password);
@@ -212,17 +308,20 @@ export class GameService extends TransactionManager {
 
   public async createNewGameFromExistingAsync(
     existingGame: IGame & Document,
-    user: IUser,
-  ): Promise<{ game: IGame & Document, chef: IChef & Document }> {
-
+    user: IUser
+  ): Promise<{ game: IGame & Document; chef: IChef & Document }> {
     const newChefIds = existingGame.chefIds.map(() => new ObjectId());
 
     // find the existing chef id's index
-    const hostChefIndex = existingGame.chefIds.findIndex(chefId => existingGame.hostChefId.toString() == chefId.toString());
+    const hostChefIndex = existingGame.chefIds.findIndex(
+      (chefId) => existingGame.hostChefId.toString() == chefId.toString()
+    );
     const newHostChefId = newChefIds[hostChefIndex];
 
     // we need to look up the user id for all chefs in the current game
-    const existingChefs = await this.chefService.getGameChefsByGameOrIdAsync(existingGame);
+    const existingChefs = await this.chefService.getGameChefsByGameOrIdAsync(
+      existingGame
+    );
 
     // Create the new Game document without persisting to the database yet
     const newGame = new this.GameModel({
@@ -238,7 +337,7 @@ export class GameService extends TransactionManager {
       lastGame: existingGame._id,
       maxChefs: existingGame.maxChefs,
       name: existingGame.name,
-      ...existingGame.password ? { password: existingGame.password } : {},
+      ...(existingGame.password ? { password: existingGame.password } : {}),
       roundBids: [],
       roundWinners: [],
       turnOrder: [], // will be chosen when the game is started
@@ -246,8 +345,14 @@ export class GameService extends TransactionManager {
 
     // Create new Chef documents
     const chefCreations = newChefIds.map((newChefId, index) => {
-      const existingChef = existingChefs.find(chef => chef._id.toString() == existingGame.chefIds[index].toString());
-      return this.chefService.newChefFromExisting(newGame, existingChef, newChefId);
+      const existingChef = existingChefs.find(
+        (chef) => chef._id.toString() == existingGame.chefIds[index].toString()
+      );
+      return this.chefService.newChefFromExisting(
+        newGame,
+        existingChef,
+        newChefId
+      );
     });
 
     // Execute all creations concurrently
@@ -257,7 +362,9 @@ export class GameService extends TransactionManager {
     const savedNewGame = await newGame.save();
 
     // Create action for game creation - this could be moved to an event or a method to encapsulate the logic
-    const hostChef = chefs.find(chef => chef._id.toString() == newHostChefId.toString());
+    const hostChef = chefs.find(
+      (chef) => chef._id.toString() == newHostChefId.toString()
+    );
     await this.actionService.createGameAsync(savedNewGame, hostChef, user);
     return { game: savedNewGame, chef: chefs[hostChefIndex] };
   }
@@ -266,7 +373,9 @@ export class GameService extends TransactionManager {
    * Validates that a new game can be created from an existing game or throws a validation error
    * @param existingGame The existing game to create a new game from
    */
-  public validateCreateNewGameFromExistingOrThrow(existingGame: IGame & Document): void {
+  public validateCreateNewGameFromExistingOrThrow(
+    existingGame: IGame & Document
+  ): void {
     if (existingGame.currentPhase !== GamePhase.GAME_OVER) {
       throw new GameInProgressError();
     }
@@ -279,10 +388,13 @@ export class GameService extends TransactionManager {
    */
   public async performCreateNewGameFromExistingAsync(
     existingGameId: string,
-    user: IUser,
-  ): Promise<{ game: IGame & Document, chef: IChef & Document }> {
+    user: IUser
+  ): Promise<{ game: IGame & Document; chef: IChef & Document }> {
     return this.withTransaction(async (session) => {
-      const existingGame = await this.getGameByIdOrThrowAsync(existingGameId, true);
+      const existingGame = await this.getGameByIdOrThrowAsync(
+        existingGameId,
+        true
+      );
       this.validateCreateNewGameFromExistingOrThrow(existingGame);
       return this.createNewGameFromExistingAsync(existingGame, user);
     });
@@ -293,7 +405,13 @@ export class GameService extends TransactionManager {
    * @param game The game to start
    * @returns A tuple of the game and the start game action
    */
-  public async startGameAsync(game: IGame & Document): Promise<{ game: IGame & Document, action: Document<Schema.Types.ObjectId, {}, IStartGameAction> & IStartGameAction }> {
+  public async startGameAsync(
+    game: IGame & Document
+  ): Promise<{
+    game: IGame & Document;
+    action: Document<Schema.Types.ObjectId, {}, IStartGameAction> &
+      IStartGameAction;
+  }> {
     // set the current bid to 0
     game.currentBid = 0;
     // set the current chef to the first player
@@ -310,7 +428,7 @@ export class GameService extends TransactionManager {
     const startAction = await this.actionService.startGameAsync(savedGame);
     // mark all chefs as PLAYING
     const chefs = await this.chefService.getGameChefsByGameOrIdAsync(savedGame);
-    chefs.forEach(chef => {
+    chefs.forEach((chef) => {
       chef.state = ChefState.PLAYING;
       chef.save();
     });
@@ -322,8 +440,11 @@ export class GameService extends TransactionManager {
    * @param game The game to start
    * @param userId The ID of the user starting the game
    */
-  public async validateStartGameOrThrowAsync(game: IGame & Document, userId: string): Promise<void> {
-    if (!await this.playerService.isGameHostAsync(userId, game._id)) {
+  public async validateStartGameOrThrowAsync(
+    game: IGame & Document,
+    userId: string
+  ): Promise<void> {
+    if (!(await this.playerService.isGameHostAsync(userId, game._id))) {
       throw new NotHostError();
     }
     if (game.currentPhase !== GamePhase.LOBBY) {
@@ -336,10 +457,17 @@ export class GameService extends TransactionManager {
 
   /**
    * Starts the specified game
-   * @param gameId 
-   * @returns 
+   * @param gameId
+   * @returns
    */
-  public async performStartGameAsync(gameCode: string, userId: string): Promise<{ game: IGame & Document, action: Document<Schema.Types.ObjectId, {}, IStartGameAction> & IStartGameAction }> {
+  public async performStartGameAsync(
+    gameCode: string,
+    userId: string
+  ): Promise<{
+    game: IGame & Document;
+    action: Document<Schema.Types.ObjectId, {}, IStartGameAction> &
+      IStartGameAction;
+  }> {
     return this.withTransaction(async (session) => {
       const game = await this.getGameByCodeOrThrowAsync(gameCode, true);
       await this.validateStartGameOrThrowAsync(game, userId);
@@ -349,11 +477,19 @@ export class GameService extends TransactionManager {
 
   /**
    * Gets a Game model by game ID
-   * @param gameId 
+   * @param gameId
    * @returns Game model
    */
-  public async getGameByIdOrThrowAsync(gameId: string, active = false): Promise<IGame & Document> {
-    const search = active ? { _id: new ObjectId(gameId), currentPhase: { $ne: GamePhase.GAME_OVER } } : { _id: new ObjectId(gameId) };
+  public async getGameByIdOrThrowAsync(
+    gameId: string,
+    active = false
+  ): Promise<IGame & Document> {
+    const search = active
+      ? {
+          _id: new ObjectId(gameId),
+          currentPhase: { $ne: GamePhase.GAME_OVER },
+        }
+      : { _id: new ObjectId(gameId) };
     const game = await this.GameModel.findOne(search);
     if (!game) {
       throw new InvalidGameError();
@@ -363,12 +499,17 @@ export class GameService extends TransactionManager {
 
   /**
    * Gets a Game model by game code
-   * @param gameCode 
+   * @param gameCode
    * @returns Game model
    */
-  public async getGameByCodeOrThrowAsync(gameCode: string, active = false): Promise<IGame & Document> {
+  public async getGameByCodeOrThrowAsync(
+    gameCode: string,
+    active = false
+  ): Promise<IGame & Document> {
     // Construct the search criteria
-    const search = active ? { code: gameCode, currentPhase: { $ne: GamePhase.GAME_OVER } } : { code: gameCode };
+    const search = active
+      ? { code: gameCode, currentPhase: { $ne: GamePhase.GAME_OVER } }
+      : { code: gameCode };
 
     // Create the query
     const query = this.GameModel.find(search).sort({ updatedAt: -1 }).limit(1);
@@ -388,9 +529,15 @@ export class GameService extends TransactionManager {
    * Expires the specified games
    * @param games A collection of games to expire
    */
-  public async expireGamesOrThrowAsync(games: Array<Document<unknown, {}, IGame> & IGame & Required<{
-    _id: Schema.Types.ObjectId;
-  }>>): Promise<void> {
+  public async expireGamesOrThrowAsync(
+    games: Array<
+      Document<unknown, {}, IGame> &
+        IGame &
+        Required<{
+          _id: Schema.Types.ObjectId;
+        }>
+    >
+  ): Promise<void> {
     for (const game of games) {
       // set currentPhase to GAME_OVER
       game.currentPhase = GamePhase.GAME_OVER;
@@ -398,8 +545,10 @@ export class GameService extends TransactionManager {
       // TODO: close any sockets for this game
       await this.actionService.expireGameAsync(savedGame);
       // set all chefs to EXPIRED
-      const chefs = await this.chefService.getGameChefsByGameOrIdAsync(savedGame);
-      chefs.forEach(chef => {
+      const chefs = await this.chefService.getGameChefsByGameOrIdAsync(
+        savedGame
+      );
+      chefs.forEach((chef) => {
         chef.state = ChefState.EXPIRED;
         chef.save();
       });
@@ -414,8 +563,14 @@ export class GameService extends TransactionManager {
       // find games not in GAME_OVER phase with a lastModified date older than MAX_GAME_AGE_WITHOUT_ACTIVITY_IN_MINUTES
       // cutoffDate is now minus MAX_GAME_AGE_WITHOUT_ACTIVITY_IN_MINUTES
       const cutoffDate = new Date();
-      cutoffDate.setMinutes(cutoffDate.getMinutes() - constants.MAX_GAME_AGE_WITHOUT_ACTIVITY_IN_MINUTES);
-      const games = await this.GameModel.find({ currentPhase: { $ne: GamePhase.GAME_OVER }, lastModified: { $lt: cutoffDate } });
+      cutoffDate.setMinutes(
+        cutoffDate.getMinutes() -
+          constants.MAX_GAME_AGE_WITHOUT_ACTIVITY_IN_MINUTES
+      );
+      const games = await this.GameModel.find({
+        currentPhase: { $ne: GamePhase.GAME_OVER },
+        lastModified: { $lt: cutoffDate },
+      });
       if (games && games.length > 0) {
         this.expireGamesOrThrowAsync(games);
       }
@@ -427,7 +582,10 @@ export class GameService extends TransactionManager {
    * @param message The message to validate
    */
   public validateSendMessageOrThrow(message: string): void {
-    if (message.length < constants.MIN_MESSAGE_LENGTH || message.length > constants.MAX_MESSAGE_LENGTH) {
+    if (
+      message.length < constants.MIN_MESSAGE_LENGTH ||
+      message.length > constants.MAX_MESSAGE_LENGTH
+    ) {
       throw new InvalidMessageError();
     }
   }
@@ -439,7 +597,13 @@ export class GameService extends TransactionManager {
    * @param message The message to send
    * @returns The message action object
    */
-  public async sendMessageAsync(game: IGame, chef: IChef, message: string): Promise<Document<Schema.Types.ObjectId, {}, IMessageAction> & IMessageAction> {
+  public async sendMessageAsync(
+    game: IGame,
+    chef: IChef,
+    message: string
+  ): Promise<
+    Document<Schema.Types.ObjectId, {}, IMessageAction> & IMessageAction
+  > {
     return this.actionService.sendMessageAsync(game, chef, message);
   }
 
@@ -450,7 +614,13 @@ export class GameService extends TransactionManager {
    * @param message The message to send
    * @returns The message action object
    */
-  public async performSendMessageAsync(gameCode: string, user: IUser & Document, message: string): Promise<Document<Schema.Types.ObjectId, {}, IMessageAction> & IMessageAction> {
+  public async performSendMessageAsync(
+    gameCode: string,
+    user: IUser & Document,
+    message: string
+  ): Promise<
+    Document<Schema.Types.ObjectId, {}, IMessageAction> & IMessageAction
+  > {
     this.validateSendMessageOrThrow(message);
     return this.withTransaction(async (session) => {
       const game = await this.getGameByCodeOrThrowAsync(gameCode, true);
@@ -461,22 +631,27 @@ export class GameService extends TransactionManager {
 
   /**
    * Gets all chef names for the specified game
-   * @param gameId 
+   * @param gameId
    * @returns Array of chef names
    */
-  public async getGameChefNamesByGameIdAsync(gameId: string): Promise<string[]> {
+  public async getGameChefNamesByGameIdAsync(
+    gameId: string
+  ): Promise<string[]> {
     const chefs = await this.chefService.getGameChefsByGameOrIdAsync(gameId);
-    return chefs.map(chef => chef.name);
+    return chefs.map((chef) => chef.name);
   }
 
   /**
    * Return whether the current chef can bid
-   * @param gameCode 
-   * @param user 
+   * @param gameCode
+   * @param user
    */
   public canBid(game: IGame, chef: IChef): boolean {
     // current phase must be SETUP or BIDDING
-    if (game.currentPhase !== GamePhase.BIDDING && game.currentPhase !== GamePhase.SETUP) {
+    if (
+      game.currentPhase !== GamePhase.BIDDING &&
+      game.currentPhase !== GamePhase.SETUP
+    ) {
       return false;
     }
     // the current chef must be the user
@@ -499,9 +674,9 @@ export class GameService extends TransactionManager {
 
   /**
    * Return whether the given chef can place a card
-   * @param game 
-   * @param chef 
-   * @returns 
+   * @param game
+   * @param chef
+   * @returns
    */
   public canPlaceCard(game: IGame, chef: IChef): boolean {
     // current phase must be SETUP
@@ -522,8 +697,8 @@ export class GameService extends TransactionManager {
 
   /**
    * Return whether the given chef can pass on bidding or increasing the bid.
-   * @param game 
-   * @param chef 
+   * @param game
+   * @param chef
    */
   public canPass(game: IGame, chef: IChef): boolean {
     // the current chef must be the user
@@ -562,8 +737,8 @@ export class GameService extends TransactionManager {
   /**
    * Returns the available actions to the current chef
    * This will return an empty array if the chef passed in is not the current chef
-   * @param game 
-   * @param chef 
+   * @param game
+   * @param chef
    * @returns An array of available actions
    */
   public availableTurnActions(game: IGame, chef: IChef): TurnAction[] {
@@ -606,7 +781,7 @@ export class GameService extends TransactionManager {
    * @returns boolean with whether the card was found
    */
   public hasIngredientInHand(chef: IChef, ingredient: CardType): boolean {
-    return (chef.hand.filter(card => card.type == ingredient).length > 0);
+    return chef.hand.filter((card) => card.type == ingredient).length > 0;
   }
 
   /**
@@ -615,7 +790,11 @@ export class GameService extends TransactionManager {
    * @param chef The chef to validate
    * @param ingredient The ingredient to place
    */
-  public validatePlaceIngredientOrThrow(game: IGame & Document, chef: IChef & Document, ingredient: CardType): void {
+  public validatePlaceIngredientOrThrow(
+    game: IGame & Document,
+    chef: IChef & Document,
+    ingredient: CardType
+  ): void {
     if (game.currentPhase !== GamePhase.SETUP) {
       throw new IncorrectGamePhaseError();
     }
@@ -623,7 +802,10 @@ export class GameService extends TransactionManager {
     if (currentChefId.toString() !== chef._id.toString()) {
       throw new OutOfOrderError();
     }
-    if (chef.placedCards.length >= constants.HAND_SIZE || chef.hand.length == 0) {
+    if (
+      chef.placedCards.length >= constants.HAND_SIZE ||
+      chef.hand.length == 0
+    ) {
       throw new AllCardsPlacedError();
     }
     // can the chef place a card in general
@@ -643,9 +825,15 @@ export class GameService extends TransactionManager {
    * @param ingredient The ingredient to place
    * @returns A tuple of the updated game and chef objects
    */
-  public async placeIngredientAsync(game: IGame & Document, chef: IChef & Document, ingredient: CardType): Promise<{ game: IGame & Document, chef: IChef & Document }> {
+  public async placeIngredientAsync(
+    game: IGame & Document,
+    chef: IChef & Document,
+    ingredient: CardType
+  ): Promise<{ game: IGame & Document; chef: IChef & Document }> {
     // remove one card of the specified type from the chef's hand
-    const ingredientIndex = chef.hand.findIndex(card => card.type == ingredient);
+    const ingredientIndex = chef.hand.findIndex(
+      (card) => card.type == ingredient
+    );
     if (ingredientIndex < 0) {
       throw new OutOfIngredientError(ingredient);
     }
@@ -664,12 +852,16 @@ export class GameService extends TransactionManager {
 
   /**
    * When the game is in setup phase, the current player can place a card or make a bid. This method places a card.
-   * @param gameCode 
-   * @param user 
-   * @param ingredient 
+   * @param gameCode
+   * @param user
+   * @param ingredient
    * @returns A tuple of the updated game and chef objects
    */
-  public async performPlaceIngredientAsync(game: IGame & Document, chef: IChef & Document, ingredient: CardType): Promise<{ game: IGame & Document, chef: IChef & Document }> {
+  public async performPlaceIngredientAsync(
+    game: IGame & Document,
+    chef: IChef & Document,
+    ingredient: CardType
+  ): Promise<{ game: IGame & Document; chef: IChef & Document }> {
     this.validatePlaceIngredientOrThrow(game, chef, ingredient);
     return this.withTransaction(async (session) => {
       return this.placeIngredientAsync(game, chef, ingredient);
@@ -682,7 +874,11 @@ export class GameService extends TransactionManager {
    * @param chef The chef to validate
    * @param bid The bid to place
    */
-  public validateMakeBidOrThrow(game: IGame & Document, chef: IChef & Document, bid: number): void {
+  public validateMakeBidOrThrow(
+    game: IGame & Document,
+    chef: IChef & Document,
+    bid: number
+  ): void {
     if (!this.canBid(game, chef)) {
       throw new InvalidActionError(TurnAction.Bid);
     }
@@ -698,7 +894,11 @@ export class GameService extends TransactionManager {
    * @param bid The bid to make
    * @returns A tuple of the updated game and chef objects
    */
-  public async makeBidAsync(game: IGame & Document, chef: IChef & Document, bid: number): Promise<{ game: IGame & Document, chef: IChef & Document }> {
+  public async makeBidAsync(
+    game: IGame & Document,
+    chef: IChef & Document,
+    bid: number
+  ): Promise<{ game: IGame & Document; chef: IChef & Document }> {
     const firstBid = game.currentBid <= 0;
     // set the current bid
     game.currentBid = bid;
@@ -730,11 +930,15 @@ export class GameService extends TransactionManager {
   /**
    * Rather than placing a card, the current player can make a bid. This method makes a bid.
    * The game phase will move from SETUP to BIDDING
-   * @param gameCode 
-   * @param user 
-   * @param bid 
+   * @param gameCode
+   * @param user
+   * @param bid
    */
-  public async performMakeBidAsync(game: IGame & Document, chef: IChef & Document, bid: number): Promise<{ game: IGame & Document, chef: IChef & Document }> {
+  public async performMakeBidAsync(
+    game: IGame & Document,
+    chef: IChef & Document,
+    bid: number
+  ): Promise<{ game: IGame & Document; chef: IChef & Document }> {
     this.validateMakeBidOrThrow(game, chef, bid);
     return this.makeBidAsync(game, chef, bid);
   }
@@ -754,7 +958,10 @@ export class GameService extends TransactionManager {
     }
 
     // Find the most recent non-passing bid in the current round
-    const lastNonPassingBid = currentRoundBids.slice().reverse().find(bid => !bid.pass);
+    const lastNonPassingBid = currentRoundBids
+      .slice()
+      .reverse()
+      .find((bid) => !bid.pass);
 
     // If no such bid exists, then return false since we need at least one non-passing bid
     if (!lastNonPassingBid) {
@@ -762,20 +969,34 @@ export class GameService extends TransactionManager {
     }
 
     // Get the index of the last non-passing bid
-    const lastNonPassingBidIndex = currentRoundBids.findIndex(bid => bid.chefId.toString() === lastNonPassingBid.chefId.toString());
+    const lastNonPassingBidIndex = currentRoundBids.findIndex(
+      (bid) => bid.chefId.toString() === lastNonPassingBid.chefId.toString()
+    );
 
     // Create a list of chefIds who have made a bid since the last non-passing bid (including the chef who made it)
-    const subsequentChefIds = currentRoundBids.slice(lastNonPassingBidIndex).map(bid => bid.chefId.toString());
+    const subsequentChefIds = currentRoundBids
+      .slice(lastNonPassingBidIndex)
+      .map((bid) => bid.chefId.toString());
 
     // Find all unique chefIds who have passed since the last non-passing bid (excluding the chef who made the bid)
-    const uniquePassingChefIds = [...new Set(subsequentChefIds.filter((chefId, index) => {
-      return currentRoundBids[lastNonPassingBidIndex + index].pass && chefId !== lastNonPassingBid.chefId.toString();
-    }))];
+    const uniquePassingChefIds = [
+      ...new Set(
+        subsequentChefIds.filter((chefId, index) => {
+          return (
+            currentRoundBids[lastNonPassingBidIndex + index].pass &&
+            chefId !== lastNonPassingBid.chefId.toString()
+          );
+        })
+      ),
+    ];
 
     // Determine if all other chefs have passed since the last non-passing bid
-    const allOtherChefsHavePassed = game.chefIds.every(chefId => {
+    const allOtherChefsHavePassed = game.chefIds.every((chefId) => {
       // The chef who made the last non-passing bid is not expected to have passed
-      return chefId.toString() === lastNonPassingBid.chefId.toString() || uniquePassingChefIds.includes(chefId.toString());
+      return (
+        chefId.toString() === lastNonPassingBid.chefId.toString() ||
+        uniquePassingChefIds.includes(chefId.toString())
+      );
     });
 
     return allOtherChefsHavePassed;
@@ -786,7 +1007,10 @@ export class GameService extends TransactionManager {
    * @param game The game to validate
    * @param chef The chef to validate
    */
-  public validatePerformPassOrThrow(game: IGame & Document, chef: IChef & Document): void {
+  public validatePerformPassOrThrow(
+    game: IGame & Document,
+    chef: IChef & Document
+  ): void {
     if (!this.canPass(game, chef)) {
       throw new InvalidActionError(TurnAction.Pass);
     }
@@ -798,7 +1022,10 @@ export class GameService extends TransactionManager {
    * @param chef The chef passing
    * @returns A tuple of the updated game and chef objects
    */
-  public async passAsync(game: IGame & Document, chef: IChef & Document): Promise<{ game: IGame & Document, chef: IChef & Document }> {
+  public async passAsync(
+    game: IGame & Document,
+    chef: IChef & Document
+  ): Promise<{ game: IGame & Document; chef: IChef & Document }> {
     // create pass event/action
     await this.actionService.passAsync(game, chef);
     // increment the current chef
@@ -822,20 +1049,28 @@ export class GameService extends TransactionManager {
    * @param game The game to pass in
    * @param chef The chef passing
    */
-  public async performPassAsync(game: IGame & Document, chef: IChef & Document): Promise<{ game: IGame & Document, chef: IChef & Document }> {
+  public async performPassAsync(
+    game: IGame & Document,
+    chef: IChef & Document
+  ): Promise<{ game: IGame & Document; chef: IChef & Document }> {
     this.validatePerformPassOrThrow(game, chef);
     return this.passAsync(game, chef);
   }
 
   /**
    * A user performs a turn action
-   * @param gameCode 
-   * @param user 
-   * @param action 
-   * @param value 
-   * @returns 
+   * @param gameCode
+   * @param user
+   * @param action
+   * @param value
+   * @returns
    */
-  public async performTurnActionAsync(gameCode: string, user: IUser & Document, action: TurnAction, value?: { bid?: number, ingredient?: CardType }): Promise<{ game: IGame & Document, chef: IChef & Document }> {
+  public async performTurnActionAsync(
+    gameCode: string,
+    user: IUser & Document,
+    action: TurnAction,
+    value?: { bid?: number; ingredient?: CardType }
+  ): Promise<{ game: IGame & Document; chef: IChef & Document }> {
     return this.withTransaction(async (session) => {
       const game = await this.getGameByCodeOrThrowAsync(gameCode, true);
       if (game.chefIds[game.currentChef].toString() !== user._id.toString()) {
@@ -847,7 +1082,8 @@ export class GameService extends TransactionManager {
       if (!availableActions.includes(action)) {
         throw new InvalidActionError(action, value?.bid, value?.ingredient);
       }
-      let result: { game: IGame & Document, chef: IChef & Document } = undefined;
+      let result: { game: IGame & Document; chef: IChef & Document } =
+        undefined;
       switch (action) {
         case TurnAction.Bid:
         case TurnAction.IncreaseBid:
@@ -860,7 +1096,11 @@ export class GameService extends TransactionManager {
           if (!value.ingredient) {
             throw new InvalidActionError(action);
           }
-          result = await this.performPlaceIngredientAsync(game, chef, value.ingredient);
+          result = await this.performPlaceIngredientAsync(
+            game,
+            chef,
+            value.ingredient
+          );
           break;
         case TurnAction.Pass:
           result = await this.performPassAsync(game, chef);

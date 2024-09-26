@@ -39,21 +39,71 @@ import { IStartBiddingAction } from './interfaces/startBiddingAction';
 import { IStartGameAction } from './interfaces/startGameAction';
 import { IStartNewRoundAction } from './interfaces/startNewRoundAction';
 
-const actionModel = BaseModel.create<IAction>(ModelData[ModelName.Action]).Model;
-export const CreateGameDiscriminator = actionModel.discriminator<ICreateGameAction>(Action.CREATE_GAME, CreateGameActionSchema);
-export const EndGameDiscriminator = actionModel.discriminator<IEndGameAction>(Action.END_GAME, EndGameActionSchema);
-export const EndRoundDiscriminator = actionModel.discriminator<IEndRoundAction>(Action.END_ROUND, EndRoundActionSchema);
-export const ExpireGameDiscriminator = actionModel.discriminator<IExpireGameAction>(Action.EXPIRE_GAME, ExpireGameActionSchema);
-export const FlipCardDiscriminator = actionModel.discriminator<IFlipCardAction>(Action.FLIP_CARD, FlipCardActionSchema);
-export const JoinGameDiscriminator = actionModel.discriminator<IJoinGameAction>(Action.JOIN_GAME, JoinGameActionSchema);
-export const MakeBidDiscriminator = actionModel.discriminator<IMakeBidAction>(Action.MAKE_BID, MakeBidActionSchema);
-export const MessageDiscriminator = actionModel.discriminator<IMessageAction>(Action.MESSAGE, MessageActionSchema);
-export const PassDiscriminator = actionModel.discriminator<IPassAction>(Action.PASS, PassActionSchema);
-export const PlaceCardDiscriminator = actionModel.discriminator<IPlaceCardAction>(Action.PLACE_CARD, PlaceCardActionSchema);
-export const QuitGameDiscriminator = actionModel.discriminator<IQuitGameAction>(Action.QUIT_GAME, QuitGameActionSchema);
-export const StartBiddingDiscriminator = actionModel.discriminator<IStartBiddingAction>(Action.START_BIDDING, StartBiddingActionSchema);
-export const StartGameDiscriminator = actionModel.discriminator<IStartGameAction>(Action.START_GAME, StartGameActionSchema);
-export const StartNewRoundDiscriminator = actionModel.discriminator<IStartNewRoundAction>(Action.START_NEW_ROUND, StartNewRoundActionSchema);
+const actionModel = BaseModel.create<IAction>(
+  ModelData[ModelName.Action]
+).Model;
+export const CreateGameDiscriminator =
+  actionModel.discriminator<ICreateGameAction>(
+    Action.CREATE_GAME,
+    CreateGameActionSchema
+  );
+export const EndGameDiscriminator = actionModel.discriminator<IEndGameAction>(
+  Action.END_GAME,
+  EndGameActionSchema
+);
+export const EndRoundDiscriminator = actionModel.discriminator<IEndRoundAction>(
+  Action.END_ROUND,
+  EndRoundActionSchema
+);
+export const ExpireGameDiscriminator =
+  actionModel.discriminator<IExpireGameAction>(
+    Action.EXPIRE_GAME,
+    ExpireGameActionSchema
+  );
+export const FlipCardDiscriminator = actionModel.discriminator<IFlipCardAction>(
+  Action.FLIP_CARD,
+  FlipCardActionSchema
+);
+export const JoinGameDiscriminator = actionModel.discriminator<IJoinGameAction>(
+  Action.JOIN_GAME,
+  JoinGameActionSchema
+);
+export const MakeBidDiscriminator = actionModel.discriminator<IMakeBidAction>(
+  Action.MAKE_BID,
+  MakeBidActionSchema
+);
+export const MessageDiscriminator = actionModel.discriminator<IMessageAction>(
+  Action.MESSAGE,
+  MessageActionSchema
+);
+export const PassDiscriminator = actionModel.discriminator<IPassAction>(
+  Action.PASS,
+  PassActionSchema
+);
+export const PlaceCardDiscriminator =
+  actionModel.discriminator<IPlaceCardAction>(
+    Action.PLACE_CARD,
+    PlaceCardActionSchema
+  );
+export const QuitGameDiscriminator = actionModel.discriminator<IQuitGameAction>(
+  Action.QUIT_GAME,
+  QuitGameActionSchema
+);
+export const StartBiddingDiscriminator =
+  actionModel.discriminator<IStartBiddingAction>(
+    Action.START_BIDDING,
+    StartBiddingActionSchema
+  );
+export const StartGameDiscriminator =
+  actionModel.discriminator<IStartGameAction>(
+    Action.START_GAME,
+    StartGameActionSchema
+  );
+export const StartNewRoundDiscriminator =
+  actionModel.discriminator<IStartNewRoundAction>(
+    Action.START_NEW_ROUND,
+    StartNewRoundActionSchema
+  );
 
 export const SchemaModels: ISchemaModels = {
   Action: actionModel,

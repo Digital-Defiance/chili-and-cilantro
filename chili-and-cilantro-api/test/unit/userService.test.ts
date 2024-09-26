@@ -38,30 +38,24 @@ describe('userService', () => {
     });
     it('should throw an error if the email is invalid', async () => {
       email = 'invalid email without at symbol';
-      await expect(userService.validateRegisterOrThrowAsync(
-        email,
-        username,
-        password
-      )).rejects.toThrow(InvalidEmailError);
+      await expect(
+        userService.validateRegisterOrThrowAsync(email, username, password)
+      ).rejects.toThrow(InvalidEmailError);
     });
     it('should throw an error if the email is already in use', async () => {
       sinon.stub(userModel, 'findOne').returns({
         exec: sinon.stub().resolves({ email: email }),
       });
-      await expect(userService.validateRegisterOrThrowAsync(
-        email,
-        username,
-        password
-      )).rejects.toThrow(EmailExistsError);
+      await expect(
+        userService.validateRegisterOrThrowAsync(email, username, password)
+      ).rejects.toThrow(EmailExistsError);
     });
     it('should throw an error if the username is too short', async () => {
       sinon.stub(userModel, 'findOne').returns(null);
       username = 'x'.repeat(constants.MIN_USERNAME_LENGTH - 1);
-      await expect(userService.validateRegisterOrThrowAsync(
-        email,
-        username,
-        password
-      )).rejects.toThrow(InvalidUsernameError);
+      await expect(
+        userService.validateRegisterOrThrowAsync(email, username, password)
+      ).rejects.toThrow(InvalidUsernameError);
     });
     it('should throw an error if the username is too long', async () => {
       sinon.stub(userModel, 'findOne').returns(null);
@@ -80,46 +74,36 @@ describe('userService', () => {
         .returns({
           exec: sinon.stub().resolves({ username: username }),
         });
-      await expect(userService.validateRegisterOrThrowAsync(
-        email,
-        username,
-        password
-      )).rejects.toThrow(UsernameExistsError);
+      await expect(
+        userService.validateRegisterOrThrowAsync(email, username, password)
+      ).rejects.toThrow(UsernameExistsError);
     });
     it('should throw an error if the password is missing', async () => {
       sinon.stub(userModel, 'findOne').returns(null);
       password = undefined;
-      await expect(userService.validateRegisterOrThrowAsync(
-        email,
-        username,
-        password
-      )).rejects.toThrow(InvalidPasswordError);
+      await expect(
+        userService.validateRegisterOrThrowAsync(email, username, password)
+      ).rejects.toThrow(InvalidPasswordError);
     });
     it('should throw an error if the password is too short', async () => {
       sinon.stub(userModel, 'findOne').returns(null);
       password = 'x'.repeat(constants.MIN_GAME_PASSWORD_LENGTH - 1);
-      await expect(userService.validateRegisterOrThrowAsync(
-        email,
-        username,
-        password
-      )).rejects.toThrow(InvalidPasswordError);
+      await expect(
+        userService.validateRegisterOrThrowAsync(email, username, password)
+      ).rejects.toThrow(InvalidPasswordError);
     });
     it('should throw an error if the password is too long', async () => {
       sinon.stub(userModel, 'findOne').returns(null);
       password = 'x'.repeat(constants.MAX_GAME_PASSWORD_LENGTH + 1);
-      await expect(userService.validateRegisterOrThrowAsync(
-        email,
-        username,
-        password
-      )).rejects.toThrow(InvalidPasswordError);
+      await expect(
+        userService.validateRegisterOrThrowAsync(email, username, password)
+      ).rejects.toThrow(InvalidPasswordError);
     });
     it('should not throw an error if the email, username, and password are valid', async () => {
       sinon.stub(userModel, 'findOne').returns(null);
-      await expect(userService.validateRegisterOrThrowAsync(
-        email,
-        username,
-        password
-      )).resolves.not.toThrow();
+      await expect(
+        userService.validateRegisterOrThrowAsync(email, username, password)
+      ).resolves.not.toThrow();
     });
   });
   describe('registerAuth0UserAsync', () => {
@@ -139,7 +123,9 @@ describe('userService', () => {
       // but it is async, so we need to return a promise
       // and resolve it with null
       sinon.stub(managementClient.users, 'create').resolves(undefined);
-      await expect(userService.registerAuth0UserAsync(email, username, password)).rejects.toThrow('Error creating user in Auth0: Unknown error');
+      await expect(
+        userService.registerAuth0UserAsync(email, username, password)
+      ).rejects.toThrow('Error creating user in Auth0: Unknown error');
     });
     it('should throw an error if the auth0 response status is not 201', async () => {
       // Mock the response with the necessary properties
@@ -153,7 +139,9 @@ describe('userService', () => {
         .stub(managementClient.users, 'create')
         .resolves(mockResponse as any);
 
-      await expect(userService.registerAuth0UserAsync(email, username, password)).rejects.toThrow('Error creating user in Auth0: Bad Request');
+      await expect(
+        userService.registerAuth0UserAsync(email, username, password)
+      ).rejects.toThrow('Error creating user in Auth0: Bad Request');
     });
     it('should return the auth0 user response if the management call is successful', async () => {
       // stub the auth0 mangement client to return a data object and expect that value
@@ -209,7 +197,7 @@ describe('userService', () => {
         username: username,
         user_id: 'auth0|'.concat(faker.string.uuid()),
       };
-      jest.spyOn(console, 'error').mockImplementation(() => { });
+      jest.spyOn(console, 'error').mockImplementation(() => {});
     });
     it('should call validateRegisterOrThrowAsync, registerAuth0UserAsync, and createUserAsync', async () => {
       jest
@@ -238,17 +226,21 @@ describe('userService', () => {
       const error = new Error('Error creating user in Auth0');
       sinon.stub(userService, 'validateRegisterOrThrowAsync').resolves();
       sinon.stub(userService, 'registerAuth0UserAsync').rejects(error);
-      await expect(userService.performRegister(email, username, password)).rejects.toThrow('Error creating user in Auth0');
+      await expect(
+        userService.performRegister(email, username, password)
+      ).rejects.toThrow('Error creating user in Auth0');
     });
   });
   describe('getUserByAuth0IdOrThrow', () => {
     beforeEach(() => {
-      jest.spyOn(console, 'error').mockImplementation(() => { });
+      jest.spyOn(console, 'error').mockImplementation(() => {});
     });
     it('should throw an error if the user is not found', async () => {
       const auth0Id = `auth0Id|${faker.string.uuid()}`;
       sinon.stub(userModel, 'findOne').returns(null);
-      await expect(userService.getUserByAuth0IdOrThrow(auth0Id)).rejects.toThrow(`Invalid user by auth0Id: ${auth0Id}`)
+      await expect(
+        userService.getUserByAuth0IdOrThrow(auth0Id)
+      ).rejects.toThrow(`Invalid user by auth0Id: ${auth0Id}`);
       expect(console.error).toHaveBeenCalledWith(
         'Error fetching user by Auth0 ID:',
         expect.anything()

@@ -7,7 +7,7 @@ import { generateObjectId } from './objectId';
 /**
  * Generate a chef with random values, and a save method to emulate mongoose Document
  * @param overrides Any values to override the generated values
- * @returns 
+ * @returns
  */
 export function generateChef(overrides?: Object): IChef & { save: jest.Mock } {
   const chef = {

@@ -255,7 +255,12 @@ describe('ChefService', () => {
   describe('getGameChefsByGameOrIdAsync', () => {
     it('should return an array of chefs for a given game ID', async () => {
       // Arrange
-      const { game: mockGame, user: mockUser, chef: mockChef, additionalChefs } = generateChefGameUser(true, 2);
+      const {
+        game: mockGame,
+        user: mockUser,
+        chef: mockChef,
+        additionalChefs,
+      } = generateChefGameUser(true, 2);
       const gameIdString = mockGame._id.toString();
       const mockChefs = [mockChef, ...additionalChefs];
 

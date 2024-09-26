@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 import express, { Application } from 'express';
 import https from 'https';
-import { Server, createServer } from "http";
+import { Server, createServer } from 'http';
 import fs from 'fs';
 import { environment } from './environment';
 import { setupDatabase } from './setupDatabase';
@@ -12,7 +12,7 @@ import { setupStaticReactApp } from './setupStaticReactApp';
 
 declare global {
   namespace Express {
-    interface User { }
+    interface User {}
   }
 }
 export const app: Application = express();
@@ -37,14 +37,14 @@ configureApplication(app).then(async () => {
     server = https.createServer(httpsOptions, app);
     server.listen(environment.developer.port, () => {
       console.log(
-        `[ ready ] https://${environment.developer.host}:${environment.developer.port}`,
+        `[ ready ] https://${environment.developer.host}:${environment.developer.port}`
       );
     });
   } else {
     server = createServer(app);
     server.listen(environment.developer.port, () => {
       console.log(
-        `[ ready ] http://${environment.developer.host}:${environment.developer.port}`,
+        `[ ready ] http://${environment.developer.host}:${environment.developer.port}`
       );
     });
   }

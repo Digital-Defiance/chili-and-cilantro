@@ -1,8 +1,8 @@
-import { Schema } from "mongoose";
+import { Schema } from 'mongoose';
 import { IBid } from './bid';
-import { IHasID } from "./hasId";
-import { IHasTimestamps } from "./hasTimestamps";
-import { GamePhase } from "../enumerations/gamePhase";
+import { IHasID } from './hasId';
+import { IHasTimestamps } from './hasTimestamps';
+import { GamePhase } from '../enumerations/gamePhase';
 
 export interface IGame extends IHasID, IHasTimestamps {
   /**
@@ -18,7 +18,7 @@ export interface IGame extends IHasID, IHasTimestamps {
    */
   password?: string;
   /**
-   * Chef IDs in the game 
+   * Chef IDs in the game
    */
   chefIds: Schema.Types.ObjectId[];
   /**

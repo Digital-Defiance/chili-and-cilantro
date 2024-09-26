@@ -1,4 +1,4 @@
-import { SigningKey } from "jwks-rsa";
+import { SigningKey } from 'jwks-rsa';
 
 /**
  * Mocks the JwksClient and its jwksClient.getSigningKey function
@@ -10,11 +10,11 @@ export class MockJwksClient {
   ) {
     callback(null, {
       kid: kid,
-      alg: "RS256",
+      alg: 'RS256',
       getPublicKey() {
-        return "public key";
+        return 'public key';
       },
-      publicKey: "public key",
+      publicKey: 'public key',
     });
   }
 }

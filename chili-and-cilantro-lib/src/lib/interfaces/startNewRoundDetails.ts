@@ -1,1 +1,1 @@
-export interface IStartNewRoundDetails { }
+export interface IStartNewRoundDetails {}

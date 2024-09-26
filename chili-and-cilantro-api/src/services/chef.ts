@@ -1,6 +1,12 @@
 import { ObjectId } from 'mongodb';
 import { Document, Model } from 'mongoose';
-import { ChefState, IChef, IGame, IUser, ModelName } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import {
+  ChefState,
+  IChef,
+  IGame,
+  IUser,
+  ModelName,
+} from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { UtilityService } from './utility';
 import { NotInGameError } from '../errors/notInGame';
 
@@ -19,7 +25,13 @@ export class ChefService {
    * @param chefId The id of the chef to create. If not provided, a new id will be generated
    * @returns A new chef document
    */
-  public async newChefAsync(game: IGame & Document, user: IUser & Document, userName: string, host: boolean, chefId?: ObjectId): Promise<IChef & Document> {
+  public async newChefAsync(
+    game: IGame & Document,
+    user: IUser & Document,
+    userName: string,
+    host: boolean,
+    chefId?: ObjectId
+  ): Promise<IChef & Document> {
     const chef = await this.ChefModel.create({
       _id: chefId ?? new ObjectId(),
       gameId: game._id,
@@ -41,7 +53,11 @@ export class ChefService {
    * @param newChefId The id of the chef to create. If not provided, a new id will be generated
    * @returns A new chef document
    */
-  public async newChefFromExisting(newGame: IGame & Document, existingChef: IChef & Document, newChefId?: ObjectId): Promise<IChef & Document> {
+  public async newChefFromExisting(
+    newGame: IGame & Document,
+    existingChef: IChef & Document,
+    newChefId?: ObjectId
+  ): Promise<IChef & Document> {
     const newChef = await this.ChefModel.create({
       _id: newChefId ?? new ObjectId(),
       gameId: newGame._id,
@@ -62,10 +78,13 @@ export class ChefService {
    * @param user The user the chef belongs to
    * @returns The chef document
    */
-  public async getGameChefOrThrowAsync(game: IGame & Document, user: IUser & Document): Promise<IChef & Document> {
+  public async getGameChefOrThrowAsync(
+    game: IGame & Document,
+    user: IUser & Document
+  ): Promise<IChef & Document> {
     const chef = await this.ChefModel.findOne({
       gameId: game._id,
-      userId: user._id
+      userId: user._id,
     }).exec();
     if (!chef) {
       throw new NotInGameError();
@@ -78,11 +97,13 @@ export class ChefService {
    * @param gameOrId The game or id of the game the chef is in
    * @returns An array of chef documents
    */
-  public async getGameChefsByGameOrIdAsync(gameOrId: string | IGame): Promise<(IChef & Document)[]> {
+  public async getGameChefsByGameOrIdAsync(
+    gameOrId: string | IGame
+  ): Promise<(IChef & Document)[]> {
     // verify that gameOrId is either a string or an IGame by checking whether there's an _id property
     const hasId = (obj: any): obj is IGame => {
       return obj._id !== undefined;
-    }
+    };
     const gameId = hasId(gameOrId) ? gameOrId._id.toString() : gameOrId;
     const chefs = await this.ChefModel.find({ gameId: gameId });
     return chefs;

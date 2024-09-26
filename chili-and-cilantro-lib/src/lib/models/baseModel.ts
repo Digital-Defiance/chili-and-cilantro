@@ -25,7 +25,7 @@ abstract class Base {
 
 export class BaseModel<
   T extends IHasID<U>,
-  U = Schema.Types.ObjectId,
+  U = Schema.Types.ObjectId
 > extends Base {
   protected static ModelDataMap: Map<string, IModelData> = new Map<
     string,
@@ -49,7 +49,7 @@ export class BaseModel<
     const newModel = model<T>(
       modelData.name,
       modelData.schema,
-      modelData.collection,
+      modelData.collection
     );
     const baseModel = new BaseModel<T>(modelData, newModel);
     return baseModel;

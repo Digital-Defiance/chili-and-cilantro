@@ -50,7 +50,7 @@ describe('BaseModel', () => {
         collection: ModelNameCollection.User,
         schema: schema3,
         path: `/${ModelNameCollection.User}}`,
-      }),
+      })
     ).toThrowError('Cannot overwrite `test1` model once compiled.');
   });
 });

@@ -28,10 +28,7 @@ usersRouter.post(
       const userService = new UserService();
       const jwtService = new JwtService(userService);
       jwtService.authenticateUserAsync(req, res, async (user, auth0User) => {
-        if (
-          auth0User.email_verified &&
-          user.email_verified === false
-        ) {
+        if (auth0User.email_verified && user.email_verified === false) {
           user.email_verified = true;
           await user.save();
         }
@@ -39,10 +36,10 @@ usersRouter.post(
           .status(200)
           .json({ message: 'User validated successfully', user: user });
       });
-    }
-    catch (error) {
+    } catch (error) {
       res.status(400).json(error);
     }
-  });
+  }
+);
 
 export default usersRouter;

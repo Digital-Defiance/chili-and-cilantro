@@ -1,5 +1,9 @@
-import { Model } from "mongoose";
-import { Action, IAction, ModelName } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { Model } from 'mongoose';
+import {
+  Action,
+  IAction,
+  ModelName,
+} from '@chili-and-cilantro/chili-and-cilantro-lib';
 
 export interface IDatabase {
   getModel<T>(modelName: ModelName): Model<T>;

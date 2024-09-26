@@ -40,7 +40,7 @@ export function setupMiddlewares(app: Application) {
       frameguard: {
         action: 'deny',
       },
-    }),
+    })
   );
   app.use(nocache());
   app.use(
@@ -49,6 +49,6 @@ export function setupMiddlewares(app: Application) {
       methods: ['GET'],
       allowedHeaders: ['Authorization', 'Content-Type'],
       maxAge: 86400,
-    }),
+    })
   );
 }

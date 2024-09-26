@@ -1,6 +1,12 @@
 import { ObjectId } from 'mongodb';
 import { Model } from 'mongoose';
-import { GamePhase, IGame, IUser, ModelData, ModelName } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import {
+  GamePhase,
+  IGame,
+  IUser,
+  ModelData,
+  ModelName,
+} from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { IDatabase } from '../interfaces/database';
 
 export class PlayerService {
@@ -10,16 +16,19 @@ export class PlayerService {
   }
 
   /**
-* Returns whether the specified user is the host of the specified game
-* @param userId
-* @param gameId
-* @returns boolean
-*/
-  public async isGameHostAsync(userId: string, gameId: string): Promise<boolean> {
+   * Returns whether the specified user is the host of the specified game
+   * @param userId
+   * @param gameId
+   * @returns boolean
+   */
+  public async isGameHostAsync(
+    userId: string,
+    gameId: string
+  ): Promise<boolean> {
     try {
       const count = await this.GameModel.countDocuments({
         _id: new ObjectId(gameId),
-        hostUserId: new ObjectId(userId)
+        hostUserId: new ObjectId(userId),
       }).exec();
 
       return count > 0;
@@ -28,7 +37,6 @@ export class PlayerService {
       throw err;
     }
   }
-
 
   /**
    * Returns whether the specified user is in any active game
@@ -40,28 +48,28 @@ export class PlayerService {
       const result = await this.GameModel.aggregate([
         {
           $match: {
-            currentPhase: { $ne: GamePhase.GAME_OVER }
-          }
+            currentPhase: { $ne: GamePhase.GAME_OVER },
+          },
         },
         {
           $lookup: {
             from: ModelData.Chef.collection,
             localField: 'chefIds',
             foreignField: '_id',
-            as: 'chefDetails'
-          }
+            as: 'chefDetails',
+          },
         },
         {
-          $unwind: '$chefDetails'
+          $unwind: '$chefDetails',
         },
         {
           $match: {
-            'chefDetails.userId': user._id
-          }
+            'chefDetails.userId': user._id,
+          },
         },
         {
-          $count: 'activeGamesCount'
-        }
+          $count: 'activeGamesCount',
+        },
       ]);
 
       // If the aggregation result is empty, count is 0, otherwise, it's the returned count
@@ -76,38 +84,42 @@ export class PlayerService {
 
   /**
    * Returns whether the user is in the specified game, regardless of game state
-   * @param userId 
-   * @param gameId 
+   * @param userId
+   * @param gameId
    * @returns boolean
    */
-  public async userIsInGameAsync(userId: string, gameId: string, active = false): Promise<boolean> {
+  public async userIsInGameAsync(
+    userId: string,
+    gameId: string,
+    active = false
+  ): Promise<boolean> {
     try {
       const result = await this.GameModel.aggregate([
         {
           $match: {
             _id: new ObjectId(gameId),
-            ...active ? { currentPhase: { $ne: GamePhase.GAME_OVER } } : {}
-          }
+            ...(active ? { currentPhase: { $ne: GamePhase.GAME_OVER } } : {}),
+          },
         },
         {
           $lookup: {
             from: ModelData.Chef.collection,
             localField: 'chefIds',
             foreignField: '_id',
-            as: 'chefDetails'
-          }
+            as: 'chefDetails',
+          },
         },
         {
-          $unwind: '$chefDetails'
+          $unwind: '$chefDetails',
         },
         {
           $match: {
-            'chefDetails.userId': new ObjectId(userId) // Match specific userId
-          }
+            'chefDetails.userId': new ObjectId(userId), // Match specific userId
+          },
         },
         {
-          $count: 'activeGamesCount'
-        }
+          $count: 'activeGamesCount',
+        },
       ]);
 
       // If the aggregation result is empty, count is 0, otherwise, it's the returned count

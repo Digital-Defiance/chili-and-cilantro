@@ -4,7 +4,11 @@ import { ActionService } from '../../src/services/action';
 import { ChefService } from '../../src/services/chef';
 import { GameService } from '../../src/services/game';
 import { PlayerService } from '../../src/services/player';
-import { IGame, ModelName, IChef } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import {
+  IGame,
+  ModelName,
+  IChef,
+} from '@chili-and-cilantro/chili-and-cilantro-lib';
 
 describe('GameService', () => {
   let gameService;
@@ -18,9 +22,13 @@ describe('GameService', () => {
     const actionService = new ActionService(database);
     const chefService = new ChefService(mockChefModel);
     const playerService = new PlayerService(mockGameModel);
-    gameService = new GameService(mockGameModel, actionService, chefService, playerService);
+    gameService = new GameService(
+      mockGameModel,
+      actionService,
+      chefService,
+      playerService
+    );
   });
-
 
   describe('generateNewGameCodeAsync', () => {
     let countDocumentsStub;
@@ -37,7 +45,10 @@ describe('GameService', () => {
       countDocumentsStub.resolves(0);
       const gameCode = await gameService.generateNewGameCodeAsync();
       expect(gameCode).toBeDefined();
-      sinon.assert.calledWith(countDocumentsStub, { code: gameCode, currentPhase: { $ne: 'GAME_OVER' } });
+      sinon.assert.calledWith(countDocumentsStub, {
+        code: gameCode,
+        currentPhase: { $ne: 'GAME_OVER' },
+      });
     });
 
     it('should retry generating a game code if the first one is taken', async () => {

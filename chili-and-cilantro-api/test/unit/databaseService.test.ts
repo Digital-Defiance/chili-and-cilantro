@@ -35,20 +35,59 @@ describe('Database Service', () => {
   describe('getActionModel', () => {
     // Test each action type
     const actionTypes = [
-      { action: Action.CREATE_GAME, model: ChiliAndCilantroLib.CreateGameDiscriminator },
-      { action: Action.START_GAME, model: ChiliAndCilantroLib.StartGameDiscriminator },
-      { action: Action.JOIN_GAME, model: ChiliAndCilantroLib.JoinGameDiscriminator },
-      { action: Action.END_GAME, model: ChiliAndCilantroLib.EndGameDiscriminator },
-      { action: Action.EXPIRE_GAME, model: ChiliAndCilantroLib.ExpireGameDiscriminator },
-      { action: Action.PLACE_CARD, model: ChiliAndCilantroLib.PlaceCardDiscriminator },
-      { action: Action.START_BIDDING, model: ChiliAndCilantroLib.StartBiddingDiscriminator },
-      { action: Action.MAKE_BID, model: ChiliAndCilantroLib.MakeBidDiscriminator },
+      {
+        action: Action.CREATE_GAME,
+        model: ChiliAndCilantroLib.CreateGameDiscriminator,
+      },
+      {
+        action: Action.START_GAME,
+        model: ChiliAndCilantroLib.StartGameDiscriminator,
+      },
+      {
+        action: Action.JOIN_GAME,
+        model: ChiliAndCilantroLib.JoinGameDiscriminator,
+      },
+      {
+        action: Action.END_GAME,
+        model: ChiliAndCilantroLib.EndGameDiscriminator,
+      },
+      {
+        action: Action.EXPIRE_GAME,
+        model: ChiliAndCilantroLib.ExpireGameDiscriminator,
+      },
+      {
+        action: Action.PLACE_CARD,
+        model: ChiliAndCilantroLib.PlaceCardDiscriminator,
+      },
+      {
+        action: Action.START_BIDDING,
+        model: ChiliAndCilantroLib.StartBiddingDiscriminator,
+      },
+      {
+        action: Action.MAKE_BID,
+        model: ChiliAndCilantroLib.MakeBidDiscriminator,
+      },
       { action: Action.PASS, model: ChiliAndCilantroLib.PassDiscriminator },
-      { action: Action.FLIP_CARD, model: ChiliAndCilantroLib.FlipCardDiscriminator },
-      { action: Action.END_ROUND, model: ChiliAndCilantroLib.EndRoundDiscriminator },
-      { action: Action.START_NEW_ROUND, model: ChiliAndCilantroLib.StartNewRoundDiscriminator },
-      { action: Action.MESSAGE, model: ChiliAndCilantroLib.MessageDiscriminator },
-      { action: Action.QUIT_GAME, model: ChiliAndCilantroLib.QuitGameDiscriminator },
+      {
+        action: Action.FLIP_CARD,
+        model: ChiliAndCilantroLib.FlipCardDiscriminator,
+      },
+      {
+        action: Action.END_ROUND,
+        model: ChiliAndCilantroLib.EndRoundDiscriminator,
+      },
+      {
+        action: Action.START_NEW_ROUND,
+        model: ChiliAndCilantroLib.StartNewRoundDiscriminator,
+      },
+      {
+        action: Action.MESSAGE,
+        model: ChiliAndCilantroLib.MessageDiscriminator,
+      },
+      {
+        action: Action.QUIT_GAME,
+        model: ChiliAndCilantroLib.QuitGameDiscriminator,
+      },
     ];
 
     actionTypes.forEach(({ action, model }) => {
@@ -65,7 +104,9 @@ describe('Database Service', () => {
       const action = 'SomeAction';
 
       // Act & Assert
-      expect(() => databaseService.getActionModel(action)).toThrow(`Action type ${action} not found`);
+      expect(() => databaseService.getActionModel(action)).toThrow(
+        `Action type ${action} not found`
+      );
     });
   });
 });

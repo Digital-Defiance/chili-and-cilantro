@@ -27,7 +27,7 @@ export interface IEnvironment {
 
 export function validateEnvironment(
   environment: IEnvironment,
-  then: (environment: IEnvironment) => void,
+  then: (environment: IEnvironment) => void
 ) {
   // ensure all required environment variables are set
   if (!environment.cookies.secret) {

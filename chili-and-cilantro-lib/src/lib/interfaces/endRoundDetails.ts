@@ -1,1 +1,1 @@
-export interface IEndRoundDetails { }
+export interface IEndRoundDetails {}

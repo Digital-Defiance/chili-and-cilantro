@@ -10,6 +10,6 @@ export function setupStaticReactApp(app: Application) {
   app.use(expressStatic(environment.developer.reactDir, serveStaticOptions));
   app.use(
     '/assets',
-    expressStatic(path.join(environment.developer.reactDir, 'src', 'assets')),
+    expressStatic(path.join(environment.developer.reactDir, 'src', 'assets'))
   );
 }
