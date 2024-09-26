@@ -19,7 +19,7 @@
 	"forwardPorts": [3000],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "yarn",
+	"postCreateCommand": "./setup-nvm.sh && ./do-yarn.sh && git config --global --add safe.directory /workspace",
 
 	// Configure tool-specific properties.
 	// "customizations": {},
