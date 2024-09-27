@@ -1,6 +1,6 @@
 import {
-  constants,
   CardType,
+  constants,
   ICard,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 
@@ -27,7 +27,7 @@ export abstract class UtilityService {
   public static swapElements(
     array: any[],
     index1: number,
-    index2: number
+    index2: number,
   ): void {
     [array[index1], array[index2]] = [array[index2], array[index1]];
   }

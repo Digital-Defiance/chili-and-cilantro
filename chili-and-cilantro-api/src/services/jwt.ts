@@ -1,4 +1,6 @@
+import { IUser, IUserDocument } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { GetUsers200ResponseOneOfInner } from 'auth0';
+import { Request, Response } from 'express';
 import {
   JwtHeader,
   JwtPayload,
@@ -6,12 +8,9 @@ import {
   verify,
 } from 'jsonwebtoken';
 import { JwksClient, SigningKey } from 'jwks-rsa';
-import { environment } from '../environment';
-import { managementClient } from '../auth0';
 import { Document } from 'mongoose';
-import { Request, Response } from 'express';
+import { environment } from '../environment';
 import { UserService } from './user';
-import { IUser } from '@chili-and-cilantro/chili-and-cilantro-lib';
 
 export class JwtService {
   private readonly client: JwksClient;
@@ -36,12 +35,12 @@ export class JwtService {
           const signingKey = key?.getPublicKey();
           callback(null, signingKey);
         }
-      }
+      },
     );
   }
 
   async validateAccessTokenAndFetchAuth0UserAsync(
-    frontEndAccessToken: string
+    frontEndAccessToken: string,
   ): Promise<GetUsers200ResponseOneOfInner> {
     const decoded = await new Promise<JwtPayload | null>((resolve, reject) => {
       verify(
@@ -54,7 +53,7 @@ export class JwtService {
           } else {
             resolve(decoded as JwtPayload);
           }
-        }
+        },
       );
     });
 
@@ -75,30 +74,28 @@ export class JwtService {
     req: Request,
     res: Response,
     next: (
-      appUser: Document & IUser,
-      auth0User: GetUsers200ResponseOneOfInner
-    ) => void
+      appUser: IUserDocument,
+    ) => void,
   ) {
     const accessToken = req.headers.authorization?.split(' ')[1];
     if (!accessToken) {
       return res.status(401).json({ message: 'Access token not found' });
     }
     try {
-      const auth0User = await this.validateAccessTokenAndFetchAuth0UserAsync(
-        accessToken
-      );
+      const auth0User =
+        await this.validateAccessTokenAndFetchAuth0UserAsync(accessToken);
       if (!auth0User.user_id) {
         return res.status(401).json({ message: 'Unable to determine user id' });
       }
 
       const user = await this.userService.getUserByAuth0IdOrThrow(
-        auth0User.user_id
+        auth0User.user_id,
       );
       if (!user) {
         return res.status(401).json({ message: 'User not found' });
       }
 
-      next(user, auth0User);
+      next(user);
     } catch (ex) {
       return res.status(401).json({ message: 'Invalid access token' });
     }
@@ -112,8 +109,8 @@ export class JwtService {
    * @returns The user data from MongoDB corresponding to the Auth0 user ID in the token.
    */
   public async getUserFromValidatedTokenAsync(
-    token: string
-  ): Promise<(Document & IUser) | null> {
+    token: string,
+  ): Promise<(IUserDocument) | null> {
     // Decode the token (without verification)
     const decoded = await new Promise<JwtPayload | null>((resolve, reject) => {
       verify(
@@ -126,7 +123,7 @@ export class JwtService {
           } else {
             resolve(decoded as JwtPayload);
           }
-        }
+        },
       );
     });
 

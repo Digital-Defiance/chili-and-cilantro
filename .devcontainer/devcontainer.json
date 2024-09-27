@@ -27,14 +27,19 @@
 		"vscode": {
 			// Add the IDs of extensions you want installed when the container is created.
 			"extensions": [
-				"esbenp.prettier-vscode",
-				"GitHub.copilot",
-				"GitHub.copilot-labs",
 				"mongodb.mongodb-vscode",
+				"rangav.vscode-thunder-client",
+				"github.vscode-github-actions",
+				"eamodio.gitlens",
 				"ms-azuretools.vscode-docker",
-				"Postman.postman-for-vscode",
+				"esbenp.prettier-vscode",
+				"ms-vscode-remote.remote-containers",
 				"firsttris.vscode-jest-runner",
-				"nrwl.angular-console"
+				"ms-playwright.playwright",
+				"nrwl.angular-console",
+				"TabNine.tabnine-vscode",
+				"GitHub.copilot",
+				"GitHub.copilot-chat"
 			],
 			// Set *default* container specific settings.json values on container create.
 			"settings": {

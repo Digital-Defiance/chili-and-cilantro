@@ -1,5 +1,5 @@
-import React, { useState, ChangeEvent, FormEvent } from 'react';
 import axios from 'axios';
+import React, { ChangeEvent, FormEvent, useState } from 'react';
 
 interface FormData {
   username: string;
@@ -46,7 +46,7 @@ const RegistrationForm: React.FC = () => {
       if (response.status === 201) {
         // Registration was successful
         setMessage(
-          'Registration successful! Please check your email for a verification link.'
+          'Registration successful! Please check your email for a verification link.',
         );
         setIsError(false);
       }
@@ -56,7 +56,7 @@ const RegistrationForm: React.FC = () => {
         // Assuming the server responds with a message in case of an error
         setMessage(
           error.response.data.message ||
-            'An error occurred during registration.'
+            'An error occurred during registration.',
         );
         setIsError(true);
       } else {

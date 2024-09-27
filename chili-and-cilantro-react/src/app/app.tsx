@@ -1,17 +1,16 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { useAuth0 } from '@auth0/auth0-react';
-import { AuthenticationGuard } from '../components/authentication-required';
-import styles from './app.module.scss';
-import AccountError from '../pages/account-error';
 import ApiAccess from '../components/api-access';
+import { AuthenticationGuard } from '../components/authentication-required';
 import Callback from '../components/callback';
 import Game from '../components/game';
 import LoginLink from '../components/login-link';
 import LogoutLink from '../components/logout-link';
+import AccountError from '../pages/account-error';
 import Register from '../pages/register';
 import UserProfile from '../pages/user-profile';
 
-import { Route, Routes, Link } from 'react-router-dom';
+import { Link, Route, Routes } from 'react-router-dom';
 
 export function App() {
   const { isAuthenticated } = useAuth0();

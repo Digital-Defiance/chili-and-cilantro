@@ -1,8 +1,24 @@
-import { Document, Model, Schema } from 'mongoose';
-import { ActionService } from '../../src/services/action';
+import {
+  ActionType,
+  CardType,
+  constants,
+  IAction,
+  IChef,
+  ICreateGameAction,
+  IExpireGameAction,
+  IGame,
+  IJoinGameAction,
+  IMessageAction,
+  IPassAction,
+  IPlaceCardAction,
+  IStartBiddingAction,
+  IStartGameAction,
+  IUser,
+} from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { faker } from '@faker-js/faker';
+import { Model, Types } from 'mongoose';
 import { IDatabase } from '../../src/interfaces/database';
-import { generateGame, generateChefGameUser } from '../fixtures/game';
-import { generateObjectId } from '../fixtures/objectId';
+import { ActionService } from '../../src/services/action';
 import {
   generateCreateGameAction,
   generateExpireGameAction,
@@ -13,26 +29,7 @@ import {
   generateStartBiddingAction,
   generateStartGameAction,
 } from '../fixtures/action';
-import {
-  constants,
-  IAction,
-  IGame,
-  IChef,
-  IUser,
-  IJoinGameAction,
-  Action,
-  ICreateGameAction,
-  IStartGameAction,
-  IMessageAction,
-  IExpireGameAction,
-  IStartBiddingAction,
-  IPassAction,
-  CardType,
-  IPlaceCardAction,
-} from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { generateUser } from '../fixtures/user';
-import { generateChef } from '../fixtures/chef';
-import { faker } from '@faker-js/faker';
+import { generateChefGameUser, generateGame } from '../fixtures/game';
 
 type MockModel<T = any> = Model<T> &
   jest.Mocked<Model<T>> & {
@@ -40,7 +37,7 @@ type MockModel<T = any> = Model<T> &
   };
 
 describe('ActionService', () => {
-  let gameId: Schema.Types.ObjectId;
+  let gameId: Types.ObjectId;
   let mockGame: IGame;
   let hostChef: IChef;
   let hostUser: IUser;
@@ -88,7 +85,7 @@ describe('ActionService', () => {
       const mockCreateGameAction = generateCreateGameAction(
         gameId,
         hostChef._id,
-        hostUser._id
+        hostUser._id,
       );
       const mockCreateGameActionDocument = {
         ...mockCreateGameAction,
@@ -101,7 +98,7 @@ describe('ActionService', () => {
         create: jest.fn(),
       } as unknown as MockModel<ICreateGameAction>;
       mockActionModel.create.mockResolvedValue(
-        mockCreateGameActionDocument as any
+        mockCreateGameActionDocument as any,
       );
 
       const mockDatabase = {
@@ -114,14 +111,14 @@ describe('ActionService', () => {
       const result = await actionService.createGameAsync(
         mockGame,
         hostChef,
-        hostUser
+        hostUser,
       );
 
       expect(mockActionModel.create).toHaveBeenCalledWith({
         gameId: gameId,
         chefId: hostChef._id,
         userId: hostUser._id,
-        type: Action.CREATE_GAME,
+        type: ActionType.CREATE_GAME,
         details: {},
         round: constants.NONE,
       });
@@ -137,7 +134,7 @@ describe('ActionService', () => {
       const mockJoinGameAction = generateJoinGameAction(
         gameId,
         hostChef._id,
-        hostUser._id
+        hostUser._id,
       );
       const mockJoinGameActionDocument = {
         ...mockJoinGameAction,
@@ -158,7 +155,7 @@ describe('ActionService', () => {
       const result = await actionService.joinGameAsync(
         mockGame,
         hostChef,
-        hostUser
+        hostUser,
       );
 
       // Assert
@@ -166,7 +163,7 @@ describe('ActionService', () => {
         gameId: gameId,
         chefId: hostChef._id,
         userId: hostUser._id,
-        type: Action.JOIN_GAME,
+        type: ActionType.JOIN_GAME,
         details: {},
         round: constants.NONE,
       });
@@ -182,7 +179,7 @@ describe('ActionService', () => {
       const mockStartGameAction = generateStartGameAction(
         gameId,
         hostChef._id,
-        hostUser._id
+        hostUser._id,
       );
       const mockStartGameActionDocument = {
         ...mockStartGameAction,
@@ -207,7 +204,7 @@ describe('ActionService', () => {
         gameId: gameId,
         chefId: hostChef._id,
         userId: hostUser._id,
-        type: Action.START_GAME,
+        type: ActionType.START_GAME,
         details: {},
         round: constants.NONE,
       });
@@ -223,7 +220,7 @@ describe('ActionService', () => {
       const mockExpireGameAction = generateExpireGameAction(
         gameId,
         hostChef._id,
-        hostUser._id
+        hostUser._id,
       );
       const mockExpireGameActionDocument = {
         ...mockExpireGameAction,
@@ -248,7 +245,7 @@ describe('ActionService', () => {
         gameId: gameId,
         chefId: hostChef._id,
         userId: hostUser._id,
-        type: Action.EXPIRE_GAME,
+        type: ActionType.EXPIRE_GAME,
         details: {},
         round: constants.NONE,
       });
@@ -266,7 +263,7 @@ describe('ActionService', () => {
         gameId,
         hostChef._id,
         hostUser._id,
-        message
+        message,
       );
       const mockSendMessageActionDocument = {
         ...mockSendMessageAction,
@@ -287,7 +284,7 @@ describe('ActionService', () => {
       const result = await actionService.sendMessageAsync(
         mockGame,
         hostChef,
-        message
+        message,
       );
 
       // Assert
@@ -295,7 +292,7 @@ describe('ActionService', () => {
         gameId: gameId,
         chefId: hostChef._id,
         userId: hostUser._id,
-        type: Action.MESSAGE,
+        type: ActionType.MESSAGE,
         details: {
           message: message,
         },
@@ -325,7 +322,7 @@ describe('ActionService', () => {
         hostChef._id,
         hostUser._id,
         round,
-        bid
+        bid,
       );
       const mockStartBiddingActionDocument = {
         ...mockStartBiddingAction,
@@ -346,7 +343,7 @@ describe('ActionService', () => {
       const result = await actionService.startBiddingAsync(
         mockGame,
         hostChef,
-        bid
+        bid,
       );
 
       // Assert
@@ -354,7 +351,7 @@ describe('ActionService', () => {
         gameId: gameId,
         chefId: hostChef._id,
         userId: hostUser._id,
-        type: Action.START_BIDDING,
+        type: ActionType.START_BIDDING,
         details: {
           bid: bid,
         },
@@ -385,7 +382,7 @@ describe('ActionService', () => {
         gameId,
         hostChef._id,
         hostUser._id,
-        round
+        round,
       );
       const mockPassActionDocument = {
         ...mockPassAction,
@@ -410,7 +407,7 @@ describe('ActionService', () => {
         gameId: gameId,
         chefId: hostChef._id,
         userId: hostUser._id,
-        type: Action.PASS,
+        type: ActionType.PASS,
         details: {},
         round: round,
       });
@@ -441,7 +438,7 @@ describe('ActionService', () => {
         hostUser._id,
         round,
         cardType,
-        position
+        position,
       );
       const mockPlaceCardActionDocument = {
         ...mockPlaceCardAction,
@@ -463,7 +460,7 @@ describe('ActionService', () => {
         mockGame,
         hostChef,
         cardType,
-        position
+        position,
       );
 
       // Assert
@@ -471,7 +468,7 @@ describe('ActionService', () => {
         gameId: gameId,
         chefId: hostChef._id,
         userId: hostUser._id,
-        type: Action.PLACE_CARD,
+        type: ActionType.PLACE_CARD,
         details: {
           cardType: cardType,
           position: position,

@@ -1,37 +1,106 @@
+/**
+ * Length of game codes eg "ABCDE"
+ */
 export const GAME_CODE_LENGTH = 5;
 
+/**
+ * Maximum number of chefs in a game
+ */
 export const MAX_CHEFS = 8;
+/**
+ * Minimum number of chefs in a game
+ */
 export const MIN_CHEFS = 3;
 
-export const MIN_GAME_PASSWORD_LENGTH = 3;
+/**
+ * Maximum length of a game password
+ */
 export const MAX_GAME_PASSWORD_LENGTH = 30;
+/**
+ * Minimum length of a game password
+ */
+export const MIN_GAME_PASSWORD_LENGTH = 3;
 
-export const MIN_GAME_NAME_LENGTH = 2;
+/**
+ * Maximum length of a game name
+ */
 export const MAX_GAME_NAME_LENGTH = 255;
+/**
+ * Minimum length of a game name
+ */
+export const MIN_GAME_NAME_LENGTH = 2;
 
-export const MIN_USERNAME_LENGTH = 3;
+/**
+ * Maximum length of a username
+ */
 export const MAX_USERNAME_LENGTH = 30;
+/**
+ * Minimum length of a username
+ */
+export const MIN_USERNAME_LENGTH = 3;
 
-export const MIN_USER_DISPLAY_NAME_LENGTH = 2;
+/**
+ * Maximum length of a user display name
+ */
 export const MAX_USER_DISPLAY_NAME_LENGTH = 255;
+/**
+ * Minimum length of a user display name
+ */
+export const MIN_USER_DISPLAY_NAME_LENGTH = 2;
 
+/**
+ * Maximum age of a game without activity in minutes
+ */
 export const MAX_GAME_AGE_WITHOUT_ACTIVITY_IN_MINUTES = 60;
 
-export const MIN_PASSWORD_LENGTH = 8;
+/**
+ * Maximum length of a password
+ */
 export const MAX_PASSWORD_LENGTH = 255;
+/**
+ * Minimum length of a password
+ */
+export const MIN_PASSWORD_LENGTH = 8;
 
-export const MIN_MESSAGE_LENGTH = 2;
+/**
+ * Maximum length of a game message
+ */
 export const MAX_MESSAGE_LENGTH = 512;
+/**
+ * Minimum length of a game message
+ */
+export const MIN_MESSAGE_LENGTH = 2;
 
+/**
+ * Regular expression to look for multilingual strings
+ */
 export const MULTILINGUAL_STRING_REGEX = /^[\s\p{N}\p{L}_-]+$/u;
 
+/**
+ * Number of cards in a hand
+ */
 export const HAND_SIZE = 4;
+/**
+ * Number of chilis in a hand
+ */
 export const CHILI_PER_HAND = 1;
+/**
+ * Number of rounds to win the game
+ */
 export const ROUNDS_TO_WIN = 2;
 
+/**
+ * Represents a value that is not set
+ */
 export const NONE = -1;
 
+/**
+ * Number of bcrypt rounds to hash passwords
+ */
+export const BCRYPT_ROUNDS = 10;
+
 export default {
+  BCRYPT_ROUNDS,
   CHILI_PER_HAND,
   GAME_CODE_LENGTH,
   MAX_CHEFS,

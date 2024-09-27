@@ -1,17 +1,17 @@
-import { Database } from '../../src/services/database';
-import { GameService } from '../../src/services/game';
 import {
+  GamePhase,
   IGame,
   ModelName,
-  GamePhase,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { GameInProgressError } from '../../src/errors/game-in-progress';
+import { NotEnoughChefsError } from '../../src/errors/not-enough-chefs';
+import { NotHostError } from '../../src/errors/not-host';
+import { Database } from '../../src/services/database';
+import { GameService } from '../../src/services/game';
 import { generateStartGameAction } from '../fixtures/action';
-import { generateChefGameUser, generateGame } from '../fixtures/game';
+import { generateChefGameUser } from '../fixtures/game';
 import { generateObjectId } from '../fixtures/objectId';
 import { mockedWithTransactionAsync } from '../fixtures/transactionManager';
-import { GameInProgressError } from '../../src/errors/gameInProgress';
-import { NotHostError } from '../../src/errors/notHost';
-import { NotEnoughChefsError } from '../../src/errors/notEnoughChefs';
 
 describe('gameService startGame', () => {
   describe('performStartGameAsync', () => {
@@ -37,7 +37,7 @@ describe('gameService startGame', () => {
         gameModel,
         mockActionService,
         mockChefService,
-        mockPlayerService
+        mockPlayerService,
       );
       gameId = generateObjectId();
       const generated = generateChefGameUser(true);
@@ -52,7 +52,7 @@ describe('gameService startGame', () => {
       const startGameAction = generateStartGameAction(
         gameId,
         chef._id,
-        user._id
+        user._id,
       );
       jest
         .spyOn(gameService, 'withTransaction')
@@ -72,11 +72,11 @@ describe('gameService startGame', () => {
       expect(result.game).toBe(game);
       expect(gameService.getGameByCodeOrThrowAsync).toHaveBeenCalledWith(
         gameCode,
-        true
+        true,
       );
       expect(gameService.validateStartGameOrThrowAsync).toHaveBeenCalledWith(
         game,
-        userId
+        userId,
       );
       expect(gameService.startGameAsync).toHaveBeenCalledWith(game);
     });
@@ -93,7 +93,7 @@ describe('gameService startGame', () => {
         .mockRejectedValue(new Error('Validation failed'));
 
       await expect(
-        gameService.performStartGameAsync(gameCode, userId)
+        gameService.performStartGameAsync(gameCode, userId),
       ).rejects.toThrow('Validation failed');
     });
   });
@@ -123,7 +123,7 @@ describe('gameService startGame', () => {
         gameModel,
         mockActionService,
         mockChefService,
-        mockPlayerService
+        mockPlayerService,
       );
       gameId = generateObjectId();
       const generated = generateChefGameUser(true, 2);
@@ -138,28 +138,28 @@ describe('gameService startGame', () => {
       game.currentPhase = GamePhase.LOBBY;
 
       await expect(
-        gameService.validateStartGameOrThrowAsync(game, userId)
+        gameService.validateStartGameOrThrowAsync(game, userId),
       ).resolves.not.toThrow();
     });
     it('should throw if the user is not the host', async () => {
       mockPlayerService.isGameHostAsync.mockResolvedValueOnce(false);
 
       await expect(
-        gameService.validateStartGameOrThrowAsync(game, userId)
+        gameService.validateStartGameOrThrowAsync(game, userId),
       ).rejects.toThrow(NotHostError);
     });
     it('should throw if the game phase is not LOBBY', async () => {
       game.currentPhase = GamePhase.SETUP;
 
       await expect(
-        gameService.validateStartGameOrThrowAsync(game, userId)
+        gameService.validateStartGameOrThrowAsync(game, userId),
       ).rejects.toThrow(GameInProgressError);
     });
     it('should throw if there are not enough chefs', async () => {
       game.chefIds = [chef._id];
 
       await expect(
-        gameService.validateStartGameOrThrowAsync(game, userId)
+        gameService.validateStartGameOrThrowAsync(game, userId),
       ).rejects.toThrow(NotEnoughChefsError);
     });
   });
@@ -193,7 +193,7 @@ describe('gameService startGame', () => {
         startGameAsync: jest
           .fn()
           .mockResolvedValue(
-            generateStartGameAction(gameId, chef._id, user._id)
+            generateStartGameAction(gameId, chef._id, user._id),
           ),
       };
       mockPlayerService = {};
@@ -206,7 +206,7 @@ describe('gameService startGame', () => {
         gameModel,
         mockActionService,
         mockChefService,
-        mockPlayerService
+        mockPlayerService,
       );
       userId = user._id;
       gameCode = game.code;
@@ -219,7 +219,7 @@ describe('gameService startGame', () => {
       expect(game.currentPhase).toBe(GamePhase.SETUP);
       expect(game.save).toHaveBeenCalled();
       expect(gameService.actionService.startGameAsync).toHaveBeenCalledWith(
-        game
+        game,
       );
     });
   });

@@ -1,10 +1,10 @@
-import { Schema } from 'mongoose';
+import { Types } from 'mongoose';
 
 export interface IBid {
   /**
    * The chef who made the bid or pass
    */
-  chefId: Schema.Types.ObjectId;
+  chefId: Types.ObjectId;
   /**
    * The new bid amount. If the chef is passing, the bid remains the same.
    */

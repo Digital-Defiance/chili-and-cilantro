@@ -1,29 +1,26 @@
-import { Schema } from 'mongoose';
-import sinon from 'sinon';
-import { Database } from '../../src/services/database';
-import { ActionService } from '../../src/services/action';
-import { ChefService } from '../../src/services/chef';
-import { GameService } from '../../src/services/game';
-import { PlayerService } from '../../src/services/player';
 import {
   constants,
+  IChef,
   IGame,
   ModelName,
-  IChef,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { AlreadyJoinedOtherError } from '../../src/errors/alreadyJoinedOther';
-import { InvalidUserDisplayNameError } from '../../src/errors/invalidUserDisplayName';
-import { generateUser } from '../fixtures/user';
-import { generateObjectId } from '../fixtures/objectId';
 import { InvalidGameNameError } from 'chili-and-cilantro-api/src/errors/invalidGameName';
-import { InvalidGamePasswordError } from 'chili-and-cilantro-api/src/errors/invalidGamePassword';
 import { InvalidGameParameterError } from 'chili-and-cilantro-api/src/errors/invalidGameParameter';
-import { generateString, numberBetween } from '../fixtures/utils';
-import { generateChef } from '../fixtures/chef';
-import { generateGame, generateChefGameUser } from '../fixtures/game';
-import { generateCreateGameAction } from '../fixtures/action';
-import { mockedWithTransactionAsync } from '../fixtures/transactionManager';
+import { InvalidGamePasswordError } from 'chili-and-cilantro-api/src/errors/invalidGamePassword';
 import { UtilityService } from 'chili-and-cilantro-api/src/services/utility';
+import sinon from 'sinon';
+import { AlreadyJoinedOtherError } from '../../src/errors/already-joined-other';
+import { InvalidUserDisplayNameError } from '../../src/errors/invalid-user-display-name';
+import { ActionService } from '../../src/services/action';
+import { ChefService } from '../../src/services/chef';
+import { Database } from '../../src/services/database';
+import { GameService } from '../../src/services/game';
+import { PlayerService } from '../../src/services/player';
+import { generateCreateGameAction } from '../fixtures/action';
+import { generateChefGameUser } from '../fixtures/game';
+import { mockedWithTransactionAsync } from '../fixtures/transactionManager';
+import { generateUser } from '../fixtures/user';
+import { generateString, numberBetween } from '../fixtures/utils';
 
 describe('GameService', () => {
   let chefModel;
@@ -41,7 +38,7 @@ describe('GameService', () => {
       gameModel,
       actionService,
       chefService,
-      playerService
+      playerService,
     );
   });
 
@@ -53,15 +50,15 @@ describe('GameService', () => {
       user = generateUser();
       userName = generateString(
         constants.MIN_USER_DISPLAY_NAME_LENGTH,
-        constants.MAX_USER_DISPLAY_NAME_LENGTH
+        constants.MAX_USER_DISPLAY_NAME_LENGTH,
       );
       gameName = generateString(
         constants.MIN_GAME_NAME_LENGTH,
-        constants.MAX_GAME_NAME_LENGTH
+        constants.MAX_GAME_NAME_LENGTH,
       );
       password = generateString(
         constants.MIN_GAME_PASSWORD_LENGTH,
-        constants.MAX_GAME_PASSWORD_LENGTH
+        constants.MAX_GAME_PASSWORD_LENGTH,
       );
       maxChefs = numberBetween(constants.MIN_CHEFS, constants.MAX_CHEFS);
     });
@@ -87,8 +84,8 @@ describe('GameService', () => {
           userName,
           gameName,
           password,
-          maxChefs
-        )
+          maxChefs,
+        ),
       ).resolves.not.toThrow();
     });
 
@@ -106,8 +103,8 @@ describe('GameService', () => {
           userName,
           gameName,
           password,
-          maxChefs
-        )
+          maxChefs,
+        ),
       ).rejects.toThrow(AlreadyJoinedOtherError);
     });
 
@@ -127,8 +124,8 @@ describe('GameService', () => {
           userName,
           gameName,
           password,
-          maxChefs
-        )
+          maxChefs,
+        ),
       ).rejects.toThrow(InvalidUserDisplayNameError);
     });
 
@@ -148,8 +145,8 @@ describe('GameService', () => {
           userName,
           gameName,
           password,
-          maxChefs
-        )
+          maxChefs,
+        ),
       ).rejects.toThrow(InvalidUserDisplayNameError);
     });
 
@@ -169,8 +166,8 @@ describe('GameService', () => {
           userName,
           gameName,
           password,
-          maxChefs
-        )
+          maxChefs,
+        ),
       ).rejects.toThrow(InvalidUserDisplayNameError);
     });
 
@@ -190,8 +187,8 @@ describe('GameService', () => {
           userName,
           gameName,
           password,
-          maxChefs
-        )
+          maxChefs,
+        ),
       ).rejects.toThrow(InvalidGameNameError);
     });
 
@@ -211,8 +208,8 @@ describe('GameService', () => {
           userName,
           gameName,
           password,
-          maxChefs
-        )
+          maxChefs,
+        ),
       ).rejects.toThrow(InvalidGameNameError);
     });
 
@@ -232,8 +229,8 @@ describe('GameService', () => {
           userName,
           gameName,
           password,
-          maxChefs
-        )
+          maxChefs,
+        ),
       ).rejects.toThrow(InvalidGameNameError);
     });
 
@@ -254,8 +251,8 @@ describe('GameService', () => {
           userName,
           gameName,
           password,
-          maxChefs
-        )
+          maxChefs,
+        ),
       ).rejects.toThrow(InvalidGamePasswordError);
     });
 
@@ -276,8 +273,8 @@ describe('GameService', () => {
           userName,
           gameName,
           password,
-          maxChefs
-        )
+          maxChefs,
+        ),
       ).rejects.toThrow(InvalidGamePasswordError);
     });
 
@@ -297,8 +294,8 @@ describe('GameService', () => {
           userName,
           gameName,
           password,
-          maxChefs
-        )
+          maxChefs,
+        ),
       ).rejects.toThrow(InvalidGameParameterError);
     });
 
@@ -318,8 +315,8 @@ describe('GameService', () => {
           userName,
           gameName,
           password,
-          maxChefs
-        )
+          maxChefs,
+        ),
       ).rejects.toThrow(InvalidGameParameterError);
     });
   });
@@ -338,15 +335,15 @@ describe('GameService', () => {
       // Setup initial valid parameters
       gameUserName = generateString(
         constants.MIN_USER_DISPLAY_NAME_LENGTH,
-        constants.MAX_USER_DISPLAY_NAME_LENGTH
+        constants.MAX_USER_DISPLAY_NAME_LENGTH,
       );
       gameName = generateString(
         constants.MIN_GAME_NAME_LENGTH,
-        constants.MAX_GAME_NAME_LENGTH
+        constants.MAX_GAME_NAME_LENGTH,
       );
       password = generateString(
         constants.MIN_GAME_PASSWORD_LENGTH,
-        constants.MAX_GAME_PASSWORD_LENGTH
+        constants.MAX_GAME_PASSWORD_LENGTH,
       );
       maxChefs = numberBetween(constants.MIN_CHEFS, constants.MAX_CHEFS);
 
@@ -358,7 +355,7 @@ describe('GameService', () => {
       mockCreateGameAction = generateCreateGameAction(
         mockGame._id,
         mockChef._id,
-        mockUser._id
+        mockUser._id,
       );
 
       // Mock dependencies
@@ -384,7 +381,7 @@ describe('GameService', () => {
         gameUserName,
         gameName,
         password,
-        maxChefs
+        maxChefs,
       );
 
       // assert
@@ -394,23 +391,23 @@ describe('GameService', () => {
       expect(gameService.generateNewGameCodeAsync.called).toBeTruthy();
       expect(
         gameService.GameModel.create.calledWith(
-          sinon.match.has('code', mockGame.code)
-        )
+          sinon.match.has('code', mockGame.code),
+        ),
       ).toBeTruthy();
       expect(
         gameService.chefService.newChefAsync.calledWith(
           mockGame,
           mockUser,
           gameUserName,
-          true
-        )
+          true,
+        ),
       ).toBeTruthy();
       expect(
         gameService.actionService.createGameAsync.calledWith(
           mockGame,
           mockChef,
-          mockUser
-        )
+          mockUser,
+        ),
       ).toBeTruthy();
     });
   });
@@ -420,15 +417,15 @@ describe('GameService', () => {
       mockUser = generateUser();
       userName = generateString(
         constants.MIN_USER_DISPLAY_NAME_LENGTH,
-        constants.MAX_USER_DISPLAY_NAME_LENGTH
+        constants.MAX_USER_DISPLAY_NAME_LENGTH,
       );
       gameName = generateString(
         constants.MIN_GAME_NAME_LENGTH,
-        constants.MAX_GAME_NAME_LENGTH
+        constants.MAX_GAME_NAME_LENGTH,
       );
       password = generateString(
         constants.MIN_GAME_PASSWORD_LENGTH,
-        constants.MAX_GAME_PASSWORD_LENGTH
+        constants.MAX_GAME_PASSWORD_LENGTH,
       );
       maxChefs = numberBetween(constants.MIN_CHEFS, constants.MAX_CHEFS);
     });
@@ -460,7 +457,7 @@ describe('GameService', () => {
         userName,
         gameName,
         password,
-        maxChefs
+        maxChefs,
       );
 
       // assert
@@ -485,8 +482,8 @@ describe('GameService', () => {
           userName,
           gameName,
           password,
-          maxChefs
-        )
+          maxChefs,
+        ),
       ).rejects.toThrow('Validation failed');
     });
   });

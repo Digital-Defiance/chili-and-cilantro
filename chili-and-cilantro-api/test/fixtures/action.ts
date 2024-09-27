@@ -1,40 +1,37 @@
-import { Schema } from 'mongoose';
-import { faker } from '@faker-js/faker';
 import {
-  constants,
-  Action,
+  ActionType,
   CardType,
-  ChefState,
-  ICreateGameAction,
+  constants,
+  ICreateGameActionObject,
   ICreateGameDetails,
-  IExpireGameAction,
+  IExpireGameActionObject,
   IExpireGameDetails,
-  IJoinGameAction,
+  IJoinGameActionObject,
   IJoinGameDetails,
-  IMessageAction,
+  IMessageActionObject,
   IMessageDetails,
-  IPassAction,
+  IPassActionObject,
   IPassDetails,
-  IPlaceCardAction,
-  IStartBiddingAction,
+  IPlaceCardActionObject,
+  IStartBiddingActionObject,
   IStartBiddingDetails,
-  IStartGameAction,
+  IStartGameActionObject,
   IStartGameDetails,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { UtilityService } from '../../src/services/utility';
-import { generateObjectId } from '../fixtures/objectId';
+import { faker } from '@faker-js/faker';
+import { Types } from 'mongoose';
 
 export function generateCreateGameAction(
-  gameId: Schema.Types.ObjectId,
-  chefId: Schema.Types.ObjectId,
-  userId: Schema.Types.ObjectId
-): ICreateGameAction {
+  gameId: Types.ObjectId,
+  chefId: Types.ObjectId,
+  userId: Types.ObjectId,
+): ICreateGameActionObject {
   return {
-    _id: generateObjectId(),
+    _id: new Types.ObjectId(),
     gameId: gameId,
     chefId: chefId,
     userId: userId,
-    type: Action.CREATE_GAME,
+    type: ActionType.CREATE_GAME,
     details: {} as ICreateGameDetails,
     round: constants.NONE,
     createdAt: faker.date.past(),
@@ -43,16 +40,16 @@ export function generateCreateGameAction(
 }
 
 export function generateJoinGameAction(
-  gameId: Schema.Types.ObjectId,
-  chefId: Schema.Types.ObjectId,
-  userId: Schema.Types.ObjectId
-): IJoinGameAction {
+  gameId: Types.ObjectId,
+  chefId: Types.ObjectId,
+  userId: Types.ObjectId,
+): IJoinGameActionObject {
   return {
-    _id: generateObjectId(),
+    _id: new Types.ObjectId(),
     gameId: gameId,
     chefId: chefId,
     userId: userId,
-    type: Action.JOIN_GAME,
+    type: ActionType.JOIN_GAME,
     details: {} as IJoinGameDetails,
     round: constants.NONE,
     createdAt: faker.date.past(),
@@ -61,16 +58,16 @@ export function generateJoinGameAction(
 }
 
 export function generateStartGameAction(
-  gameId: Schema.Types.ObjectId,
-  chefId: Schema.Types.ObjectId,
-  userId: Schema.Types.ObjectId
-): IStartGameAction {
+  gameId: Types.ObjectId,
+  chefId: Types.ObjectId,
+  userId: Types.ObjectId,
+): IStartGameActionObject {
   return {
-    _id: generateObjectId(),
+    _id: new Types.ObjectId(),
     gameId: gameId,
     chefId: chefId,
     userId: userId,
-    type: Action.START_GAME,
+    type: ActionType.START_GAME,
     details: {} as IStartGameDetails,
     round: constants.NONE,
     createdAt: faker.date.past(),
@@ -79,16 +76,16 @@ export function generateStartGameAction(
 }
 
 export function generateExpireGameAction(
-  gameId: Schema.Types.ObjectId,
-  chefId: Schema.Types.ObjectId,
-  userId: Schema.Types.ObjectId
-): IExpireGameAction {
+  gameId: Types.ObjectId,
+  chefId: Types.ObjectId,
+  userId: Types.ObjectId,
+): IExpireGameActionObject {
   return {
-    _id: generateObjectId(),
+    _id: new Types.ObjectId(),
     gameId: gameId,
     chefId: chefId,
     userId: userId,
-    type: Action.EXPIRE_GAME,
+    type: ActionType.EXPIRE_GAME,
     details: {} as IExpireGameDetails,
     round: constants.NONE,
     createdAt: faker.date.past(),
@@ -97,17 +94,17 @@ export function generateExpireGameAction(
 }
 
 export function generateSendMessageAction(
-  gameId: Schema.Types.ObjectId,
-  chefId: Schema.Types.ObjectId,
-  userId: Schema.Types.ObjectId,
-  message: string
-): IMessageAction {
+  gameId: Types.ObjectId,
+  chefId: Types.ObjectId,
+  userId: Types.ObjectId,
+  message: string,
+): IMessageActionObject {
   return {
-    _id: generateObjectId(),
+    _id: new Types.ObjectId(),
     gameId: gameId,
     chefId: chefId,
     userId: userId,
-    type: Action.MESSAGE,
+    type: ActionType.MESSAGE,
     details: {
       message: message,
     } as IMessageDetails,
@@ -118,18 +115,18 @@ export function generateSendMessageAction(
 }
 
 export function generateStartBiddingAction(
-  gameId: Schema.Types.ObjectId,
-  chefId: Schema.Types.ObjectId,
-  userId: Schema.Types.ObjectId,
+  gameId: Types.ObjectId,
+  chefId: Types.ObjectId,
+  userId: Types.ObjectId,
   round: number,
-  bid: number
-): IStartBiddingAction {
+  bid: number,
+): IStartBiddingActionObject {
   return {
-    _id: generateObjectId(),
+    _id: new Types.ObjectId(),
     gameId: gameId,
     chefId: chefId,
     userId: userId,
-    type: Action.START_BIDDING,
+    type: ActionType.START_BIDDING,
     details: {
       bid: bid,
     } as IStartBiddingDetails,
@@ -140,17 +137,17 @@ export function generateStartBiddingAction(
 }
 
 export function generatePassAction(
-  gameId: Schema.Types.ObjectId,
-  chefId: Schema.Types.ObjectId,
-  userId: Schema.Types.ObjectId,
-  round: number
-): IPassAction {
+  gameId: Types.ObjectId,
+  chefId: Types.ObjectId,
+  userId: Types.ObjectId,
+  round: number,
+): IPassActionObject {
   return {
-    _id: generateObjectId(),
+    _id: new Types.ObjectId(),
     gameId: gameId,
     chefId: chefId,
     userId: userId,
-    type: Action.PASS,
+    type: ActionType.PASS,
     details: {} as IPassDetails,
     round: round,
     createdAt: faker.date.past(),
@@ -159,19 +156,19 @@ export function generatePassAction(
 }
 
 export function generatePlaceCardAction(
-  gameId: Schema.Types.ObjectId,
-  chefId: Schema.Types.ObjectId,
-  userId: Schema.Types.ObjectId,
+  gameId: Types.ObjectId,
+  chefId: Types.ObjectId,
+  userId: Types.ObjectId,
   round: number,
   cardType: CardType,
-  position: number
-): IPlaceCardAction {
+  position: number,
+): IPlaceCardActionObject {
   return {
-    _id: generateObjectId(),
+    _id: new Types.ObjectId(),
     gameId: gameId,
     chefId: chefId,
     userId: userId,
-    type: Action.PLACE_CARD,
+    type: ActionType.PLACE_CARD,
     details: {
       cardType: cardType,
       position: position,

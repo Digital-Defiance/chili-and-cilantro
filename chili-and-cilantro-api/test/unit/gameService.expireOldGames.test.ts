@@ -1,18 +1,16 @@
-import { Database } from '../../src/services/database';
-import { GameService } from '../../src/services/game';
 import {
-  constants,
   ChefState,
+  constants,
   GamePhase,
   IChef,
   IGame,
   ModelName,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { mockedWithTransactionAsync } from '../fixtures/transactionManager';
-import { InvalidGameError } from '../../src/errors/invalidGame';
-import { generateGame } from '../fixtures/game';
-import mongoose from 'mongoose';
+import { Database } from '../../src/services/database';
+import { GameService } from '../../src/services/game';
 import { generateChef } from '../fixtures/chef';
+import { generateGame } from '../fixtures/game';
+import { mockedWithTransactionAsync } from '../fixtures/transactionManager';
 
 describe('GameService', () => {
   let gameService;
@@ -31,7 +29,7 @@ describe('GameService', () => {
       mockGameModel,
       mockActionService,
       mockChefService,
-      mockPlayerService
+      mockPlayerService,
     );
   });
   describe('expireGamesOrThrowAsync', () => {
@@ -73,7 +71,7 @@ describe('GameService', () => {
 
       // Assert that actionService.expireGameAsync is called for each game
       expect(gameService.actionService.expireGameAsync).toHaveBeenCalledTimes(
-        mockGames.length
+        mockGames.length,
       );
     });
 
@@ -92,7 +90,7 @@ describe('GameService', () => {
 
       // Call the method and expect an error
       await expect(
-        gameService.expireGamesOrThrowAsync([mockGame])
+        gameService.expireGamesOrThrowAsync([mockGame]),
       ).rejects.toThrow('Save failed');
 
       // Assert that the save method was called
@@ -107,7 +105,7 @@ describe('GameService', () => {
       cutoffDate.setMinutes(
         cutoffDate.getMinutes() -
           constants.MAX_GAME_AGE_WITHOUT_ACTIVITY_IN_MINUTES -
-          1
+          1,
       ); // Subtracting an extra minute to ensure the date is old enough
 
       // Create mock old games
@@ -146,7 +144,7 @@ describe('GameService', () => {
 
       // Assert that expireGamesOrThrowAsync was called with the found games
       expect(gameService.expireGamesOrThrowAsync).toHaveBeenCalledWith(
-        mockOldGames
+        mockOldGames,
       );
     });
 
@@ -221,7 +219,7 @@ describe('GameService', () => {
 
       // Expect that calling performExpireOldGamesAsync will throw the mock error
       await expect(gameService.performExpireOldGamesAsync()).rejects.toThrow(
-        mockError
+        mockError,
       );
 
       // Optionally, assert that expireGamesOrThrowAsync was not called

@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-namespace */
 /* eslint-disable @typescript-eslint/no-empty-interface */
 import express, { Application } from 'express';
-import https from 'https';
-import { Server, createServer } from 'http';
 import fs from 'fs';
+import { Server, createServer } from 'http';
+import https from 'https';
 import { environment } from './environment';
-import { setupDatabase } from './setupDatabase';
-import { setupMiddlewares } from './setupMiddlewares';
-import { setupRoutes } from './setupRoutes';
-import { setupStaticReactApp } from './setupStaticReactApp';
+import { setupDatabase } from './setup-database';
+import { setupMiddlewares } from './setup-middlewares';
+import { setupRoutes } from './setup-routes';
+import { setupStaticReactApp } from './setup-static-react-app';
 
 declare global {
   namespace Express {
@@ -37,14 +37,14 @@ configureApplication(app).then(async () => {
     server = https.createServer(httpsOptions, app);
     server.listen(environment.developer.port, () => {
       console.log(
-        `[ ready ] https://${environment.developer.host}:${environment.developer.port}`
+        `[ ready ] https://${environment.developer.host}:${environment.developer.port}`,
       );
     });
   } else {
     server = createServer(app);
     server.listen(environment.developer.port, () => {
       console.log(
-        `[ ready ] http://${environment.developer.host}:${environment.developer.port}`
+        `[ ready ] http://${environment.developer.host}:${environment.developer.port}`,
       );
     });
   }

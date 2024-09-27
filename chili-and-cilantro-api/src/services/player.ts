@@ -1,18 +1,12 @@
-import { ObjectId } from 'mongodb';
-import { Model } from 'mongoose';
 import {
   GamePhase,
-  IGame,
-  IUser,
-  ModelData,
-  ModelName,
+  IUserDocument,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { IDatabase } from '../interfaces/database';
+import { GameModel, Schema } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import { Types } from 'mongoose';
 
 export class PlayerService {
-  private readonly GameModel: Model<IGame>;
-  constructor(gameModel: Model<IGame>) {
-    this.GameModel = gameModel;
+  constructor() {
   }
 
   /**
@@ -22,13 +16,13 @@ export class PlayerService {
    * @returns boolean
    */
   public async isGameHostAsync(
-    userId: string,
-    gameId: string
+    userId: Types.ObjectId,
+    gameId: Types.ObjectId,
   ): Promise<boolean> {
     try {
-      const count = await this.GameModel.countDocuments({
-        _id: new ObjectId(gameId),
-        hostUserId: new ObjectId(userId),
+      const count = await GameModel.countDocuments({
+        _id: gameId,
+        hostUserId: userId,
       }).exec();
 
       return count > 0;
@@ -43,9 +37,9 @@ export class PlayerService {
    * @param userId
    * @returns boolean
    */
-  public async userIsInAnyActiveGameAsync(user: IUser): Promise<boolean> {
+  public async userIsInAnyActiveGameAsync(user: IUserDocument): Promise<boolean> {
     try {
-      const result = await this.GameModel.aggregate([
+      const result = await GameModel.aggregate([
         {
           $match: {
             currentPhase: { $ne: GamePhase.GAME_OVER },
@@ -53,7 +47,7 @@ export class PlayerService {
         },
         {
           $lookup: {
-            from: ModelData.Chef.collection,
+            from: Schema.Chef.collection,
             localField: 'chefIds',
             foreignField: '_id',
             as: 'chefDetails',
@@ -89,21 +83,21 @@ export class PlayerService {
    * @returns boolean
    */
   public async userIsInGameAsync(
-    userId: string,
-    gameId: string,
-    active = false
+    userId: Types.ObjectId,
+    gameId: Types.ObjectId,
+    active = false,
   ): Promise<boolean> {
     try {
-      const result = await this.GameModel.aggregate([
+      const result = await GameModel.aggregate([
         {
           $match: {
-            _id: new ObjectId(gameId),
+            _id: gameId,
             ...(active ? { currentPhase: { $ne: GamePhase.GAME_OVER } } : {}),
           },
         },
         {
           $lookup: {
-            from: ModelData.Chef.collection,
+            from: Schema.Chef.collection,
             localField: 'chefIds',
             foreignField: '_id',
             as: 'chefDetails',
@@ -114,7 +108,7 @@ export class PlayerService {
         },
         {
           $match: {
-            'chefDetails.userId': new ObjectId(userId), // Match specific userId
+            'chefDetails.userId': userId, // Match specific userId
           },
         },
         {

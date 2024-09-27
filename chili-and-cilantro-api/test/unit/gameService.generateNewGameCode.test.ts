@@ -1,14 +1,14 @@
-import sinon from 'sinon';
-import { Database } from '../../src/services/database';
-import { ActionService } from '../../src/services/action';
-import { ChefService } from '../../src/services/chef';
-import { GameService } from '../../src/services/game';
-import { PlayerService } from '../../src/services/player';
 import {
+  IChef,
   IGame,
   ModelName,
-  IChef,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import sinon from 'sinon';
+import { ActionService } from '../../src/services/action';
+import { ChefService } from '../../src/services/chef';
+import { Database } from '../../src/services/database';
+import { GameService } from '../../src/services/game';
+import { PlayerService } from '../../src/services/player';
 
 describe('GameService', () => {
   let gameService;
@@ -26,7 +26,7 @@ describe('GameService', () => {
       mockGameModel,
       actionService,
       chefService,
-      playerService
+      playerService,
     );
   });
 

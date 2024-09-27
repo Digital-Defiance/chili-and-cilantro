@@ -1,24 +1,24 @@
-import { faker } from '@faker-js/faker';
-import sinon from 'sinon';
-import { UserService } from '../../src/services/user';
 import {
-  constants,
   BaseModel,
-  ModelName,
   IUser,
+  ModelName,
+  constants,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { faker } from '@faker-js/faker';
+import { EmailExistsError } from 'chili-and-cilantro-api/src/errors/emailExists';
+import { InvalidEmailError } from 'chili-and-cilantro-api/src/errors/invalidEmail';
+import { InvalidPasswordError } from 'chili-and-cilantro-api/src/errors/invalidPassword';
+import { InvalidUsernameError } from 'chili-and-cilantro-api/src/errors/invalidUsername';
+import { UsernameExistsError } from 'chili-and-cilantro-api/src/errors/usernameExists';
+import sinon from 'sinon';
 import { managementClient } from '../../src/auth0';
+import { UserService } from '../../src/services/user';
+import { generateGamePassword } from '../fixtures/game';
 import {
   generateUser,
   generateUserPassword,
   generateUsername,
 } from '../fixtures/user';
-import { generateGamePassword } from '../fixtures/game';
-import { InvalidUsernameError } from 'chili-and-cilantro-api/src/errors/invalidUsername';
-import { InvalidEmailError } from 'chili-and-cilantro-api/src/errors/invalidEmail';
-import { EmailExistsError } from 'chili-and-cilantro-api/src/errors/emailExists';
-import { UsernameExistsError } from 'chili-and-cilantro-api/src/errors/usernameExists';
-import { InvalidPasswordError } from 'chili-and-cilantro-api/src/errors/invalidPassword';
 
 describe('userService', () => {
   let userService, userModel;
@@ -39,7 +39,7 @@ describe('userService', () => {
     it('should throw an error if the email is invalid', async () => {
       email = 'invalid email without at symbol';
       await expect(
-        userService.validateRegisterOrThrowAsync(email, username, password)
+        userService.validateRegisterOrThrowAsync(email, username, password),
       ).rejects.toThrow(InvalidEmailError);
     });
     it('should throw an error if the email is already in use', async () => {
@@ -47,21 +47,21 @@ describe('userService', () => {
         exec: sinon.stub().resolves({ email: email }),
       });
       await expect(
-        userService.validateRegisterOrThrowAsync(email, username, password)
+        userService.validateRegisterOrThrowAsync(email, username, password),
       ).rejects.toThrow(EmailExistsError);
     });
     it('should throw an error if the username is too short', async () => {
       sinon.stub(userModel, 'findOne').returns(null);
       username = 'x'.repeat(constants.MIN_USERNAME_LENGTH - 1);
       await expect(
-        userService.validateRegisterOrThrowAsync(email, username, password)
+        userService.validateRegisterOrThrowAsync(email, username, password),
       ).rejects.toThrow(InvalidUsernameError);
     });
     it('should throw an error if the username is too long', async () => {
       sinon.stub(userModel, 'findOne').returns(null);
       username = 'x'.repeat(constants.MAX_USERNAME_LENGTH + 1);
       await expect(
-        userService.validateRegisterOrThrowAsync(email, username, password)
+        userService.validateRegisterOrThrowAsync(email, username, password),
       ).rejects.toThrow(InvalidUsernameError);
     });
     it('should throw an error if the username is already in use', async () => {
@@ -75,34 +75,34 @@ describe('userService', () => {
           exec: sinon.stub().resolves({ username: username }),
         });
       await expect(
-        userService.validateRegisterOrThrowAsync(email, username, password)
+        userService.validateRegisterOrThrowAsync(email, username, password),
       ).rejects.toThrow(UsernameExistsError);
     });
     it('should throw an error if the password is missing', async () => {
       sinon.stub(userModel, 'findOne').returns(null);
       password = undefined;
       await expect(
-        userService.validateRegisterOrThrowAsync(email, username, password)
+        userService.validateRegisterOrThrowAsync(email, username, password),
       ).rejects.toThrow(InvalidPasswordError);
     });
     it('should throw an error if the password is too short', async () => {
       sinon.stub(userModel, 'findOne').returns(null);
       password = 'x'.repeat(constants.MIN_GAME_PASSWORD_LENGTH - 1);
       await expect(
-        userService.validateRegisterOrThrowAsync(email, username, password)
+        userService.validateRegisterOrThrowAsync(email, username, password),
       ).rejects.toThrow(InvalidPasswordError);
     });
     it('should throw an error if the password is too long', async () => {
       sinon.stub(userModel, 'findOne').returns(null);
       password = 'x'.repeat(constants.MAX_GAME_PASSWORD_LENGTH + 1);
       await expect(
-        userService.validateRegisterOrThrowAsync(email, username, password)
+        userService.validateRegisterOrThrowAsync(email, username, password),
       ).rejects.toThrow(InvalidPasswordError);
     });
     it('should not throw an error if the email, username, and password are valid', async () => {
       sinon.stub(userModel, 'findOne').returns(null);
       await expect(
-        userService.validateRegisterOrThrowAsync(email, username, password)
+        userService.validateRegisterOrThrowAsync(email, username, password),
       ).resolves.not.toThrow();
     });
   });
@@ -124,7 +124,7 @@ describe('userService', () => {
       // and resolve it with null
       sinon.stub(managementClient.users, 'create').resolves(undefined);
       await expect(
-        userService.registerAuth0UserAsync(email, username, password)
+        userService.registerAuth0UserAsync(email, username, password),
       ).rejects.toThrow('Error creating user in Auth0: Unknown error');
     });
     it('should throw an error if the auth0 response status is not 201', async () => {
@@ -140,7 +140,7 @@ describe('userService', () => {
         .resolves(mockResponse as any);
 
       await expect(
-        userService.registerAuth0UserAsync(email, username, password)
+        userService.registerAuth0UserAsync(email, username, password),
       ).rejects.toThrow('Error creating user in Auth0: Bad Request');
     });
     it('should return the auth0 user response if the management call is successful', async () => {
@@ -227,7 +227,7 @@ describe('userService', () => {
       sinon.stub(userService, 'validateRegisterOrThrowAsync').resolves();
       sinon.stub(userService, 'registerAuth0UserAsync').rejects(error);
       await expect(
-        userService.performRegister(email, username, password)
+        userService.performRegister(email, username, password),
       ).rejects.toThrow('Error creating user in Auth0');
     });
   });
@@ -239,11 +239,11 @@ describe('userService', () => {
       const auth0Id = `auth0Id|${faker.string.uuid()}`;
       sinon.stub(userModel, 'findOne').returns(null);
       await expect(
-        userService.getUserByAuth0IdOrThrow(auth0Id)
+        userService.getUserByAuth0IdOrThrow(auth0Id),
       ).rejects.toThrow(`Invalid user by auth0Id: ${auth0Id}`);
       expect(console.error).toHaveBeenCalledWith(
         'Error fetching user by Auth0 ID:',
-        expect.anything()
+        expect.anything(),
       );
     });
     it('should return the user if the user is found', async () => {

@@ -1,18 +1,18 @@
-import sinon from 'sinon';
-import { ObjectId } from 'mongodb';
-import { PlayerService } from '../../src/services/player';
 import {
-  BaseModel,
   IGame,
   ModelName,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import sinon from 'sinon';
+import { PlayerService } from '../../src/services/player';
+import { GameModel } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import { Types } from 'mongoose';
 
 describe('PlayerService', () => {
   let mockGameModel, playerService;
 
   beforeAll(() => {
-    mockGameModel = BaseModel.getModel<IGame>(ModelName.Game);
-    playerService = new PlayerService(mockGameModel);
+    mockGameModel = GameModel;
+    playerService = new PlayerService();
   });
 
   describe('isGameHostAsync', () => {
@@ -37,8 +37,8 @@ describe('PlayerService', () => {
       expect(result).toBe(true);
       sinon.assert.calledOnce(countDocumentsStub);
       sinon.assert.calledWith(countDocumentsStub, {
-        _id: new ObjectId(gameId),
-        hostUserId: new ObjectId(userId),
+        _id: new Types.ObjectId(gameId),
+        hostUserId: new Types.ObjectId(userId),
       });
     });
 
@@ -52,8 +52,8 @@ describe('PlayerService', () => {
       expect(result).toBe(false);
       sinon.assert.calledOnce(countDocumentsStub);
       sinon.assert.calledWith(countDocumentsStub, {
-        _id: new ObjectId(gameId),
-        hostUserId: new ObjectId(userId),
+        _id: new Types.ObjectId(gameId),
+        hostUserId: new Types.ObjectId(userId),
       });
     });
     it('should log an error when the aggregate call fails', async () => {
@@ -72,7 +72,7 @@ describe('PlayerService', () => {
 
       expect(console.error).toHaveBeenCalledWith(
         'Error checking if user is host of game:',
-        error
+        error,
       );
       sinon.assert.calledOnce(countDocumentsStub);
     });
@@ -94,7 +94,7 @@ describe('PlayerService', () => {
       aggregateStub = sinon
         .stub(mockGameModel, 'aggregate')
         .resolves([{ activeGamesCount: 1 }]);
-      const userId = new ObjectId('bbbbbbbbbbbb');
+      const userId = new Types.ObjectId('bbbbbbbbbbbb');
       const result = await playerService.userIsInAnyActiveGameAsync({
         _id: userId,
       });
@@ -104,7 +104,7 @@ describe('PlayerService', () => {
 
     it('should return false when the user is not in any active game', async () => {
       aggregateStub = sinon.stub(mockGameModel, 'aggregate').resolves([]);
-      const userId = new ObjectId('bbbbbbbbbbbb');
+      const userId = new Types.ObjectId('bbbbbbbbbbbb');
       const result = await playerService.userIsInAnyActiveGameAsync({
         _id: userId,
       });
@@ -114,12 +114,12 @@ describe('PlayerService', () => {
     it('should log an error when the aggregate call fails', async () => {
       const error = new Error('aggregate error');
       aggregateStub = sinon.stub(mockGameModel, 'aggregate').throws(error);
-      const userId = new ObjectId('bbbbbbbbbbbb');
+      const userId = new Types.ObjectId('bbbbbbbbbbbb');
 
       try {
         await playerService.userIsInAnyActiveGameAsync({ _id: userId });
         throw new Error(
-          'Expected userIsInAnyActiveGameAsync to throw an error'
+          'Expected userIsInAnyActiveGameAsync to throw an error',
         );
       } catch (caughtError) {
         expect(caughtError).toBe(error);
@@ -127,7 +127,7 @@ describe('PlayerService', () => {
 
       expect(console.error).toHaveBeenCalledWith(
         'Error checking if user is in game:',
-        error
+        error,
       );
       sinon.assert.calledOnce(aggregateStub);
     });
@@ -149,18 +149,18 @@ describe('PlayerService', () => {
       aggregateStub = sinon
         .stub(mockGameModel, 'aggregate')
         .resolves([{ activeGamesCount: 1 }]);
-      const userId = new ObjectId('bbbbbbbbbbbb');
-      const gameId = new ObjectId('aaaaaaaaaaaa');
+      const userId = new Types.ObjectId('bbbbbbbbbbbb');
+      const gameId = new Types.ObjectId('aaaaaaaaaaaa');
       const result = await playerService.userIsInGameAsync(
-        userId.toString(),
-        gameId.toString()
+        userId,
+        gameId,
       );
       expect(result).toBe(true);
       sinon.assert.calledOnce(aggregateStub);
       sinon.assert.calledWith(aggregateStub, [
         {
           $match: {
-            _id: new ObjectId(gameId),
+            _id: gameId,
           },
         },
         {
@@ -176,7 +176,7 @@ describe('PlayerService', () => {
         },
         {
           $match: {
-            'chefDetails.userId': new ObjectId(userId),
+            'chefDetails.userId': userId,
           },
         },
         {
@@ -189,19 +189,19 @@ describe('PlayerService', () => {
       aggregateStub = sinon
         .stub(mockGameModel, 'aggregate')
         .resolves([{ activeGamesCount: 1 }]);
-      const userId = new ObjectId('bbbbbbbbbbbb');
-      const gameId = new ObjectId('aaaaaaaaaaaa');
+      const userId = new Types.ObjectId('bbbbbbbbbbbb');
+      const gameId = new Types.ObjectId('aaaaaaaaaaaa');
       const result = await playerService.userIsInGameAsync(
-        userId.toString(),
-        gameId.toString(),
-        true
+        userId,
+        gameId,
+        true,
       );
       expect(result).toBe(true);
       sinon.assert.calledOnce(aggregateStub);
       sinon.assert.calledWith(aggregateStub, [
         {
           $match: {
-            _id: new ObjectId(gameId),
+            _id: gameId,
             currentPhase: { $ne: 'GAME_OVER' },
           },
         },
@@ -218,7 +218,7 @@ describe('PlayerService', () => {
         },
         {
           $match: {
-            'chefDetails.userId': new ObjectId(userId),
+            'chefDetails.userId': userId,
           },
         },
         {
@@ -229,11 +229,11 @@ describe('PlayerService', () => {
 
     it('should return false when the user is not in the specified game', async () => {
       aggregateStub = sinon.stub(mockGameModel, 'aggregate').resolves([]);
-      const userId = new ObjectId('bbbbbbbbbbbb');
-      const gameId = new ObjectId('aaaaaaaaaaaa');
+      const userId = new Types.ObjectId('bbbbbbbbbbbb');
+      const gameId = new Types.ObjectId('aaaaaaaaaaaa');
       const result = await playerService.userIsInGameAsync(
-        userId.toString(),
-        gameId.toString()
+        userId,
+        gameId,
       );
       expect(result).toBe(false);
       sinon.assert.calledOnce(aggregateStub);
@@ -241,12 +241,12 @@ describe('PlayerService', () => {
     it('should log an error when the aggregate call fails', async () => {
       const error = new Error('aggregate error');
       aggregateStub = sinon.stub(mockGameModel, 'aggregate').throws(error);
-      const userId = new ObjectId('bbbbbbbbbbbb');
-      const gameId = new ObjectId('aaaaaaaaaaaa');
+      const userId = new Types.ObjectId('bbbbbbbbbbbb');
+      const gameId = new Types.ObjectId('aaaaaaaaaaaa');
       try {
         await playerService.userIsInGameAsync(
-          userId.toString(),
-          gameId.toString()
+          userId,
+          gameId,
         );
         throw new Error('Expected userIsInGameAsync to throw an error');
       } catch (caughtError) {
@@ -255,7 +255,7 @@ describe('PlayerService', () => {
 
       expect(console.error).toHaveBeenCalledWith(
         'Error checking if user is in the specified game:',
-        error
+        error,
       );
       sinon.assert.calledOnce(aggregateStub);
     });

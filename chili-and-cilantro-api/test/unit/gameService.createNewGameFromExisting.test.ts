@@ -1,18 +1,16 @@
-import { Schema } from 'mongoose';
-import sinon from 'sinon';
-import { GameService } from '../../src/services/game';
-import { Database } from '../../src/services/database';
-import { generateGame, generateChefGameUser } from '../fixtures/game';
-import { generateUser } from '../fixtures/user';
-import { generateChef } from '../fixtures/chef';
-import { generateObjectId } from '../fixtures/objectId';
-import { mockedWithTransactionAsync } from '../fixtures/transactionManager';
 import {
+  GamePhase,
   IGame,
   ModelName,
-  GamePhase,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { GameInProgressError } from '../../src/errors/gameInProgress';
+import sinon from 'sinon';
+import { GameInProgressError } from '../../src/errors/game-in-progress';
+import { Database } from '../../src/services/database';
+import { GameService } from '../../src/services/game';
+import { generateChef } from '../fixtures/chef';
+import { generateChefGameUser, generateGame } from '../fixtures/game';
+import { generateObjectId } from '../fixtures/objectId';
+import { mockedWithTransactionAsync } from '../fixtures/transactionManager';
 
 describe('GameService', () => {
   describe('validateCreateNewGameFromExistingOrThrow', () => {
@@ -36,7 +34,7 @@ describe('GameService', () => {
         gameModel,
         actionService,
         chefService,
-        playerService
+        playerService,
       );
       const generated = generateChefGameUser(true, 0, {
         game: { currentPhase: GamePhase.GAME_OVER },
@@ -106,7 +104,7 @@ describe('GameService', () => {
         mockGameModel,
         mockActionService,
         mockChefService,
-        mockPlayerService
+        mockPlayerService,
       );
     });
 
@@ -114,15 +112,15 @@ describe('GameService', () => {
       // Call the method
       const result = await gameService.createNewGameFromExistingAsync(
         existingGame,
-        user
+        user,
       );
 
       // Assertions
       expect(mockChefService.getGameChefsByGameOrIdAsync).toHaveBeenCalledWith(
-        existingGame
+        existingGame,
       );
       expect(mockChefService.newChefFromExisting).toHaveBeenCalledTimes(
-        existingGame.chefIds.length
+        existingGame.chefIds.length,
       );
       expect(mockGameModel.prototype.save).toHaveBeenCalled();
       expect(result).toHaveProperty('game');
@@ -160,7 +158,7 @@ describe('GameService', () => {
         gameModel,
         actionService,
         chefService,
-        playerService
+        playerService,
       );
     });
     afterEach(() => {
@@ -185,7 +183,7 @@ describe('GameService', () => {
       // act
       const result = await gameService.performCreateNewGameFromExistingAsync(
         existingGameId,
-        mockUser
+        mockUser,
       );
 
       // assert
@@ -210,8 +208,8 @@ describe('GameService', () => {
       await expect(
         gameService.performCreateNewGameFromExistingAsync(
           existingGameId,
-          mockUser
-        )
+          mockUser,
+        ),
       ).rejects.toThrow('Validation failed');
     });
   });

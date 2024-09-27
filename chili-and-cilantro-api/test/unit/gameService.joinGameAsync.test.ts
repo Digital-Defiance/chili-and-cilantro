@@ -1,31 +1,29 @@
-import { Schema } from 'mongoose';
-import sinon from 'sinon';
-import { Database } from '../../src/services/database';
-import { ActionService } from '../../src/services/action';
-import { ChefService } from '../../src/services/chef';
-import { GameService } from '../../src/services/game';
-import { PlayerService } from '../../src/services/player';
 import {
   constants,
+  GamePhase,
+  IChef,
   IGame,
   ModelName,
-  IChef,
-  GamePhase,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { AlreadyJoinedOtherError } from '../../src/errors/alreadyJoinedOther';
-import { InvalidUserDisplayNameError } from '../../src/errors/invalidUserDisplayName';
-import { generateUser } from '../fixtures/user';
-import { generateString } from '../fixtures/utils';
+import sinon from 'sinon';
+import { AlreadyJoinedOtherError } from '../../src/errors/already-joined-other';
+import { GameFullError } from '../../src/errors/game-full';
+import { GameInProgressError } from '../../src/errors/game-in-progress';
+import { GamePasswordMismatchError } from '../../src/errors/game-password-mismatch';
+import { InvalidUserDisplayNameError } from '../../src/errors/invalid-user-display-name';
+import { UsernameInUseError } from '../../src/errors/username-in-use';
+import { ActionService } from '../../src/services/action';
+import { ChefService } from '../../src/services/chef';
+import { Database } from '../../src/services/database';
+import { GameService } from '../../src/services/game';
+import { PlayerService } from '../../src/services/player';
+import { UtilityService } from '../../src/services/utility';
 import { generateChef } from '../fixtures/chef';
 import { generateChefGameUser, generateGame } from '../fixtures/game';
 import { generateObjectId } from '../fixtures/objectId';
 import { mockedWithTransactionAsync } from '../fixtures/transactionManager';
-import { UtilityService } from '../../src/services/utility';
-import { GameFullError } from '../../src/errors/gameFull';
-import { faker } from '@faker-js/faker';
-import { GamePasswordMismatchError } from '../../src/errors/gamePasswordMismatch';
-import { UsernameInUseError } from '../../src/errors/usernameInUse';
-import { GameInProgressError } from '../../src/errors/gameInProgress';
+import { generateUser } from '../fixtures/user';
+import { generateString } from '../fixtures/utils';
 
 describe('GameService', () => {
   let chefModel;
@@ -43,7 +41,7 @@ describe('GameService', () => {
       gameModel,
       actionService,
       chefService,
-      playerService
+      playerService,
     );
   });
 
@@ -59,7 +57,7 @@ describe('GameService', () => {
       game = generated.game;
       userDisplayName = generateString(
         constants.MIN_USER_DISPLAY_NAME_LENGTH,
-        constants.MAX_USER_DISPLAY_NAME_LENGTH
+        constants.MAX_USER_DISPLAY_NAME_LENGTH,
       );
     });
 
@@ -87,8 +85,8 @@ describe('GameService', () => {
           game,
           user,
           userDisplayName,
-          game.password
-        )
+          game.password,
+        ),
       ).resolves.not.toThrow();
     });
 
@@ -108,8 +106,8 @@ describe('GameService', () => {
           game,
           user,
           userDisplayName,
-          game.password
-        )
+          game.password,
+        ),
       ).rejects.toThrow(AlreadyJoinedOtherError);
     });
     it('should throw an error when the chef name is already in the specified game', async () => {
@@ -128,8 +126,8 @@ describe('GameService', () => {
           game,
           user,
           chef.name,
-          game.password
-        )
+          game.password,
+        ),
       ).rejects.toThrow(UsernameInUseError);
     });
     it('should throw an error when the game is already in progress', () => {
@@ -153,8 +151,8 @@ describe('GameService', () => {
           game,
           user,
           userDisplayName,
-          game.password
-        )
+          game.password,
+        ),
       ).rejects.toThrow(GameInProgressError);
     });
     it('should throw an error for an invalid username with special characters', async () => {
@@ -175,8 +173,8 @@ describe('GameService', () => {
           game,
           user,
           userDisplayName,
-          game.password
-        )
+          game.password,
+        ),
       ).rejects.toThrow(InvalidUserDisplayNameError);
     });
 
@@ -198,8 +196,8 @@ describe('GameService', () => {
           game,
           user,
           userDisplayName,
-          game.password
-        )
+          game.password,
+        ),
       ).rejects.toThrow(InvalidUserDisplayNameError);
     });
 
@@ -221,8 +219,8 @@ describe('GameService', () => {
           game,
           user,
           userDisplayName,
-          game.password
-        )
+          game.password,
+        ),
       ).rejects.toThrow(InvalidUserDisplayNameError);
     });
 
@@ -242,8 +240,8 @@ describe('GameService', () => {
           game,
           user,
           userDisplayName,
-          'xxxx'
-        )
+          'xxxx',
+        ),
       ).rejects.toThrow(GamePasswordMismatchError);
     });
 
@@ -266,8 +264,8 @@ describe('GameService', () => {
           game,
           user,
           userDisplayName,
-          game.password
-        )
+          game.password,
+        ),
       ).rejects.toThrow(GameFullError);
     });
     it('should allow a user to join a game with no password as long as none is provided', async () => {
@@ -275,7 +273,7 @@ describe('GameService', () => {
       const user = generateUser();
       const userName = generateString(
         constants.MIN_USER_DISPLAY_NAME_LENGTH,
-        constants.MAX_USER_DISPLAY_NAME_LENGTH
+        constants.MAX_USER_DISPLAY_NAME_LENGTH,
       );
 
       sinon
@@ -284,7 +282,7 @@ describe('GameService', () => {
       sinon.stub(gameService, 'getGameChefNamesByGameIdAsync').resolves([]);
 
       await expect(
-        gameService.validateJoinGameOrThrowAsync(game, user, userName, '')
+        gameService.validateJoinGameOrThrowAsync(game, user, userName, ''),
       ).resolves.not.toThrow();
     });
     it('should throw an error if a user tries to join a game with a password when none is required', async () => {
@@ -292,7 +290,7 @@ describe('GameService', () => {
       const user = generateUser();
       const userName = generateString(
         constants.MIN_USER_DISPLAY_NAME_LENGTH,
-        constants.MAX_USER_DISPLAY_NAME_LENGTH
+        constants.MAX_USER_DISPLAY_NAME_LENGTH,
       );
       const unnecessaryPassword = 'somePassword';
 
@@ -306,8 +304,8 @@ describe('GameService', () => {
           game,
           user,
           userName,
-          unnecessaryPassword
-        )
+          unnecessaryPassword,
+        ),
       ).rejects.toThrow(GamePasswordMismatchError);
     });
     it('should throw an error if a user tries to join a game and does not supply a password when one is required', async () => {
@@ -315,7 +313,7 @@ describe('GameService', () => {
       const user = generateUser();
       const userName = generateString(
         constants.MIN_USER_DISPLAY_NAME_LENGTH,
-        constants.MAX_USER_DISPLAY_NAME_LENGTH
+        constants.MAX_USER_DISPLAY_NAME_LENGTH,
       );
 
       sinon
@@ -324,7 +322,7 @@ describe('GameService', () => {
       sinon.stub(gameService, 'getGameChefNamesByGameIdAsync').resolves([]);
 
       await expect(
-        gameService.validateJoinGameOrThrowAsync(game, user, userName, '')
+        gameService.validateJoinGameOrThrowAsync(game, user, userName, ''),
       ).rejects.toThrow(GamePasswordMismatchError);
     });
   });
@@ -350,7 +348,7 @@ describe('GameService', () => {
         gameModel,
         mockActionService,
         mockChefService,
-        mockPlayerService
+        mockPlayerService,
       );
       gameId = generateObjectId();
       const generated = generateChefGameUser(true);
@@ -374,12 +372,12 @@ describe('GameService', () => {
         game,
         user,
         userName,
-        false
+        false,
       );
       expect(mockActionService.joinGameAsync).toHaveBeenCalledWith(
         game,
         mockChef,
-        user
+        user,
       );
       expect(game.chefIds).toContain(mockChef._id);
       expect(game.save).toHaveBeenCalled();
@@ -418,7 +416,7 @@ describe('GameService', () => {
         mockGame.code,
         mockGame.password,
         mockUser,
-        mockUser.userName
+        mockUser.userName,
       );
 
       // assert
@@ -443,8 +441,8 @@ describe('GameService', () => {
           mockGame.code,
           mockGame.password,
           mockUser,
-          userName
-        )
+          userName,
+        ),
       ).rejects.toThrow('Validation failed');
     });
   });

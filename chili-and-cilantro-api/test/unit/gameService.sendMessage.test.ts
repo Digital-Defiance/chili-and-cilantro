@@ -1,17 +1,14 @@
-import { GameService } from '../../src/services/game';
-import { Database } from '../../src/services/database';
-import { generateGame } from '../fixtures/game';
-import { generateChef } from '../fixtures/chef';
-import { mockedWithTransactionAsync } from '../fixtures/transactionManager';
 import {
   constants,
   IGame,
   ModelName,
-  GamePhase,
-  CardType,
-  TurnAction,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { InvalidMessageError } from '../../src/errors/invalidMessage';
+import { InvalidMessageError } from '../../src/errors/invalid-message';
+import { Database } from '../../src/services/database';
+import { GameService } from '../../src/services/game';
+import { generateChef } from '../fixtures/chef';
+import { generateGame } from '../fixtures/game';
+import { mockedWithTransactionAsync } from '../fixtures/transactionManager';
 import { generateUser } from '../fixtures/user';
 
 describe('GameService', () => {
@@ -38,7 +35,7 @@ describe('GameService', () => {
       gameModel,
       actionService,
       chefService,
-      playerService
+      playerService,
     );
     game = generateGame(true);
     chef = generateChef();
@@ -49,21 +46,21 @@ describe('GameService', () => {
     it('should not throw an error for a valid message length', () => {
       const message = 'Valid message';
       expect(() =>
-        gameService.validateSendMessageOrThrow(message)
+        gameService.validateSendMessageOrThrow(message),
       ).not.toThrow();
     });
 
     it('should throw an error for a message too short', () => {
       const message = 'L'.repeat(constants.MIN_MESSAGE_LENGTH - 1);
       expect(() => gameService.validateSendMessageOrThrow(message)).toThrow(
-        InvalidMessageError
+        InvalidMessageError,
       );
     });
 
     it('should throw an error for a message too long', () => {
       const message = 'L'.repeat(constants.MAX_MESSAGE_LENGTH + 1);
       expect(() => gameService.validateSendMessageOrThrow(message)).toThrow(
-        InvalidMessageError
+        InvalidMessageError,
       );
     });
   });
@@ -82,7 +79,7 @@ describe('GameService', () => {
       expect(gameService.actionService.sendMessageAsync).toHaveBeenCalledWith(
         game,
         chef,
-        message
+        message,
       );
     });
   });
@@ -109,16 +106,16 @@ describe('GameService', () => {
       const result = await gameService.performSendMessageAsync(
         game.code,
         user,
-        message
+        message,
       );
       expect(result).toBeDefined(); // Adjust based on your mock return value
       expect(gameService.validateSendMessageOrThrow).toHaveBeenCalledWith(
-        message
+        message,
       );
       expect(gameService.sendMessageAsync).toHaveBeenCalledWith(
         game,
         chef,
-        message
+        message,
       );
     });
 
@@ -131,7 +128,7 @@ describe('GameService', () => {
         });
 
       await expect(
-        gameService.performSendMessageAsync(game.code, user, message)
+        gameService.performSendMessageAsync(game.code, user, message),
       ).rejects.toThrow(InvalidMessageError);
     });
   });

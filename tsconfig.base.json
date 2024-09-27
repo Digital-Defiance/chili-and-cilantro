@@ -17,6 +17,9 @@
     "paths": {
       "@chili-and-cilantro/chili-and-cilantro-lib": [
         "chili-and-cilantro-lib/src/index.ts"
+      ],
+      "@chili-and-cilantro/chili-and-cilantro-node-lib": [
+        "chili-and-cilantro-node-lib/src/index.ts"
       ]
     }
   },

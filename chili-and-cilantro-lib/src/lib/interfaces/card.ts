@@ -1,6 +1,5 @@
-import { Schema } from 'mongoose';
-import { CardType } from '../enumerations/cardType';
-import { IHasID } from './hasId';
+import { CardType } from '../enumerations/card-type';
+import { IHasID } from './has-id';
 
 export interface ICard extends IHasID {
   type: CardType;

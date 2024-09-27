@@ -1,10 +1,9 @@
-import { ClientSession, startSession } from 'mongoose';
-import mongoose from 'mongoose';
-import { TransactionManager } from '../../src/services/transactionManager';
+import mongoose, { ClientSession } from 'mongoose';
+import { TransactionManager } from '../../src/services/transaction-manager';
 
 class TestTransactionManager extends TransactionManager {
   public async withTransaction<TResult>(
-    work: (session: ClientSession) => Promise<TResult>
+    work: (session: ClientSession) => Promise<TResult>,
   ): Promise<TResult> {
     return super.withTransaction(work);
   }
@@ -56,7 +55,7 @@ describe('transactionManager', () => {
       const mockCallback = jest.fn().mockRejectedValue(mockError);
 
       await expect(manager.withTransaction(mockCallback)).rejects.toThrow(
-        mockError
+        mockError,
       );
 
       expect(mockCallback).toHaveBeenCalled();

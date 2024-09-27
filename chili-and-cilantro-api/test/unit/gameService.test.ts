@@ -1,5 +1,3 @@
-import { Database } from '../../src/services/database';
-import { GameService } from '../../src/services/game';
 import {
   CardType,
   GamePhase,
@@ -7,11 +5,13 @@ import {
   ModelName,
   TurnAction,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { InvalidGameError } from '../../src/errors/invalidGame';
-import { generateGame } from '../fixtures/game';
 import mongoose from 'mongoose';
-import { generateObjectId } from '../fixtures/objectId';
+import { InvalidGameError } from '../../src/errors/invalid-game';
+import { Database } from '../../src/services/database';
+import { GameService } from '../../src/services/game';
 import { generateChef } from '../fixtures/chef';
+import { generateGame } from '../fixtures/game';
+import { generateObjectId } from '../fixtures/objectId';
 
 describe('GameService', () => {
   let gameService;
@@ -32,7 +32,7 @@ describe('GameService', () => {
       mockGameModel,
       mockActionService,
       mockChefService,
-      mockPlayerService
+      mockPlayerService,
     );
   });
   describe('getGameByIdOrThrowAsync', () => {
@@ -55,7 +55,7 @@ describe('GameService', () => {
       const gameId = new mongoose.Types.ObjectId().toString();
 
       await expect(gameService.getGameByIdOrThrowAsync(gameId)).rejects.toThrow(
-        InvalidGameError
+        InvalidGameError,
       );
     });
 
@@ -100,7 +100,7 @@ describe('GameService', () => {
       const gameCode = 'testCode';
 
       await expect(
-        gameService.getGameByCodeOrThrowAsync(gameCode)
+        gameService.getGameByCodeOrThrowAsync(gameCode),
       ).rejects.toThrow(InvalidGameError);
     });
     it('should throw InvalidGameError when no game is found, returning empty array', async () => {
@@ -114,7 +114,7 @@ describe('GameService', () => {
       const gameCode = 'testCode';
 
       await expect(
-        gameService.getGameByCodeOrThrowAsync(gameCode)
+        gameService.getGameByCodeOrThrowAsync(gameCode),
       ).rejects.toThrow(InvalidGameError);
     });
     it('should search for active games when active parameter is true', async () => {
@@ -163,7 +163,7 @@ describe('GameService', () => {
       // Assert
       expect(result).toEqual(['Chef A', 'Chef B']);
       expect(mockChefService.getGameChefsByGameOrIdAsync).toHaveBeenCalledWith(
-        gameId
+        gameId,
       );
     });
 
@@ -178,7 +178,7 @@ describe('GameService', () => {
       // Assert
       expect(result).toEqual([]);
       expect(mockChefService.getGameChefsByGameOrIdAsync).toHaveBeenCalledWith(
-        gameId
+        gameId,
       );
     });
   });
@@ -374,7 +374,7 @@ describe('GameService', () => {
       const game = generateGame();
       const chef = generateChef();
       expect(gameService.availableTurnActions(game, chef)).toContain(
-        TurnAction.PlaceCard
+        TurnAction.PlaceCard,
       );
     });
 
@@ -386,7 +386,7 @@ describe('GameService', () => {
       const game = generateGame();
       const chef = generateChef();
       expect(gameService.availableTurnActions(game, chef)).toContain(
-        TurnAction.Pass
+        TurnAction.Pass,
       );
     });
 
@@ -398,7 +398,7 @@ describe('GameService', () => {
       const chef = generateChef();
       const game = generateGame(true, { currentBid: 1 });
       expect(gameService.availableTurnActions(game, chef)).toContain(
-        TurnAction.IncreaseBid
+        TurnAction.IncreaseBid,
       );
     });
 
@@ -410,7 +410,7 @@ describe('GameService', () => {
       const game = generateGame(true, { currentBid: 0 });
       const chef = generateChef();
       expect(gameService.availableTurnActions(game, chef)).toContain(
-        TurnAction.Bid
+        TurnAction.Bid,
       );
     });
 
@@ -517,7 +517,7 @@ describe('GameService', () => {
       });
 
       expect(() => gameService.getGameCurrentChefId(game)).toThrow(
-        `Invalid current chef index: ${game.currentChef}`
+        `Invalid current chef index: ${game.currentChef}`,
       );
     });
 
@@ -528,7 +528,7 @@ describe('GameService', () => {
       });
 
       expect(() => gameService.getGameCurrentChefId(game)).toThrow(
-        `Invalid current chef index: ${game.currentChef}`
+        `Invalid current chef index: ${game.currentChef}`,
       );
     });
   });

@@ -1,11 +1,10 @@
-import sinon from 'sinon';
-import jwt, { JwtPayload } from 'jsonwebtoken';
-import { Document } from 'mongoose';
 import { IUser } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { GetUsers200ResponseOneOfInner } from 'auth0';
-import JwksRsa, { JwksClient, SigningKey } from 'jwks-rsa';
-import { JwtService } from '../../src/services/jwt';
+import jwt, { JwtPayload } from 'jsonwebtoken';
+import { JwksClient, SigningKey } from 'jwks-rsa';
+import { Document } from 'mongoose';
 import { managementClient } from '../../src/auth0';
+import { JwtService } from '../../src/services/jwt';
 import { UserService } from '../../src/services/user';
 import { generateUser } from '../fixtures/user';
 
@@ -79,12 +78,12 @@ describe('JwtService', () => {
             options: jwt.VerifyOptions | undefined,
             callback?:
               | jwt.VerifyCallback<string | jwt.Jwt | jwt.JwtPayload>
-              | undefined
+              | undefined,
           ) => {
             if (callback) {
               callback(null, mockDecodedToken);
             }
-          }
+          },
         );
 
       // Mocking the managementClient to return a successful response
@@ -94,9 +93,10 @@ describe('JwtService', () => {
       });
 
       // Call the method with a mock token
-      const result = await jwtService.validateAccessTokenAndFetchAuth0UserAsync(
-        'mock-token'
-      );
+      const result =
+        await jwtService.validateAccessTokenAndFetchAuth0UserAsync(
+          'mock-token',
+        );
 
       // Assertions
       expect(result).toEqual(mockAuth0User);
@@ -116,17 +116,17 @@ describe('JwtService', () => {
             options: jwt.VerifyOptions | undefined,
             callback?:
               | jwt.VerifyCallback<string | jwt.Jwt | jwt.JwtPayload>
-              | undefined
+              | undefined,
           ) => {
             const error = new jwt.JsonWebTokenError('Invalid token');
             if (callback) {
               callback(error, undefined);
             }
-          }
+          },
         ),
         // Attempt to call the method with an invalid token and expect an error
         await expect(
-          jwtService.validateAccessTokenAndFetchAuth0UserAsync('invalid-token')
+          jwtService.validateAccessTokenAndFetchAuth0UserAsync('invalid-token'),
         ).rejects.toThrow('Invalid token');
 
       // Ensure that the managementClient's get method is not called
@@ -142,15 +142,15 @@ describe('JwtService', () => {
           options: jwt.VerifyOptions | undefined,
           callback?:
             | jwt.VerifyCallback<string | jwt.Jwt | jwt.JwtPayload>
-            | undefined
+            | undefined,
         ) => {
           callback(null, {}); // No 'sub' field
-        }
+        },
       );
 
       // Expect an error when calling validateAccessTokenAndFetchAuth0UserAsync
       await expect(
-        jwtService.validateAccessTokenAndFetchAuth0UserAsync('token')
+        jwtService.validateAccessTokenAndFetchAuth0UserAsync('token'),
       ).rejects.toThrow('Invalid token');
     });
 
@@ -163,10 +163,10 @@ describe('JwtService', () => {
           options: jwt.VerifyOptions | undefined,
           callback?:
             | jwt.VerifyCallback<string | jwt.Jwt | jwt.JwtPayload>
-            | undefined
+            | undefined,
         ) => {
           callback(null, { sub: 'user-id' });
-        }
+        },
       );
 
       // Mock managementClient to simulate user not found
@@ -176,7 +176,7 @@ describe('JwtService', () => {
 
       // Expect an error when calling validateAccessTokenAndFetchAuth0UserAsync
       await expect(
-        jwtService.validateAccessTokenAndFetchAuth0UserAsync('token')
+        jwtService.validateAccessTokenAndFetchAuth0UserAsync('token'),
       ).rejects.toThrow('User not found');
     });
   });
@@ -200,12 +200,12 @@ describe('JwtService', () => {
             options: jwt.VerifyOptions | undefined,
             callback?:
               | jwt.VerifyCallback<string | jwt.Jwt | jwt.JwtPayload>
-              | undefined
+              | undefined,
           ) => {
             if (callback) {
               callback(null, mockDecodedToken);
             }
-          }
+          },
         );
 
       // Mock the managementClient to return a successful response
@@ -230,7 +230,7 @@ describe('JwtService', () => {
       await jwtService.authenticateUserAsync(
         mockRequest as any,
         mockResponse as any,
-        nextFunction
+        nextFunction,
       );
 
       // Assertions
@@ -238,7 +238,7 @@ describe('JwtService', () => {
         'valid-token',
         expect.any(Function),
         expect.any(Object),
-        expect.any(Function)
+        expect.any(Function),
       );
       expect(managementClient.users.get).toHaveBeenCalledWith({
         id: mockDecodedToken.sub,
@@ -254,7 +254,7 @@ describe('JwtService', () => {
       await jwtService.authenticateUserAsync(
         mockRequest as any,
         mockResponse as any,
-        nextFunction
+        nextFunction,
       );
 
       // Assertions
@@ -282,12 +282,12 @@ describe('JwtService', () => {
             options: jwt.VerifyOptions | undefined,
             callback?:
               | jwt.VerifyCallback<string | jwt.Jwt | jwt.JwtPayload>
-              | undefined
+              | undefined,
           ) => {
             if (callback) {
               callback(null, mockDecodedToken);
             }
-          }
+          },
         );
 
       // Mock the managementClient to return a successful response
@@ -303,7 +303,7 @@ describe('JwtService', () => {
       await jwtService.authenticateUserAsync(
         mockRequest as any,
         mockResponse as any,
-        nextFunction
+        nextFunction,
       );
 
       // Assertions
@@ -331,12 +331,12 @@ describe('JwtService', () => {
             options: jwt.VerifyOptions | undefined,
             callback?:
               | jwt.VerifyCallback<string | jwt.Jwt | jwt.JwtPayload>
-              | undefined
+              | undefined,
           ) => {
             if (callback) {
               callback(null, mockDecodedToken);
             }
-          }
+          },
         );
 
       // Mock the managementClient to return a successful response
@@ -351,7 +351,7 @@ describe('JwtService', () => {
       await jwtService.authenticateUserAsync(
         mockRequest as any,
         mockResponse as any,
-        nextFunction
+        nextFunction,
       );
 
       // Assertions
@@ -370,17 +370,17 @@ describe('JwtService', () => {
           options: jwt.VerifyOptions | undefined,
           callback?:
             | jwt.VerifyCallback<string | jwt.Jwt | jwt.JwtPayload>
-            | undefined
+            | undefined,
         ) => {
           callback(new jwt.JsonWebTokenError('Invalid access token'), null);
-        }
+        },
       );
 
       // Call the authenticateUserAsync method
       await jwtService.authenticateUserAsync(
         mockRequest as any,
         mockResponse as any,
-        nextFunction
+        nextFunction,
       );
 
       // Assertions
@@ -405,12 +405,12 @@ describe('JwtService', () => {
             options: jwt.VerifyOptions | undefined,
             callback?:
               | jwt.VerifyCallback<string | jwt.Jwt | jwt.JwtPayload>
-              | undefined
+              | undefined,
           ) => {
             if (callback) {
               callback(null, mockDecodedToken);
             }
-          }
+          },
         );
 
       // Mock the user service to return a user
@@ -423,14 +423,13 @@ describe('JwtService', () => {
       userService.getUserByAuth0IdOrThrow.mockResolvedValue(mockUserDocument);
 
       // Call the getUserFromValidatedTokenAsync method with a mock token
-      const user = await jwtService.getUserFromValidatedTokenAsync(
-        'valid-token'
-      );
+      const user =
+        await jwtService.getUserFromValidatedTokenAsync('valid-token');
 
       // Assertions
       expect(user).toEqual(mockUserDocument);
       expect(userService.getUserByAuth0IdOrThrow).toHaveBeenCalledWith(
-        mockDecodedToken.sub
+        mockDecodedToken.sub,
       );
     });
 
@@ -445,18 +444,18 @@ describe('JwtService', () => {
             options: jwt.VerifyOptions | undefined,
             callback?:
               | jwt.VerifyCallback<string | jwt.Jwt | jwt.JwtPayload>
-              | undefined
+              | undefined,
           ) => {
             const error = new jwt.JsonWebTokenError('Invalid token');
             if (callback) {
               callback(error, undefined);
             }
-          }
+          },
         );
 
       // Attempt to call the method with an invalid token and expect an error
       await expect(
-        jwtService.getUserFromValidatedTokenAsync('invalid-token')
+        jwtService.getUserFromValidatedTokenAsync('invalid-token'),
       ).rejects.toThrow('Token Verification Failed: Invalid token');
 
       // Ensure that the userService's getUserByAuth0IdOrThrow method is not called
@@ -471,15 +470,15 @@ describe('JwtService', () => {
           options: jwt.VerifyOptions | undefined,
           callback?:
             | jwt.VerifyCallback<string | jwt.Jwt | jwt.JwtPayload>
-            | undefined
+            | undefined,
         ) => {
           callback(new jwt.JsonWebTokenError('Invalid token'), null);
-        }
+        },
       );
 
       // Expect an error when calling getUserFromValidatedTokenAsync
       await expect(
-        jwtService.getUserFromValidatedTokenAsync('invalid-token')
+        jwtService.getUserFromValidatedTokenAsync('invalid-token'),
       ).rejects.toThrow('Token Verification Failed: Invalid token');
     });
     it('should throw an error if user not found in database in getUserFromValidatedTokenAsync', async () => {
@@ -491,10 +490,10 @@ describe('JwtService', () => {
           options: jwt.VerifyOptions | undefined,
           callback?:
             | jwt.VerifyCallback<string | jwt.Jwt | jwt.JwtPayload>
-            | undefined
+            | undefined,
         ) => {
           callback(null, { sub: 'user-id' });
-        }
+        },
       );
 
       // Mock userService to simulate user not found
@@ -502,7 +501,7 @@ describe('JwtService', () => {
 
       // Expect an error when calling getUserFromValidatedTokenAsync
       await expect(
-        jwtService.getUserFromValidatedTokenAsync('valid-token')
+        jwtService.getUserFromValidatedTokenAsync('valid-token'),
       ).rejects.toThrow('User not found in database');
     });
     it('should throw an error if there is not a sub field in the decoded token', async () => {
@@ -514,15 +513,15 @@ describe('JwtService', () => {
           options: jwt.VerifyOptions | undefined,
           callback?:
             | jwt.VerifyCallback<string | jwt.Jwt | jwt.JwtPayload>
-            | undefined
+            | undefined,
         ) => {
           callback(null, {}); // No 'sub' field
-        }
+        },
       );
 
       // Expect an error when calling getUserFromValidatedTokenAsync
       await expect(
-        jwtService.getUserFromValidatedTokenAsync('token')
+        jwtService.getUserFromValidatedTokenAsync('token'),
       ).rejects.toThrow('Invalid token: unable to extract payload or user ID');
     });
   });

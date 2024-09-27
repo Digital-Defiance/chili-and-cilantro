@@ -3,6 +3,7 @@
   "$schema": "../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "chili-and-cilantro-react/src",
   "projectType": "application",
+  "implicitDependencies": ["chili-and-cilantro-lib", "chili-and-cilantro-api"],
   "tags": [],
   "targets": {
     "build": {

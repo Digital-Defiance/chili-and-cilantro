@@ -1,7 +1,6 @@
-import { constants, IUser } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { Schema } from 'mongoose';
+import { constants, IUser, IUserDocument } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { faker } from '@faker-js/faker';
-import { generateObjectId } from './objectId';
+import { Types } from 'mongoose';
 
 export function generateUserPassword(): string {
   let generatedPassword = '';
@@ -37,29 +36,30 @@ export function generateUserDisplayName(): string {
 }
 
 /**
- * Generate a user with random values, and a save method to emulate mongoose Document
- * @param overrides Any values to override the generated values
- * @returns
+ * Generates a mock user document.
+ * @param overrides Optional overrides for the user fields.
+ * @returns A mock IUserDocument with a jest mock for the save method.
  */
-export function generateUser(overrides?: Object): IUser & { save: jest.Mock } {
-  const id = generateObjectId();
+export function generateUser(overrides?: Partial<IUser>): IUserDocument & { save: jest.Mock } {
+  const id = new Types.ObjectId();
   const user = {
     _id: id,
-    auth0Id: faker.string.uuid(),
     username: generateUsername(),
+    password: faker.internet.password(),
     givenName: faker.person.firstName(),
-    name: generateUserDisplayName(),
     surname: faker.person.lastName(),
     userPrincipalName: faker.internet.email(),
     email: faker.internet.email(),
-    email_verified: faker.datatype.boolean(),
+    emailVerified: faker.datatype.boolean(),
+    lastLogin: faker.date.past(),
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
     createdBy: id,
     updatedBy: id,
     save: jest.fn(),
     ...overrides,
-  };
+  } as IUserDocument & { save: jest.Mock };
+
   user.save.mockImplementation(() => Promise.resolve(user));
   return user;
 }

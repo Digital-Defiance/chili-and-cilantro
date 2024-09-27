@@ -1,8 +1,8 @@
-import { UtilityService } from '../../src/services/utility';
 import {
-  constants,
   CardType,
+  constants,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { UtilityService } from '../../src/services/utility';
 
 describe('UtilityService', () => {
   describe('generateGameCode', () => {
@@ -20,10 +20,10 @@ describe('UtilityService', () => {
       // the shuffled array should contain the same elements as the original array
       expect(shuffledArray.length).toEqual(array.length);
       expect(shuffledArray.every((element) => array.includes(element))).toBe(
-        true
+        true,
       );
       expect(array.every((element) => shuffledArray.includes(element))).toBe(
-        true
+        true,
       );
     });
     it('should shuffle an array with duplicate values and have the same count of each value', () => {
@@ -33,10 +33,10 @@ describe('UtilityService', () => {
       // the shuffled array should contain the same elements as the original array
       expect(shuffledArray.length).toEqual(array.length);
       expect(shuffledArray.every((element) => array.includes(element))).toBe(
-        true
+        true,
       );
       expect(array.every((element) => shuffledArray.includes(element))).toBe(
-        true
+        true,
       );
       // the shuffled array should have the same count of each element as the original array
       const arrayCounts = array.reduce((counts, element) => {
@@ -62,10 +62,10 @@ describe('UtilityService', () => {
       // the shuffled array should contain the same elements as the original array
       expect(shuffledArray.length).toEqual(array.length);
       expect(shuffledArray.every((element) => array.includes(element))).toBe(
-        true
+        true,
       );
       expect(array.every((element) => shuffledArray.includes(element))).toBe(
-        true
+        true,
       );
     });
     it('should call swap the correct number of times when shuffling an array', () => {
@@ -102,15 +102,15 @@ describe('UtilityService', () => {
     it('should make a hand with the correct number of each type of card', () => {
       const hand = UtilityService.makeHand();
       const chiliCount = hand.filter(
-        (card) => card.type === CardType.CHILI
+        (card) => card.type === CardType.CHILI,
       ).length;
       const cilantroCount = hand.filter(
-        (card) => card.type === CardType.CILANTRO
+        (card) => card.type === CardType.CILANTRO,
       ).length;
       expect(hand.length).toEqual(constants.HAND_SIZE);
       expect(chiliCount).toEqual(constants.CHILI_PER_HAND);
       expect(cilantroCount).toEqual(
-        constants.HAND_SIZE - constants.CHILI_PER_HAND
+        constants.HAND_SIZE - constants.CHILI_PER_HAND,
       );
     });
   });

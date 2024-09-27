@@ -1,6 +1,5 @@
-import { Schema } from 'mongoose';
-import { faker } from '@faker-js/faker';
 import { ChefState, IChef } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { faker } from '@faker-js/faker';
 import { UtilityService } from '../../src/services/utility';
 import { generateObjectId } from './objectId';
 
