@@ -1,5 +1,8 @@
+import {
+  IMakeBidActionDocument,
+  IMakeBidDetails,
+} from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { Schema } from 'mongoose';
-import { IMakeBidActionDocument, IMakeBidDetails } from '@chili-and-cilantro/chili-and-cilantro-lib';
 
 export const MakeBidDetailsSchema = new Schema<IMakeBidDetails>(
   {

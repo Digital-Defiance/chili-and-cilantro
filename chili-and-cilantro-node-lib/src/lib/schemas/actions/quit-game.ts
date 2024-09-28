@@ -1,5 +1,9 @@
+import {
+  IQuitGameActionDocument,
+  IQuitGameDetails,
+  QuitGameReason,
+} from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { Schema } from 'mongoose';
-import { IQuitGameActionDocument, IQuitGameDetails, QuitGameReason } from '@chili-and-cilantro/chili-and-cilantro-lib';
 
 export const QuitGameDetailsSchema = new Schema<IQuitGameDetails>(
   {

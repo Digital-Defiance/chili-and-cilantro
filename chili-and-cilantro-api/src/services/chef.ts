@@ -4,17 +4,15 @@ import {
   IChefDocument,
   IGame,
   IGameDocument,
-  IUser,
   IUserDocument,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { Document, Model, Types } from 'mongoose';
+import { ChefModel } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import { Document, Types } from 'mongoose';
 import { NotInGameError } from '../errors/not-in-game';
 import { UtilityService } from './utility';
-import { ChefModel } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 
 export class ChefService {
-  constructor() {
-  }
+  constructor() {}
 
   /**
    * Creates a new chef in the database

@@ -1,4 +1,4 @@
-import { IUserDocument } from "./documents/user";
+import { IUserDocument } from './documents/user';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface IHasCreator {

@@ -1,5 +1,8 @@
+import {
+  IEndRoundActionDocument,
+  IEndRoundDetails,
+} from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { Schema } from 'mongoose';
-import { IEndRoundActionDocument, IEndRoundDetails } from '@chili-and-cilantro/chili-and-cilantro-lib';
 
 export const EndRoundDetailsSchema = new Schema<IEndRoundDetails>(
   {},

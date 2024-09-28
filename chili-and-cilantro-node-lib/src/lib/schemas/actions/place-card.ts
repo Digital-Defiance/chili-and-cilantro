@@ -1,5 +1,9 @@
+import {
+  CardType,
+  IPlaceCardActionDocument,
+  IPlaceCardDetails,
+} from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { Schema } from 'mongoose';
-import { CardType, IPlaceCardActionDocument, IPlaceCardDetails } from '@chili-and-cilantro/chili-and-cilantro-lib';
 
 export const PlaceCardDetailsSchema = new Schema<IPlaceCardDetails>(
   {

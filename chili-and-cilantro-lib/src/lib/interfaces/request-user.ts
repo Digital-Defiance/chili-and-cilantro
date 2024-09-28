@@ -1,4 +1,3 @@
-
 /**
  * Interface for the user object stored in the request object
  */

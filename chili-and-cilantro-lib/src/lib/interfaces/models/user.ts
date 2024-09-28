@@ -1,12 +1,11 @@
-import { IHasSoftDeleter } from '../has-soft-deleter';
+import { AccountStatusTypeEnum } from '../../enumerations/account-status-type';
 import { IHasSoftDelete } from '../has-soft-delete';
+import { IHasSoftDeleter } from '../has-soft-deleter';
 import { IHasTimestampOwners } from '../has-timestamp-owners';
 import { IHasTimestamps } from '../has-timestamps';
-import { AccountStatusTypeEnum } from '../../enumerations/account-status-type';
 
 export interface IUser
-  extends
-    IHasTimestamps,
+  extends IHasTimestamps,
     IHasTimestampOwners,
     IHasSoftDelete,
     IHasSoftDeleter {

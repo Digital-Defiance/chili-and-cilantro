@@ -1,4 +1,3 @@
 export interface IApiMessageResponse {
-    message: string;
-  }
-  
+  message: string;
+}

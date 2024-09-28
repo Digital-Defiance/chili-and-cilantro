@@ -1,4 +1,6 @@
-import { IFlipCardAction } from "../../models/actions/flip-card";
-import { IBaseDocument } from "../base";
+import { IFlipCardAction } from '../../models/actions/flip-card';
+import { IBaseDocument } from '../base';
 
-export interface IFlipCardActionDocument extends IFlipCardAction, IBaseDocument<IFlipCardAction> {}
+export interface IFlipCardActionDocument
+  extends IFlipCardAction,
+    IBaseDocument<IFlipCardAction> {}

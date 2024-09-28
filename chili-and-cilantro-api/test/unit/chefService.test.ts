@@ -1,6 +1,6 @@
 import { NotInGameError } from 'chili-and-cilantro-api/src/errors/notInGame';
 import constants from 'chili-and-cilantro-lib/src/lib/constants';
-import mongoose, { Schema, Types } from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import { ChefState } from '../../../chili-and-cilantro-lib/src';
 import { ChefService } from '../../src/services/chef';
 import { UtilityService } from '../../src/services/utility';

@@ -1,5 +1,8 @@
+import {
+  IMessageActionDocument,
+  IMessageDetails,
+} from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { Schema } from 'mongoose';
-import { IMessageActionDocument, IMessageDetails } from '@chili-and-cilantro/chili-and-cilantro-lib';
 
 export const MessageDetailsSchema = new Schema<IMessageDetails>(
   {

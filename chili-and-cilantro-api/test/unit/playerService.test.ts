@@ -1,11 +1,7 @@
-import {
-  IGame,
-  ModelName,
-} from '@chili-and-cilantro/chili-and-cilantro-lib';
-import sinon from 'sinon';
-import { PlayerService } from '../../src/services/player';
 import { GameModel } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { Types } from 'mongoose';
+import sinon from 'sinon';
+import { PlayerService } from '../../src/services/player';
 
 describe('PlayerService', () => {
   let mockGameModel, playerService;
@@ -151,10 +147,7 @@ describe('PlayerService', () => {
         .resolves([{ activeGamesCount: 1 }]);
       const userId = new Types.ObjectId('bbbbbbbbbbbb');
       const gameId = new Types.ObjectId('aaaaaaaaaaaa');
-      const result = await playerService.userIsInGameAsync(
-        userId,
-        gameId,
-      );
+      const result = await playerService.userIsInGameAsync(userId, gameId);
       expect(result).toBe(true);
       sinon.assert.calledOnce(aggregateStub);
       sinon.assert.calledWith(aggregateStub, [
@@ -231,10 +224,7 @@ describe('PlayerService', () => {
       aggregateStub = sinon.stub(mockGameModel, 'aggregate').resolves([]);
       const userId = new Types.ObjectId('bbbbbbbbbbbb');
       const gameId = new Types.ObjectId('aaaaaaaaaaaa');
-      const result = await playerService.userIsInGameAsync(
-        userId,
-        gameId,
-      );
+      const result = await playerService.userIsInGameAsync(userId, gameId);
       expect(result).toBe(false);
       sinon.assert.calledOnce(aggregateStub);
     });
@@ -244,10 +234,7 @@ describe('PlayerService', () => {
       const userId = new Types.ObjectId('bbbbbbbbbbbb');
       const gameId = new Types.ObjectId('aaaaaaaaaaaa');
       try {
-        await playerService.userIsInGameAsync(
-          userId,
-          gameId,
-        );
+        await playerService.userIsInGameAsync(userId, gameId);
         throw new Error('Expected userIsInGameAsync to throw an error');
       } catch (caughtError) {
         expect(caughtError).toBe(error);

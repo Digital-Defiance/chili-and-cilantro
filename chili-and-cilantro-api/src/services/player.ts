@@ -2,12 +2,14 @@ import {
   GamePhase,
   IUserDocument,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { GameModel, Schema } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import {
+  GameModel,
+  Schema,
+} from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { Types } from 'mongoose';
 
 export class PlayerService {
-  constructor() {
-  }
+  constructor() {}
 
   /**
    * Returns whether the specified user is the host of the specified game
@@ -37,7 +39,9 @@ export class PlayerService {
    * @param userId
    * @returns boolean
    */
-  public async userIsInAnyActiveGameAsync(user: IUserDocument): Promise<boolean> {
+  public async userIsInAnyActiveGameAsync(
+    user: IUserDocument,
+  ): Promise<boolean> {
     try {
       const result = await GameModel.aggregate([
         {

@@ -31,9 +31,9 @@ import {
 import { MailDataRequired, MailService } from '@sendgrid/mail';
 import { compare, hashSync } from 'bcrypt';
 import { randomBytes } from 'crypto';
+import { Types } from 'mongoose';
 import { environment } from '../environment';
 import { MongooseValidationError } from '../errors/mongoose-validation-error';
-import { Types } from 'mongoose';
 
 export class UserService {
   private sendgridClient: MailService;
@@ -178,7 +178,10 @@ export class UserService {
    * @param newUser
    * @returns
    */
-  public fillUserDefaults(newUser: ICreateUserBasics, createdBy?: Types.ObjectId): IUserObject {
+  public fillUserDefaults(
+    newUser: ICreateUserBasics,
+    createdBy?: Types.ObjectId,
+  ): IUserObject {
     const now = new Date();
     const userId = new Types.ObjectId();
     const createdById = createdBy || userId;
@@ -344,9 +347,7 @@ export class UserService {
       throw new UserNotFoundError();
     }
 
-    if (
-      user.emailVerified
-    ) {
+    if (user.emailVerified) {
       throw new EmailVerifiedError();
     }
 

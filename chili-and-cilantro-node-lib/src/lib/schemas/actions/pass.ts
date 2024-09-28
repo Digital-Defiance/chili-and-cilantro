@@ -1,5 +1,8 @@
+import {
+  IPassActionDocument,
+  IPassDetails,
+} from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { Schema } from 'mongoose';
-import { IPassActionDocument, IPassDetails } from '@chili-and-cilantro/chili-and-cilantro-lib';
 
 export const PassDetailsSchema = new Schema<IPassDetails>({}, { _id: false });
 

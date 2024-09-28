@@ -1,5 +1,8 @@
+import {
+  IExpireGameActionDocument,
+  IExpireGameDetails,
+} from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { Schema } from 'mongoose';
-import { IExpireGameActionDocument, IExpireGameDetails } from '@chili-and-cilantro/chili-and-cilantro-lib';
 
 export const ExpireGameDetailsSchema = new Schema<IExpireGameDetails>(
   {},

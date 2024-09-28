@@ -1,4 +1,6 @@
-import { IEndRoundAction } from "../../models/actions/end-round";
-import { IBaseDocument } from "../base";
+import { IEndRoundAction } from '../../models/actions/end-round';
+import { IBaseDocument } from '../base';
 
-export interface IEndRoundActionDocument extends IEndRoundAction, IBaseDocument<IEndRoundAction> {};
+export interface IEndRoundActionDocument
+  extends IEndRoundAction,
+    IBaseDocument<IEndRoundAction> {}

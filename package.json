@@ -24,7 +24,8 @@
     "lint": "eslint '**/*.{ts,tsx}'",
     "lint:fix": "eslint '**/*.{ts,tsx}' --fix",
     "prettier:check": "prettier --check '**/*.{ts,tsx}'",
-    "prettier:fix": "prettier --write '**/*.{ts,tsx}'"
+    "prettier:fix": "prettier --write '**/*.{ts,tsx}'",
+    "commands": "./list-scripts.sh"
   },
   "private": true,
   "dependencies": {

@@ -9,11 +9,11 @@ import {
   IUserDocument,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { faker } from '@faker-js/faker';
+import { Types } from 'mongoose';
 import { UtilityService } from '../../src/services/utility';
 import { numberBetween } from '../fixtures/utils';
 import { generateChef } from './chef';
 import { generateUser } from './user';
-import { Types } from 'mongoose';
 
 export function generateGamePassword(): string {
   let generatedPassword = '';
@@ -70,8 +70,17 @@ export function generateGame(
 export function generateChefGameUser(
   withPassword: boolean,
   numAdditionalChefs = 0,
-  overrides?: { user?: Partial<IUser>; chef?: Partial<IChef>; game?: Partial<IGame> },
-): { user: IUserDocument; chef: IChefDocument; game: IGameDocument; additionalChefs: IChefDocument[] } {
+  overrides?: {
+    user?: Partial<IUser>;
+    chef?: Partial<IChef>;
+    game?: Partial<IGame>;
+  },
+): {
+  user: IUserDocument;
+  chef: IChefDocument;
+  game: IGameDocument;
+  additionalChefs: IChefDocument[];
+} {
   const gameId = new Types.ObjectId();
   const user = generateUser(overrides?.user);
   const chef = generateChef({

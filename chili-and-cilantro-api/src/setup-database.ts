@@ -1,10 +1,8 @@
-import {
-  ModelName,
-} from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { ModelName } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { Schema } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import { ISchemaModelData } from 'chili-and-cilantro-node-lib/src/lib/interfaces/schema-model-data';
 import mongoose, { connect, set } from 'mongoose';
 import { environment } from './environment';
-import { ISchemaModelData } from 'chili-and-cilantro-node-lib/src/lib/interfaces/schema-model-data';
-import { Schema } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 
 export async function setupDatabase(): Promise<{
   db: mongoose.Mongoose;

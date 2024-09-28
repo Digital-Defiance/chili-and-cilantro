@@ -11,9 +11,7 @@ export class InvalidActionError extends ValidationError {
     if (action === TurnAction.Bid || action === TurnAction.IncreaseBid) {
       super(`Invalid action: ${action}${amountString}`);
     } else if (action === TurnAction.PlaceCard) {
-      super(
-        `Invalid action: ${action}${ingredientString}`,
-      );
+      super(`Invalid action: ${action}${ingredientString}`);
     } else if (action === TurnAction.Pass) {
       super(`Invalid action: ${action}`);
     } else {

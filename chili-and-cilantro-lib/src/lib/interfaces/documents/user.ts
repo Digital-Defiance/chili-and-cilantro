@@ -1,4 +1,4 @@
-import { IUser } from "../models/user";
-import { IBaseDocument } from "./base";
+import { IUser } from '../models/user';
+import { IBaseDocument } from './base';
 
-export interface IUserDocument extends IUser, IBaseDocument<IUser> {};
+export interface IUserDocument extends IUser, IBaseDocument<IUser> {}

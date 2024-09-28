@@ -1,6 +1,13 @@
+import {
+  constants,
+  GamePhase,
+  IBid,
+  IGameDocument,
+  IRoundBids,
+  ModelName,
+} from '@chili-and-cilantro/chili-and-cilantro-lib';
 import mongoose from 'mongoose';
 import validator from 'validator';
-import { constants, GamePhase, IBid, IGameDocument, IRoundBids, ModelName } from '@chili-and-cilantro/chili-and-cilantro-lib';
 
 const { Schema } = mongoose;
 

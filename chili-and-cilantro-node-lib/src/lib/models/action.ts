@@ -1,39 +1,10 @@
 import {
-  ActionType,
   IActionDocument,
-  ICreateGameActionDocument,
-  IEndGameActionDocument,
-  IEndRoundActionDocument,
-  IExpireGameActionDocument,
-  IFlipCardActionDocument,
-  IJoinGameActionDocument,
-  IMakeBidActionDocument,
-  IMessageActionDocument,
-  IPassActionDocument,
-  IPlaceCardAction,
-  IQuitGameActionDocument,
-  IStartBiddingActionDocument,
-  IStartGameActionDocument,
-  IStartNewRoundActionDocument,
   ModelName,
   ModelNameCollection,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { model } from 'mongoose';
 import { ActionSchema } from '../schemas/action';
-import { CreateGameActionSchema } from '../schemas/actions/create-game';
-import { EndGameActionSchema } from '../schemas/actions/end-game';
-import { EndRoundActionSchema } from '../schemas/actions/end-round';
-import { ExpireGameActionSchema } from '../schemas/actions/expire-game';
-import { FlipCardActionSchema } from '../schemas/actions/flip-card';
-import { JoinGameActionSchema } from '../schemas/actions/join-game';
-import { MakeBidActionSchema } from '../schemas/actions/make-bid';
-import { MessageActionSchema } from '../schemas/actions/message';
-import { PassActionSchema } from '../schemas/actions/pass';
-import { PlaceCardActionSchema } from '../schemas/actions/place-card';
-import { QuitGameActionSchema } from '../schemas/actions/quit-game';
-import { StartBiddingActionSchema } from '../schemas/actions/start-bidding';
-import { StartGameActionSchema } from '../schemas/actions/start-game';
-import { StartNewRoundActionSchema } from '../schemas/actions/start-new-round';
 
 export const ActionModel = model<IActionDocument>(
   ModelName.Action,

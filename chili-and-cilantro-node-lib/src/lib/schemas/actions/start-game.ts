@@ -1,5 +1,8 @@
+import {
+  IStartGameActionDocument,
+  IStartGameDetails,
+} from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { Schema } from 'mongoose';
-import { IStartGameActionDocument, IStartGameDetails } from '@chili-and-cilantro/chili-and-cilantro-lib';
 
 export const StartGameDetailsSchema = new Schema<IStartGameDetails>(
   {},

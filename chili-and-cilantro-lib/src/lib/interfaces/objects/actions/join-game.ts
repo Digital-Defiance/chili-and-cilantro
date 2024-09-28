@@ -1,4 +1,4 @@
-import { IHasID } from "../../has-id";
-import { IJoinGameAction } from "../../models/actions/join-game";
+import { IHasID } from '../../has-id';
+import { IJoinGameAction } from '../../models/actions/join-game';
 
-export interface IJoinGameActionObject extends IJoinGameAction, IHasID {};
+export interface IJoinGameActionObject extends IJoinGameAction, IHasID {}

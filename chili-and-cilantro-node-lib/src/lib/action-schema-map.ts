@@ -1,4 +1,5 @@
 import { ActionType } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { Schema } from 'mongoose';
 import { CreateGameActionSchema } from './schemas/actions/create-game';
 import { EndGameActionSchema } from './schemas/actions/end-game';
 import { EndRoundActionSchema } from './schemas/actions/end-round';
@@ -13,21 +14,20 @@ import { QuitGameActionSchema } from './schemas/actions/quit-game';
 import { StartBiddingActionSchema } from './schemas/actions/start-bidding';
 import { StartGameActionSchema } from './schemas/actions/start-game';
 import { StartNewRoundActionSchema } from './schemas/actions/start-new-round';
-import { Schema } from 'mongoose';
 
 export const ActionSchemas: Record<string, Schema> = {
-    [ActionType.CREATE_GAME]: CreateGameActionSchema,
-    [ActionType.END_GAME]: EndGameActionSchema,
-    [ActionType.END_ROUND]: EndRoundActionSchema,
-    [ActionType.EXPIRE_GAME]: ExpireGameActionSchema,
-    [ActionType.FLIP_CARD]: FlipCardActionSchema,
-    [ActionType.JOIN_GAME]: JoinGameActionSchema,
-    [ActionType.MAKE_BID]: MakeBidActionSchema,
-    [ActionType.MESSAGE]: MessageActionSchema,
-    [ActionType.PASS]: PassActionSchema,
-    [ActionType.PLACE_CARD]: PlaceCardActionSchema,
-    [ActionType.QUIT_GAME]: QuitGameActionSchema,
-    [ActionType.START_BIDDING]: StartBiddingActionSchema,
-    [ActionType.START_GAME]: StartGameActionSchema,
-    [ActionType.START_NEW_ROUND]: StartNewRoundActionSchema,
+  [ActionType.CREATE_GAME]: CreateGameActionSchema,
+  [ActionType.END_GAME]: EndGameActionSchema,
+  [ActionType.END_ROUND]: EndRoundActionSchema,
+  [ActionType.EXPIRE_GAME]: ExpireGameActionSchema,
+  [ActionType.FLIP_CARD]: FlipCardActionSchema,
+  [ActionType.JOIN_GAME]: JoinGameActionSchema,
+  [ActionType.MAKE_BID]: MakeBidActionSchema,
+  [ActionType.MESSAGE]: MessageActionSchema,
+  [ActionType.PASS]: PassActionSchema,
+  [ActionType.PLACE_CARD]: PlaceCardActionSchema,
+  [ActionType.QUIT_GAME]: QuitGameActionSchema,
+  [ActionType.START_BIDDING]: StartBiddingActionSchema,
+  [ActionType.START_GAME]: StartGameActionSchema,
+  [ActionType.START_NEW_ROUND]: StartNewRoundActionSchema,
 };

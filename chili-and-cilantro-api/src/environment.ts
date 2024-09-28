@@ -33,8 +33,8 @@ function getSiteUrl() {
 export const environment: IEnvironment = {
   production: production,
   siteUrl: process.env.SITE_URL ?? getSiteUrl(),
-  jwtSecret: process.env.JWT_SECRET?? 'Ch1l!&C1l@ntr0',
-  sendgridKey: process.env.SENDGRID_API_KEY?? '',
+  jwtSecret: process.env.JWT_SECRET ?? 'Ch1l!&C1l@ntr0',
+  sendgridKey: process.env.SENDGRID_API_KEY ?? '',
   developer: {
     reactDir: reactDir,
     host: host,

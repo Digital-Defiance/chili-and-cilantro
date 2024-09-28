@@ -12,5 +12,5 @@ export interface ISchemaModelData<T extends IBaseDocument<T>> {
   model: Model<T>;
   schema: Schema<T>;
   path: string;
-  discriminators?: Array<Model<any>>
+  discriminators?: Array<Model<any>>;
 }

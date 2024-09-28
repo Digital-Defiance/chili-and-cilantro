@@ -1,4 +1,8 @@
-import { constants, IUser, IUserDocument } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import {
+  constants,
+  IUser,
+  IUserDocument,
+} from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { faker } from '@faker-js/faker';
 import { Types } from 'mongoose';
 
@@ -40,7 +44,9 @@ export function generateUserDisplayName(): string {
  * @param overrides Optional overrides for the user fields.
  * @returns A mock IUserDocument with a jest mock for the save method.
  */
-export function generateUser(overrides?: Partial<IUser>): IUserDocument & { save: jest.Mock } {
+export function generateUser(
+  overrides?: Partial<IUser>,
+): IUserDocument & { save: jest.Mock } {
   const id = new Types.ObjectId();
   const user = {
     _id: id,

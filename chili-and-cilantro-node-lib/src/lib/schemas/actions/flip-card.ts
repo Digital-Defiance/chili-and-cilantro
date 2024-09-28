@@ -1,5 +1,9 @@
+import {
+  IFlipCardActionDocument,
+  IFlipCardDetails,
+  ModelName,
+} from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { Schema } from 'mongoose';
-import { IFlipCardActionDocument, IFlipCardDetails, ModelName } from '@chili-and-cilantro/chili-and-cilantro-lib';
 
 export const FlipCardDetailsSchema = new Schema<IFlipCardDetails>(
   {

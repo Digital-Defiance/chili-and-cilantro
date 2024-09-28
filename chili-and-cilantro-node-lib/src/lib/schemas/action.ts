@@ -1,5 +1,9 @@
+import {
+  ActionType,
+  IActionDocument,
+  ModelName,
+} from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { Schema } from 'mongoose';
-import { ActionType, IActionDocument, ModelName } from '@chili-and-cilantro/chili-and-cilantro-lib';
 
 export const ActionSchema = new Schema<IActionDocument>(
   {

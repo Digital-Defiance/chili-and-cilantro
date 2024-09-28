@@ -1,4 +1,4 @@
-import { IHasID } from "../../has-id";
-import { IEndRoundAction } from "../../models/actions/end-round";
+import { IHasID } from '../../has-id';
+import { IEndRoundAction } from '../../models/actions/end-round';
 
-export interface IEndRoundActionObject extends IEndRoundAction, IHasID {};
+export interface IEndRoundActionObject extends IEndRoundAction, IHasID {}
