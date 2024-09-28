@@ -1,38 +1,47 @@
 import {
-  constants,
-  IGame,
+  IChefDocument,
+  IGameDocument,
+  IMessageActionDocument,
+  IUserDocument,
+  InvalidMessageError,
   ModelName,
+  constants,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { InvalidMessageError } from '../../src/errors/invalid-message';
-import { Database } from '../../src/services/database';
+import { IApplication } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import { Model } from 'mongoose';
+import { ActionService } from '../../src/services/action';
+import { ChefService } from '../../src/services/chef';
 import { GameService } from '../../src/services/game';
+import { PlayerService } from '../../src/services/player';
+import { MockApplication } from '../fixtures/application';
 import { generateChef } from '../fixtures/chef';
 import { generateGame } from '../fixtures/game';
-import { mockedWithTransactionAsync } from '../fixtures/transactionManager';
 import { generateUser } from '../fixtures/user';
+import { mockedWithTransactionAsync } from '../fixtures/with-transaction';
 
 describe('GameService', () => {
-  let actionService;
-  let chefService;
-  let playerService;
-  let gameModel;
-  let gameService;
-  let game;
-  let chef;
-  let user;
+  let application: IApplication;
+  let actionService: ActionService;
+  let chefService: ChefService;
+  let playerService: PlayerService;
+  let gameModel: Model<IGameDocument>;
+  let gameService: GameService;
+  let game: IGameDocument;
+  let chef: IChefDocument;
+  let user: IUserDocument;
 
   beforeEach(() => {
-    const database = new Database();
-    gameModel = database.getModel<IGame>(ModelName.Game);
+    application = new MockApplication();
+    gameModel = application.getModel<IGameDocument>(ModelName.Game);
     actionService = {
       sendMessageAsync: jest.fn(),
-    };
+    } as unknown as ActionService;
     chefService = {
       getGameChefOrThrowAsync: jest.fn(),
-    };
-    playerService = {};
+    } as unknown as ChefService;
+    playerService = new PlayerService(application);
     gameService = new GameService(
-      gameModel,
+      application,
       actionService,
       chefService,
       playerService,
@@ -68,15 +77,11 @@ describe('GameService', () => {
   describe('sendMessageAsync', () => {
     it('should successfully send a message', async () => {
       const message = 'L'.repeat(constants.MIN_MESSAGE_LENGTH + 1);
-      jest
-        .spyOn(gameService.actionService, 'sendMessageAsync')
-        .mockResolvedValue({
-          /* mock return value */
-        });
+      actionService.sendMessageAsync = jest.fn().mockResolvedValue({});
 
       const result = await gameService.sendMessageAsync(game, chef, message);
       expect(result).toBeDefined(); // Adjust based on your mock return value
-      expect(gameService.actionService.sendMessageAsync).toHaveBeenCalledWith(
+      expect(actionService.sendMessageAsync).toHaveBeenCalledWith(
         game,
         chef,
         message,
@@ -94,14 +99,14 @@ describe('GameService', () => {
         .spyOn(gameService, 'getGameByCodeOrThrowAsync')
         .mockResolvedValue(game);
       jest
-        .spyOn(gameService.chefService, 'getGameChefOrThrowAsync')
+        .spyOn(chefService, 'getGameChefOrThrowAsync')
         .mockResolvedValue(chef);
       jest
         .spyOn(gameService, 'validateSendMessageOrThrow')
         .mockImplementation(() => {});
       jest.spyOn(gameService, 'sendMessageAsync').mockResolvedValue({
         /* mock return value */
-      });
+      } as unknown as IMessageActionDocument);
 
       const result = await gameService.performSendMessageAsync(
         game.code,
@@ -127,7 +132,7 @@ describe('GameService', () => {
           throw new InvalidMessageError();
         });
 
-      await expect(
+      await expect(async () =>
         gameService.performSendMessageAsync(game.code, user, message),
       ).rejects.toThrow(InvalidMessageError);
     });

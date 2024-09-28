@@ -3,7 +3,7 @@
   "$schema": "../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "chili-and-cilantro-react/src",
   "projectType": "application",
-  "implicitDependencies": ["chili-and-cilantro-lib", "chili-and-cilantro-api"],
+  "implicitDependencies": ["chili-and-cilantro-lib"],
   "tags": [],
   "targets": {
     "build": {
@@ -21,7 +21,7 @@
           "chili-and-cilantro-react/src/favicon.ico",
           "chili-and-cilantro-react/src/assets"
         ],
-        "styles": ["chili-and-cilantro-react/src/styles.css"],
+        "styles": ["chili-and-cilantro-react/src/styles.scss"],
         "scripts": [],
         "isolatedConfig": true,
         "webpackConfig": "chili-and-cilantro-react/webpack.config.js"

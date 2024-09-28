@@ -1,42 +1,50 @@
 import {
+  AllCardsPlacedError,
   CardType,
-  constants,
   GamePhase,
-  IGame,
+  IChefDocument,
+  IGameDocument,
+  IUserDocument,
+  IncorrectGamePhaseError,
+  InvalidActionError,
   ModelName,
+  OutOfIngredientError,
+  OutOfOrderError,
   TurnAction,
+  constants,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { AllCardsPlacedError } from '../../src/errors/all-cards-placed';
-import { IncorrectGamePhaseError } from '../../src/errors/incorrect-game-phase';
-import { InvalidActionError } from '../../src/errors/invalid-action';
-import { OutOfIngredientError } from '../../src/errors/out-of-ingredient';
-import { OutOfOrderError } from '../../src/errors/out-of-order';
-import { Database } from '../../src/services/database';
+import { IApplication } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import { Model } from 'mongoose';
+import { ActionService } from '../../src/services/action';
+import { ChefService } from '../../src/services/chef';
 import { GameService } from '../../src/services/game';
+import { PlayerService } from '../../src/services/player';
+import { MockApplication } from '../fixtures/application';
 import { generateChef } from '../fixtures/chef';
 import { generateChefGameUser, generateGame } from '../fixtures/game';
 import { generateObjectId } from '../fixtures/objectId';
-import { mockedWithTransactionAsync } from '../fixtures/transactionManager';
+import { mockedWithTransactionAsync } from '../fixtures/with-transaction';
 
 describe('GameService', () => {
   describe('validatePlaceIngredientOrThrow', () => {
-    let gameModel;
-    let gameService;
-    let actionService;
-    let chefService;
-    let playerService;
-    let game;
-    let chef;
-    let user;
+    let application: IApplication;
+    let gameModel: Model<IGameDocument>;
+    let gameService: GameService;
+    let actionService: ActionService;
+    let chefService: ChefService;
+    let playerService: PlayerService;
+    let game: IGameDocument;
+    let chef: IChefDocument;
+    let user: IUserDocument;
 
     beforeEach(() => {
-      const database = new Database();
-      gameModel = database.getModel<IGame>(ModelName.Game);
-      actionService = {};
-      chefService = {};
-      playerService = {};
+      application = new MockApplication();
+      gameModel = application.getModel<IGameDocument>(ModelName.Game);
+      actionService = new ActionService(application);
+      chefService = new ChefService(application);
+      playerService = new PlayerService(application);
       gameService = new GameService(
-        gameModel,
+        application,
         actionService,
         chefService,
         playerService,
@@ -83,7 +91,7 @@ describe('GameService', () => {
     });
 
     it('should throw an error if the chef does not have the specified ingredient', () => {
-      chef.hand = [{ type: 'Cilantro', faceUp: false }]; // Chef does not have 'Chili'
+      chef.hand = [{ type: CardType.CILANTRO, faceUp: false }]; // Chef does not have 'Chili'
       expect(() =>
         gameService.validatePlaceIngredientOrThrow(game, chef, CardType.CHILI),
       ).toThrow(OutOfIngredientError);
@@ -91,22 +99,23 @@ describe('GameService', () => {
   });
 
   describe('placeIngredientAsync', () => {
-    let gameModel;
-    let gameService;
-    let actionService;
-    let chefService;
-    let playerService;
-    let game;
-    let chef;
+    let application: IApplication;
+    let gameModel: Model<IGameDocument>;
+    let gameService: GameService;
+    let actionService: ActionService;
+    let chefService: ChefService;
+    let playerService: PlayerService;
+    let game: IGameDocument;
+    let chef: IChefDocument;
 
     beforeEach(() => {
-      const database = new Database();
-      gameModel = database.getModel<IGame>(ModelName.Game);
-      actionService = {};
-      chefService = {};
-      playerService = {};
+      application = new MockApplication();
+      gameModel = application.getModel<IGameDocument>(ModelName.Game);
+      actionService = new ActionService(application);
+      chefService = new ChefService(application);
+      playerService = new PlayerService(application);
       gameService = new GameService(
-        gameModel,
+        application,
         actionService,
         chefService,
         playerService,
@@ -157,29 +166,30 @@ describe('GameService', () => {
       chef.hand = [{ type: CardType.CILANTRO, faceUp: false }]; // Chef does not have 'Chili'
       const ingredient = CardType.CHILI;
 
-      await expect(
+      await expect(async () =>
         gameService.placeIngredientAsync(game, chef, ingredient),
       ).rejects.toThrow(OutOfIngredientError);
     });
   });
 
   describe('performPlaceIngredientAsync', () => {
-    let gameModel;
-    let gameService;
-    let actionService;
-    let chefService;
-    let playerService;
-    let game;
-    let chef;
+    let application: IApplication;
+    let gameModel: Model<IGameDocument>;
+    let gameService: GameService;
+    let actionService: ActionService;
+    let chefService: ChefService;
+    let playerService: PlayerService;
+    let game: IGameDocument;
+    let chef: IChefDocument;
 
     beforeEach(() => {
-      const database = new Database();
-      gameModel = database.getModel<IGame>(ModelName.Game);
-      actionService = {};
-      chefService = {};
-      playerService = {};
+      application = new MockApplication();
+      gameModel = application.getModel<IGameDocument>(ModelName.Game);
+      actionService = new ActionService(application);
+      chefService = new ChefService(application);
+      playerService = new PlayerService(application);
       gameService = new GameService(
-        gameModel,
+        application,
         actionService,
         chefService,
         playerService,
@@ -226,7 +236,7 @@ describe('GameService', () => {
           throw new InvalidActionError(TurnAction.PlaceCard);
         });
 
-      await expect(
+      await expect(async () =>
         gameService.performPlaceIngredientAsync(game, chef, ingredient),
       ).rejects.toThrow(InvalidActionError);
     });
@@ -243,7 +253,7 @@ describe('GameService', () => {
         throw new Error('Placement failed');
       });
 
-      await expect(
+      await expect(async () =>
         gameService.performPlaceIngredientAsync(game, chef, ingredient),
       ).rejects.toThrow('Placement failed');
     });

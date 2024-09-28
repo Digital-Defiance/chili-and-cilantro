@@ -1,6 +1,5 @@
+import { DefaultIdType } from '../../../shared-types';
 import { IAction } from '../action';
 import { IPassDetails } from './details/pass';
 
-export interface IPassAction extends IAction {
-  details: IPassDetails;
-}
+export type IPassAction<I = DefaultIdType> = IAction<I, IPassDetails>;

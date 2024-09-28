@@ -1,53 +1,58 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/typescript-node
 {
-	"name": "Node.js & TypeScript",
-	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"dockerComposeFile": "docker-compose.yml",
-	"service": "app",
-	"workspaceFolder": "/workspace",
+  "name": "Node.js & TypeScript",
+  // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
 
-	// Features to add to the dev container. More info: https://containers.dev/features.
-	// "features": {},
-	"features": {
-		"ghcr.io/devcontainers/features/common-utils:2": {},
-		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
-	},
+  // Features to add to the dev container. More info: https://containers.dev/features.
+  // "features": {},
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {},
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+  },
 
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
-	"forwardPorts": [27017],
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  // "forwardPorts": [],
+  "forwardPorts": [3000, 27017],
 
-	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "./setup-nvm.sh && ./do-yarn.sh && git config --global --add safe.directory /workspace",
+  // Use 'postCreateCommand' to run commands after the container is created.
+  "postCreateCommand": "./setup-nvm.sh && ./fontawesome-npmrc.sh && ./npm-install-globals.sh && ./do-yarn.sh && git config --global --add safe.directory /workspaces/chili-and-cilantro",
 
-	// Configure tool-specific properties.
-	// "customizations": {},
-	"customizations": {
-		"vscode": {
-			// Add the IDs of extensions you want installed when the container is created.
-			"extensions": [
-				"mongodb.mongodb-vscode",
-				"rangav.vscode-thunder-client",
-				"github.vscode-github-actions",
-				"eamodio.gitlens",
-				"ms-azuretools.vscode-docker",
-				"esbenp.prettier-vscode",
-				"ms-vscode-remote.remote-containers",
-				"firsttris.vscode-jest-runner",
-				"ms-playwright.playwright",
-				"nrwl.angular-console",
-				"TabNine.tabnine-vscode",
-				"GitHub.copilot",
-				"GitHub.copilot-chat"
-			],
-			// Set *default* container specific settings.json values on container create.
-			"settings": {
-				"terminal.integrated.shell.linux": "/usr/bin/zsh"
-			},
-		},
-	},
+  // Configure tool-specific properties.
+  // "customizations": {},
+  "customizations": {
+    "vscode": {
+      // Add the IDs of extensions you want installed when the container is created.
+      "extensions": [
+        "mongodb.mongodb-vscode",
+        "rangav.vscode-thunder-client",
+        "github.vscode-github-actions",
+        "eamodio.gitlens",
+        "ms-azuretools.vscode-docker",
+        "esbenp.prettier-vscode",
+        "ms-vscode-remote.remote-containers",
+        "firsttris.vscode-jest-runner",
+        "ms-playwright.playwright",
+        "nrwl.angular-console",
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "Codeium.codeium",
+        "bruno-api-client.bruno",
+        "GitHub.vscode-pull-request-github",
+        "MermaidChart.vscode-mermaid-chart",
+        "Graphite.gti-vscode",
+        "Orta.vscode-jest"
+      ],
+      // Set *default* container specific settings.json values on container create.
+      "settings": {
+        "terminal.integrated.shell.linux": "/usr/bin/zsh"
+      }
+    }
+  },
 
-	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-	"remoteUser": "root"
+  // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+  "remoteUser": "root"
 }

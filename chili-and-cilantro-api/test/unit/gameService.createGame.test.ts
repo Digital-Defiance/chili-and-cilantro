@@ -1,41 +1,47 @@
 import {
+  AlreadyJoinedOtherError,
   constants,
-  IChef,
-  IGame,
+  IChefDocument,
+  ICreateGameActionDocument,
+  IGameDocument,
+  InvalidGameNameError,
+  InvalidGameParameterError,
+  InvalidGamePasswordError,
+  InvalidUserDisplayNameError,
+  IUserDocument,
   ModelName,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { InvalidGameNameError } from 'chili-and-cilantro-api/src/errors/invalidGameName';
-import { InvalidGameParameterError } from 'chili-and-cilantro-api/src/errors/invalidGameParameter';
-import { InvalidGamePasswordError } from 'chili-and-cilantro-api/src/errors/invalidGamePassword';
-import { UtilityService } from 'chili-and-cilantro-api/src/services/utility';
-import sinon from 'sinon';
-import { AlreadyJoinedOtherError } from '../../src/errors/already-joined-other';
-import { InvalidUserDisplayNameError } from '../../src/errors/invalid-user-display-name';
+import { IApplication } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import { Model } from 'mongoose';
 import { ActionService } from '../../src/services/action';
 import { ChefService } from '../../src/services/chef';
-import { Database } from '../../src/services/database';
 import { GameService } from '../../src/services/game';
 import { PlayerService } from '../../src/services/player';
 import { generateCreateGameAction } from '../fixtures/action';
+import { MockApplication } from '../fixtures/application';
 import { generateChefGameUser } from '../fixtures/game';
-import { mockedWithTransactionAsync } from '../fixtures/transactionManager';
 import { generateUser } from '../fixtures/user';
 import { generateString, numberBetween } from '../fixtures/utils';
+import { mockedWithTransactionAsync } from '../fixtures/with-transaction';
 
 describe('GameService', () => {
-  let chefModel;
-  let gameModel;
-  let gameService;
+  let application: IApplication;
+  let GameModel: Model<IGameDocument>;
+  let gameService: GameService;
+  let actionService: ActionService;
+  let chefService: ChefService;
+  let playerService: PlayerService;
 
   beforeAll(() => {
-    const database = new Database();
-    chefModel = database.getModel<IChef>(ModelName.Chef);
-    gameModel = database.getModel<IGame>(ModelName.Game);
-    const actionService = new ActionService(database);
-    const chefService = new ChefService(chefModel);
-    const playerService = new PlayerService(gameModel);
+    application = new MockApplication();
+  });
+  beforeEach(() => {
+    GameModel = application.getModel<IGameDocument>(ModelName.Game);
+    actionService = new ActionService(application);
+    playerService = new PlayerService(application);
+    chefService = new ChefService(application);
     gameService = new GameService(
-      gameModel,
+      application,
       actionService,
       chefService,
       playerService,
@@ -64,18 +70,15 @@ describe('GameService', () => {
     });
 
     afterEach(() => {
-      // Restore the stub to its original method after each test
-      if (gameService.playerService.userIsInAnyActiveGameAsync.restore) {
-        gameService.playerService.userIsInAnyActiveGameAsync.restore();
-      }
+      jest.restoreAllMocks();
     });
 
     it('should not throw an error when all parameters are valid', async () => {
       // arrange
       // Mock the condition where user is not in an active game
-      sinon
-        .stub(gameService.playerService, 'userIsInAnyActiveGameAsync')
-        .resolves(false);
+      jest
+        .spyOn(playerService, 'userIsInAnyActiveGameAsync')
+        .mockResolvedValue(false);
 
       // act/assert
       await expect(
@@ -92,12 +95,12 @@ describe('GameService', () => {
     it('throws an error if user is already in an active game', async () => {
       // arrange
       // Mock the condition where user is in an active game
-      sinon
-        .stub(gameService.playerService, 'userIsInAnyActiveGameAsync')
-        .resolves(true);
+      jest
+        .spyOn(playerService, 'userIsInAnyActiveGameAsync')
+        .mockResolvedValue(true);
 
       // act/assert
-      await expect(
+      await expect(async () =>
         gameService.validateCreateGameOrThrowAsync(
           user,
           userName,
@@ -111,14 +114,14 @@ describe('GameService', () => {
     it('should throw an error for an invalid username with special characters', async () => {
       // arrange
       // Mock the condition where user is not in an active game
-      sinon
-        .stub(gameService.playerService, 'userIsInAnyActiveGameAsync')
-        .resolves(false);
+      jest
+        .spyOn(playerService, 'userIsInAnyActiveGameAsync')
+        .mockResolvedValue(false);
 
       userName = '!'.repeat(constants.MIN_USER_DISPLAY_NAME_LENGTH + 1); // Set an invalid username with special characters
 
       // act/assert
-      await expect(
+      await expect(async () =>
         gameService.validateCreateGameOrThrowAsync(
           user,
           userName,
@@ -132,14 +135,14 @@ describe('GameService', () => {
     it('should throw an error for invalid username that is too short', async () => {
       // arrange
       // Mock the condition where user is not in an active game
-      sinon
-        .stub(gameService.playerService, 'userIsInAnyActiveGameAsync')
-        .resolves(false);
+      jest
+        .spyOn(playerService, 'userIsInAnyActiveGameAsync')
+        .mockResolvedValue(false);
 
       userName = 'x'.repeat(constants.MIN_USER_DISPLAY_NAME_LENGTH - 1); // Set an invalid username that is too short
 
       // act/assert
-      await expect(
+      await expect(async () =>
         gameService.validateCreateGameOrThrowAsync(
           user,
           userName,
@@ -153,14 +156,14 @@ describe('GameService', () => {
     it('should throw an error for invalid username that is too long', async () => {
       // arrange
       // Mock the condition where user is not in an active game
-      sinon
-        .stub(gameService.playerService, 'userIsInAnyActiveGameAsync')
-        .resolves(false);
+      jest
+        .spyOn(playerService, 'userIsInAnyActiveGameAsync')
+        .mockResolvedValue(false);
 
       userName = 'x'.repeat(constants.MAX_USER_DISPLAY_NAME_LENGTH + 1); // Set an invalid username that is too long
 
       // act/assert
-      await expect(
+      await expect(async () =>
         gameService.validateCreateGameOrThrowAsync(
           user,
           userName,
@@ -174,14 +177,14 @@ describe('GameService', () => {
     it('should throw an error for an invalid game name with special characters', async () => {
       // arrange
       // Mock the condition where user is not in an active game
-      sinon
-        .stub(gameService.playerService, 'userIsInAnyActiveGameAsync')
-        .resolves(false);
+      jest
+        .spyOn(playerService, 'userIsInAnyActiveGameAsync')
+        .mockResolvedValue(false);
 
       gameName = '!'.repeat(constants.MIN_GAME_NAME_LENGTH + 1); // Set an invalid game name with special characters
 
       // act/assert
-      await expect(
+      await expect(async () =>
         gameService.validateCreateGameOrThrowAsync(
           user,
           userName,
@@ -195,14 +198,14 @@ describe('GameService', () => {
     it('should throw an error for invalid game name that is too short', async () => {
       // arrange
       // Mock the condition where user is not in an active game
-      sinon
-        .stub(gameService.playerService, 'userIsInAnyActiveGameAsync')
-        .resolves(false);
+      jest
+        .spyOn(playerService, 'userIsInAnyActiveGameAsync')
+        .mockResolvedValue(false);
 
       gameName = 'x'.repeat(constants.MIN_GAME_NAME_LENGTH - 1); // Set an invalid game name that is too short
 
       // act/assert
-      await expect(
+      await expect(async () =>
         gameService.validateCreateGameOrThrowAsync(
           user,
           userName,
@@ -216,14 +219,14 @@ describe('GameService', () => {
     it('should throw an error for invalid game name that is too long', async () => {
       // arrange
       // Mock the condition where user is not in an active game
-      sinon
-        .stub(gameService.playerService, 'userIsInAnyActiveGameAsync')
-        .resolves(false);
+      jest
+        .spyOn(playerService, 'userIsInAnyActiveGameAsync')
+        .mockResolvedValue(false);
 
       gameName = 'x'.repeat(constants.MAX_GAME_NAME_LENGTH + 1); // Set an invalid game name that is too long
 
       // act/assert
-      await expect(
+      await expect(async () =>
         gameService.validateCreateGameOrThrowAsync(
           user,
           userName,
@@ -237,15 +240,15 @@ describe('GameService', () => {
     it('should throw an error for invalid password that is too short', async () => {
       // arrange
       // Mock the condition where user is not in an active game
-      sinon
-        .stub(gameService.playerService, 'userIsInAnyActiveGameAsync')
-        .resolves(false);
+      jest
+        .spyOn(playerService, 'userIsInAnyActiveGameAsync')
+        .mockResolvedValue(false);
 
       // generate a string that is constants.MIN_GAME_PASSWORD_LENGTH - 1 characters long
       password = 'x'.repeat(constants.MIN_GAME_PASSWORD_LENGTH - 1);
 
       // act/assert
-      await expect(
+      await expect(async () =>
         gameService.validateCreateGameOrThrowAsync(
           user,
           userName,
@@ -259,15 +262,15 @@ describe('GameService', () => {
     it('should throw an error for invalid password that is too long', async () => {
       // arrange
       // Mock the condition where user is not in an active game
-      sinon
-        .stub(gameService.playerService, 'userIsInAnyActiveGameAsync')
-        .resolves(false);
+      jest
+        .spyOn(playerService, 'userIsInAnyActiveGameAsync')
+        .mockResolvedValue(false);
 
       // generate a string that is constants.MAX_PASSWORD_LENGTH + 1 characters long
       password = 'x'.repeat(constants.MAX_PASSWORD_LENGTH + 1);
 
       // act/assert
-      await expect(
+      await expect(async () =>
         gameService.validateCreateGameOrThrowAsync(
           user,
           userName,
@@ -281,14 +284,14 @@ describe('GameService', () => {
     it('should throw an error to too few chefs', async () => {
       // arrange
       // Mock the condition where user is not in an active game
-      sinon
-        .stub(gameService.playerService, 'userIsInAnyActiveGameAsync')
-        .resolves(false);
+      jest
+        .spyOn(playerService, 'userIsInAnyActiveGameAsync')
+        .mockResolvedValue(false);
 
       maxChefs = constants.MIN_CHEFS - 1; // Set an invalid number of chefs by 1 too few
 
       // act/assert
-      await expect(
+      await expect(async () =>
         gameService.validateCreateGameOrThrowAsync(
           user,
           userName,
@@ -302,14 +305,14 @@ describe('GameService', () => {
     it('should throw an error to too many chefs', async () => {
       // arrange
       // Mock the condition where user is not in an active game
-      sinon
-        .stub(gameService.playerService, 'userIsInAnyActiveGameAsync')
-        .resolves(false);
+      jest
+        .spyOn(playerService, 'userIsInAnyActiveGameAsync')
+        .mockResolvedValue(false);
 
       maxChefs = constants.MAX_CHEFS + 1; // Set an invalid number of chefs by 1 too many
 
       // act/assert
-      await expect(
+      await expect(async () =>
         gameService.validateCreateGameOrThrowAsync(
           user,
           userName,
@@ -322,14 +325,17 @@ describe('GameService', () => {
   });
 
   describe('createGameAsync', () => {
-    let mockUser,
-      gameUserName,
-      gameName,
-      password,
-      maxChefs,
-      mockGame,
-      mockChef,
-      mockCreateGameAction;
+    let mockUser: IUserDocument;
+    let gameUserName: string;
+    let gameName: string;
+    let password: string;
+    let maxChefs: number;
+    let mockGame: IGameDocument;
+    let mockChef: IChefDocument;
+    let mockCreateGameAction: ICreateGameActionDocument;
+    let generateGameCodeSpy: jest.SpyInstance;
+    let createGameSpy: jest.SpyInstance;
+    let newChefSpy: jest.SpyInstance;
 
     beforeEach(() => {
       // Setup initial valid parameters
@@ -359,19 +365,21 @@ describe('GameService', () => {
       );
 
       // Mock dependencies
-      sinon
-        .stub(gameService, 'generateNewGameCodeAsync')
-        .resolves(mockGame.code);
-      sinon.stub(gameService.GameModel, 'create').resolves(mockGame);
-      sinon.stub(gameService.chefService, 'newChefAsync').resolves(mockChef);
-      sinon
-        .stub(gameService.actionService, 'createGameAsync')
-        .resolves(mockCreateGameAction);
+      generateGameCodeSpy = jest
+        .spyOn(gameService, 'generateNewGameCodeAsync')
+        .mockResolvedValue(mockGame.code);
+      (GameModel as any).create = jest.fn().mockResolvedValue([mockGame]);
+      newChefSpy = jest
+        .spyOn(chefService, 'newChefAsync')
+        .mockResolvedValue(mockChef);
+      createGameSpy = jest
+        .spyOn(actionService, 'createGameAsync')
+        .mockResolvedValue(mockCreateGameAction);
     });
 
     afterEach(() => {
       // Restore all mocks
-      sinon.restore();
+      jest.restoreAllMocks();
     });
 
     it('creates a game successfully with valid parameters', async () => {
@@ -382,33 +390,28 @@ describe('GameService', () => {
         gameName,
         password,
         maxChefs,
+        mockGame._id,
+        mockChef._id,
       );
 
       // assert
       expect(result.game).toEqual(mockGame);
       expect(result.chef).toEqual(mockChef);
       expect(result.action).toEqual(mockCreateGameAction);
-      expect(gameService.generateNewGameCodeAsync.called).toBeTruthy();
-      expect(
-        gameService.GameModel.create.calledWith(
-          sinon.match.has('code', mockGame.code),
-        ),
-      ).toBeTruthy();
-      expect(
-        gameService.chefService.newChefAsync.calledWith(
-          mockGame,
-          mockUser,
-          gameUserName,
-          true,
-        ),
-      ).toBeTruthy();
-      expect(
-        gameService.actionService.createGameAsync.calledWith(
-          mockGame,
-          mockChef,
-          mockUser,
-        ),
-      ).toBeTruthy();
+      expect(generateGameCodeSpy).toBeTruthy();
+      expect(GameModel.create).toHaveBeenCalledWith([
+        expect.objectContaining({
+          code: mockGame.code,
+        }),
+      ]);
+      expect(createGameSpy).toHaveBeenCalledWith(mockGame, mockChef, mockUser);
+      expect(newChefSpy).toHaveBeenCalledWith(
+        mockGame,
+        mockUser,
+        gameUserName,
+        true,
+        mockChef._id,
+      );
     });
   });
   describe('performCreateGameAsync', () => {
@@ -431,25 +434,34 @@ describe('GameService', () => {
     });
     afterEach(() => {
       // Restore all mocks
-      sinon.restore();
+      jest.restoreAllMocks();
     });
     it('should create a game successfully', async () => {
-      // arrange
       const {
         game: mockGame,
         chef: mockChef,
         user: mockUser,
       } = generateChefGameUser(true);
-      sinon
-        .stub(gameService, 'withTransaction')
-        .callsFake(mockedWithTransactionAsync);
-      sinon.stub(gameService, 'validateCreateGameOrThrowAsync').resolves();
-      sinon
-        .stub(gameService, 'generateNewGameCodeAsync')
-        .resolves(UtilityService.generateGameCode());
-      sinon
-        .stub(gameService, 'createGameAsync')
-        .resolves({ game: mockGame, chef: mockChef });
+      const mockCreateGameAction = generateCreateGameAction(
+        mockGame._id,
+        mockChef._id,
+        mockUser._id,
+      );
+      // arrange
+      jest
+        .spyOn(gameService, 'withTransaction')
+        .mockImplementation(mockedWithTransactionAsync);
+      jest
+        .spyOn(gameService, 'validateCreateGameOrThrowAsync')
+        .mockImplementation(() => Promise.resolve());
+      jest
+        .spyOn(gameService, 'generateNewGameCodeAsync')
+        .mockResolvedValue(mockGame.code);
+      jest.spyOn(gameService, 'createGameAsync').mockResolvedValue({
+        game: mockGame,
+        chef: mockChef,
+        action: mockCreateGameAction,
+      });
 
       // act
       const result = await gameService.performCreateGameAsync(
@@ -467,16 +479,16 @@ describe('GameService', () => {
 
     it('should throw an error if validation fails', async () => {
       // arrange
-      sinon
-        .stub(gameService, 'withTransaction')
-        .callsFake(mockedWithTransactionAsync);
+      jest
+        .spyOn(gameService, 'withTransaction')
+        .mockImplementation(mockedWithTransactionAsync);
       // Mock a validation failure
-      sinon
-        .stub(gameService, 'validateCreateGameOrThrowAsync')
-        .throws(new Error('Validation failed'));
+      jest
+        .spyOn(gameService, 'validateCreateGameOrThrowAsync')
+        .mockRejectedValue(new Error('Validation failed'));
 
       // act/assert
-      await expect(
+      await expect(async () =>
         gameService.performCreateGameAsync(
           mockUser,
           userName,

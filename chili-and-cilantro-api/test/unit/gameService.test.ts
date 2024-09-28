@@ -1,35 +1,42 @@
 import {
   CardType,
   GamePhase,
-  IGame,
+  IGameDocument,
+  InvalidGameError,
   ModelName,
   TurnAction,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import mongoose from 'mongoose';
-import { InvalidGameError } from '../../src/errors/invalid-game';
-import { Database } from '../../src/services/database';
+import { IApplication } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import mongoose, { Model, Query, Types } from 'mongoose';
+import { ActionService } from '../../src/services/action';
+import { ChefService } from '../../src/services/chef';
 import { GameService } from '../../src/services/game';
+import { PlayerService } from '../../src/services/player';
+import { MockApplication } from '../fixtures/application';
 import { generateChef } from '../fixtures/chef';
 import { generateGame } from '../fixtures/game';
 import { generateObjectId } from '../fixtures/objectId';
 
 describe('GameService', () => {
-  let gameService;
-  let mockActionService;
-  let mockChefService;
-  let mockPlayerService;
-  let mockGameModel;
+  let application: IApplication;
+  let gameService: GameService;
+  let mockActionService: ActionService;
+  let mockChefService: ChefService;
+  let mockPlayerService: PlayerService;
+  let mockGameModel: Model<IGameDocument>;
+  let getGameChefsByGameOrIdAsyncMock = jest.fn();
 
   beforeEach(() => {
-    const database = new Database();
-    mockGameModel = database.getModel<IGame>(ModelName.Game);
-    mockActionService = {};
+    application = new MockApplication();
+    mockGameModel = application.getModel<IGameDocument>(ModelName.Game);
+    getGameChefsByGameOrIdAsyncMock = jest.fn();
+    mockActionService = {} as unknown as ActionService;
     mockChefService = {
-      getGameChefsByGameOrIdAsync: jest.fn(),
-    };
-    mockPlayerService = {};
+      getGameChefsByGameOrIdAsync: getGameChefsByGameOrIdAsyncMock,
+    } as unknown as ChefService;
+    mockPlayerService = {} as unknown as PlayerService;
     gameService = new GameService(
-      mockGameModel,
+      application,
       mockActionService,
       mockChefService,
       mockPlayerService,
@@ -38,35 +45,45 @@ describe('GameService', () => {
   describe('getGameByIdOrThrowAsync', () => {
     it('should return a game when found', async () => {
       const mockGame = generateGame();
-      jest.spyOn(mockGameModel, 'findOne').mockResolvedValue(mockGame);
+      const findOneSpy = jest
+        .spyOn(mockGameModel, 'findOne')
+        .mockResolvedValue(mockGame);
 
-      const gameId = new mongoose.Types.ObjectId().toString();
+      const gameId = new Types.ObjectId();
       const result = await gameService.getGameByIdOrThrowAsync(gameId);
 
       expect(result).toBe(mockGame);
-      expect(mockGameModel.findOne).toHaveBeenCalledWith({
-        _id: new mongoose.Types.ObjectId(gameId),
+      expect(findOneSpy).toHaveBeenCalledWith({
+        _id: gameId,
       });
     });
 
     it('should throw InvalidGameError when game is not found', async () => {
-      mockGameModel.findOne.mockResolvedValue(null);
+      jest.spyOn(mockGameModel, 'findOne').mockResolvedValue(null);
 
-      const gameId = new mongoose.Types.ObjectId().toString();
+      const gameId = new mongoose.Types.ObjectId();
 
-      await expect(gameService.getGameByIdOrThrowAsync(gameId)).rejects.toThrow(
-        InvalidGameError,
-      );
+      await expect(async () =>
+        gameService.getGameByIdOrThrowAsync(gameId),
+      ).rejects.toThrow(InvalidGameError);
     });
 
     it('should search for active games when active parameter is true', async () => {
       const mockGame = generateGame();
-      jest.spyOn(mockGameModel, 'findOne').mockResolvedValue(mockGame);
+      const findOneSpy = jest
+        .spyOn(mockGameModel, 'findOne')
+        .mockImplementation(
+          () =>
+            ({
+              exec: jest.fn().mockResolvedValue(mockGame),
+              sort: jest.fn().mockReturnThis(),
+            }) as unknown as Query<IGameDocument[], IGameDocument>,
+        );
 
-      const gameId = new mongoose.Types.ObjectId().toString();
+      const gameId = new mongoose.Types.ObjectId();
       await gameService.getGameByIdOrThrowAsync(gameId, true);
 
-      expect(mockGameModel.findOne).toHaveBeenCalledWith({
+      expect(findOneSpy).toHaveBeenCalledWith({
         _id: new mongoose.Types.ObjectId(gameId),
         currentPhase: { $ne: GamePhase.GAME_OVER },
       });
@@ -79,27 +96,28 @@ describe('GameService', () => {
         sort: jest.fn().mockReturnThis(),
         limit: jest.fn().mockReturnThis(),
         exec: jest.fn().mockResolvedValue([mockGame]),
-      };
-      jest.spyOn(mockGameModel, 'find').mockReturnValue(mockQuery);
+      } as unknown as Query<IGameDocument[], IGameDocument>;
+      const findSpy = jest
+        .spyOn(mockGameModel, 'find')
+        .mockReturnValue(mockQuery);
 
       const gameCode = mockGame.code;
       const result = await gameService.getGameByCodeOrThrowAsync(gameCode);
 
       expect(result).toBe(mockGame);
-      expect(mockGameModel.find).toHaveBeenCalledWith({ code: gameCode });
-      expect(mockQuery.exec).toHaveBeenCalled();
+      expect(findSpy).toHaveBeenCalledWith({ code: gameCode });
     });
     it('should throw InvalidGameError when no game is found, returning null', async () => {
       const mockQuery = {
         sort: jest.fn().mockReturnThis(),
         limit: jest.fn().mockReturnThis(),
         exec: jest.fn().mockResolvedValue(null),
-      };
+      } as unknown as Query<IGameDocument[], IGameDocument>;
       jest.spyOn(mockGameModel, 'find').mockReturnValue(mockQuery);
 
       const gameCode = 'testCode';
 
-      await expect(
+      await expect(async () =>
         gameService.getGameByCodeOrThrowAsync(gameCode),
       ).rejects.toThrow(InvalidGameError);
     });
@@ -108,12 +126,12 @@ describe('GameService', () => {
         sort: jest.fn().mockReturnThis(),
         limit: jest.fn().mockReturnThis(),
         exec: jest.fn().mockResolvedValue([]),
-      };
+      } as unknown as Query<IGameDocument[], IGameDocument>;
       jest.spyOn(mockGameModel, 'find').mockReturnValue(mockQuery);
 
       const gameCode = 'testCode';
 
-      await expect(
+      await expect(async () =>
         gameService.getGameByCodeOrThrowAsync(gameCode),
       ).rejects.toThrow(InvalidGameError);
     });
@@ -123,7 +141,7 @@ describe('GameService', () => {
         sort: jest.fn().mockReturnThis(),
         limit: jest.fn().mockReturnThis(),
         exec: jest.fn().mockResolvedValue([mockGame]),
-      };
+      } as unknown as Query<IGameDocument[], IGameDocument>;
       jest.spyOn(mockGameModel, 'find').mockReturnValue(mockQuery);
 
       const gameCode = mockGame.code;
@@ -133,7 +151,6 @@ describe('GameService', () => {
         code: gameCode,
         currentPhase: { $ne: GamePhase.GAME_OVER },
       });
-      expect(mockQuery.exec).toHaveBeenCalled();
     });
     it('should return the most recent game when multiple games are found', async () => {
       const gameOne = generateGame();
@@ -141,44 +158,47 @@ describe('GameService', () => {
         sort: jest.fn().mockReturnThis(),
         limit: jest.fn().mockReturnThis(),
         exec: jest.fn().mockResolvedValue([gameOne]),
-      };
+      } as unknown as Query<IGameDocument[], IGameDocument>;
       jest.spyOn(mockGameModel, 'find').mockReturnValue(mockQuery);
 
       const result = await gameService.getGameByCodeOrThrowAsync(gameOne.code);
 
       expect(result).toBe(gameOne);
-      expect(mockQuery.exec).toHaveBeenCalled();
     });
   });
   describe('getGameChefNamesByGameIdAsync ', () => {
     it('should return chef names when chefs are found for the game', async () => {
       // Arrange
-      const gameId = generateObjectId().toString();
+      const gameId = generateObjectId();
       const mockChefs = [{ name: 'Chef A' }, { name: 'Chef B' }];
-      mockChefService.getGameChefsByGameOrIdAsync.mockResolvedValue(mockChefs);
+      getGameChefsByGameOrIdAsyncMock.mockResolvedValue(mockChefs);
 
       // Act
-      const result = await gameService.getGameChefNamesByGameIdAsync(gameId);
+      const result = await gameService.getGameChefNamesByGameIdAsync(
+        gameId.toString(),
+      );
 
       // Assert
       expect(result).toEqual(['Chef A', 'Chef B']);
-      expect(mockChefService.getGameChefsByGameOrIdAsync).toHaveBeenCalledWith(
-        gameId,
+      expect(getGameChefsByGameOrIdAsyncMock).toHaveBeenCalledWith(
+        gameId.toString(),
       );
     });
 
     it('should return an empty array when no chefs are found for the game', async () => {
       // Arrange
-      const gameId = generateObjectId().toString();
-      mockChefService.getGameChefsByGameOrIdAsync.mockResolvedValue([]);
+      const gameId = generateObjectId();
+      getGameChefsByGameOrIdAsyncMock.mockResolvedValue([]);
 
       // Act
-      const result = await gameService.getGameChefNamesByGameIdAsync(gameId);
+      const result = await gameService.getGameChefNamesByGameIdAsync(
+        gameId.toString(),
+      );
 
       // Assert
       expect(result).toEqual([]);
-      expect(mockChefService.getGameChefsByGameOrIdAsync).toHaveBeenCalledWith(
-        gameId,
+      expect(getGameChefsByGameOrIdAsyncMock).toHaveBeenCalledWith(
+        gameId.toString(),
       );
     });
   });
@@ -261,7 +281,7 @@ describe('GameService', () => {
         currentPhase: GamePhase.SETUP,
         turnOrder: [chef._id, chef2._id],
         currentChef: 1,
-      };
+      } as IGameDocument;
       expect(gameService.canPlaceCard(game, chef)).toBe(false);
     });
 
@@ -367,9 +387,9 @@ describe('GameService', () => {
       gameService.canBid = jest.fn();
     });
     it('should include PlaceCard when the chef can place a card', () => {
-      gameService.canPlaceCard.mockReturnValue(true);
-      gameService.canPass.mockReturnValue(false);
-      gameService.canBid.mockReturnValue(false);
+      (gameService.canPlaceCard as jest.Mock).mockReturnValue(true);
+      (gameService.canPass as jest.Mock).mockReturnValue(false);
+      (gameService.canBid as jest.Mock).mockReturnValue(false);
 
       const game = generateGame();
       const chef = generateChef();
@@ -379,9 +399,9 @@ describe('GameService', () => {
     });
 
     it('should include Pass when the chef can pass', () => {
-      gameService.canPlaceCard.mockReturnValue(false);
-      gameService.canPass.mockReturnValue(true);
-      gameService.canBid.mockReturnValue(false);
+      (gameService.canPlaceCard as jest.Mock).mockReturnValue(false);
+      (gameService.canPass as jest.Mock).mockReturnValue(true);
+      (gameService.canBid as jest.Mock).mockReturnValue(false);
 
       const game = generateGame();
       const chef = generateChef();
@@ -391,9 +411,9 @@ describe('GameService', () => {
     });
 
     it('should include IncreaseBid when the chef can increase the bid', () => {
-      gameService.canPlaceCard.mockReturnValue(false);
-      gameService.canPass.mockReturnValue(false);
-      gameService.canBid.mockReturnValue(true);
+      (gameService.canPlaceCard as jest.Mock).mockReturnValue(false);
+      (gameService.canPass as jest.Mock).mockReturnValue(false);
+      (gameService.canBid as jest.Mock).mockReturnValue(true);
 
       const chef = generateChef();
       const game = generateGame(true, { currentBid: 1 });
@@ -403,9 +423,9 @@ describe('GameService', () => {
     });
 
     it('should include Bid when the chef can make a bid', () => {
-      gameService.canPlaceCard.mockReturnValue(false);
-      gameService.canPass.mockReturnValue(false);
-      gameService.canBid.mockReturnValue(true);
+      (gameService.canPlaceCard as jest.Mock).mockReturnValue(false);
+      (gameService.canPass as jest.Mock).mockReturnValue(false);
+      (gameService.canBid as jest.Mock).mockReturnValue(true);
 
       const game = generateGame(true, { currentBid: 0 });
       const chef = generateChef();
@@ -415,9 +435,9 @@ describe('GameService', () => {
     });
 
     it('should return an empty array when the chef has no available actions', () => {
-      gameService.canPlaceCard.mockReturnValue(false);
-      gameService.canPass.mockReturnValue(false);
-      gameService.canBid.mockReturnValue(false);
+      (gameService.canPlaceCard as jest.Mock).mockReturnValue(false);
+      (gameService.canPass as jest.Mock).mockReturnValue(false);
+      (gameService.canBid as jest.Mock).mockReturnValue(false);
 
       const game = generateGame();
       const chef = generateChef();
@@ -443,7 +463,7 @@ describe('GameService', () => {
         currentRound: 0,
         roundBids: { 0: [{ chefId: chef1._id, pass: true }] },
         chefIds: [chef1._id, chef2._id],
-      };
+      } as unknown as IGameDocument;
       expect(gameService.haveAllRemainingPlayersPassed(game)).toBe(false);
     });
 
@@ -454,8 +474,8 @@ describe('GameService', () => {
         currentRound: 0,
         roundBids: {
           0: [
-            { chefId: chef1._id, pass: false },
-            { chefId: chef2._id, pass: true },
+            { chefId: chef1._id, pass: false, bid: 1 },
+            { chefId: chef2._id, pass: true, bid: -1 },
           ],
         },
         chefIds: [chef1._id, chef2._id],
@@ -470,8 +490,8 @@ describe('GameService', () => {
         currentRound: 0,
         roundBids: {
           0: [
-            { chefId: chef1._id, pass: false },
-            { chefId: chef2._id, pass: false },
+            { chefId: chef1._id, pass: false, bid: 1 },
+            { chefId: chef2._id, pass: false, bid: 2 },
           ],
         },
         chefIds: [chef1._id, chef2._id],
@@ -487,9 +507,9 @@ describe('GameService', () => {
         currentRound: 0,
         roundBids: {
           0: [
-            { chefId: chef1._id, pass: false },
-            { chefId: chef2._id, pass: false },
-            { chefId: chef3._id, pass: true },
+            { chefId: chef1._id, pass: false, bid: 1 },
+            { chefId: chef2._id, pass: false, bid: 2 },
+            { chefId: chef3._id, pass: true, bid: -1 },
           ],
         },
         chefIds: [chef1._id, chef2._id, chef3._id],

@@ -1,3 +1,5 @@
+import { StringLanguages } from '../enumerations/string-languages';
+
 /**
  * Interface for the user object stored in the request object
  */
@@ -18,6 +20,10 @@ export interface IRequestUser {
    * The timezone of the user
    */
   timezone: string;
+  /**
+   * The language the user has selected for the site
+   */
+  siteLanguage: StringLanguages;
   /**
    * The date the user last logged in
    */

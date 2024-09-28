@@ -2,7 +2,14 @@
   "name": "@chili-and-cilantro/chili-and-cilantro-lib",
   "version": "0.0.1",
   "dependencies": {
-    "tslib": "^2.3.0"
+    "express-validator": "^7.1.0",
+    "mongoose": "^7.6.2",
+    "tslib": "^2.6.3"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/jsonwebtoken": "^9.0.6",
+    "eslint": "^9.15.0"
   },
   "type": "commonjs",
   "main": "./src/index.js",

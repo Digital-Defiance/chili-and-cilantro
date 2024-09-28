@@ -6,7 +6,7 @@ import {
   IRoundBids,
   ModelName,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import mongoose from 'mongoose';
+import mongoose, { ValidatorProps } from 'mongoose';
 import validator from 'validator';
 
 const { Schema } = mongoose;
@@ -44,7 +44,8 @@ export const GameSchema = new Schema<IGameDocument>(
             v.length == constants.GAME_CODE_LENGTH
           );
         },
-        message: (props) => `${props.value} is not a valid game code!`,
+        message: (props: ValidatorProps) =>
+          `${props.value} is not a valid game code!`,
       },
       set: (v: string) => (v || '').trim().toUpperCase(),
     },
@@ -60,7 +61,8 @@ export const GameSchema = new Schema<IGameDocument>(
             v.length <= constants.MAX_GAME_NAME_LENGTH
           );
         },
-        message: (props) => `${props.value} is not a valid game name!`,
+        message: (props: ValidatorProps) =>
+          `${props.value} is not a valid game name!`,
       },
       set: (v: string) => (v || '').trim(),
     },
@@ -76,7 +78,8 @@ export const GameSchema = new Schema<IGameDocument>(
             v.length <= constants.MAX_GAME_PASSWORD_LENGTH
           );
         },
-        message: (props) => `${props.value} is not a valid password!`,
+        message: (props: ValidatorProps) =>
+          `${props.value} is not a valid password!`,
       },
       set: (v: string) => (v || '').trim(),
     },
@@ -101,7 +104,8 @@ export const GameSchema = new Schema<IGameDocument>(
         validator: function (v: number) {
           return v >= constants.MIN_CHEFS && v <= constants.MAX_CHEFS;
         },
-        message: (props) => `${props.value} is not a valid number of chefs!`,
+        message: (props: ValidatorProps) =>
+          `${props.value} is not a valid number of chefs!`,
       },
     },
     cardsPlaced: {
@@ -135,7 +139,6 @@ export const GameSchema = new Schema<IGameDocument>(
       of: {
         type: Schema.Types.ObjectId,
         ref: ModelName.Chef,
-        required: true,
       },
       required: true,
     },

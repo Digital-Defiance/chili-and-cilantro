@@ -1,258 +1,674 @@
 import {
-  BaseModel,
-  IUser,
+  AccountDeletedError,
+  AccountLockedError,
+  AccountStatusError,
+  AccountStatusTypeEnum,
+  DefaultIdType,
+  EmailInUseError,
+  EmailTokenExpiredError,
+  EmailTokenSentTooRecentlyError,
+  EmailTokenType,
+  EmailTokenUsedOrInvalidError,
+  EmailVerifiedError,
+  IEmailTokenDocument,
+  IUserDocument,
+  InvalidCredentialsError,
+  InvalidPasswordError,
+  InvalidUsernameError,
   ModelName,
-  constants,
+  PendingEmailVerificationError,
+  UserNotFoundError,
+  UsernameInUseError,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { faker } from '@faker-js/faker';
-import { EmailExistsError } from 'chili-and-cilantro-api/src/errors/emailExists';
-import { InvalidEmailError } from 'chili-and-cilantro-api/src/errors/invalidEmail';
-import { InvalidPasswordError } from 'chili-and-cilantro-api/src/errors/invalidPassword';
-import { InvalidUsernameError } from 'chili-and-cilantro-api/src/errors/invalidUsername';
-import { UsernameExistsError } from 'chili-and-cilantro-api/src/errors/usernameExists';
-import sinon from 'sinon';
-import { managementClient } from '../../src/auth0';
-import { UserService } from '../../src/services/user';
-import { generateGamePassword } from '../fixtures/game';
 import {
-  generateUser,
-  generateUserPassword,
-  generateUsername,
-} from '../fixtures/user';
+  IApplication,
+  MongooseValidationError,
+} from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import { MailService } from '@sendgrid/mail';
+import * as bcrypt from 'bcrypt';
+import { randomBytes } from 'crypto';
+import { Model, Query, Types } from 'mongoose';
+import { UserService } from '../../src/services/user';
+import { MockApplication } from '../fixtures/application';
+import { generateEmailToken } from '../fixtures/email-token';
+import { generateUser } from '../fixtures/user';
 
-describe('userService', () => {
-  let userService, userModel;
-  beforeAll(() => {
-    userService = new UserService();
-    userModel = BaseModel.getModel<IUser>(ModelName.User);
+jest.mock('@sendgrid/mail');
+jest.mock('bcrypt');
+
+describe('UserService', () => {
+  let mailService: MailService;
+  let userService: UserService;
+  let mockApplication: IApplication;
+  let mockUserModel: Model<IUserDocument>;
+  let mockEmailTokenModel: Model<IEmailTokenDocument>;
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+    mockApplication = new MockApplication();
+    mockUserModel = mockApplication.getModel<IUserDocument>(ModelName.User);
+    mockEmailTokenModel = mockApplication.getModel<IEmailTokenDocument>(
+      ModelName.EmailToken,
+    );
+
+    mailService = {
+      setApiKey: jest.fn(),
+      send: jest.fn(),
+    } as unknown as MailService;
+    userService = new UserService(mockApplication, mailService);
+    console.error = jest.fn();
   });
-  afterEach(() => {
-    sinon.restore();
-  });
-  describe('validateRegisterOrThrowAsync', () => {
-    let email, password, username;
-    beforeEach(() => {
-      email = faker.internet.email();
-      password = generateGamePassword();
-      username = generateUsername();
-    });
-    it('should throw an error if the email is invalid', async () => {
-      email = 'invalid email without at symbol';
-      await expect(
-        userService.validateRegisterOrThrowAsync(email, username, password),
-      ).rejects.toThrow(InvalidEmailError);
-    });
-    it('should throw an error if the email is already in use', async () => {
-      sinon.stub(userModel, 'findOne').returns({
-        exec: sinon.stub().resolves({ email: email }),
+
+  describe('createEmailToken', () => {
+    it('should create a new email token', async () => {
+      const userDoc = generateUser();
+      const mockEmailToken = generateEmailToken({
+        userId: userDoc._id,
       });
-      await expect(
-        userService.validateRegisterOrThrowAsync(email, username, password),
-      ).rejects.toThrow(EmailExistsError);
-    });
-    it('should throw an error if the username is too short', async () => {
-      sinon.stub(userModel, 'findOne').returns(null);
-      username = 'x'.repeat(constants.MIN_USERNAME_LENGTH - 1);
-      await expect(
-        userService.validateRegisterOrThrowAsync(email, username, password),
-      ).rejects.toThrow(InvalidUsernameError);
-    });
-    it('should throw an error if the username is too long', async () => {
-      sinon.stub(userModel, 'findOne').returns(null);
-      username = 'x'.repeat(constants.MAX_USERNAME_LENGTH + 1);
-      await expect(
-        userService.validateRegisterOrThrowAsync(email, username, password),
-      ).rejects.toThrow(InvalidUsernameError);
-    });
-    it('should throw an error if the username is already in use', async () => {
-      // sinon needs to return null once and then return a user object
-      sinon
-        .stub(userModel, 'findOne')
-        .onFirstCall()
-        .returns(null)
-        .onSecondCall()
-        .returns({
-          exec: sinon.stub().resolves({ username: username }),
+      const createSpy = jest
+        .spyOn(mockEmailTokenModel, 'create')
+        .mockResolvedValueOnce([
+          mockEmailToken as unknown as IEmailTokenDocument & {
+            _id: DefaultIdType;
+          },
+        ]);
+      const deleteManySpy = jest
+        .spyOn(mockEmailTokenModel, 'deleteMany')
+        .mockResolvedValueOnce({
+          deletedCount: 1,
+          acknowledged: true,
         });
-      await expect(
-        userService.validateRegisterOrThrowAsync(email, username, password),
-      ).rejects.toThrow(UsernameExistsError);
-    });
-    it('should throw an error if the password is missing', async () => {
-      sinon.stub(userModel, 'findOne').returns(null);
-      password = undefined;
-      await expect(
-        userService.validateRegisterOrThrowAsync(email, username, password),
-      ).rejects.toThrow(InvalidPasswordError);
-    });
-    it('should throw an error if the password is too short', async () => {
-      sinon.stub(userModel, 'findOne').returns(null);
-      password = 'x'.repeat(constants.MIN_GAME_PASSWORD_LENGTH - 1);
-      await expect(
-        userService.validateRegisterOrThrowAsync(email, username, password),
-      ).rejects.toThrow(InvalidPasswordError);
-    });
-    it('should throw an error if the password is too long', async () => {
-      sinon.stub(userModel, 'findOne').returns(null);
-      password = 'x'.repeat(constants.MAX_GAME_PASSWORD_LENGTH + 1);
-      await expect(
-        userService.validateRegisterOrThrowAsync(email, username, password),
-      ).rejects.toThrow(InvalidPasswordError);
-    });
-    it('should not throw an error if the email, username, and password are valid', async () => {
-      sinon.stub(userModel, 'findOne').returns(null);
-      await expect(
-        userService.validateRegisterOrThrowAsync(email, username, password),
-      ).resolves.not.toThrow();
+
+      const result = await userService.createEmailToken(
+        userDoc,
+        EmailTokenType.AccountVerification,
+      );
+
+      expect(deleteManySpy).toHaveBeenCalled();
+      expect(createSpy).toHaveBeenCalled();
+      expect(result).toEqual(mockEmailToken);
     });
   });
-  describe('registerAuth0UserAsync', () => {
-    let email, password, username;
-    beforeEach(() => {
-      email = faker.internet.email();
-      password = generateUserPassword();
-      username = generateUsername();
+
+  describe('sendEmailToken', () => {
+    it('should send an email token', async () => {
+      const mockEmailToken = {
+        _id: new Types.ObjectId(),
+        email: 'test@example.com',
+        token: 'mockToken',
+        type: EmailTokenType.AccountVerification,
+        lastSent: null,
+        save: jest.fn(),
+      } as unknown as IEmailTokenDocument;
+
+      (mailService.send as jest.Mock).mockResolvedValueOnce({});
+
+      await userService.sendEmailToken(mockEmailToken);
+
+      expect(mailService.send).toHaveBeenCalled();
+      expect(mockEmailToken.save).toHaveBeenCalled();
     });
 
-    afterEach(() => {
-      sinon.restore();
-    });
+    it('should throw EmailTokenSentTooRecentlyError if token was sent recently', async () => {
+      const mockEmailToken = {
+        lastSent: new Date(),
+      } as unknown as IEmailTokenDocument;
 
-    it('should throw an error if there is no auth0 response', async () => {
-      // stub the auth0 management client to return null
-      // but it is async, so we need to return a promise
-      // and resolve it with null
-      sinon.stub(managementClient.users, 'create').resolves(undefined);
-      await expect(
-        userService.registerAuth0UserAsync(email, username, password),
-      ).rejects.toThrow('Error creating user in Auth0: Unknown error');
-    });
-    it('should throw an error if the auth0 response status is not 201', async () => {
-      // Mock the response with the necessary properties
-      const mockResponse = {
-        status: 400,
-        statusText: 'Bad Request',
-      };
-
-      // Stub the Auth0 management client to return the mock response
-      sinon
-        .stub(managementClient.users, 'create')
-        .resolves(mockResponse as any);
-
-      await expect(
-        userService.registerAuth0UserAsync(email, username, password),
-      ).rejects.toThrow('Error creating user in Auth0: Bad Request');
-    });
-    it('should return the auth0 user response if the management call is successful', async () => {
-      // stub the auth0 mangement client to return a data object and expect that value
-      sinon.stub(managementClient.users, 'create').resolves({
-        status: 201,
-        data: {
-          email: email,
-          username: username,
-          user_id: faker.string.uuid(),
-        },
-      } as any);
-      userService
-        .registerAuth0UserAsync(email, username, password)
-        .then((result) => {
-          expect(result.email).toBe(email);
-        });
-    });
-  });
-  describe('createUserAsync', () => {
-    let email, auth0User;
-    beforeEach(() => {
-      email = faker.internet.email();
-      auth0User = {
-        username: generateUsername(),
-        user_id: 'auth0|'.concat(faker.string.uuid()),
-      };
-    });
-    it('should create the user model', async () => {
-      sinon.stub(userModel, 'create').resolves({
-        email: email,
-        username: auth0User.username,
-        auth0Id: auth0User.user_id,
-        shadowBan: false,
-        userHidden: true,
-      });
-      expect.assertions(5);
-      userService.createUserAsync(email, auth0User).then((result) => {
-        expect(result.email).toBe(email);
-        expect(result.username).toBe(auth0User.username);
-        expect(result.auth0Id).toBe(auth0User.user_id);
-        expect(result.shadowBan).toBe(false);
-        expect(result.userHidden).toBe(true);
-      });
-    });
-  });
-  describe('performRegister', () => {
-    let auth0User, email, username, password;
-    beforeEach(() => {
-      email = faker.internet.email();
-      username = generateUsername();
-      password = generateUserPassword();
-      auth0User = {
-        username: username,
-        user_id: 'auth0|'.concat(faker.string.uuid()),
-      };
-      jest.spyOn(console, 'error').mockImplementation(() => {});
-    });
-    it('should call validateRegisterOrThrowAsync, registerAuth0UserAsync, and createUserAsync', async () => {
-      jest
-        .spyOn(userService, 'validateRegisterOrThrowAsync')
-        .mockResolvedValue(undefined);
-      sinon.stub(userService, 'registerAuth0UserAsync').resolves(auth0User);
-      sinon.stub(userService, 'createUserAsync').resolves({
-        _id: faker.string.uuid(),
-        email: email,
-        username: username,
-        auth0Id: auth0User.user_id,
-        shadowBan: false,
-        userHidden: true,
-      });
-      expect.assertions(6);
-      userService.performRegister(email, username, password).then((result) => {
-        expect(userService.validateRegisterOrThrowAsync).toHaveBeenCalled();
-        expect(result.email).toBe(email);
-        expect(result.username).toBe(username);
-        expect(result.auth0Id).toBe(auth0User.user_id);
-        expect(result.shadowBan).toBe(false);
-        expect(result.userHidden).toBe(true);
-      });
-    });
-    it('should throw an error if registerAuth0UserAsync throws an error', async () => {
-      const error = new Error('Error creating user in Auth0');
-      sinon.stub(userService, 'validateRegisterOrThrowAsync').resolves();
-      sinon.stub(userService, 'registerAuth0UserAsync').rejects(error);
-      await expect(
-        userService.performRegister(email, username, password),
-      ).rejects.toThrow('Error creating user in Auth0');
-    });
-  });
-  describe('getUserByAuth0IdOrThrow', () => {
-    beforeEach(() => {
-      jest.spyOn(console, 'error').mockImplementation(() => {});
-    });
-    it('should throw an error if the user is not found', async () => {
-      const auth0Id = `auth0Id|${faker.string.uuid()}`;
-      sinon.stub(userModel, 'findOne').returns(null);
-      await expect(
-        userService.getUserByAuth0IdOrThrow(auth0Id),
-      ).rejects.toThrow(`Invalid user by auth0Id: ${auth0Id}`);
-      expect(console.error).toHaveBeenCalledWith(
-        'Error fetching user by Auth0 ID:',
-        expect.anything(),
+      await expect(userService.sendEmailToken(mockEmailToken)).rejects.toThrow(
+        EmailTokenSentTooRecentlyError,
       );
     });
-    it('should return the user if the user is found', async () => {
-      const auth0Id = `auth0Id|${faker.string.uuid()}`;
-      const user = generateUser({ auth0Id });
-      sinon.stub(userModel, 'findOne').returns(user);
-      expect.assertions(1);
-      userService.getUserByAuth0IdOrThrow(auth0Id).then((result) => {
-        expect(result).toBe(user);
+  });
+
+  describe('findUser', () => {
+    it('should find a user by email and password', async () => {
+      const email = 'test@example.com';
+      const password = 'Password123!';
+      const mockUser = {
+        _id: new Types.ObjectId(),
+        email,
+        password: 'hashedPassword',
+        accountStatusType: AccountStatusTypeEnum.Active,
+      };
+
+      jest.spyOn(mockUserModel, 'findOne').mockResolvedValueOnce(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValueOnce(true);
+
+      const result = await userService.findUser(password, email);
+
+      expect(mockUserModel.findOne).toHaveBeenCalledWith({
+        email: email.toLowerCase(),
+      });
+      expect(result).toEqual(mockUser);
+    });
+
+    it('should throw InvalidCredentialsError if user not found', async () => {
+      jest.spyOn(mockUserModel, 'findOne').mockResolvedValueOnce(null);
+
+      await expect(
+        userService.findUser('password', 'nonexistent@example.com'),
+      ).rejects.toThrow(InvalidCredentialsError);
+    });
+
+    it("should throw InvalidCredentialsError if password doesn't match", async () => {
+      jest.spyOn(mockUserModel, 'findOne').mockResolvedValueOnce({
+        password: 'hashedPassword',
+      });
+      (bcrypt.compare as jest.Mock).mockResolvedValueOnce(false);
+
+      await expect(
+        userService.findUser('wrongpassword', 'test@example.com'),
+      ).rejects.toThrow(InvalidCredentialsError);
+    });
+
+    it('should throw appropriate error based on account status', async () => {
+      const testCases = [
+        { status: AccountStatusTypeEnum.Locked, error: AccountLockedError },
+        {
+          status: AccountStatusTypeEnum.NewUnverified,
+          error: PendingEmailVerificationError,
+        },
+        {
+          status: AccountStatusTypeEnum.AdminDelete,
+          error: AccountDeletedError,
+        },
+        {
+          status: AccountStatusTypeEnum.SelfDelete,
+          error: AccountDeletedError,
+        },
+        {
+          status: AccountStatusTypeEnum.SelfDeleteWaitPeriod,
+          error: AccountDeletedError,
+        },
+        {
+          status: 'InvalidStatus' as AccountStatusTypeEnum,
+          error: AccountStatusError,
+        },
+      ];
+
+      for (const testCase of testCases) {
+        jest.spyOn(mockUserModel, 'findOne').mockResolvedValueOnce({
+          accountStatusType: testCase.status,
+          password: 'hashedPassword',
+        });
+        (bcrypt.compare as jest.Mock).mockResolvedValueOnce(true);
+
+        await expect(
+          userService.findUser('password', 'test@example.com'),
+        ).rejects.toThrow(testCase.error);
+      }
+    });
+  });
+
+  describe('fillUserDefaults', () => {
+    it('should fill user defaults correctly', () => {
+      const newUser = { email: 'test@example.com', username: 'testuser' };
+      const result = userService.fillUserDefaults(newUser);
+
+      expect(result).toHaveProperty('_id');
+      expect(result.email).toBe('test@example.com');
+      expect(result.username).toBe('testuser');
+      expect(result.emailVerified).toBe(false);
+      expect(result.accountStatusType).toBe(
+        AccountStatusTypeEnum.NewUnverified,
+      );
+    });
+  });
+
+  describe('makeUserDoc', () => {
+    it('should create a user document', () => {
+      const newUser = { email: 'test@example.com', username: 'testuser' };
+      const password = 'Password123!';
+
+      const fakedHash = randomBytes(16).toString('hex');
+      (bcrypt.hashSync as jest.Mock).mockReturnValueOnce(fakedHash);
+      mockUserModel.prototype.validateSync.mockReturnValueOnce(undefined);
+
+      const result = userService.makeUserDoc(newUser as any, password);
+
+      expect(result).toHaveProperty('password', fakedHash);
+      expect(mockUserModel.prototype.validateSync).toHaveBeenCalled();
+    });
+
+    it('should throw MongooseValidationError if validation fails', () => {
+      const newUser = { email: 'test@example.com', username: 'testuser' };
+      const password = 'Password123!';
+
+      mockUserModel.prototype.validateSync.mockReturnValueOnce({ errors: {} });
+
+      expect(() => userService.makeUserDoc(newUser as any, password)).toThrow(
+        MongooseValidationError,
+      );
+    });
+  });
+
+  describe('newUser', () => {
+    it('should create a new user and send verification email', async () => {
+      const userData = { username: 'testuser', email: 'test@example.com' };
+      const password = 'Password123!';
+
+      const countDocumentsSpy = jest.spyOn(mockUserModel, 'countDocuments');
+      countDocumentsSpy.mockResolvedValueOnce(0).mockResolvedValueOnce(0);
+      mockUserModel.prototype.save.mockResolvedValueOnce({
+        _id: new Types.ObjectId(),
+        ...userData,
+      });
+
+      const createEmailTokenSpy = jest
+        .spyOn(userService, 'createEmailToken')
+        .mockResolvedValueOnce({} as IEmailTokenDocument);
+      const sendEmailTokenSpy = jest
+        .spyOn(userService, 'sendEmailToken')
+        .mockResolvedValueOnce();
+
+      await userService.newUser(userData, password);
+
+      expect(mockUserModel.countDocuments).toHaveBeenCalledTimes(2);
+      expect(mockUserModel.prototype.save).toHaveBeenCalledTimes(1);
+      expect(mailService.send).toHaveBeenCalled();
+      expect(createEmailTokenSpy).toHaveBeenCalledTimes(1);
+      expect(sendEmailTokenSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw InvalidUsernameError for invalid username', async () => {
+      const userData = { username: 'inv@lid', email: 'test@example.com' };
+      const password = 'Password123!';
+
+      await expect(userService.newUser(userData, password)).rejects.toThrow(
+        InvalidUsernameError,
+      );
+    });
+
+    it('should throw InvalidPasswordError for invalid password', async () => {
+      const userData = { username: 'testuser', email: 'test@example.com' };
+      const password = 'weak';
+
+      await expect(userService.newUser(userData, password)).rejects.toThrow(
+        InvalidPasswordError,
+      );
+    });
+
+    it('should throw EmailInUseError if email already exists', async () => {
+      const userData = { username: 'testuser', email: 'test@example.com' };
+      const password = 'Password123!';
+
+      jest.spyOn(mockUserModel, 'countDocuments').mockResolvedValueOnce(1);
+
+      await expect(userService.newUser(userData, password)).rejects.toThrow(
+        EmailInUseError,
+      );
+    });
+
+    it('should throw UsernameInUseError if username already exists', async () => {
+      const userData = { username: 'testuser', email: 'test@example.com' };
+      const password = 'Password123!';
+
+      const countDocumentsSpy = jest.spyOn(mockUserModel, 'countDocuments');
+      countDocumentsSpy.mockResolvedValueOnce(0).mockResolvedValueOnce(1);
+
+      await expect(userService.newUser(userData, password)).rejects.toThrow(
+        UsernameInUseError,
+      );
+    });
+  });
+
+  describe('resendEmailToken', () => {
+    it('should resend email token', async () => {
+      const userId = new Types.ObjectId().toString();
+      const mockEmailToken = {
+        _id: new Types.ObjectId(),
+      } as IEmailTokenDocument;
+
+      jest.spyOn(mockEmailTokenModel, 'findOne').mockReturnValue({
+        sort: jest.fn().mockReturnValue({
+          limit: jest.fn().mockResolvedValueOnce(mockEmailToken),
+        }),
+      } as unknown as Query<IEmailTokenDocument[], IEmailTokenDocument>);
+
+      const sendEmailTokenSpy = jest
+        .spyOn(userService, 'sendEmailToken')
+        .mockResolvedValueOnce();
+
+      await userService.resendEmailToken(userId);
+
+      expect(mockEmailTokenModel.findOne).toHaveBeenCalled();
+      expect(mailService.send).not.toHaveBeenCalled(); // we mocked sendEmailToken
+      expect(sendEmailTokenSpy).toHaveBeenCalledWith(mockEmailToken);
+    });
+
+    it('should throw EmailTokenUsedOrInvalidError if no valid token found', async () => {
+      const userId = new Types.ObjectId().toString();
+
+      jest.spyOn(mockEmailTokenModel, 'findOne').mockReturnValue({
+        sort: jest.fn().mockReturnValue({
+          limit: jest.fn().mockResolvedValueOnce(null),
+        }),
+      } as unknown as Query<IEmailTokenDocument[], IEmailTokenDocument>);
+
+      await expect(userService.resendEmailToken(userId)).rejects.toThrow(
+        EmailTokenUsedOrInvalidError,
+      );
+    });
+  });
+
+  describe('verifyEmailToken', () => {
+    it('should verify a valid email token', async () => {
+      const token = 'validToken';
+      const mockEmailToken = {
+        _id: new Types.ObjectId(),
+        expiresAt: new Date(Date.now() + 3600000), // 1 hour from now
+      } as IEmailTokenDocument;
+
+      jest
+        .spyOn(mockEmailTokenModel, 'findOne')
+        .mockResolvedValueOnce(mockEmailToken);
+
+      const result = await userService.verifyEmailToken(token);
+
+      expect(result).toBe(true);
+      expect(mockEmailTokenModel.findOne).toHaveBeenCalledWith({ token });
+    });
+
+    it('should throw EmailTokenUsedOrInvalidError for invalid token', async () => {
+      const token = 'invalidToken';
+
+      jest.spyOn(mockEmailTokenModel, 'findOne').mockResolvedValueOnce(null);
+
+      await expect(userService.verifyEmailToken(token)).rejects.toThrow(
+        EmailTokenUsedOrInvalidError,
+      );
+    });
+
+    it('should throw EmailTokenExpiredError for expired token', async () => {
+      const token = 'expiredToken';
+      const mockEmailToken = {
+        _id: new Types.ObjectId(),
+        expiresAt: new Date(Date.now() - 3600000), // 1 hour ago
+      } as IEmailTokenDocument;
+
+      jest
+        .spyOn(mockEmailTokenModel, 'findOne')
+        .mockResolvedValueOnce(mockEmailToken);
+      jest
+        .spyOn(mockEmailTokenModel, 'deleteOne')
+        .mockResolvedValueOnce({ deletedCount: 1, acknowledged: true });
+
+      await expect(userService.verifyEmailToken(token)).rejects.toThrow(
+        EmailTokenExpiredError,
+      );
+      expect(mockEmailTokenModel.deleteOne).toHaveBeenCalledWith({
+        _id: mockEmailToken._id,
+      });
+    });
+  });
+
+  describe('verifyEmailTokenAndFinalize', () => {
+    it('should verify and finalize email token', async () => {
+      const token = 'validToken';
+      const mockEmailToken = {
+        _id: new Types.ObjectId(),
+        userId: new Types.ObjectId(),
+        expiresAt: new Date(Date.now() + 3600000), // 1 hour from now
+      } as IEmailTokenDocument;
+      const mockUser = {
+        _id: mockEmailToken.userId,
+        emailVerified: false,
+        save: jest.fn(),
+      } as unknown as IUserDocument;
+
+      jest
+        .spyOn(mockEmailTokenModel, 'findOne')
+        .mockResolvedValueOnce(mockEmailToken);
+      jest.spyOn(mockUserModel, 'findById').mockResolvedValueOnce(mockUser);
+      jest
+        .spyOn(mockEmailTokenModel, 'deleteOne')
+        .mockResolvedValueOnce({ deletedCount: 1, acknowledged: true });
+
+      await userService.verifyEmailTokenAndFinalize(token);
+
+      expect(mockUser.emailVerified).toBe(true);
+      expect(mockUser.accountStatusType).toBe(AccountStatusTypeEnum.Active);
+      expect(mockUser.save).toHaveBeenCalled();
+      expect(mockEmailTokenModel.deleteOne).toHaveBeenCalledWith({
+        _id: mockEmailToken._id,
+      });
+    });
+
+    it('should throw UserNotFoundError if user not found', async () => {
+      const token = 'validToken';
+      const mockEmailToken = {
+        _id: new Types.ObjectId(),
+        userId: new Types.ObjectId(),
+        expiresAt: new Date(Date.now() + 3600000), // 1 hour from now
+      } as IEmailTokenDocument;
+
+      jest
+        .spyOn(mockEmailTokenModel, 'findOne')
+        .mockResolvedValueOnce(mockEmailToken);
+      jest.spyOn(mockUserModel, 'findById').mockResolvedValueOnce(null);
+
+      await expect(
+        userService.verifyEmailTokenAndFinalize(token),
+      ).rejects.toThrow(UserNotFoundError);
+    });
+
+    it('should throw EmailVerifiedError if email is already verified', async () => {
+      const token = 'validToken';
+      const mockEmailToken = {
+        _id: new Types.ObjectId(),
+        userId: new Types.ObjectId(),
+        expiresAt: new Date(Date.now() + 3600000), // 1 hour from now
+      } as IEmailTokenDocument;
+      const mockUser = {
+        _id: mockEmailToken.userId,
+        emailVerified: true,
+      } as IUserDocument;
+
+      jest
+        .spyOn(mockEmailTokenModel, 'findOne')
+        .mockResolvedValueOnce(mockEmailToken);
+      jest.spyOn(mockUserModel, 'findById').mockResolvedValueOnce(mockUser);
+
+      await expect(
+        userService.verifyEmailTokenAndFinalize(token),
+      ).rejects.toThrow(EmailVerifiedError);
+    });
+  });
+
+  describe('changePassword', () => {
+    it('should change user password', async () => {
+      const userId = new Types.ObjectId();
+      const oldPassword = 'oldPassword';
+      const newPassword = 'newPassword';
+      const mockUser = {
+        _id: userId,
+        password: 'hashedOldPassword',
+        save: jest.fn(),
+      } as unknown as IUserDocument;
+
+      jest.spyOn(mockUserModel, 'findById').mockResolvedValueOnce(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValueOnce(true);
+      (bcrypt.hash as jest.Mock).mockResolvedValueOnce('hashedNewPassword');
+
+      await userService.changePassword(
+        userId.toString(),
+        oldPassword,
+        newPassword,
+      );
+
+      expect(mockUser.password).toBe('hashedNewPassword');
+      expect(mockUser.save).toHaveBeenCalled();
+    });
+
+    it('should throw UserNotFoundError if user not found', async () => {
+      const userId = new Types.ObjectId();
+      jest.spyOn(mockUserModel, 'findById').mockResolvedValueOnce(null);
+
+      await expect(
+        userService.changePassword(userId.toString(), 'old', 'new'),
+      ).rejects.toThrow(UserNotFoundError);
+    });
+
+    it('should throw InvalidCredentialsError if old password is incorrect', async () => {
+      const userId = new Types.ObjectId();
+      const mockUser = {
+        _id: userId,
+        password: 'hashedOldPassword',
+      } as IUserDocument;
+
+      jest.spyOn(mockUserModel, 'findById').mockResolvedValueOnce(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValueOnce(false);
+
+      await expect(
+        userService.changePassword(userId.toString(), 'wrongOld', 'new'),
+      ).rejects.toThrow(InvalidCredentialsError);
+    });
+  });
+
+  describe('resetPassword', () => {
+    it('should reset user password', async () => {
+      const token = 'validToken';
+      const newPassword = 'newPassword';
+      const mockEmailToken = {
+        _id: new Types.ObjectId(),
+        userId: new Types.ObjectId(),
+        expiresAt: new Date(Date.now() + 3600000), // 1 hour from now
+      } as IEmailTokenDocument;
+      const mockUser = {
+        _id: mockEmailToken.userId,
+        password: 'hashedOldPassword',
+        save: jest.fn(),
+      } as unknown as IUserDocument;
+
+      jest
+        .spyOn(mockEmailTokenModel, 'findOne')
+        .mockResolvedValueOnce(mockEmailToken);
+      jest.spyOn(mockUserModel, 'findById').mockResolvedValueOnce(mockUser);
+      const fakedHash = randomBytes(16).toString('hex');
+      (bcrypt.hashSync as jest.Mock).mockReturnValueOnce(fakedHash);
+      jest
+        .spyOn(mockEmailTokenModel, 'deleteOne')
+        .mockResolvedValueOnce({ deletedCount: 1, acknowledged: true });
+
+      await userService.resetPassword(token, newPassword);
+
+      expect(mockUser.password).toBe(fakedHash);
+      expect(mockUser.save).toHaveBeenCalled();
+      expect(mockEmailTokenModel.deleteOne).toHaveBeenCalledWith({
+        _id: mockEmailToken._id,
+      });
+    });
+
+    it('should throw EmailTokenUsedOrInvalidError if token not found', async () => {
+      jest.spyOn(mockEmailTokenModel, 'findOne').mockResolvedValueOnce(null);
+
+      await expect(
+        userService.resetPassword('invalidToken', 'newPassword'),
+      ).rejects.toThrow(EmailTokenUsedOrInvalidError);
+    });
+
+    it('should throw UserNotFoundError if user not found', async () => {
+      const mockEmailToken = {
+        _id: new Types.ObjectId(),
+        userId: new Types.ObjectId(),
+        expiresAt: new Date(Date.now() + 3600000), // 1 hour from now
+      } as IEmailTokenDocument;
+
+      jest
+        .spyOn(mockEmailTokenModel, 'findOne')
+        .mockResolvedValueOnce(mockEmailToken);
+      jest.spyOn(mockUserModel, 'findById').mockResolvedValueOnce(null);
+
+      await expect(
+        userService.resetPassword('validToken', 'newPassword'),
+      ).rejects.toThrow(UserNotFoundError);
+    });
+  });
+
+  describe('initiatePasswordReset', () => {
+    it('should return success message if user does not exist', async () => {
+      jest.spyOn(mockUserModel, 'findOne').mockResolvedValueOnce(null);
+
+      const result = await userService.initiatePasswordReset(
+        'nonexistent@example.com',
+      );
+
+      expect(result).toEqual({
+        success: true,
+        message:
+          'If an account with that email exists, a password reset link has been sent.',
+      });
+    });
+
+    it('should return error message if email is not verified', async () => {
+      const mockUser = {
+        _id: new Types.ObjectId(),
+        email: 'test@example.com',
+        emailVerified: false,
+      };
+
+      jest.spyOn(mockUserModel, 'findOne').mockResolvedValueOnce(mockUser);
+
+      const result =
+        await userService.initiatePasswordReset('test@example.com');
+
+      expect(result).toEqual({
+        success: false,
+        message:
+          'Please verify your email address before resetting your password.',
+      });
+    });
+
+    it('should create and send password reset token if user exists and email is verified', async () => {
+      const mockUser = {
+        _id: new Types.ObjectId(),
+        email: 'test@example.com',
+        emailVerified: true,
+      };
+
+      const mockEmailToken = {
+        _id: new Types.ObjectId(),
+        userId: mockUser._id,
+        email: mockUser.email,
+        token: 'mockToken',
+        type: EmailTokenType.PasswordReset,
+        lastSent: null,
+        createdAt: new Date(),
+        expiresAt: new Date(Date.now() + 3600000), // 1 hour from now
+      } as unknown as IEmailTokenDocument;
+
+      jest.spyOn(mockUserModel, 'findOne').mockResolvedValueOnce(mockUser);
+      jest
+        .spyOn(userService, 'createEmailToken')
+        .mockResolvedValueOnce(mockEmailToken);
+      jest.spyOn(userService, 'sendEmailToken').mockResolvedValueOnce();
+
+      const result =
+        await userService.initiatePasswordReset('test@example.com');
+
+      expect(result).toEqual({
+        success: true,
+        message: 'Password reset link has been sent to your email.',
+      });
+      expect(mailService.send).not.toHaveBeenCalled(); // Email should not be sent because we mocked sendEmailToken
+      expect(userService.createEmailToken).toHaveBeenCalledWith(
+        mockUser,
+        EmailTokenType.PasswordReset,
+      );
+      expect(userService.sendEmailToken).toHaveBeenCalledWith(mockEmailToken);
+    });
+
+    it('should handle errors and return appropriate message', async () => {
+      jest
+        .spyOn(mockUserModel, 'findOne')
+        .mockRejectedValueOnce(new Error('Unexpected error'));
+
+      const result =
+        await userService.initiatePasswordReset('test@example.com');
+
+      expect(result).toEqual({
+        success: false,
+        message: 'An unexpected error occurred. Please try again later.',
       });
     });
   });

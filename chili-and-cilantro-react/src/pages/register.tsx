@@ -1,5 +1,5 @@
-import axios from 'axios';
 import React, { ChangeEvent, FormEvent, useState } from 'react';
+import api from '../app/services/api';
 
 interface FormData {
   username: string;
@@ -41,7 +41,7 @@ const RegistrationForm: React.FC = () => {
     setIsError(false);
 
     try {
-      const response = await axios.post('/api/users/register', formData);
+      const response = await api.post('/users/register', formData);
 
       if (response.status === 201) {
         // Registration was successful

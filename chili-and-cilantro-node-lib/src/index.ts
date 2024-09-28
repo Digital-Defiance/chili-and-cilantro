@@ -1,5 +1,12 @@
-export * from './lib/action-schema-map';
+export * from './lib/action-discriminator-schemas';
 export * from './lib/discriminators/action';
+export * from './lib/errors/express-validation-error';
+export * from './lib/errors/mongoose-validation-error';
+export * from './lib/interfaces/application';
+export * from './lib/interfaces/discriminator-collections';
+export * from './lib/interfaces/route-config';
+export * from './lib/interfaces/schema-data';
+export * from './lib/interfaces/schema-model-data';
 export * from './lib/models/action';
 export * from './lib/models/chef';
 export * from './lib/models/email-token';
@@ -25,3 +32,9 @@ export * from './lib/schemas/chef';
 export * from './lib/schemas/email-token';
 export * from './lib/schemas/game';
 export * from './lib/schemas/user';
+export * from './lib/shared-types';
+export * from './lib/types';
+export * from './lib/utils';
+import './lib/types';
+
+/// <reference path="./lib/types.d.ts" />

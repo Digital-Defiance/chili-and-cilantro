@@ -6,6 +6,9 @@ export default {
   transform: {
     '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
   },
+  collectCoverage: true,
+  coverageReporters: ['json', 'lcov', 'text', 'clover'],
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../coverage/chili-and-cilantro-api',
+  setupFiles: ['<rootDir>/test/test-setup.ts'],
 };

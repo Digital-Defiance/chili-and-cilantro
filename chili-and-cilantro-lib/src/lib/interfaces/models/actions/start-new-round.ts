@@ -1,6 +1,8 @@
+import { DefaultIdType } from '../../../shared-types';
 import { IAction } from '../action';
 import { IStartNewRoundDetails } from './details/start-new-round';
 
-export interface IStartNewRoundAction extends IAction {
-  details: IStartNewRoundDetails;
-}
+export type IStartNewRoundAction<I = DefaultIdType> = IAction<
+  I,
+  IStartNewRoundDetails
+>;
