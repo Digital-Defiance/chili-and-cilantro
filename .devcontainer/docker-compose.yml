@@ -7,6 +7,7 @@ services:
     command: /bin/sh -c "while sleep 1000; do :; done"
     environment:
       NODE_ENV: development
+      FONTAWESOME_KEY: ${FONTAWESOME_KEY}
     depends_on:
       - mongo
     networks:
