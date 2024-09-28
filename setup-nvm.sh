@@ -6,4 +6,4 @@ export NVM_DIR="/usr/local/share/nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 sudo chmod -R 755 /usr/local/share/nvm
-nvm install 20.9.0 && nvm use 20.9.0
+nvm install ${DEFAULT_NVM_VERSION} && nvm use ${DEFAULT_NVM_VERSION}

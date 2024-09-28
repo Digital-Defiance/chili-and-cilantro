@@ -8,7 +8,13 @@
     },
     {
       "files": ["*.ts", "*.tsx"],
-      "rules": {}
+      "rules": {},
+      "parserOptions": {
+        "project": [
+          "chili-and-cilantro-node-lib/tsconfig.lib.json",
+          "chili-and-cilantro-node-lib/tsconfig.spec.json"
+        ]
+      }
     },
     {
       "files": ["*.js", "*.jsx"],

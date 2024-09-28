@@ -2,6 +2,8 @@ import {
   AccountStatusTypeEnum,
   IUserDocument,
   ModelName,
+  StringLanguages,
+  constants,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { Schema } from 'mongoose';
 import validator from 'validator';
@@ -24,10 +26,7 @@ export const UserSchema = new Schema<IUserDocument>(
       trim: true,
       validate: {
         validator: async function (value: any) {
-          if (!validator.isEmail(value)) {
-            return false;
-          }
-          return true;
+          return validator.isEmail(value);
         },
       },
     },
@@ -45,6 +44,10 @@ export const UserSchema = new Schema<IUserDocument>(
      */
     timezone: { type: String, required: true },
     /**
+     * The user's site language.
+     */
+    siteLanguage: { type: String, enum: Object.values(StringLanguages) },
+    /**
      * The unique @username of the user.
      */
     username: {
@@ -53,9 +56,16 @@ export const UserSchema = new Schema<IUserDocument>(
       required: true,
       lowercase: true,
       trim: true,
-      match: /^[a-z0-9]+$/, // Alphanumeric validation
+      match: constants.USERNAME_REGEX,
       minlength: 3,
       maxlength: 20,
+    },
+    displayName: {
+      type: String,
+      trim: true,
+      match: constants.USER_DISPLAY_NAME_REGEX,
+      minlength: constants.MIN_USER_DISPLAY_NAME_LENGTH,
+      maxlength: constants.MAX_USER_DISPLAY_NAME_LENGTH,
     },
     /**
      * The hashed password of the user.
@@ -63,6 +73,7 @@ export const UserSchema = new Schema<IUserDocument>(
     password: {
       type: String,
       required: true,
+      trim: true,
     },
     /**
      * User's last login date/time.

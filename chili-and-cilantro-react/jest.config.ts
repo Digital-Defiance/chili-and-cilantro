@@ -7,5 +7,8 @@ export default {
     '^.+\\.[tj]sx?$': ['babel-jest', { presets: ['@nx/react/babel'] }],
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
+  collectCoverage: true,
+  coverageReporters: ['json', 'lcov', 'text', 'clover'],
   coverageDirectory: '../coverage/chili-and-cilantro-react',
+  testEnvironment: 'jsdom',
 };

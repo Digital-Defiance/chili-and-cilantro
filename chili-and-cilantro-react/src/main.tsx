@@ -1,30 +1,29 @@
-import { Auth0Provider, Auth0ProviderOptions } from '@auth0/auth0-react';
-import { StrictMode } from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import { environment } from './environments/environment';
 
 import App from './app/app';
 
-const providerConfig: Auth0ProviderOptions = {
-  domain: environment.auth0.domain,
-  clientId: environment.auth0.clientId,
-  authorizationParams: {
-    redirect_uri: environment.auth0.callbackUrl,
-    audience: environment.auth0.audience,
-  },
-  cacheLocation: 'localstorage',
-};
+import '@fortawesome/fontawesome-svg-core/styles.css';
+
+// Add favicon
+const favicon = document.createElement('link');
+favicon.rel = 'icon';
+favicon.href = '/favicon.ico';
+document.head.appendChild(favicon);
+
+// Add font links
+const fontLinks = `
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+`;
+document.head.insertAdjacentHTML('beforeend', fontLinks);
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement,
 );
 root.render(
-  <StrictMode>
-    <BrowserRouter>
-      <Auth0Provider {...providerConfig}>
-        <App />
-      </Auth0Provider>
-    </BrowserRouter>
-  </StrictMode>,
+  <BrowserRouter>
+    <App />
+  </BrowserRouter>,
 );

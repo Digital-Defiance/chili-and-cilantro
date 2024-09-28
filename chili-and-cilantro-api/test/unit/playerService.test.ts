@@ -1,156 +1,150 @@
-import { GameModel } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
-import { Types } from 'mongoose';
-import sinon from 'sinon';
+import {
+  IGameDocument,
+  IUserDocument,
+  ModelName,
+} from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { IApplication } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import { Model, Types } from 'mongoose';
 import { PlayerService } from '../../src/services/player';
+import { MockApplication } from '../fixtures/application';
+import { generateObjectId } from '../fixtures/objectId';
 
 describe('PlayerService', () => {
-  let mockGameModel, playerService;
+  let application: IApplication;
+  let mockGameModel: Model<IGameDocument>;
+  let playerService: PlayerService;
 
   beforeAll(() => {
-    mockGameModel = GameModel;
-    playerService = new PlayerService();
+    application = new MockApplication();
+    mockGameModel = application.getModel<IGameDocument>(ModelName.Game);
+    playerService = new PlayerService(application);
   });
 
   describe('isGameHostAsync', () => {
-    let countDocumentsStub;
-
     beforeEach(() => {
       jest.spyOn(console, 'error').mockImplementation(() => {});
     });
 
     afterEach(() => {
-      countDocumentsStub.restore();
       jest.restoreAllMocks();
     });
 
     it('should return true when the user is the host of the game', async () => {
-      countDocumentsStub = sinon.stub(mockGameModel, 'countDocuments').returns({
-        exec: sinon.stub().resolves(1),
-      });
-      const gameId = 'aaaaaaaaaaaa';
-      const userId = 'bbbbbbbbbbbb';
+      jest.spyOn(mockGameModel, 'countDocuments').mockResolvedValue(1);
+      const gameId = generateObjectId();
+      const userId = generateObjectId();
       const result = await playerService.isGameHostAsync(userId, gameId);
       expect(result).toBe(true);
-      sinon.assert.calledOnce(countDocumentsStub);
-      sinon.assert.calledWith(countDocumentsStub, {
-        _id: new Types.ObjectId(gameId),
-        hostUserId: new Types.ObjectId(userId),
+      expect(mockGameModel.countDocuments).toHaveBeenCalledTimes(1);
+      expect(mockGameModel.countDocuments).toHaveBeenCalledWith({
+        _id: gameId,
+        hostUserId: userId,
       });
     });
 
     it('should return false when the user is not the host of the game', async () => {
-      countDocumentsStub = sinon.stub(mockGameModel, 'countDocuments').returns({
-        exec: sinon.stub().resolves(0),
-      });
-      const gameId = 'aaaaaaaaaaaa';
-      const userId = 'bbbbbbbbbbbb';
+      jest.spyOn(mockGameModel, 'countDocuments').mockResolvedValue(0);
+      const gameId = generateObjectId();
+      const userId = generateObjectId();
       const result = await playerService.isGameHostAsync(userId, gameId);
       expect(result).toBe(false);
-      sinon.assert.calledOnce(countDocumentsStub);
-      sinon.assert.calledWith(countDocumentsStub, {
-        _id: new Types.ObjectId(gameId),
-        hostUserId: new Types.ObjectId(userId),
+      expect(mockGameModel.countDocuments).toHaveBeenCalledTimes(1);
+      expect(mockGameModel.countDocuments).toHaveBeenCalledWith({
+        _id: gameId,
+        hostUserId: userId,
       });
     });
     it('should log an error when the aggregate call fails', async () => {
       const error = new Error('aggregate error');
-      countDocumentsStub = sinon
-        .stub(mockGameModel, 'countDocuments')
-        .throws(error);
-      const gameId = 'aaaaaaaaaaaa';
-      const userId = 'bbbbbbbbbbbb';
-      try {
-        const result = await playerService.isGameHostAsync(userId, gameId);
-        throw new Error('Expected isGameHostAsync to throw an error');
-      } catch (caughtError) {
-        expect(caughtError).toBe(error);
-      }
+      jest.spyOn(mockGameModel, 'countDocuments').mockImplementation(() => {
+        throw error;
+      });
+      const gameId = generateObjectId();
+      const userId = generateObjectId();
+      expect(async () =>
+        playerService.isGameHostAsync(userId, gameId),
+      ).rejects.toThrow(error);
 
       expect(console.error).toHaveBeenCalledWith(
         'Error checking if user is host of game:',
         error,
       );
-      sinon.assert.calledOnce(countDocumentsStub);
+      expect(mockGameModel.countDocuments).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('userIsInAnyActiveGameAsync', () => {
-    let aggregateStub;
-
     beforeEach(() => {
       jest.spyOn(console, 'error').mockImplementation(() => {});
     });
 
     afterEach(() => {
-      aggregateStub.restore();
       jest.restoreAllMocks();
     });
 
     it('should return true when the user is in any active game', async () => {
-      aggregateStub = sinon
-        .stub(mockGameModel, 'aggregate')
-        .resolves([{ activeGamesCount: 1 }]);
-      const userId = new Types.ObjectId('bbbbbbbbbbbb');
+      const aggregateSpy = jest
+        .spyOn(mockGameModel, 'aggregate')
+        .mockResolvedValue([{ activeGamesCount: 1 }]);
+      const userId = generateObjectId();
       const result = await playerService.userIsInAnyActiveGameAsync({
         _id: userId,
-      });
+      } as IUserDocument);
       expect(result).toBe(true);
-      sinon.assert.calledOnce(aggregateStub);
+      expect(aggregateSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should return false when the user is not in any active game', async () => {
-      aggregateStub = sinon.stub(mockGameModel, 'aggregate').resolves([]);
-      const userId = new Types.ObjectId('bbbbbbbbbbbb');
+      const aggregateSpy = jest
+        .spyOn(mockGameModel, 'aggregate')
+        .mockResolvedValue([]);
+      const userId = generateObjectId();
       const result = await playerService.userIsInAnyActiveGameAsync({
         _id: userId,
-      });
+      } as IUserDocument);
       expect(result).toBe(false);
-      sinon.assert.calledOnce(aggregateStub);
+      expect(aggregateSpy).toHaveBeenCalledTimes(1);
     });
     it('should log an error when the aggregate call fails', async () => {
       const error = new Error('aggregate error');
-      aggregateStub = sinon.stub(mockGameModel, 'aggregate').throws(error);
-      const userId = new Types.ObjectId('bbbbbbbbbbbb');
+      jest.spyOn(mockGameModel, 'aggregate').mockImplementation(() => {
+        throw error;
+      });
+      const userId = generateObjectId();
 
-      try {
-        await playerService.userIsInAnyActiveGameAsync({ _id: userId });
-        throw new Error(
-          'Expected userIsInAnyActiveGameAsync to throw an error',
-        );
-      } catch (caughtError) {
-        expect(caughtError).toBe(error);
-      }
+      expect(async () =>
+        playerService.userIsInAnyActiveGameAsync({
+          _id: userId,
+        } as IUserDocument),
+      ).rejects.toThrow(error);
 
       expect(console.error).toHaveBeenCalledWith(
         'Error checking if user is in game:',
         error,
       );
-      sinon.assert.calledOnce(aggregateStub);
+      expect(mockGameModel.aggregate).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('userIsInGameAsync', () => {
-    let aggregateStub;
-
     beforeEach(() => {
       jest.spyOn(console, 'error').mockImplementation(() => {});
     });
 
     afterEach(() => {
-      aggregateStub.restore();
       jest.restoreAllMocks();
     });
 
     it('should return true when the user is in the specified game', async () => {
-      aggregateStub = sinon
-        .stub(mockGameModel, 'aggregate')
-        .resolves([{ activeGamesCount: 1 }]);
-      const userId = new Types.ObjectId('bbbbbbbbbbbb');
-      const gameId = new Types.ObjectId('aaaaaaaaaaaa');
+      const aggregateSpy = jest
+        .spyOn(mockGameModel, 'aggregate')
+        .mockResolvedValue([{ activeGamesCount: 1 }]);
+      const userId = new Types.ObjectId();
+      const gameId = new Types.ObjectId();
       const result = await playerService.userIsInGameAsync(userId, gameId);
       expect(result).toBe(true);
-      sinon.assert.calledOnce(aggregateStub);
-      sinon.assert.calledWith(aggregateStub, [
+      expect(aggregateSpy).toHaveBeenCalledTimes(1);
+      expect(aggregateSpy).toHaveBeenCalledWith([
         {
           $match: {
             _id: gameId,
@@ -179,19 +173,19 @@ describe('PlayerService', () => {
     });
 
     it('should look for the aggregate where the game is active when active is true', async () => {
-      aggregateStub = sinon
-        .stub(mockGameModel, 'aggregate')
-        .resolves([{ activeGamesCount: 1 }]);
-      const userId = new Types.ObjectId('bbbbbbbbbbbb');
-      const gameId = new Types.ObjectId('aaaaaaaaaaaa');
+      const aggregateSpy = jest
+        .spyOn(mockGameModel, 'aggregate')
+        .mockResolvedValue([{ activeGamesCount: 1 }]);
+      const userId = new Types.ObjectId();
+      const gameId = new Types.ObjectId();
       const result = await playerService.userIsInGameAsync(
         userId,
         gameId,
         true,
       );
       expect(result).toBe(true);
-      sinon.assert.calledOnce(aggregateStub);
-      sinon.assert.calledWith(aggregateStub, [
+      expect(aggregateSpy).toHaveBeenCalledTimes(1);
+      expect(aggregateSpy).toHaveBeenCalledWith([
         {
           $match: {
             _id: gameId,
@@ -221,30 +215,31 @@ describe('PlayerService', () => {
     });
 
     it('should return false when the user is not in the specified game', async () => {
-      aggregateStub = sinon.stub(mockGameModel, 'aggregate').resolves([]);
-      const userId = new Types.ObjectId('bbbbbbbbbbbb');
-      const gameId = new Types.ObjectId('aaaaaaaaaaaa');
+      const aggregateSpy = jest
+        .spyOn(mockGameModel, 'aggregate')
+        .mockResolvedValue([]);
+      const userId = new Types.ObjectId();
+      const gameId = new Types.ObjectId();
       const result = await playerService.userIsInGameAsync(userId, gameId);
       expect(result).toBe(false);
-      sinon.assert.calledOnce(aggregateStub);
+      expect(aggregateSpy).toHaveBeenCalledTimes(1);
     });
     it('should log an error when the aggregate call fails', async () => {
       const error = new Error('aggregate error');
-      aggregateStub = sinon.stub(mockGameModel, 'aggregate').throws(error);
-      const userId = new Types.ObjectId('bbbbbbbbbbbb');
-      const gameId = new Types.ObjectId('aaaaaaaaaaaa');
-      try {
-        await playerService.userIsInGameAsync(userId, gameId);
-        throw new Error('Expected userIsInGameAsync to throw an error');
-      } catch (caughtError) {
-        expect(caughtError).toBe(error);
-      }
+      jest.spyOn(mockGameModel, 'aggregate').mockImplementation(() => {
+        throw error;
+      });
+      const userId = new Types.ObjectId();
+      const gameId = new Types.ObjectId();
+      expect(async () =>
+        playerService.userIsInGameAsync(userId, gameId),
+      ).rejects.toThrow(error);
 
       expect(console.error).toHaveBeenCalledWith(
         'Error checking if user is in the specified game:',
         error,
       );
-      sinon.assert.calledOnce(aggregateStub);
+      expect(mockGameModel.aggregate).toHaveBeenCalledTimes(1);
     });
   });
 });

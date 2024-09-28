@@ -1,32 +1,43 @@
-version: '3'
 services:
   app:
-    image: mcr.microsoft.com/devcontainers/typescript-node:0-20-bullseye
+    build:
+      context: .
+      dockerfile: Dockerfile
     volumes:
-      - ..:/workspace:cached
-    command: /bin/sh -c "while sleep 1000; do :; done"
-    environment:
-      NODE_ENV: development
+      - ../..:/workspaces:cached
+    command: sleep infinity
+    env_file:
+      - .env
+    network_mode: host
     depends_on:
-      - mongo
-    networks:
-      - node_app
+      - db
 
-  mongo:
-    restart: always
-    image: mongo:6.0.7
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_DB_USERNAME}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_DB_PASSWORD}
-    volumes:
-      - mongo_data:/data/db
-    networks:
-      - node_app
+  db:
+    build:
+      context: .
+      dockerfile: ./Mongo.Dockerfile
+    container_name: db          # Ensures the container name is 'db'
+    hostname: db                 # Sets the internal hostname to 'db'
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     ports:
-      - 27017:27017
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME} 
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
+      - MONGO_REPLICA_SET_NAME=${MONGO_REPLICA_SET_NAME}
+      - MONGO_PORT=${MONGO_PORT}
+      - MONGO_KEYFILE=${MONGO_KEYFILE}
+      - MONGO_DB_PATH=${MONGO_DB_PATH}
+      - DB_HOST=127.0.0.1:27017
+    network_mode: host
 
 volumes:
-  mongo_data:
-
-networks:
-  node_app:
+  mongodb-data:

@@ -3,6 +3,7 @@ import {
   IExpireGameDetails,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { Schema } from 'mongoose';
+import { ActionSchemaBase } from '../action';
 
 export const ExpireGameDetailsSchema = new Schema<IExpireGameDetails>(
   {},
@@ -10,5 +11,6 @@ export const ExpireGameDetailsSchema = new Schema<IExpireGameDetails>(
 );
 
 export const ExpireGameActionSchema = new Schema<IExpireGameActionDocument>({
+  ...ActionSchemaBase,
   details: { type: ExpireGameDetailsSchema, required: true },
 });

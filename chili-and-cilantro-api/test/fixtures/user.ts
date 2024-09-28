@@ -1,10 +1,14 @@
 import {
+  AccountStatusTypeEnum,
   constants,
   IUser,
   IUserDocument,
+  StringLanguages,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { faker } from '@faker-js/faker';
-import { Types } from 'mongoose';
+import moment from 'moment-timezone';
+import { MockedModel } from './mocked-model';
+import { generateObjectId } from './objectId';
 
 export function generateUserPassword(): string {
   let generatedPassword = '';
@@ -46,26 +50,40 @@ export function generateUserDisplayName(): string {
  */
 export function generateUser(
   overrides?: Partial<IUser>,
-): IUserDocument & { save: jest.Mock } {
-  const id = new Types.ObjectId();
-  const user = {
+): IUserDocument & MockedModel {
+  const id = generateObjectId();
+  const userData = {
     _id: id,
     username: generateUsername(),
-    password: faker.internet.password(),
-    givenName: faker.person.firstName(),
-    surname: faker.person.lastName(),
-    userPrincipalName: faker.internet.email(),
+    password: generateUserPassword(),
     email: faker.internet.email(),
     emailVerified: faker.datatype.boolean(),
+    timezone: faker.helpers.arrayElement(moment.tz.names()),
+    siteLanguage: faker.helpers.arrayElement(Object.values(StringLanguages)),
+    accountStatusType: AccountStatusTypeEnum.Active,
     lastLogin: faker.date.past(),
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
     createdBy: id,
     updatedBy: id,
-    save: jest.fn(),
     ...overrides,
-  } as IUserDocument & { save: jest.Mock };
+  };
 
-  user.save.mockImplementation(() => Promise.resolve(user));
+  const user = {
+    find: jest.fn().mockReturnThis(),
+    findOne: jest.fn().mockReturnThis(),
+    findById: jest.fn().mockReturnThis(),
+    create: jest.fn().mockImplementation((doc) => Promise.resolve(doc)),
+    updateOne: jest.fn().mockResolvedValue({ nModified: 1 }),
+    deleteOne: jest.fn().mockResolvedValue({ deletedCount: 1 }),
+    deleteMany: jest.fn().mockResolvedValue({ deletedCount: 1 }),
+    validateSync: jest.fn(),
+    countDocuments: jest.fn(),
+    populate: jest.fn().mockReturnThis(),
+    exec: jest.fn().mockResolvedValue(userData),
+    save: jest.fn().mockImplementation(() => Promise.resolve(user)),
+    sort: jest.fn().mockReturnThis(),
+    ...userData,
+  } as IUserDocument & MockedModel;
   return user;
 }

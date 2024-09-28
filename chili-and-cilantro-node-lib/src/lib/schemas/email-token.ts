@@ -3,7 +3,7 @@ import {
   IEmailTokenDocument,
   ModelName,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { Schema } from 'mongoose';
+import { Schema, ValidatorProps } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 import validator from 'validator';
 
@@ -53,7 +53,8 @@ export const EmailTokenSchema = new Schema<IEmailTokenDocument>({
     immutable: true,
     validate: {
       validator: (v: string) => validator.isEmail(v),
-      message: (props) => `${props.value} is not a valid email address!`,
+      message: (props: ValidatorProps) =>
+        `${props.value} is not a valid email address!`,
     },
   },
   /**

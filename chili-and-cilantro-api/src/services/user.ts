@@ -4,6 +4,7 @@ import {
   AccountStatusError,
   AccountStatusTypeEnum,
   constants,
+  DefaultIdType,
   EmailInUseError,
   EmailTokenExpiredError,
   EmailTokenSentTooRecentlyError,
@@ -16,62 +17,80 @@ import {
   InvalidPasswordError,
   InvalidTokenError,
   InvalidUsernameError,
+  IRequestUser,
   IUser,
   IUserDocument,
   IUserObject,
+  ModelName,
   PendingEmailVerificationError,
+  StringLanguages,
   UsernameInUseError,
   UsernameOrEmailRequiredError,
   UserNotFoundError,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import {
-  EmailTokenModel,
-  UserModel,
+  IApplication,
+  MongooseValidationError,
 } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { MailDataRequired, MailService } from '@sendgrid/mail';
 import { compare, hashSync } from 'bcrypt';
 import { randomBytes } from 'crypto';
-import { Types } from 'mongoose';
+import { ClientSession, Types } from 'mongoose';
 import { environment } from '../environment';
-import { MongooseValidationError } from '../errors/mongoose-validation-error';
+import { BaseService } from './base';
+import { RequestUserService } from './request-user';
 
-export class UserService {
-  private sendgridClient: MailService;
-  constructor() {
-    this.sendgridClient = new MailService();
+export class UserService extends BaseService {
+  private readonly sendgridClient: MailService;
+  constructor(
+    application: IApplication,
+    mailService: MailService,
+    useTransactions = true,
+  ) {
+    super(application, useTransactions);
+    this.sendgridClient = mailService;
     this.sendgridClient.setApiKey(environment.sendgridKey);
   }
 
   /**
    * Create a new email token to send to the user for email verification
-   * @param userDoc
-   * @returns
+   * @param userDoc The user to create the token for
+   * @param type The type of email token
+   * @returns The email token
    */
   public async createEmailToken(
     userDoc: IUserDocument,
     type: EmailTokenType,
   ): Promise<IEmailTokenDocument> {
+    const EmailTokenModel = this.application.getModel<IEmailTokenDocument>(
+      ModelName.EmailToken,
+    );
     // delete any expired tokens for the same user and email to prevent index constraint conflicts
     await EmailTokenModel.deleteMany({
       userId: userDoc.id,
       email: userDoc.email,
       expiresAt: { $lt: new Date() },
     });
-    const emailToken: IEmailTokenDocument = await EmailTokenModel.create({
-      userId: userDoc.id,
-      type: type,
-      email: userDoc.email,
-      token: randomBytes(constants.EMAIL_TOKEN_LENGTH).toString('hex'),
-      lastSent: null,
-      createdAt: Date.now(),
-      expiresAt: new Date(Date.now() + constants.EMAIL_TOKEN_EXPIRATION),
-    });
-    return emailToken;
+    const emailTokens = await EmailTokenModel.create([
+      {
+        userId: userDoc.id,
+        type: type,
+        email: userDoc.email,
+        token: randomBytes(constants.EMAIL_TOKEN_LENGTH).toString('hex'),
+        lastSent: null,
+        createdAt: Date.now(),
+        expiresAt: new Date(Date.now() + constants.EMAIL_TOKEN_EXPIRATION),
+      },
+    ]);
+    if (emailTokens.length !== 1) {
+      throw new Error('Failed to create email token');
+    }
+    return emailTokens[0];
   }
 
   /**
    * Send an email token to the user for email verification
-   * @param token
+   * @param emailToken The email token to send
    */
   public async sendEmailToken(emailToken: IEmailTokenDocument): Promise<void> {
     if (
@@ -133,6 +152,7 @@ export class UserService {
     email?: string,
     username?: string,
   ): Promise<IUserDocument> {
+    const UserModel = this.application.getModel<IUserDocument>(ModelName.User);
     let userDoc: IUserDocument | null;
 
     if (username) {
@@ -175,12 +195,13 @@ export class UserService {
 
   /**
    * Fill in the default values to a user object
-   * @param newUser
+   * @param newUser The user's basic information
+   * @param createdBy The user that created the user
    * @returns
    */
   public fillUserDefaults(
     newUser: ICreateUserBasics,
-    createdBy?: Types.ObjectId,
+    createdBy?: DefaultIdType,
   ): IUserObject {
     const now = new Date();
     const userId = new Types.ObjectId();
@@ -192,7 +213,7 @@ export class UserService {
       email: newUser.email.toLowerCase(),
       emailVerified: false,
       accountStatusType: AccountStatusTypeEnum.NewUnverified,
-      password: 'willbereplaced',
+      password: '',
       createdAt: now,
       createdBy: createdById,
       updatedAt: now,
@@ -207,10 +228,10 @@ export class UserService {
    * @returns
    */
   public makeUserDoc(newUser: IUser, password: string): IUserDocument {
-    const hashedPassword = hashSync(password, constants.BCRYPT_ROUNDS);
+    const UserModel = this.application.getModel<IUserDocument>(ModelName.User);
     const newUserData: IUser = {
       ...newUser,
-      password: hashedPassword,
+      password: hashSync(password, constants.BCRYPT_ROUNDS),
     } as IUser;
     const newUserDoc: IUserDocument = new UserModel(newUserData);
 
@@ -224,16 +245,15 @@ export class UserService {
 
   /**
    * Create a new user
-   * @param username
-   * @param email
-   * @param password
-   * @param timezone
+   * @param userData The user's basic information
+   * @param password The user's password
    * @returns
    */
   public async newUser(
     userData: ICreateUserBasics,
     password: string,
   ): Promise<IUserDocument> {
+    const UserModel = this.application.getModel<IUserDocument>(ModelName.User);
     if (!constants.USERNAME_REGEX.test(userData.username)) {
       throw new InvalidUsernameError();
     }
@@ -279,6 +299,9 @@ export class UserService {
    * @param userId
    */
   public async resendEmailToken(userId: string): Promise<void> {
+    const EmailTokenModel = this.application.getModel<IEmailTokenDocument>(
+      ModelName.EmailToken,
+    );
     const now = new Date();
     const minLastSentTime = new Date(
       now.getTime() - constants.EMAIL_TOKEN_RESEND_INTERVAL,
@@ -307,6 +330,9 @@ export class UserService {
    * @returns
    */
   public async verifyEmailToken(emailToken: string): Promise<boolean> {
+    const EmailTokenModel = this.application.getModel<IEmailTokenDocument>(
+      ModelName.EmailToken,
+    );
     const token: IEmailTokenDocument | null = await EmailTokenModel.findOne({
       token: emailToken,
     });
@@ -328,6 +354,10 @@ export class UserService {
    * @param emailToken
    */
   public async verifyEmailTokenAndFinalize(emailToken: string): Promise<void> {
+    const EmailTokenModel = this.application.getModel<IEmailTokenDocument>(
+      ModelName.EmailToken,
+    );
+    const UserModel = this.application.getModel<IUserDocument>(ModelName.User);
     const token: IEmailTokenDocument | null = await EmailTokenModel.findOne({
       token: emailToken,
     });
@@ -370,6 +400,7 @@ export class UserService {
     currentPassword: string,
     newPassword: string,
   ): Promise<void> {
+    const UserModel = this.application.getModel<IUserDocument>(ModelName.User);
     const user: IUserDocument | null = await UserModel.findById(userId);
     if (!user) {
       throw new UserNotFoundError();
@@ -384,8 +415,7 @@ export class UserService {
       throw new InvalidPasswordError();
     }
 
-    const hashedPassword = hashSync(newPassword, constants.BCRYPT_ROUNDS);
-    user.password = hashedPassword;
+    user.password = hashSync(newPassword, constants.BCRYPT_ROUNDS);
     await user.save();
   }
 
@@ -397,6 +427,7 @@ export class UserService {
   public async initiatePasswordReset(
     email: string,
   ): Promise<{ success: boolean; message: string }> {
+    const UserModel = this.application.getModel<IUserDocument>(ModelName.User);
     try {
       const user = await UserModel.findOne({ email: email.toLowerCase() });
       if (!user) {
@@ -445,6 +476,9 @@ export class UserService {
   public async validatePasswordResetToken(
     token: string,
   ): Promise<IEmailTokenDocument> {
+    const EmailTokenModel = this.application.getModel<IEmailTokenDocument>(
+      ModelName.EmailToken,
+    );
     const emailToken = await EmailTokenModel.findOne({
       token,
       type: EmailTokenType.PasswordReset,
@@ -469,6 +503,10 @@ export class UserService {
     token: string,
     password: string,
   ): Promise<IUserDocument> {
+    const EmailTokenModel = this.application.getModel<IEmailTokenDocument>(
+      ModelName.EmailToken,
+    );
+    const UserModel = this.application.getModel<IUserDocument>(ModelName.User);
     const emailToken = await EmailTokenModel.findOne({
       token,
       type: EmailTokenType.PasswordReset,
@@ -486,15 +524,43 @@ export class UserService {
     }
 
     // Hash the new password
-    const hashedPassword = hashSync(password, constants.BCRYPT_ROUNDS);
-
     // Update the user's password
-    user.password = hashedPassword;
+    user.password = hashSync(password, constants.BCRYPT_ROUNDS);
     await user.save();
 
     // Delete the used token
     await EmailTokenModel.deleteOne({ _id: emailToken._id });
 
     return user;
+  }
+
+  /**
+   * Updates the user's language
+   * @param userId - The ID of the user
+   * @param newLanguage - The new language
+   * @param session - The session to use for the query
+   * @returns The updated user
+   */
+  public async updateSiteLanguage(
+    userId: string,
+    newLanguage: StringLanguages,
+    session?: ClientSession,
+  ): Promise<IRequestUser> {
+    return await this.withTransaction<IRequestUser>(async (sess) => {
+      const UserModel = this.application.getModel<IUserDocument>(
+        ModelName.User,
+      );
+      const userDoc = await UserModel.findByIdAndUpdate(
+        new Types.ObjectId(userId),
+        {
+          siteLanguage: newLanguage,
+        },
+        { new: true },
+      ).session(sess ?? null);
+      if (!userDoc) {
+        throw new UserNotFoundError();
+      }
+      return RequestUserService.makeRequestUser(userDoc);
+    }, session);
   }
 }

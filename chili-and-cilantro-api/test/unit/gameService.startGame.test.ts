@@ -1,40 +1,49 @@
 import {
+  DefaultIdType,
+  GameInProgressError,
   GamePhase,
-  IGame,
+  IChefDocument,
+  IGameDocument,
+  IUserDocument,
   ModelName,
+  NotEnoughChefsError,
+  NotHostError,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { GameInProgressError } from '../../src/errors/game-in-progress';
-import { NotEnoughChefsError } from '../../src/errors/not-enough-chefs';
-import { NotHostError } from '../../src/errors/not-host';
-import { Database } from '../../src/services/database';
+import { IApplication } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import { Model } from 'mongoose';
+import { ActionService } from '../../src/services/action';
+import { ChefService } from '../../src/services/chef';
 import { GameService } from '../../src/services/game';
+import { PlayerService } from '../../src/services/player';
 import { generateStartGameAction } from '../fixtures/action';
+import { MockApplication } from '../fixtures/application';
 import { generateChefGameUser } from '../fixtures/game';
 import { generateObjectId } from '../fixtures/objectId';
-import { mockedWithTransactionAsync } from '../fixtures/transactionManager';
+import { mockedWithTransactionAsync } from '../fixtures/with-transaction';
 
 describe('gameService startGame', () => {
   describe('performStartGameAsync', () => {
-    let gameModel,
-      gameService,
-      gameId,
-      game,
-      chef,
-      user,
-      userId,
-      gameCode,
-      mockActionService,
-      mockChefService,
-      mockPlayerService;
+    let application: IApplication;
+    let gameModel: Model<IGameDocument>;
+    let gameService: GameService;
+    let gameId: DefaultIdType;
+    let game: IGameDocument;
+    let chef: IChefDocument;
+    let user: IUserDocument;
+    let userId: DefaultIdType;
+    let gameCode: string;
+    let mockActionService: ActionService;
+    let mockChefService: ChefService;
+    let mockPlayerService: PlayerService;
 
     beforeEach(() => {
-      const database = new Database();
-      gameModel = database.getModel<IGame>(ModelName.Game);
-      mockActionService = {};
-      mockPlayerService = {};
-      mockChefService = {};
+      application = new MockApplication();
+      gameModel = application.getModel<IGameDocument>(ModelName.Game);
+      mockActionService = {} as unknown as ActionService;
+      mockPlayerService = {} as unknown as PlayerService;
+      mockChefService = {} as unknown as ChefService;
       gameService = new GameService(
-        gameModel,
+        application,
         mockActionService,
         mockChefService,
         mockPlayerService,
@@ -92,35 +101,38 @@ describe('gameService startGame', () => {
         .spyOn(gameService, 'validateStartGameOrThrowAsync')
         .mockRejectedValue(new Error('Validation failed'));
 
-      await expect(
+      await expect(async () =>
         gameService.performStartGameAsync(gameCode, userId),
       ).rejects.toThrow('Validation failed');
     });
   });
   describe('validateStartGameOrThrowAsync', () => {
-    let gameModel,
-      gameService,
-      gameId,
-      game,
-      chef,
-      user,
-      additionalChefs,
-      userId,
-      gameCode,
-      mockActionService,
-      mockChefService,
-      mockPlayerService;
+    let application: IApplication;
+    let gameModel: Model<IGameDocument>;
+    let gameService: GameService;
+    let gameId: DefaultIdType;
+    let game: IGameDocument;
+    let chef: IChefDocument;
+    let user: IUserDocument;
+    let additionalChefs: IChefDocument[];
+    let userId: DefaultIdType;
+    let gameCode: string;
+    let mockActionService: ActionService;
+    let mockChefService: ChefService;
+    let mockPlayerService: PlayerService;
+    let isGameHostAsync: jest.Mock;
 
     beforeEach(() => {
-      const database = new Database();
-      gameModel = database.getModel<IGame>(ModelName.Game);
-      mockActionService = {};
+      application = new MockApplication();
+      gameModel = application.getModel<IGameDocument>(ModelName.Game);
+      mockActionService = {} as unknown as ActionService;
+      isGameHostAsync = jest.fn();
       mockPlayerService = {
-        isGameHostAsync: jest.fn().mockResolvedValue(true),
-      };
-      mockChefService = {};
+        isGameHostAsync: isGameHostAsync,
+      } as unknown as PlayerService;
+      mockChefService = {} as unknown as ChefService;
       gameService = new GameService(
-        gameModel,
+        application,
         mockActionService,
         mockChefService,
         mockPlayerService,
@@ -135,6 +147,7 @@ describe('gameService startGame', () => {
       gameCode = game.code;
     });
     it('should validate successfully for a valid game start', async () => {
+      isGameHostAsync.mockResolvedValue(true);
       game.currentPhase = GamePhase.LOBBY;
 
       await expect(
@@ -142,49 +155,52 @@ describe('gameService startGame', () => {
       ).resolves.not.toThrow();
     });
     it('should throw if the user is not the host', async () => {
-      mockPlayerService.isGameHostAsync.mockResolvedValueOnce(false);
+      isGameHostAsync.mockResolvedValue(false);
 
-      await expect(
+      await expect(async () =>
         gameService.validateStartGameOrThrowAsync(game, userId),
       ).rejects.toThrow(NotHostError);
     });
     it('should throw if the game phase is not LOBBY', async () => {
+      isGameHostAsync.mockResolvedValue(true);
       game.currentPhase = GamePhase.SETUP;
 
-      await expect(
+      await expect(async () =>
         gameService.validateStartGameOrThrowAsync(game, userId),
       ).rejects.toThrow(GameInProgressError);
     });
     it('should throw if there are not enough chefs', async () => {
+      isGameHostAsync.mockResolvedValue(true);
       game.chefIds = [chef._id];
 
-      await expect(
+      await expect(async () =>
         gameService.validateStartGameOrThrowAsync(game, userId),
       ).rejects.toThrow(NotEnoughChefsError);
     });
   });
   describe('startGameAsync', () => {
-    let gameModel,
-      gameService,
-      gameId,
-      game,
-      chef,
-      user,
-      userId,
-      gameCode,
-      mockActionService,
-      mockChefService,
-      mockPlayerService;
+    let application: IApplication;
+    let gameModel: Model<IGameDocument>;
+    let gameService: GameService;
+    let gameId: DefaultIdType;
+    let game: IGameDocument;
+    let chef: IChefDocument;
+    let user: IUserDocument;
+    let userId: DefaultIdType;
+    let gameCode: string;
+    let mockActionService: ActionService;
+    let mockChefService: ChefService;
+    let mockPlayerService: PlayerService;
 
     beforeEach(() => {
-      const database = new Database();
-      gameModel = database.getModel<IGame>(ModelName.Game);
+      application = new MockApplication();
+      gameModel = application.getModel<IGameDocument>(ModelName.Game);
       const {
         user: mockUser,
         chef: mockChef,
         game: mockGame,
         additionalChefs,
-      } = generateChefGameUser(true, 2, { game: { save: jest.fn() } });
+      } = generateChefGameUser(true, 2);
       user = mockUser;
       chef = mockChef;
       game = mockGame;
@@ -195,15 +211,15 @@ describe('gameService startGame', () => {
           .mockResolvedValue(
             generateStartGameAction(gameId, chef._id, user._id),
           ),
-      };
-      mockPlayerService = {};
+      } as unknown as ActionService;
+      mockPlayerService = {} as unknown as PlayerService;
       mockChefService = {
         getGameChefsByGameOrIdAsync: jest
           .fn()
           .mockResolvedValue([chef, ...additionalChefs]),
-      };
+      } as unknown as ChefService;
       gameService = new GameService(
-        gameModel,
+        application,
         mockActionService,
         mockChefService,
         mockPlayerService,
@@ -218,9 +234,7 @@ describe('gameService startGame', () => {
       expect(result.game).toBe(game);
       expect(game.currentPhase).toBe(GamePhase.SETUP);
       expect(game.save).toHaveBeenCalled();
-      expect(gameService.actionService.startGameAsync).toHaveBeenCalledWith(
-        game,
-      );
+      expect(mockActionService.startGameAsync).toHaveBeenCalledWith(game);
     });
   });
 });

@@ -3,7 +3,7 @@
 
 export interface ICreateUserBasics {
   username: string;
-  languages: string[];
+  displayName: string;
   /**
    * The user's email address, used for login if accountType is email/password.
    * Used for sending notifications, regardless.

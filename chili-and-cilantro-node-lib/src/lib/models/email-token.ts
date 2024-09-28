@@ -1,9 +1,12 @@
 import { IEmailTokenDocument } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { model } from 'mongoose';
+import { Connection, Model } from 'mongoose';
 import { Schema } from '../schema';
 
-export const EmailTokenModel = model<IEmailTokenDocument>(
-  Schema.EmailToken.name,
-  Schema.EmailToken.schema,
-  Schema.EmailToken.collection,
-);
+export const EmailTokenModel = (
+  connection: Connection,
+): Model<IEmailTokenDocument> =>
+  connection.model<IEmailTokenDocument>(
+    Schema.EmailToken.name,
+    Schema.EmailToken.schema,
+    Schema.EmailToken.collection,
+  );

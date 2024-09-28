@@ -3,6 +3,7 @@ import {
   IMessageDetails,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { Schema } from 'mongoose';
+import { ActionSchemaBase } from '../action';
 
 export const MessageDetailsSchema = new Schema<IMessageDetails>(
   {
@@ -12,5 +13,6 @@ export const MessageDetailsSchema = new Schema<IMessageDetails>(
 );
 
 export const MessageActionSchema = new Schema<IMessageActionDocument>({
+  ...ActionSchemaBase,
   details: { type: MessageDetailsSchema, required: true },
 });

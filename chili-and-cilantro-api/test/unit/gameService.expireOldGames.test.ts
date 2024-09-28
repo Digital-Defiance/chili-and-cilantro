@@ -3,30 +3,40 @@ import {
   constants,
   GamePhase,
   IChef,
-  IGame,
+  IGameDocument,
   ModelName,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { Database } from '../../src/services/database';
+import { IApplication } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import { Model, Query } from 'mongoose';
+import { ActionService } from '../../src/services/action';
+import { ChefService } from '../../src/services/chef';
 import { GameService } from '../../src/services/game';
+import { PlayerService } from '../../src/services/player';
+import { MockApplication } from '../fixtures/application';
 import { generateChef } from '../fixtures/chef';
 import { generateGame } from '../fixtures/game';
-import { mockedWithTransactionAsync } from '../fixtures/transactionManager';
+import { mockedWithTransactionAsync } from '../fixtures/with-transaction';
 
 describe('GameService', () => {
-  let gameService;
-  let mockActionService;
-  let mockChefService;
-  let mockPlayerService;
-  let mockGameModel;
+  let application: IApplication;
+  let gameService: GameService;
+  let mockActionService: ActionService;
+  let mockChefService: ChefService;
+  let mockPlayerService: PlayerService;
+  let mockGameModel: Model<IGameDocument>;
 
   beforeEach(() => {
-    const database = new Database();
-    mockGameModel = database.getModel<IGame>(ModelName.Game);
-    mockActionService = {};
-    mockChefService = {};
-    mockPlayerService = {};
+    application = new MockApplication();
+    mockGameModel = application.getModel<IGameDocument>(ModelName.Game);
+    mockActionService = {
+      expireGameAsync: jest.fn(),
+    } as unknown as ActionService;
+    mockChefService = {
+      getGameChefsByGameOrIdAsync: jest.fn(),
+    } as unknown as ChefService;
+    mockPlayerService = {} as unknown as PlayerService;
     gameService = new GameService(
-      mockGameModel,
+      application,
       mockActionService,
       mockChefService,
       mockPlayerService,
@@ -35,16 +45,16 @@ describe('GameService', () => {
   describe('expireGamesOrThrowAsync', () => {
     it('should expire multiple games', async () => {
       // Create mock games
-      const mockGames: Array<IGame & { save: jest.Mock }> = [
+      const mockGames: Array<IGameDocument & { save: jest.Mock }> = [
         generateGame(true, { currentPhase: GamePhase.ROUND_START }),
         generateGame(true, { currentPhase: GamePhase.ROUND_START }),
       ];
 
       // Mock dependencies
-      gameService.actionService.expireGameAsync = jest.fn();
+      mockActionService.expireGameAsync = jest.fn();
       // mock getGameChefsByGameOrIdAsync to return an array of chefs and insert them into the map
       const mockChefs: Map<string, IChef & { save: jest.Mock }> = new Map();
-      gameService.chefService.getGameChefsByGameOrIdAsync = jest
+      mockChefService.getGameChefsByGameOrIdAsync = jest
         .fn()
         .mockImplementation(async (game) => {
           return Array.from({ length: constants.MIN_CHEFS }).map(() => {
@@ -70,7 +80,7 @@ describe('GameService', () => {
       });
 
       // Assert that actionService.expireGameAsync is called for each game
-      expect(gameService.actionService.expireGameAsync).toHaveBeenCalledTimes(
+      expect(mockActionService.expireGameAsync).toHaveBeenCalledTimes(
         mockGames.length,
       );
     });
@@ -83,13 +93,13 @@ describe('GameService', () => {
       mockGame.save = jest.fn().mockRejectedValue(new Error('Save failed'));
 
       // Mock dependencies
-      gameService.actionService.expireGameAsync = jest.fn();
-      gameService.chefService.getGameChefsByGameOrIdAsync = jest
+      mockActionService.expireGameAsync = jest.fn();
+      mockChefService.getGameChefsByGameOrIdAsync = jest
         .fn()
         .mockResolvedValue([]);
 
       // Call the method and expect an error
-      await expect(
+      await expect(async () =>
         gameService.expireGamesOrThrowAsync([mockGame]),
       ).rejects.toThrow('Save failed');
 
@@ -109,22 +119,24 @@ describe('GameService', () => {
       ); // Subtracting an extra minute to ensure the date is old enough
 
       // Create mock old games
-      const mockOldGames = [
+      const mockOldGames: IGameDocument[] = [
         generateGame(true, {
           currentPhase: GamePhase.ROUND_START,
-          lastModified: cutoffDate,
+          updatedAt: cutoffDate,
         }),
         generateGame(true, {
           currentPhase: GamePhase.ROUND_START,
-          lastModified: cutoffDate,
+          updatedAt: cutoffDate,
         }),
       ];
 
       // Mock GameModel.find to return the old games
-      jest.spyOn(gameService.GameModel, 'find').mockResolvedValue(mockOldGames);
+      const findSpy = jest
+        .spyOn(mockGameModel, 'find')
+        .mockResolvedValue(mockOldGames);
 
       // Mock expireGamesOrThrowAsync
-      jest
+      const expireGamesOrThrowAsyncSpy: jest.SpyInstance = jest
         .spyOn(gameService, 'expireGamesOrThrowAsync')
         .mockResolvedValue(undefined);
 
@@ -137,20 +149,24 @@ describe('GameService', () => {
       await gameService.performExpireOldGamesAsync();
 
       // Assert that GameModel.find was called with the correct query
-      expect(gameService.GameModel.find).toHaveBeenCalledWith({
+      expect(findSpy).toHaveBeenCalledWith({
         currentPhase: { $ne: GamePhase.GAME_OVER },
         lastModified: { $lt: expect.any(Date) },
       });
 
       // Assert that expireGamesOrThrowAsync was called with the found games
-      expect(gameService.expireGamesOrThrowAsync).toHaveBeenCalledWith(
-        mockOldGames,
-      );
+      expect(expireGamesOrThrowAsyncSpy).toHaveBeenCalledWith(mockOldGames);
     });
 
     it('should handle when there are no old games to expire due to error', async () => {
       // Mock GameModel.find to return an empty array
-      jest.spyOn(gameService.GameModel, 'find').mockResolvedValue(null);
+      jest.spyOn(mockGameModel, 'find').mockImplementation(
+        () =>
+          ({
+            exec: jest.fn().mockResolvedValue(null),
+            sort: jest.fn().mockReturnThis(),
+          }) as unknown as Query<IGameDocument[], IGameDocument>,
+      );
 
       // Mock expireGamesOrThrowAsync
       jest
@@ -166,7 +182,7 @@ describe('GameService', () => {
       await gameService.performExpireOldGamesAsync();
 
       // Assert that GameModel.find was called with the correct query
-      expect(gameService.GameModel.find).toHaveBeenCalledWith({
+      expect(mockGameModel.find).toHaveBeenCalledWith({
         currentPhase: { $ne: GamePhase.GAME_OVER },
         lastModified: { $lt: expect.any(Date) },
       });
@@ -177,7 +193,13 @@ describe('GameService', () => {
 
     it('should handle when there are no old games to expire', async () => {
       // Mock GameModel.find to return an empty array
-      jest.spyOn(gameService.GameModel, 'find').mockResolvedValue([]);
+      jest.spyOn(mockGameModel, 'find').mockImplementation(
+        () =>
+          ({
+            exec: jest.fn().mockResolvedValue([]),
+            sort: jest.fn().mockReturnThis(),
+          }) as unknown as Query<IGameDocument[], IGameDocument>,
+      );
 
       // Mock expireGamesOrThrowAsync
       jest
@@ -193,7 +215,7 @@ describe('GameService', () => {
       await gameService.performExpireOldGamesAsync();
 
       // Assert that GameModel.find was called with the correct query
-      expect(gameService.GameModel.find).toHaveBeenCalledWith({
+      expect(mockGameModel.find).toHaveBeenCalledWith({
         currentPhase: { $ne: GamePhase.GAME_OVER },
         lastModified: { $lt: expect.any(Date) },
       });
@@ -207,7 +229,9 @@ describe('GameService', () => {
       const mockError = new Error('Test error');
 
       // Mock GameModel.find to return a promise that rejects with the mock error
-      jest.spyOn(gameService.GameModel, 'find').mockRejectedValue(mockError);
+      jest.spyOn(mockGameModel, 'find').mockImplementation(() => {
+        throw mockError;
+      });
 
       // Mock withTransaction
       jest
@@ -218,9 +242,9 @@ describe('GameService', () => {
       // jest.spyOn(gameService, 'expireGamesOrThrowAsync').mockRejectedValue(mockError);
 
       // Expect that calling performExpireOldGamesAsync will throw the mock error
-      await expect(gameService.performExpireOldGamesAsync()).rejects.toThrow(
-        mockError,
-      );
+      await expect(async () =>
+        gameService.performExpireOldGamesAsync(),
+      ).rejects.toThrow(mockError);
 
       // Optionally, assert that expireGamesOrThrowAsync was not called
       // expect(gameService.expireGamesOrThrowAsync).not.toHaveBeenCalled();

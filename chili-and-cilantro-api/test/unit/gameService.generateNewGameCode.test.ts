@@ -1,29 +1,28 @@
 import {
-  IChef,
-  IGame,
+  IGameDocument,
   ModelName,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import sinon from 'sinon';
+import { IApplication } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import { Model } from 'mongoose';
 import { ActionService } from '../../src/services/action';
 import { ChefService } from '../../src/services/chef';
-import { Database } from '../../src/services/database';
 import { GameService } from '../../src/services/game';
 import { PlayerService } from '../../src/services/player';
+import { MockApplication } from '../fixtures/application';
 
 describe('GameService', () => {
-  let gameService;
-  let mockChefModel;
-  let mockGameModel;
+  let application: IApplication;
+  let gameService: GameService;
+  let mockGameModel: Model<IGameDocument>;
 
   beforeAll(() => {
-    const database = new Database();
-    mockChefModel = database.getModel<IChef>(ModelName.Chef);
-    mockGameModel = database.getModel<IGame>(ModelName.Game);
-    const actionService = new ActionService(database);
-    const chefService = new ChefService(mockChefModel);
-    const playerService = new PlayerService(mockGameModel);
+    application = new MockApplication();
+    const actionService = new ActionService(application);
+    const chefService = new ChefService(application);
+    const playerService = new PlayerService(application);
+    mockGameModel = application.getModel<IGameDocument>(ModelName.Game);
     gameService = new GameService(
-      mockGameModel,
+      application,
       actionService,
       chefService,
       playerService,
@@ -31,38 +30,38 @@ describe('GameService', () => {
   });
 
   describe('generateNewGameCodeAsync', () => {
-    let countDocumentsStub;
-
-    beforeEach(() => {
-      countDocumentsStub = sinon.stub(mockGameModel, 'countDocuments');
-    });
-
     afterEach(() => {
-      countDocumentsStub.restore();
+      jest.restoreAllMocks();
     });
 
     it('should generate a unique game code', async () => {
-      countDocumentsStub.resolves(0);
+      jest.spyOn(mockGameModel, 'countDocuments').mockResolvedValue(0);
       const gameCode = await gameService.generateNewGameCodeAsync();
       expect(gameCode).toBeDefined();
-      sinon.assert.calledWith(countDocumentsStub, {
+      expect(mockGameModel.countDocuments).toHaveBeenCalledTimes(1);
+      expect(mockGameModel.countDocuments).toHaveBeenCalledWith({
         code: gameCode,
         currentPhase: { $ne: 'GAME_OVER' },
       });
     });
 
     it('should retry generating a game code if the first one is taken', async () => {
-      countDocumentsStub.onFirstCall().resolves(1);
-      countDocumentsStub.onSecondCall().resolves(0);
+      const countDocumentsSpy = jest
+        .spyOn(mockGameModel, 'countDocuments')
+        .mockResolvedValueOnce(1);
+      countDocumentsSpy.mockResolvedValueOnce(0);
 
       const gameCode = await gameService.generateNewGameCodeAsync();
 
       expect(gameCode).toBeDefined();
-      sinon.assert.calledTwice(countDocumentsStub);
+
+      expect(mockGameModel.countDocuments).toHaveBeenCalledTimes(2);
     });
     it('should throw an error if it cannot generate a unique game code', async () => {
-      countDocumentsStub.resolves(1);
-      await expect(gameService.generateNewGameCodeAsync()).rejects.toThrow();
+      jest.spyOn(mockGameModel, 'countDocuments').mockResolvedValue(1);
+      await expect(async () =>
+        gameService.generateNewGameCodeAsync(),
+      ).rejects.toThrow();
     });
   });
 });

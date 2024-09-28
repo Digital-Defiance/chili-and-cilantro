@@ -1,20 +1,29 @@
 import {
   AccountStatusTypeEnum,
   constants,
-  EmailTokenExpiredError,
-  EmailTokenUsedOrInvalidError,
+  HandleableError,
   IApiMessageResponse,
-  InvalidCredentialsError,
-  InvalidPasswordError,
+  ICreateUserBasics,
   IRequestUser,
   ITokenResponse,
+  IUserDocument,
   IUserResponse,
+  ModelName,
+  StringLanguages,
+  StringNames,
+  translate,
+  UserNotFoundError,
+  ValidationError,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { UserModel } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
-import { Request, Response } from 'express';
+import {
+  handleError,
+  IApplication,
+  routeConfig,
+  RouteConfig,
+} from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import { MailService } from '@sendgrid/mail';
+import { NextFunction, Request, Response } from 'express';
 import { body, query } from 'express-validator';
-import { MongooseValidationError } from '../../errors/mongoose-validation-error';
-import { RouteConfig } from '../../interfaces/route-config';
 import { findAuthToken } from '../../middlewares/authenticate-token';
 import { JwtService } from '../../services/jwt';
 import { RequestUserService } from '../../services/request-user';
@@ -25,18 +34,20 @@ import { BaseController } from '../base';
  * Controller for user-related routes
  */
 export class UserController extends BaseController {
-  private jwtService: JwtService;
-  private userService: UserService;
+  private readonly jwtService: JwtService;
+  private readonly userService: UserService;
+  private readonly mailService: MailService;
 
-  constructor() {
-    super();
-    this.jwtService = new JwtService();
-    this.userService = new UserService();
+  constructor(application: IApplication) {
+    super(application);
+    this.jwtService = new JwtService(application);
+    this.mailService = new MailService();
+    this.userService = new UserService(application, this.mailService);
   }
 
-  protected getRoutes(): RouteConfig[] {
+  protected getRoutes(): RouteConfig<unknown[]>[] {
     return [
-      {
+      routeConfig<unknown[]>({
         method: 'post',
         path: '/change-password',
         handler: this.changePassword,
@@ -49,8 +60,8 @@ export class UserController extends BaseController {
             .matches(constants.PASSWORD_REGEX)
             .withMessage(constants.PASSWORD_REGEX_ERROR),
         ],
-      },
-      {
+      }),
+      routeConfig<unknown[]>({
         method: 'post',
         path: '/register',
         handler: this.register,
@@ -58,6 +69,9 @@ export class UserController extends BaseController {
           body('username')
             .matches(constants.USERNAME_REGEX)
             .withMessage(constants.USERNAME_REGEX_ERROR),
+          body('displayname')
+            .matches(constants.USER_DISPLAY_NAME_REGEX)
+            .withMessage(constants.USER_DISPLAY_NAME_REGEX_ERROR),
           body('email').isEmail().withMessage('Invalid email address'),
           body('password')
             .matches(constants.PASSWORD_REGEX)
@@ -65,8 +79,8 @@ export class UserController extends BaseController {
           body('timezone').optional().isString(),
         ],
         useAuthentication: false,
-      },
-      {
+      }),
+      routeConfig<unknown[]>({
         method: 'post',
         path: '/login',
         handler: this.login,
@@ -90,14 +104,14 @@ export class UserController extends BaseController {
             .withMessage(constants.PASSWORD_REGEX_ERROR),
         ],
         useAuthentication: false,
-      },
-      {
+      }),
+      routeConfig<unknown[]>({
         method: 'get',
         path: '/refresh-token',
         handler: this.refreshToken,
         useAuthentication: true,
-      },
-      {
+      }),
+      routeConfig<unknown[]>({
         method: 'get',
         path: '/verify-email',
         handler: this.verifyEmailToken,
@@ -111,14 +125,14 @@ export class UserController extends BaseController {
             .withMessage('Invalid token'),
         ],
         useAuthentication: false,
-      },
-      {
+      }),
+      routeConfig<unknown[]>({
         method: 'get',
         path: '/verify',
         handler: this.tokenVerifiedResponse,
         useAuthentication: true,
-      },
-      {
+      }),
+      routeConfig<unknown[]>({
         method: 'post',
         path: '/resend-verification',
         handler: this.resendVerification,
@@ -133,8 +147,8 @@ export class UserController extends BaseController {
           body('email').optional().isEmail(),
         ],
         useAuthentication: false,
-      },
-      {
+      }),
+      routeConfig<unknown[]>({
         method: 'post',
         path: '/forgot-password',
         handler: this.forgotPassword,
@@ -145,8 +159,8 @@ export class UserController extends BaseController {
             .withMessage('Invalid email address'),
         ],
         useAuthentication: false,
-      },
-      {
+      }),
+      routeConfig<unknown[]>({
         method: 'get',
         path: '/verify-reset-token',
         handler: this.verifyResetToken,
@@ -160,8 +174,8 @@ export class UserController extends BaseController {
             .withMessage('Invalid token'),
         ],
         useAuthentication: false,
-      },
-      {
+      }),
+      routeConfig<unknown[]>({
         method: 'post',
         path: '/reset-password',
         handler: this.resetPassword,
@@ -172,24 +186,55 @@ export class UserController extends BaseController {
             .withMessage(constants.PASSWORD_REGEX_ERROR),
         ],
         useAuthentication: false,
-      },
+      }),
+      routeConfig<any>({
+        method: 'post',
+        path: '/language',
+        handler: this.setLanguage,
+        validation: (validationLanguage: StringLanguages) => [
+          body('language')
+            .isString()
+            .withMessage(
+              translate(
+                StringNames.Validation_InvalidLanguage,
+                validationLanguage,
+              ),
+            )
+            .isIn(Object.values(StringLanguages))
+            .withMessage(
+              translate(
+                StringNames.Validation_InvalidLanguage,
+                validationLanguage,
+              ),
+            ),
+        ],
+        useAuthentication: true,
+      }),
     ];
   }
 
   /**
    * Change the user's password
-   * @param req
-   * @param res
+   * @param req The request object
+   * @param res The response object
+   * @param next The next function
+   * @returns
    */
-  public async changePassword(req: Request, res: Response): Promise<void> {
+  public async changePassword(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
-      const { currentPassword, newPassword } = req.body;
+      const { currentPassword, newPassword } = req.validatedBody;
       const userId = req.user?.id;
       if (!userId) {
-        this.sendApiMessageResponse(
-          401,
-          { message: 'User not authenticated' } as IApiMessageResponse,
+        handleError(
+          new HandleableError(translate(StringNames.Common_Unauthorized), {
+            statusCode: 401,
+          }),
           res,
+          next,
         );
         return;
       }
@@ -205,22 +250,7 @@ export class UserController extends BaseController {
         res,
       );
     } catch (error) {
-      if (error instanceof InvalidCredentialsError) {
-        this.sendApiMessageResponse(
-          401,
-          { message: 'Current password is incorrect' } as IApiMessageResponse,
-          res,
-        );
-      } else if (error instanceof InvalidPasswordError) {
-        this.sendApiMessageResponse(
-          400,
-          { message: constants.PASSWORD_REGEX_ERROR } as IApiMessageResponse,
-          res,
-        );
-      } else {
-        console.error('Error changing password:', error);
-        this.sendApiErrorResponse(500, 'Internal server error', error, res);
-      }
+      handleError(error, res, next);
     }
   }
 
@@ -245,16 +275,20 @@ export class UserController extends BaseController {
    * Refresh the JWT token
    * @param req
    * @param res
+   * @param next
    * @returns
    */
-  private async refreshToken(req: Request, res: Response) {
+  private async refreshToken(req: Request, res: Response, next: NextFunction) {
+    const UserModel = this.application.getModel<IUserDocument>(ModelName.User);
     try {
       const token = findAuthToken(req.headers);
       if (!token) {
-        this.sendApiMessageResponse(
-          401,
-          { message: 'No token provided' } as IApiMessageResponse,
+        handleError(
+          new HandleableError(translate(StringNames.Validation_InvalidToken), {
+            statusCode: 422,
+          }),
           res,
+          next,
         );
         return;
       }
@@ -268,7 +302,8 @@ export class UserController extends BaseController {
         !userDoc ||
         userDoc.accountStatusType !== AccountStatusTypeEnum.Active
       ) {
-        return res.status(403).json({ message: 'User not found or inactive' });
+        handleError(new UserNotFoundError(), res, next);
+        return;
       }
       const { token: newToken } = await this.jwtService.signToken(userDoc);
 
@@ -278,28 +313,34 @@ export class UserController extends BaseController {
         user: RequestUserService.makeRequestUser(userDoc),
       } as IUserResponse);
     } catch (error) {
-      console.error('Token refresh error:', error);
-      this.sendApiErrorResponse(500, 'Internal server error', error, res);
+      handleError(error, res, next);
     }
   }
 
   /**
    * Register a new user
-   * @param req
-   * @param res
+   * @param req The request object
+   * @param res The response object
+   * @param next The next function
    * @returns
    */
-  public async register(req: Request, res: Response): Promise<void> {
+  public async register(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
-      const { username, email, password, timezone } = req.body;
+      const { username, displayname, email, password, timezone } =
+        req.validatedBody;
 
       await this.userService.newUser(
         {
           username: username.trim(),
+          usernameLower: username.toLowerCase().trim(),
+          displayName: displayname.trim(),
           email: email.trim(),
-          languages: ['en'],
           timezone: timezone,
-        },
+        } as ICreateUserBasics,
         password,
       );
       this.sendApiMessageResponse(
@@ -308,26 +349,22 @@ export class UserController extends BaseController {
         res,
       );
     } catch (error) {
-      if (error instanceof MongooseValidationError) {
-        this.sendApiMongoValidationErrorResponse(
-          400,
-          'Validation error',
-          error.errors,
-          res,
-        );
-      } else {
-        this.sendApiErrorResponse(500, 'Internal server error', error, res);
-      }
+      handleError(error, res, next);
     }
   }
 
   /**
    * Log in a user
-   * @param req
-   * @param res
+   * @param req The request object
+   * @param res The response object
+   * @param next The next function
    * @returns
    */
-  public async login(req: Request, res: Response): Promise<void> {
+  public async login(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       const { username, email, password } = req.body;
 
@@ -346,17 +383,22 @@ export class UserController extends BaseController {
         .status(200)
         .json({ token, message: 'Logged in successfully' } as ITokenResponse);
     } catch (error) {
-      this.sendApiErrorResponse(500, 'Internal server error', error, res);
+      handleError(error, res, next);
     }
   }
 
   /**
    * Verify an email token
-   * @param req
-   * @param res
+   * @param req The request object
+   * @param res The response object
+   * @param next The next function
    * @returns
    */
-  public async verifyEmailToken(req: Request, res: Response): Promise<void> {
+  public async verifyEmailToken(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     const emailToken = Array.isArray(req.query.token)
       ? req.query.token[0]
       : req.query.token;
@@ -365,10 +407,10 @@ export class UserController extends BaseController {
       typeof emailToken !== 'string' ||
       emailToken.length !== constants.EMAIL_TOKEN_LENGTH * 2
     ) {
-      this.sendApiMessageResponse(
-        400,
-        { message: 'Invalid token format' } as IApiMessageResponse,
+      handleError(
+        new ValidationError(translate(StringNames.Validation_InvalidToken)),
         res,
+        next,
       );
       return;
     }
@@ -382,28 +424,29 @@ export class UserController extends BaseController {
         res,
       );
     } catch (error) {
-      console.error('Error during email verification:', error);
-      this.sendApiErrorResponse(500, 'Internal server error', error, res);
+      handleError(error, res, next);
     }
   }
 
   /**
    * Resend the verification email
-   * @param req
-   * @param res
+   * @param req The request object
+   * @param res The response object
+   * @param next The next function
    */
-  public async resendVerification(req: Request, res: Response): Promise<void> {
+  public async resendVerification(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    const UserModel = this.application.getModel<IUserDocument>(ModelName.User);
     try {
-      const { username, email } = req.body;
+      const { username, email } = req.validatedBody;
 
       // Find the user
       const user = await UserModel.findOne(username ? { username } : { email });
       if (!user) {
-        this.sendApiMessageResponse(
-          404,
-          { message: 'User not found' } as IApiMessageResponse,
-          res,
-        );
+        handleError(new UserNotFoundError(), res, next);
         return;
       }
 
@@ -418,30 +461,24 @@ export class UserController extends BaseController {
         res,
       );
     } catch (error) {
-      if (error instanceof EmailTokenUsedOrInvalidError) {
-        this.sendApiMessageResponse(
-          400,
-          {
-            message: 'No active verification token found',
-          } as IApiMessageResponse,
-          res,
-        );
-      } else {
-        console.error('Error resending verification email:', error);
-        this.sendApiErrorResponse(500, 'Internal server error', error, res);
-      }
+      handleError(error, res, next);
     }
   }
 
   /**
    * Send a password reset email
-   * @param req
-   * @param res
+   * @param req The request object
+   * @param res The response object
+   * @param next The next function
    * @returns
    */
-  public async forgotPassword(req: Request, res: Response): Promise<void> {
+  public async forgotPassword(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
-      const { email } = req.body;
+      const { email } = req.validatedBody;
       const result = await this.userService.initiatePasswordReset(email);
 
       this.sendApiMessageResponse(
@@ -450,21 +487,21 @@ export class UserController extends BaseController {
         res,
       );
     } catch (error) {
-      this.sendApiErrorResponse(
-        500,
-        'An unexpected error occurred. Please try again later.',
-        error,
-        res,
-      );
+      handleError(error, res, next);
     }
   }
 
   /**
    * Verify the password reset token
-   * @param req
-   * @param res
+   * @param req The request object
+   * @param res The response object
+   * @param next The next function
    */
-  public async verifyResetToken(req: Request, res: Response): Promise<void> {
+  public async verifyResetToken(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       const { token } = req.query;
       await this.userService.verifyEmailToken(token as string);
@@ -474,36 +511,23 @@ export class UserController extends BaseController {
         res,
       );
     } catch (error) {
-      if (error instanceof EmailTokenExpiredError) {
-        this.sendApiMessageResponse(
-          400,
-          {
-            message: 'Password reset token has expired',
-          } as IApiMessageResponse,
-          res,
-        );
-      } else if (error instanceof EmailTokenUsedOrInvalidError) {
-        this.sendApiMessageResponse(
-          400,
-          {
-            message: 'Invalid or already used password reset token',
-          } as IApiMessageResponse,
-          res,
-        );
-      } else {
-        this.sendApiErrorResponse(500, 'Internal server error', error, res);
-      }
+      handleError(error, res, next);
     }
   }
 
   /**
    * Reset the user's password
-   * @param req
-   * @param res
+   * @param req The request object
+   * @param res The response object
+   * @param next The next function
    */
-  public async resetPassword(req: Request, res: Response): Promise<void> {
+  public async resetPassword(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
-      const { token, password } = req.body;
+      const { token, password } = req.validatedBody;
       const user = await this.userService.resetPassword(token, password);
 
       // Generate a new JWT token for the user
@@ -516,32 +540,52 @@ export class UserController extends BaseController {
         user: requestUser,
       } as IUserResponse);
     } catch (error) {
-      if (error instanceof EmailTokenExpiredError) {
-        this.sendApiMessageResponse(
-          400,
-          {
-            message: 'Password reset token has expired',
-          } as IApiMessageResponse,
-          res,
-        );
-      } else if (error instanceof EmailTokenUsedOrInvalidError) {
-        this.sendApiMessageResponse(
-          400,
-          {
-            message: 'Invalid or already used password reset token',
-          } as IApiMessageResponse,
-          res,
-        );
-      } else {
-        console.error('Error resetting password:', error);
-        this.sendApiMessageResponse(
-          500,
-          { message: 'Internal server error' } as IApiMessageResponse,
-          res,
-        );
-      }
+      handleError(error, res, next);
     }
   }
-}
 
-export default new UserController().router;
+  /**
+   * Set the user's language
+   * @param req The request
+   * @param res The response
+   * @param next The next function
+   * @returns void
+   */
+  public async setLanguage(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    return await this.withTransaction<void>(async (sess) => {
+      try {
+        const { language } = req.validatedBody;
+        const userId = req.user.id;
+        if (!Object.values(StringLanguages).includes(language)) {
+          handleError(
+            new ValidationError(
+              translate(StringNames.Validation_InvalidLanguage),
+            ),
+            res,
+            next,
+          );
+          return;
+        }
+        const user = await this.userService.updateSiteLanguage(
+          userId,
+          language as StringLanguages,
+          sess,
+        );
+        this.sendApiMessageResponse(
+          200,
+          {
+            message: translate(StringNames.LanguageUpdate_Success),
+            user,
+          } as IUserResponse,
+          res,
+        );
+      } catch (error) {
+        handleError(error, res, next);
+      }
+    });
+  }
+}

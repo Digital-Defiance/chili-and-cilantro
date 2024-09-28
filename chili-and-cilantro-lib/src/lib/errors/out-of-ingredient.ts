@@ -1,4 +1,4 @@
-import { CardType } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { CardType } from '../enumerations/card-type';
 import { ValidationError } from './validation-error';
 
 export class OutOfIngredientError extends ValidationError {
