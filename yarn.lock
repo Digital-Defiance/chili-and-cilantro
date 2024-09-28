@@ -2297,6 +2297,29 @@
   resolved "https://registry.yarnpkg.com/@remix-run/router/-/router-1.19.2.tgz#0c896535473291cb41f152c180bedd5680a3b273"
   integrity sha512-baiMx18+IMuD1yyvOGaHM9QrVUPGGG0jC+z+IPHnRJWUAUvaKuWKyE8gjDj2rzv3sz9zOGoRSPgeBVHRhZnBlA==
 
+"@sendgrid/client@^8.1.3":
+  version "8.1.3"
+  resolved "https://registry.yarnpkg.com/@sendgrid/client/-/client-8.1.3.tgz#51fd4a318627c4b615ff98e35609e98486a3bd6f"
+  integrity sha512-mRwTticRZIdUTsnyzvlK6dMu3jni9ci9J+dW/6fMMFpGRAJdCJlivFVYQvqk8kRS3RnFzS7sf6BSmhLl1ldDhA==
+  dependencies:
+    "@sendgrid/helpers" "^8.0.0"
+    axios "^1.6.8"
+
+"@sendgrid/helpers@^8.0.0":
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/@sendgrid/helpers/-/helpers-8.0.0.tgz#f74bf9743bacafe4c8573be46166130c604c0fc1"
+  integrity sha512-Ze7WuW2Xzy5GT5WRx+yEv89fsg/pgy3T1E3FS0QEx0/VvRmigMZ5qyVGhJz4SxomegDkzXv/i0aFPpHKN8qdAA==
+  dependencies:
+    deepmerge "^4.2.2"
+
+"@sendgrid/mail@^8.1.3":
+  version "8.1.3"
+  resolved "https://registry.yarnpkg.com/@sendgrid/mail/-/mail-8.1.3.tgz#d371cbddcd2e8ca9469a68d1ed0c6b3a5c365e5e"
+  integrity sha512-Wg5iKSUOER83/cfY6rbPa+o3ChnYzWwv1OcsR8gCV8SKi+sUPIMroildimlnb72DBkQxcbylxng1W7f0RIX7MQ==
+  dependencies:
+    "@sendgrid/client" "^8.1.3"
+    "@sendgrid/helpers" "^8.0.0"
+
 "@sinclair/typebox@^0.27.8":
   version "0.27.8"
   resolved "https://registry.yarnpkg.com/@sinclair/typebox/-/typebox-0.27.8.tgz#6667fac16c436b5434a387a34dedb013198f6e6e"
@@ -3060,6 +3083,11 @@
   resolved "https://registry.yarnpkg.com/@types/tough-cookie/-/tough-cookie-4.0.5.tgz#cb6e2a691b70cb177c6e3ae9c1d2e8b2ea8cd304"
   integrity sha512-/Ad8+nIOV7Rl++6f1BdKxFSMgmoqEoYbHRpPcx3JEfv8VRsQe9Z4mCXeJBzxs7mbHY/XOZZuXlRNfhpVPbs6ZA==
 
+"@types/uuid@^10.0.0":
+  version "10.0.0"
+  resolved "https://registry.yarnpkg.com/@types/uuid/-/uuid-10.0.0.tgz#e9c07fe50da0f53dc24970cca94d619ff03f6f6d"
+  integrity sha512-7gqG38EyHgyP1S+7+xomFtL+ZNHcKv6DwNaCZmJmo1vgMugyF3TCnXVg4t1uk89mLNwnLtnY3TpOpCOyp1/xHQ==
+
 "@types/validator@^13.11.3":
   version "13.12.2"
   resolved "https://registry.yarnpkg.com/@types/validator/-/validator-13.12.2.tgz#760329e756e18a4aab82fc502b51ebdfebbe49f5"
@@ -3776,7 +3804,7 @@ axe-core@^4.6.2:
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.10.0.tgz#d9e56ab0147278272739a000880196cdfe113b59"
   integrity sha512-Mr2ZakwQ7XUAjp7pAwQWRhhK8mQQ6JAaNWSjmjxil0R8BPioMtQsTLOolGYkji1rcL++3dCqZA3zWqpT+9Ew6g==
 
-axios@1.7.7, axios@^1.7.4:
+axios@1.7.7, axios@^1.6.8, axios@^1.7.4:
   version "1.7.7"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.7.7.tgz#2f554296f9892a72ac8d8e4c5b79c14a91d0a47f"
   integrity sha512-S4kL7XrjgBmvdGut0sN3yJxqYzrDOnivkBiN0OFs6hLiUam3UPvswUo0kqGyhqUZGEOytHyumEdXsAkgCOUf3Q==
@@ -5809,6 +5837,14 @@ express-unless@^2.1.3:
   version "2.1.3"
   resolved "https://registry.yarnpkg.com/express-unless/-/express-unless-2.1.3.tgz#f951c6cca52a24da3de32d42cfd4db57bc0f9a2e"
   integrity sha512-wj4tLMyCVYuIIKHGt0FhCtIViBcwzWejX0EjNxveAa6dG+0XBCQhMbx+PnkLkFCxLC69qoFrxds4pIyL88inaQ==
+
+express-validator@^7.2.0:
+  version "7.2.0"
+  resolved "https://registry.yarnpkg.com/express-validator/-/express-validator-7.2.0.tgz#f6077758732d52e2365bb983b1abaca51bbefba6"
+  integrity sha512-I2ByKD8panjtr8Y05l21Wph9xk7kk64UMyvJCl/fFM/3CTJq8isXYPLeKW/aZBCdb/LYNv63PwhY8khw8VWocA==
+  dependencies:
+    lodash "^4.17.21"
+    validator "~13.12.0"
 
 express@^4.19.2:
   version "4.21.0"
@@ -11063,6 +11099,11 @@ utils-merge@1.0.1:
   resolved "https://registry.yarnpkg.com/utils-merge/-/utils-merge-1.0.1.tgz#9f95710f50a267947b2ccc124741c1028427e713"
   integrity sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==
 
+uuid@^10.0.0:
+  version "10.0.0"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-10.0.0.tgz#5a95aa454e6e002725c79055fd42aaba30ca6294"
+  integrity sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==
+
 uuid@^8.3.2:
   version "8.3.2"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
@@ -11092,7 +11133,7 @@ validate-npm-package-name@^5.0.0:
   resolved "https://registry.yarnpkg.com/validate-npm-package-name/-/validate-npm-package-name-5.0.1.tgz#a316573e9b49f3ccd90dbb6eb52b3f06c6d604e8"
   integrity sha512-OljLrQ9SQdOUqTaQxqL5dEfZWrXExyyWsozYlAWFawPVNuD83igl7uJD2RTkNMbniIYgt8l81eCJGIdQF7avLQ==
 
-validator@^13.11.0:
+validator@^13.11.0, validator@~13.12.0:
   version "13.12.0"
   resolved "https://registry.yarnpkg.com/validator/-/validator-13.12.0.tgz#7d78e76ba85504da3fee4fd1922b385914d4b35f"
   integrity sha512-c1Q0mCiPlgdTVVVIJIrBuxNicYE+t/7oKeI9MWLj3fh/uq2Pxh/3eeWbVZ4OcGW1TUf53At0njHw5SMdA3tmMg==

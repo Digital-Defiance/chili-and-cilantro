@@ -33,20 +33,14 @@ function getSiteUrl() {
 export const environment: IEnvironment = {
   production: production,
   siteUrl: process.env.SITE_URL ?? getSiteUrl(),
+  jwtSecret: process.env.JWT_SECRET?? 'Ch1l!&C1l@ntr0',
+  sendgridKey: process.env.SENDGRID_API_KEY?? '',
   developer: {
     reactDir: reactDir,
     host: host,
     port: port,
     sslEnabled: sslEnabled,
     corsOrigin: process.env.CORS_ORIGIN ?? getSiteUrl(),
-  },
-  auth0: {
-    database: process.env.AUTH0_DATABASE ?? '',
-    domain: process.env.AUTH0_DOMAIN ?? '',
-    clientId: process.env.AUTH0_CLIENT_ID ?? '',
-    clientSecret: process.env.AUTH0_CLIENT_SECRET ?? '',
-    scope: process.env.AUTH0_SCOPE ?? '',
-    audience: process.env.AUTH0_AUDIENCE ?? '',
   },
   mongo: {
     uri: process.env.MONGO_URI ?? 'mongodb://localhost:27017/chilicilantro',

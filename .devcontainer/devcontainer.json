@@ -16,7 +16,7 @@
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
-	"forwardPorts": [3000],
+	"forwardPorts": [27017],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": "./setup-nvm.sh && ./do-yarn.sh && git config --global --add safe.directory /workspace",

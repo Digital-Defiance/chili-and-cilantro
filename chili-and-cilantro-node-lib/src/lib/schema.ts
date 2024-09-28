@@ -6,10 +6,12 @@ import { ActionDiscriminators } from './discriminators/action';
 import { ISchemaModelData } from './interfaces/schema-model-data';
 import { ActionModel } from './models/action';
 import { ChefModel } from './models/chef';
+import { EmailTokenModel } from './models/email-token';
 import { GameModel } from './models/game';
 import { UserModel } from './models/user';
 import { ActionSchema } from './schemas/action';
 import { ChefSchema } from './schemas/chef';
+import { EmailTokenSchema } from './schemas/email-token';
 import { GameSchema } from './schemas/game';
 import { UserSchema } from './schemas/user';
 
@@ -40,6 +42,14 @@ export const Schema: Record<ModelName, ISchemaModelData<any>> = {
     model: ChefModel,
     schema: ChefSchema,
     path: modelNameCollectionToPath(ModelNameCollection.Chef),
+  },
+  [ModelName.EmailToken]: {
+    name: ModelName.EmailToken,
+    description: 'An email token for email verification or password reset',
+    collection: ModelNameCollection.EmailToken,
+    model: EmailTokenModel,
+    schema: EmailTokenSchema,
+    path: modelNameCollectionToPath(ModelNameCollection.EmailToken),
   },
   [ModelName.Game]: {
     name: ModelName.Game,

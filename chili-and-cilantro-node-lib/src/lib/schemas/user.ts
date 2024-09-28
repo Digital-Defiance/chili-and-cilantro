@@ -1,6 +1,10 @@
+import {
+  AccountStatusTypeEnum,
+  IUserDocument,
+  ModelName,
+} from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { Schema } from 'mongoose';
 import validator from 'validator';
-import { IUserDocument, ModelName } from '@chili-and-cilantro/chili-and-cilantro-lib';
 
 /**
  * A user in the system.
@@ -29,6 +33,18 @@ export const UserSchema = new Schema<IUserDocument>(
     },
     emailVerified: { type: Boolean, default: false },
     /**
+     * The status of the user's account.
+     */
+    accountStatusType: {
+      type: String,
+      enum: Object.values(AccountStatusTypeEnum),
+      required: true,
+    },
+    /**
+     * The timezone of the user.
+     */
+    timezone: { type: String, required: true },
+    /**
      * The unique @username of the user.
      */
     username: {
@@ -40,6 +56,13 @@ export const UserSchema = new Schema<IUserDocument>(
       match: /^[a-z0-9]+$/, // Alphanumeric validation
       minlength: 3,
       maxlength: 20,
+    },
+    /**
+     * The hashed password of the user.
+     */
+    password: {
+      type: String,
+      required: true,
     },
     /**
      * User's last login date/time.

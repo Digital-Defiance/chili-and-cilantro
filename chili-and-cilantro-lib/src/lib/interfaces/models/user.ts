@@ -2,6 +2,7 @@ import { IHasSoftDeleter } from '../has-soft-deleter';
 import { IHasSoftDelete } from '../has-soft-delete';
 import { IHasTimestampOwners } from '../has-timestamp-owners';
 import { IHasTimestamps } from '../has-timestamps';
+import { AccountStatusTypeEnum } from '../../enumerations/account-status-type';
 
 export interface IUser
   extends
@@ -18,18 +19,6 @@ export interface IUser
    */
   password: string;
   /**
-   * The user's given name.
-   */
-  givenName: string;
-  /**
-   * The user's surname.
-   */
-  surname: string;
-  /**
-   * The user's display name.
-   */
-  userPrincipalName: string;
-  /**
    * The user's email address, used for login if accountType is email/password.
    * Used for sending notifications, regardless.
    */
@@ -38,6 +27,14 @@ export interface IUser
    * Whether the user's email address has been verified.
    */
   emailVerified: boolean;
+  /**
+   * The status of the user's account.
+   */
+  accountStatusType: AccountStatusTypeEnum;
+  /**
+   * The user's timezone.
+   */
+  timezone: string;
   /**
    * The date the user last logged in.
    */

@@ -99,10 +99,79 @@ export const NONE = -1;
  */
 export const BCRYPT_ROUNDS = 10;
 
+/**
+ * Algorithm to use for JWT
+ */
+export const JWT_ALGO:
+  | 'HS256'
+  | 'HS384'
+  | 'HS512'
+  | 'RS256'
+  | 'RS384'
+  | 'RS512'
+  | 'ES256'
+  | 'ES384'
+  | 'ES512'
+  | 'PS256'
+  | 'PS384'
+  | 'PS512' = 'HS256';
+
+/**
+ * The expiration time for a JWT token in seconds
+ */
+export const JWT_EXPIRATION = 86400;
+
+/**
+ * The address from which to send emails.
+ */
+export const EMAIL_FROM = 'noreply@chilicilantro.com';
+
+/**
+ * The name of the application.
+ */
+export const APPLICATION_NAME = 'Chili and Cilantro';
+
+/**
+ * Duration in milliseconds for which an email token is valid.
+ */
+export const EMAIL_TOKEN_EXPIRATION = 24 * 60 * 60 * 1000;
+/**
+ * Length in bytes of the email token generated (is represented as a hex string of twice as many)
+ */
+export const EMAIL_TOKEN_LENGTH = 32;
+
+/**
+ * The regular expression for valid email addresses.
+ */
+export const EMAIL_TOKEN_RESEND_INTERVAL = 5 * 60 * 1000; // 5 minutes
+
+/**
+ * The regular expression for valid usernames.
+ */
+export const USERNAME_REGEX = /^[A-Za-z0-9]{3,30}$/;
+/**
+ * The error message for invalid usernames.
+ */
+export const USERNAME_REGEX_ERROR =
+  'Username must be 3-30 characters long and contain only letters and numbers';
+/**
+ * The regular expression for valid passwords.
+ */
+export const PASSWORD_REGEX =
+  /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?])[A-Za-z\d!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]{8,}$/;
+/**
+ * The error message for invalid passwords.
+ */
+export const PASSWORD_REGEX_ERROR =
+  'Password must be at least 8 characters long and include at least one letter, one number, and one special character (!@#$%^&*()_+-=[]{};\':"|,.<>/?)';
+
 export default {
   BCRYPT_ROUNDS,
   CHILI_PER_HAND,
+  EMAIL_TOKEN_RESEND_INTERVAL,
   GAME_CODE_LENGTH,
+  JWT_ALGO,
+  JWT_EXPIRATION,
   MAX_CHEFS,
   MIN_CHEFS,
   MAX_GAME_PASSWORD_LENGTH,
@@ -120,6 +189,10 @@ export default {
   MAX_PASSWORD_LENGTH,
   MIN_PASSWORD_LENGTH,
   MULTILINGUAL_STRING_REGEX,
+  PASSWORD_REGEX,
+  PASSWORD_REGEX_ERROR,
   ROUNDS_TO_WIN,
+  USERNAME_REGEX,
+  USERNAME_REGEX_ERROR,
   NONE: NONE,
 };

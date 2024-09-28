@@ -1,20 +1,14 @@
 export interface IEnvironment {
   production: boolean;
   siteUrl: string;
+  jwtSecret: string;
+  sendgridKey: string;
   developer: {
     reactDir: string;
     host: string;
     port: number;
     sslEnabled: boolean;
     corsOrigin: string;
-  };
-  auth0: {
-    database: string;
-    domain: string;
-    clientId: string;
-    clientSecret: string;
-    scope: string;
-    audience: string;
   };
   mongo: {
     uri: string;
