@@ -1,9 +1,9 @@
-import { useAuth0 } from '@auth0/auth0-react';
 import './login-link.scss';
 
 function LoginLink() {
-  const { loginWithRedirect } = useAuth0();
-
+  const loginWithRedirect = () => {
+    // Implement the logic to initiate the OAuth login flow
+  };
   return (
     <button onClick={() => loginWithRedirect()} className="login-link">
       Log In

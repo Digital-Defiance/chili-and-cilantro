@@ -3,6 +3,7 @@ import {
   CardType,
   constants,
   IAction,
+  IActionDocument,
   IChefDocument,
   ICreateGameAction,
   ICreateGameActionDocument,
@@ -30,15 +31,20 @@ import {
   IStartGameActionDocument,
   IStartGameDetails,
   IUserDocument,
+  ModelName,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import {
   ActionDiscriminatorsByActionType,
-  ActionModel,
+  GetModelFunction,
 } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 
 export class ActionService {
-  constructor() {}
+  private readonly getModel: GetModelFunction;
+  constructor(getModel: GetModelFunction) {
+    this.getModel = getModel;
+  }
   public async getGameHistoryAsync(game: IGameDocument): Promise<IAction[]> {
+    const ActionModel = this.getModel<IActionDocument>(ModelName.Action);
     const actions = await ActionModel.find({ gameId: game._id }).sort({
       createdAt: 1,
     });

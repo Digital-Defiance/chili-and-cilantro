@@ -1,19 +1,17 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { useAuth0 } from '@auth0/auth0-react';
 import ApiAccess from '../components/api-access';
-import { AuthenticationGuard } from '../components/authentication-required';
 import Callback from '../components/callback';
 import Game from '../components/game';
 import LoginLink from '../components/login-link';
 import LogoutLink from '../components/logout-link';
 import AccountError from '../pages/account-error';
 import Register from '../pages/register';
-import UserProfile from '../pages/user-profile';
+import SplashPage from '../pages/splash-page';
 
 import { Link, Route, Routes } from 'react-router-dom';
 
 export function App() {
-  const { isAuthenticated } = useAuth0();
+  const isAuthenticated = false; // Replace with actual authentication logic
   return (
     <div>
       {/* START: routes */}
@@ -47,52 +45,17 @@ export function App() {
           )}
           {isAuthenticated && (
             <li>
-              <Link to="/profile">Profile</Link>
-            </li>
-          )}
-          {isAuthenticated && (
-            <li>
               <LogoutLink />
             </li>
           )}
         </ul>
       </div>
       <Routes>
-        <Route
-          path="/"
-          element={
-            <div>
-              This is the generated root route.{' '}
-              <Link to="/page-2">Click here for page 2.</Link>
-            </div>
-          }
-        />
+        <Route path="/" element={<SplashPage />} />
         <Route path="/callback" element={<Callback />} />
         <Route path="/register" element={<Register />} />
-        <Route
-          path="/profile"
-          element={
-            <div>
-              <AuthenticationGuard component={UserProfile} />
-            </div>
-          }
-        />
-        <Route
-          path="/api-access"
-          element={
-            <div>
-              <AuthenticationGuard component={ApiAccess} />
-            </div>
-          }
-        />
-        <Route
-          path="/game"
-          element={
-            <div>
-              <AuthenticationGuard component={Game} />
-            </div>
-          }
-        />
+        <Route path="/api-access" element={<ApiAccess />} />
+        <Route path="/game" element={<Game />} />
         <Route path="/account-error" element={<AccountError />} />
       </Routes>
       {/* END: routes */}

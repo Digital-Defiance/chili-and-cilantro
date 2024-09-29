@@ -122,14 +122,19 @@ export const JWT_ALGO:
 export const JWT_EXPIRATION = 86400;
 
 /**
+ * The domain of the site
+ */
+export const SITE_DOMAIN = 'chilicilantro.com';
+
+/**
  * The address from which to send emails.
  */
-export const EMAIL_FROM = 'noreply@chilicilantro.com';
+export const EMAIL_FROM = `noreply@${SITE_DOMAIN}`;
 
 /**
  * The name of the application.
  */
-export const APPLICATION_NAME = 'Chili and Cilantro';
+export const APPLICATION_NAME = 'Chili & Cilantro';
 
 /**
  * Duration in milliseconds for which an email token is valid.
@@ -168,6 +173,7 @@ export const PASSWORD_REGEX_ERROR =
 export default {
   BCRYPT_ROUNDS,
   CHILI_PER_HAND,
+  EMAIL_FROM,
   EMAIL_TOKEN_RESEND_INTERVAL,
   GAME_CODE_LENGTH,
   JWT_ALGO,
@@ -194,5 +200,6 @@ export default {
   ROUNDS_TO_WIN,
   USERNAME_REGEX,
   USERNAME_REGEX_ERROR,
+  SITE_DOMAIN,
   NONE: NONE,
 };

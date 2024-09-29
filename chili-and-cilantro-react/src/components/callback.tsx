@@ -1,4 +1,3 @@
-import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -6,8 +5,13 @@ function Callback() {
   const navigate = useNavigate();
   const location = useLocation();
   const hasFetchedRef = useRef(false);
-  const { isLoading, error, user, isAuthenticated, getAccessTokenSilently } =
-    useAuth0();
+  const error = null;
+  const isLoading = false;
+  const isAuthenticated = false;
+  const user = null;
+  const getAccessTokenSilently = async () => {
+    return '';
+  };
 
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
@@ -52,15 +56,7 @@ function Callback() {
           });
         });
     }
-  }, [
-    getAccessTokenSilently,
-    isLoading,
-    navigate,
-    isAuthenticated,
-    user,
-    location,
-    error,
-  ]);
+  }, [isLoading, navigate, isAuthenticated, user, location, error]);
 
   return <div>Loading...</div>;
 }

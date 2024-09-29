@@ -4,18 +4,29 @@ import {
   IApiMessageResponse,
   IApiMongoValidationErrorResponse,
   IMongoErrors,
+  IRequestUser,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { GetModelFunction } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { NextFunction, Request, Response, Router } from 'express';
-import { ValidationError, validationResult } from 'express-validator';
+import {
+  matchedData,
+  ValidationChain,
+  ValidationError,
+  validationResult,
+} from 'express-validator';
 import { RouteConfig } from '../interfaces/route-config';
 import { authenticateToken } from '../middlewares/authenticate-token';
 
 export abstract class BaseController {
   public readonly router: Router;
+  private activeRequest: Request | null = null;
+  private activeResponse: Response | null = null;
+  public readonly getModel: GetModelFunction;
 
-  constructor() {
+  constructor(getModel: GetModelFunction) {
     this.router = Router();
     this.initializeRoutes();
+    this.getModel = getModel;
   }
 
   /**
@@ -38,11 +49,10 @@ export abstract class BaseController {
         validation = [],
       } = route;
       const routeHandlers = [
-        ...middleware,
         ...(useAuthentication
           ? [
               (req: Request, res: Response, next: NextFunction) =>
-                this.authenticateRequest(req, res, next),
+                this.authenticateRequest(this.getModel, req, res, next),
             ]
           : []),
         ...(validation.length > 0
@@ -52,7 +62,19 @@ export abstract class BaseController {
                 this.validateRequest(req, res, next),
             ]
           : []),
+        ...middleware,
         (req: Request, res: Response, next: NextFunction) => {
+          this.activeRequest = req;
+          this.activeResponse = res;
+          // if req.user wasn't added above, return an unauthorized response
+          if (useAuthentication && !req.user) {
+            this.sendApiMessageResponse(
+              401,
+              { message: 'Unauthorized' } as IApiMessageResponse,
+              res,
+            );
+            return;
+          }
           handler.call(this, req, res, next);
         },
       ];
@@ -130,11 +152,12 @@ export abstract class BaseController {
    * @param next
    */
   protected authenticateRequest(
+    getModel: GetModelFunction,
     req: Request,
     res: Response,
     next: NextFunction,
   ): void {
-    authenticateToken(req, res, (err) => {
+    authenticateToken(getModel, req, res, (err) => {
       if (err || !req.user) {
         this.sendApiMessageResponse(
           401,
@@ -149,21 +172,87 @@ export abstract class BaseController {
 
   /**
    * Validates the request using the express-validator library.
-   * @param req
-   * @param res
-   * @param next
+   * @param req The request object
+   * @param res The response object
+   * @param next The next function
+   * @param validationArray An array of express validation chains to apply to the request.
    * @returns
    */
   protected validateRequest(
     req: Request,
     res: Response,
     next: NextFunction,
+    validationArray: ValidationChain[] = [],
   ): void {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       this.sendApiExpressValidationErrorResponse(400, errors.array(), res);
       return;
     }
+    // Create an object with only the validated fields
+    const validatedBody = matchedData(req, {
+      locations: ['body'], // Only match data from request body
+      includeOptionals: false, // Exclude fields that weren't validated
+    });
+
+    validationArray.forEach((validation: ValidationChain) => {
+      const fieldChains = validation.builder.build().fields;
+
+      fieldChains.forEach((field: string) => {
+        const hasBooleanValidator = validation.builder
+          .build()
+          .stack.some((item: any) => {
+            return (
+              item.validator &&
+              typeof item.validator === 'function' &&
+              item.validator.name === 'isBoolean' &&
+              !item.negated
+            );
+          });
+
+        if (hasBooleanValidator && !(field in validatedBody)) {
+          validatedBody[field] = false;
+        }
+      });
+    });
+
+    // Attach the validated fields to the request object
+    req.validatedBody = validatedBody;
+
     next();
+  }
+
+  public get user(): IRequestUser {
+    if (!this.activeRequest) {
+      throw new Error('No active request');
+    }
+    if (!this.activeRequest.user) {
+      throw new Error('No user on request');
+    }
+    return this.activeRequest.user;
+  }
+
+  public get validatedBody(): Record<string, any> {
+    if (!this.activeRequest) {
+      throw new Error('No active request');
+    }
+    if (!this.activeRequest.validatedBody) {
+      throw new Error('No validated body on request');
+    }
+    return this.activeRequest.validatedBody;
+  }
+
+  public get req(): Request {
+    if (!this.activeRequest) {
+      throw new Error('No active request');
+    }
+    return this.activeRequest;
+  }
+
+  public get res(): Response {
+    if (!this.activeResponse) {
+      throw new Error('No active response');
+    }
+    return this.activeResponse;
   }
 }

@@ -1,38 +1,39 @@
 import {
+  AllCardsPlacedError,
+  AlreadyJoinedOtherError,
   CardType,
   ChefState,
   constants,
+  GameFullError,
+  GameInProgressError,
+  GamePasswordMismatchError,
   GamePhase,
   IBid,
   IChefDocument,
   ICreateGameActionDocument,
   IGameDocument,
   IMessageActionDocument,
+  IncorrectGamePhaseError,
+  InvalidActionError,
+  InvalidGameError,
+  InvalidGameNameError,
+  InvalidGameParameterError,
+  InvalidGamePasswordError,
+  InvalidMessageError,
+  InvalidUserDisplayNameError,
   IStartGameActionDocument,
   IUserDocument,
+  ModelName,
+  NotEnoughChefsError,
+  NotHostError,
+  OutOfIngredientError,
+  OutOfOrderError,
   TurnAction,
+  UsernameInUseError,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { GameModel } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import { GetModelFunction } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { Types } from 'mongoose';
 import validator from 'validator';
-import { AllCardsPlacedError } from '../errors/all-cards-placed';
-import { AlreadyJoinedOtherError } from '../errors/already-joined-other';
-import { GameFullError } from '../errors/game-full';
-import { GameInProgressError } from '../errors/game-in-progress';
-import { GamePasswordMismatchError } from '../errors/game-password-mismatch';
-import { IncorrectGamePhaseError } from '../errors/incorrect-game-phase';
-import { InvalidActionError } from '../errors/invalid-action';
-import { InvalidGameError } from '../errors/invalid-game';
-import { InvalidGameNameError } from '../errors/invalid-game-name';
-import { InvalidGameParameterError } from '../errors/invalid-game-parameter';
-import { InvalidGamePasswordError } from '../errors/invalid-game-password';
-import { InvalidMessageError } from '../errors/invalid-message';
-import { InvalidUserDisplayNameError } from '../errors/invalid-user-display-name';
-import { NotEnoughChefsError } from '../errors/not-enough-chefs';
-import { NotHostError } from '../errors/not-host';
-import { OutOfIngredientError } from '../errors/out-of-ingredient';
-import { OutOfOrderError } from '../errors/out-of-order';
-import { UsernameInUseError } from '../errors/username-in-use';
 import { ActionService } from './action';
 import { ChefService } from './chef';
 import { PlayerService } from './player';
@@ -40,16 +41,19 @@ import { TransactionManager } from './transaction-manager';
 import { UtilityService } from './utility';
 
 export class GameService extends TransactionManager {
+  private readonly getModel: GetModelFunction;
   private readonly actionService: ActionService;
   private readonly chefService: ChefService;
   private readonly playerService: PlayerService;
 
   constructor(
+    getModel: GetModelFunction,
     actionService: ActionService,
     chefService: ChefService,
     playerService: PlayerService,
   ) {
     super();
+    this.getModel = getModel;
     this.actionService = actionService;
     this.chefService = chefService;
     this.playerService = playerService;
@@ -61,6 +65,7 @@ export class GameService extends TransactionManager {
    * @returns string game code
    */
   public async generateNewGameCodeAsync(): Promise<string> {
+    const GameModel = this.getModel<IGameDocument>(ModelName.Game);
     // find a game code that is not being used by an active game
     // codes are freed up when currentPhase is GAME_OVER
     let code = '';
@@ -129,7 +134,6 @@ export class GameService extends TransactionManager {
     if (maxChefs < constants.MIN_CHEFS || maxChefs > constants.MAX_CHEFS) {
       throw new InvalidGameParameterError(
         `Must be between ${constants.MIN_CHEFS} and ${constants.MAX_CHEFS}.`,
-        'maxChefs',
       );
     }
   }
@@ -154,6 +158,7 @@ export class GameService extends TransactionManager {
     chef: IChefDocument;
     action: ICreateGameActionDocument;
   }> {
+    const GameModel = this.getModel<IGameDocument>(ModelName.Game);
     const gameId = new Types.ObjectId();
     const chefId = new Types.ObjectId();
     const gameCode = await this.generateNewGameCodeAsync();
@@ -304,6 +309,7 @@ export class GameService extends TransactionManager {
     existingGame: IGameDocument,
     user: IUserDocument,
   ): Promise<{ game: IGameDocument; chef: IChefDocument }> {
+    const GameModel = this.getModel<IGameDocument>(ModelName.Game);
     const newChefIds = existingGame.chefIds.map(() => new Types.ObjectId());
 
     // find the existing chef id's index
@@ -473,6 +479,7 @@ export class GameService extends TransactionManager {
     gameId: Types.ObjectId,
     active = false,
   ): Promise<IGameDocument> {
+    const GameModel = this.getModel<IGameDocument>(ModelName.Game);
     const search = active
       ? {
           _id: gameId,
@@ -495,6 +502,7 @@ export class GameService extends TransactionManager {
     gameCode: string,
     active = false,
   ): Promise<IGameDocument> {
+    const GameModel = this.getModel<IGameDocument>(ModelName.Game);
     // Construct the search criteria
     const search = active
       ? { code: gameCode, currentPhase: { $ne: GamePhase.GAME_OVER } }
@@ -541,6 +549,7 @@ export class GameService extends TransactionManager {
    * Finds games not in GAME_OVER phase with a lastModified date older than MAX_GAME_AGE_WITHOUT_ACTIVITY_IN_MINUTES and marks them GAME_OVER
    */
   public async performExpireOldGamesAsync(): Promise<void> {
+    const GameModel = this.getModel<IGameDocument>(ModelName.Game);
     return this.withTransaction(async (session) => {
       // find games not in GAME_OVER phase with a lastModified date older than MAX_GAME_AGE_WITHOUT_ACTIVITY_IN_MINUTES
       // cutoffDate is now minus MAX_GAME_AGE_WITHOUT_ACTIVITY_IN_MINUTES

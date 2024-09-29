@@ -1,10 +1,12 @@
 version: '3'
 services:
   app:
-    image: mcr.microsoft.com/devcontainers/typescript-node:0-20-bullseye
+    build:
+      context: .
+      dockerfile: Dockerfile
     volumes:
       - ..:/workspace:cached
-    command: /bin/sh -c "while sleep 1000; do :; done"
+    command: sleep infinity
     environment:
       NODE_ENV: development
       FONTAWESOME_KEY: ${FONTAWESOME_KEY}
@@ -14,8 +16,8 @@ services:
       - node_app
 
   mongo:
-    restart: always
-    image: mongo:6.0.7
+    image: mongo:latest
+    restart: unless-stopped
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_DB_USERNAME}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_DB_PASSWORD}

@@ -1,8 +1,11 @@
-import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect, useState } from 'react';
 
 function ApiAccess() {
-  const { isLoading, error, getAccessTokenSilently } = useAuth0();
+  const getAccessTokenSilently = async () => {
+    return '';
+  };
+  const isLoading = false;
+  const error: { message: string } | null = null;
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
@@ -32,9 +35,9 @@ function ApiAccess() {
     return <div>Loading...</div>;
   }
 
-  if (error) {
-    return <div>Error: {error.message}</div>;
-  }
+  // if (error !== null) {
+  //   return <div>Error: {error.message}</div>;
+  // }
 
   return (
     <div>

@@ -1,15 +1,20 @@
 import {
   GamePhase,
+  IGameDocument,
   IUserDocument,
+  ModelName,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import {
-  GameModel,
+  GetModelFunction,
   Schema,
 } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { Types } from 'mongoose';
 
 export class PlayerService {
-  constructor() {}
+  private readonly getModel: GetModelFunction;
+  constructor(getModel: GetModelFunction) {
+    this.getModel = getModel;
+  }
 
   /**
    * Returns whether the specified user is the host of the specified game
@@ -21,6 +26,7 @@ export class PlayerService {
     userId: Types.ObjectId,
     gameId: Types.ObjectId,
   ): Promise<boolean> {
+    const GameModel = this.getModel<IGameDocument>(ModelName.Game);
     try {
       const count = await GameModel.countDocuments({
         _id: gameId,
@@ -42,6 +48,7 @@ export class PlayerService {
   public async userIsInAnyActiveGameAsync(
     user: IUserDocument,
   ): Promise<boolean> {
+    const GameModel = this.getModel<IGameDocument>(ModelName.Game);
     try {
       const result = await GameModel.aggregate([
         {
@@ -91,6 +98,7 @@ export class PlayerService {
     gameId: Types.ObjectId,
     active = false,
   ): Promise<boolean> {
+    const GameModel = this.getModel<IGameDocument>(ModelName.Game);
     try {
       const result = await GameModel.aggregate([
         {

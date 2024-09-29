@@ -5,14 +5,18 @@ import {
   IGame,
   IGameDocument,
   IUserDocument,
+  ModelName,
+  NotInGameError,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { ChefModel } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import { GetModelFunction } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { Document, Types } from 'mongoose';
-import { NotInGameError } from '../errors/not-in-game';
 import { UtilityService } from './utility';
 
 export class ChefService {
-  constructor() {}
+  public readonly getModel: GetModelFunction;
+  constructor(getModel: GetModelFunction) {
+    this.getModel = getModel;
+  }
 
   /**
    * Creates a new chef in the database
@@ -30,6 +34,7 @@ export class ChefService {
     host: boolean,
     chefId?: Types.ObjectId,
   ): Promise<IChefDocument> {
+    const ChefModel = this.getModel<IChefDocument>(ModelName.Chef);
     const chef = await ChefModel.create({
       _id: chefId ?? new Types.ObjectId(),
       gameId: game._id,
@@ -56,6 +61,7 @@ export class ChefService {
     existingChef: IChefDocument,
     newChefId?: Types.ObjectId,
   ): Promise<IChefDocument> {
+    const ChefModel = this.getModel<IChefDocument>(ModelName.Chef);
     const newChef = await ChefModel.create({
       _id: newChefId ?? new Types.ObjectId(),
       gameId: newGame._id,
@@ -80,6 +86,7 @@ export class ChefService {
     game: IGameDocument,
     user: IUserDocument,
   ): Promise<IChef & Document> {
+    const ChefModel = this.getModel<IChefDocument>(ModelName.Chef);
     const chef = await ChefModel.findOne({
       gameId: game._id,
       userId: user._id,
@@ -98,6 +105,7 @@ export class ChefService {
   public async getGameChefsByGameOrIdAsync(
     gameOrId: string | IGame,
   ): Promise<(IChef & Document)[]> {
+    const ChefModel = this.getModel<IChefDocument>(ModelName.Chef);
     // verify that gameOrId is either a string or an IGame by checking whether there's an _id property
     const hasId = (obj: any): obj is IGame => {
       return obj._id !== undefined;

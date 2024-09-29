@@ -1,6 +1,10 @@
-import 'dotenv/config';
-import { join } from 'path';
+import { constants } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { config } from 'dotenv';
+import { join, resolve } from 'path';
 import { IEnvironment } from './interfaces/environment';
+
+// Load .env file from the root directory
+config({ path: resolve(__dirname, '../../.env') });
 
 /**
  * Finds the path to the dist folder using the current filename
@@ -17,7 +21,8 @@ const host = process.env.SERVER_HOST ?? 'localhost';
 const port = Number(process.env.PORT ?? 3000);
 const production = process.env.NODE_ENV === 'production';
 const sslEnabled = process.env.SSL_ENABLED === 'true';
-const reactDir = relativeToDist('chili-and-cilantro-react');
+const reactDistDir =
+  process.env['REACT_DIST_DIR'] ?? relativeToDist('chili-and-cilantro-react');
 
 function getSiteUrl() {
   const proto = sslEnabled ? 'https' : 'http';
@@ -35,8 +40,9 @@ export const environment: IEnvironment = {
   siteUrl: process.env.SITE_URL ?? getSiteUrl(),
   jwtSecret: process.env.JWT_SECRET ?? 'Ch1l!&C1l@ntr0',
   sendgridKey: process.env.SENDGRID_API_KEY ?? '',
+  emailSender: process.env.EMAIL_SENDER ?? constants.EMAIL_FROM,
   developer: {
-    reactDir: reactDir,
+    reactDistDir: reactDistDir,
     host: host,
     port: port,
     sslEnabled: sslEnabled,

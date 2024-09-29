@@ -19,15 +19,13 @@ import {
   IUser,
   IUserDocument,
   IUserObject,
+  ModelName,
   PendingEmailVerificationError,
   UsernameInUseError,
   UsernameOrEmailRequiredError,
   UserNotFoundError,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import {
-  EmailTokenModel,
-  UserModel,
-} from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import { GetModelFunction } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { MailDataRequired, MailService } from '@sendgrid/mail';
 import { compare, hashSync } from 'bcrypt';
 import { randomBytes } from 'crypto';
@@ -36,8 +34,10 @@ import { environment } from '../environment';
 import { MongooseValidationError } from '../errors/mongoose-validation-error';
 
 export class UserService {
-  private sendgridClient: MailService;
-  constructor() {
+  private readonly getModel: GetModelFunction;
+  private readonly sendgridClient: MailService;
+  constructor(getModel: GetModelFunction) {
+    this.getModel = getModel;
     this.sendgridClient = new MailService();
     this.sendgridClient.setApiKey(environment.sendgridKey);
   }
@@ -51,6 +51,9 @@ export class UserService {
     userDoc: IUserDocument,
     type: EmailTokenType,
   ): Promise<IEmailTokenDocument> {
+    const EmailTokenModel = this.getModel<IEmailTokenDocument>(
+      ModelName.EmailToken,
+    );
     // delete any expired tokens for the same user and email to prevent index constraint conflicts
     await EmailTokenModel.deleteMany({
       userId: userDoc.id,
@@ -133,6 +136,7 @@ export class UserService {
     email?: string,
     username?: string,
   ): Promise<IUserDocument> {
+    const UserModel = this.getModel<IUserDocument>(ModelName.User);
     let userDoc: IUserDocument | null;
 
     if (username) {
@@ -207,6 +211,7 @@ export class UserService {
    * @returns
    */
   public makeUserDoc(newUser: IUser, password: string): IUserDocument {
+    const UserModel = this.getModel<IUserDocument>(ModelName.User);
     const hashedPassword = hashSync(password, constants.BCRYPT_ROUNDS);
     const newUserData: IUser = {
       ...newUser,
@@ -234,6 +239,7 @@ export class UserService {
     userData: ICreateUserBasics,
     password: string,
   ): Promise<IUserDocument> {
+    const UserModel = this.getModel<IUserDocument>(ModelName.User);
     if (!constants.USERNAME_REGEX.test(userData.username)) {
       throw new InvalidUsernameError();
     }
@@ -279,6 +285,9 @@ export class UserService {
    * @param userId
    */
   public async resendEmailToken(userId: string): Promise<void> {
+    const EmailTokenModel = this.getModel<IEmailTokenDocument>(
+      ModelName.EmailToken,
+    );
     const now = new Date();
     const minLastSentTime = new Date(
       now.getTime() - constants.EMAIL_TOKEN_RESEND_INTERVAL,
@@ -307,6 +316,9 @@ export class UserService {
    * @returns
    */
   public async verifyEmailToken(emailToken: string): Promise<boolean> {
+    const EmailTokenModel = this.getModel<IEmailTokenDocument>(
+      ModelName.EmailToken,
+    );
     const token: IEmailTokenDocument | null = await EmailTokenModel.findOne({
       token: emailToken,
     });
@@ -328,6 +340,10 @@ export class UserService {
    * @param emailToken
    */
   public async verifyEmailTokenAndFinalize(emailToken: string): Promise<void> {
+    const EmailTokenModel = this.getModel<IEmailTokenDocument>(
+      ModelName.EmailToken,
+    );
+    const UserModel = this.getModel<IUserDocument>(ModelName.User);
     const token: IEmailTokenDocument | null = await EmailTokenModel.findOne({
       token: emailToken,
     });
@@ -370,6 +386,7 @@ export class UserService {
     currentPassword: string,
     newPassword: string,
   ): Promise<void> {
+    const UserModel = this.getModel<IUserDocument>(ModelName.User);
     const user: IUserDocument | null = await UserModel.findById(userId);
     if (!user) {
       throw new UserNotFoundError();
@@ -397,6 +414,7 @@ export class UserService {
   public async initiatePasswordReset(
     email: string,
   ): Promise<{ success: boolean; message: string }> {
+    const UserModel = this.getModel<IUserDocument>(ModelName.User);
     try {
       const user = await UserModel.findOne({ email: email.toLowerCase() });
       if (!user) {
@@ -445,6 +463,9 @@ export class UserService {
   public async validatePasswordResetToken(
     token: string,
   ): Promise<IEmailTokenDocument> {
+    const EmailTokenModel = this.getModel<IEmailTokenDocument>(
+      ModelName.EmailToken,
+    );
     const emailToken = await EmailTokenModel.findOne({
       token,
       type: EmailTokenType.PasswordReset,
@@ -469,6 +490,10 @@ export class UserService {
     token: string,
     password: string,
   ): Promise<IUserDocument> {
+    const EmailTokenModel = this.getModel<IEmailTokenDocument>(
+      ModelName.EmailToken,
+    );
+    const UserModel = this.getModel<IUserDocument>(ModelName.User);
     const emailToken = await EmailTokenModel.findOne({
       token,
       type: EmailTokenType.PasswordReset,
