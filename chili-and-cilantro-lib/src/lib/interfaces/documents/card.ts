@@ -1,6 +1,7 @@
-import { Document, Types } from 'mongoose';
+import { DefaultIdType } from '../../shared-types';
 import { ICard } from '../card';
+import { IBaseDocument } from './base';
 
-export interface ICardDocument
-  extends ICard,
-    Document<Types.ObjectId, unknown, ICard> {}
+export interface ICardDocument<I = DefaultIdType>
+  extends IBaseDocument<ICard, I>,
+    ICard {}

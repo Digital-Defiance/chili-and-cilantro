@@ -4,13 +4,13 @@
 
 This game is best developed using the included Visual Studio Code DevContainer. This will ensure that all dependencies are installed and configured correctly.
 
-Open the project in Visual Studio Code, and you should be prompted to open the project in a DevContainer- Don't do this right away if you haven't yet configured your .env for the devcontainer. Under .devcontainer, copy .env.example to .env and update the values to suit your needs. You can run ```npm run new:secret``` to generate a new database secret. You'll want to copy the other .env.example file under chili-and-cilantro-api with matching values. Once you have modified the environment configuration files, you can open the command palette and search for "Reopen in Container". (control+shift+p) You'll need access to auth0 in order to get the secrets necessary for the application .env file.
+Open the project in Visual Studio Code, and you should be prompted to open the project in a DevContainer- Don't do this right away if you haven't yet configured your .env for the devcontainer. Under .devcontainer, copy .env.example to .env and update the values to suit your needs. You can run `npm run new:secret` to generate a new database secret. You'll want to copy the other .env.example file under chili-and-cilantro-api with matching values. Once you have modified the environment configuration files, you can open the command palette and search for "Reopen in Container". (control+shift+p) You'll need access to auth0 in order to get the secrets necessary for the application .env file.
 
- If you wish to change the database password later, you'll need to delete the mongo volume in Docker Desktop and restart the container.
+If you wish to change the database password later, you'll need to delete the mongo volume in Docker Desktop and restart the container.
 
-Once you have reopened the project in the DevContainer, you'll have a running mongo instance available on localhost:27017 and your application will be able to use it. The DevContainer will automatically run yarn install for you and this will take a few minutes the first time you load the container. Once it is done you can run ```yarn build-serve:dev``` to build the shared library, react app, and run the node api server in development mode. The application will be available at localhost:3000.
+Once you have reopened the project in the DevContainer, you'll have a running mongo instance available on localhost:27017 and your application will be able to use it. The DevContainer will automatically run yarn install for you and this will take a few minutes the first time you load the container. Once it is done you can run `yarn build-serve:dev` to build the shared library, react app, and run the node api server in development mode. The application will be available at localhost:3000.
 
-See the root package.json for additional commands available to you. ```yarn serve:dev``` will just build and serve the node portion if the library and react apps are unchanged.
+See the root package.json for additional commands available to you. `yarn serve:dev` will just build and serve the node portion if the library and react apps are unchanged.
 
 ## Application Structure
 
@@ -21,12 +21,6 @@ In the root directory, there are sub-directories for the API, shared library, an
 The library has the mongoose schema and model definitions, as well as the typescript interfaces for the models. We have built a custom model framework underneath src/lib/models/BaseModel.ts and we have a custom schema class that references all of the models under src/schema.ts. The model descriptions, etc are in src/lib/schemaModelData.ts. If you add a new model, it must also be added to the ModelName enum in src/lib/enumerations/modelName.ts and src/lib/enumerations/modelNameCollection.ts which has the collection name. The model name is used to reference the model in the schema and the collection name is used to reference the collection in the database. BaseModel.getModel is then used to retrieve the model from the schema.
 
 The interfaces are in the library so that we can reference the model interfaces from the front end to deal with retrieved documents, but the front end doesn't need to know about the schema, however it made sense to leave it all together in the library. In general we have tried to put everything in the library rather than leaving them in the API server or react application.
-
-You'll want access to the Auth0 admin interface, please contact Jessica Mulein for access.
-
-You can create an account using the Register endpoint. A Postman collection is available in the root directory, and you can join the Digital Defiance team on Postman to get access to the test collection. There is a registration page that is incomplete.
-
-After creating an account, in order to get an access token, you'll want to log in to the app on localhost:3000 and then visit [http://localhost:3000/api-access](http://localhost:3000/api-access) and copy your token from that page into the dev environment {{access_token}} variable in postman. You can then register or perform other actions on the site.
 
 # Rules/flow for Chili and Cilantro
 
@@ -43,12 +37,8 @@ After creating an account, in order to get an access token, you'll want to log i
   - If the second player in the turn order increases the bid, we must go through the remainder of the players in the turn order and back through the first before moving to REVEAL phase.
 - Once bidding is settled and we move to the REVEAL phase, the chef must turn over all of their own cards first, and may then select from other chef's ingredients in any order.
 
-# Bootstrapping Auth0
-
-Chili and Cilantro was built with [Project Albatross](https://github.com/Digital-Defiance/project-albatross#readme). Please follow the relevant parts of those instructions for configuring Auth0. You'll create a tenant, a react application, and a machine to machine API.
-
 ## References
 
 - [How to play Skull | Official Rules | UltraBoardGames](https://www.ultraboardgames.com/skull-and-roses/game-rules.php)
-- [Skull (card game) - Wikipedia](https://en.wikipedia.org/wiki/Skull_(card_game))
+- [Skull (card game) - Wikipedia](<https://en.wikipedia.org/wiki/Skull_(card_game)>)
 - [Skull | Board Game | BoardGameGeek](https://boardgamegeek.com/boardgame/92415/skull)

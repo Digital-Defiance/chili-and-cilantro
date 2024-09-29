@@ -1,0 +1,102 @@
+@import '../../styles.scss';
+
+// Splash Page styles
+.splash-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: $primary-dark; // Using dark theme background
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); // Darker shadow for depth
+  text-align: center;
+  color: $text-color; // Use shared text color
+
+  .splash-logo {
+    max-width: 60%;
+    margin-bottom: 1rem;
+  }
+
+  .splash-subdescription {
+    font-size: 1.5rem;
+    color: $highlight-color; // Use highlight color
+    font-family: $font-family; // Shared primary font
+    margin-bottom: 2rem;
+  }
+
+  .feature-list {
+    margin-bottom: 2rem;
+    text-align: left;
+
+    .feature-title {
+      color: $accent-color; // Use accent color for headers
+      font-size: 1.8rem;
+      font-family: $font-secondary; // Use secondary font for contrast
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .feature-bullets {
+      list-style-type: disc;
+      padding-left: 2rem;
+
+      li {
+        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
+        color: $text-muted; // Muted text color for bullets
+        font-family: $font-family;
+      }
+
+      li:hover {
+        color: $text-color; // Highlight bullets on hover
+        transition: color 0.3s ease-in-out;
+      }
+    }
+  }
+
+  .game-description {
+    background-color: $secondary-dark; // Use lighter dark for the card
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); // Subtle shadow for depth
+    margin-bottom: 2rem;
+
+    h3 {
+      color: $highlight-color; // Use highlight color for headers
+      font-family: $font-family;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    p {
+      color: $text-muted; // Muted text for description
+      font-family: $font-family;
+      margin: 0;
+    }
+  }
+
+  .cta-container {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+
+    .btn {
+      @extend .btn; // Extend shared button styles
+      text-decoration: none;
+      text-align: center;
+
+      &-primary {
+        @extend .btn-primary; // Use primary button style
+        &:hover {
+          background-color: $highlight-hover; // Shared hover color
+        }
+      }
+
+      &-secondary {
+        @extend .btn-secondary; // Use secondary button style
+        &:hover {
+          background-color: $accent-hover; // Shared hover color
+        }
+      }
+    }
+  }
+}

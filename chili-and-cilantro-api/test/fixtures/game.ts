@@ -11,9 +11,11 @@ import {
 import { faker } from '@faker-js/faker';
 import { Types } from 'mongoose';
 import { UtilityService } from '../../src/services/utility';
-import { numberBetween } from '../fixtures/utils';
 import { generateChef } from './chef';
+import { MockedModel } from './mocked-model';
+import { generateObjectId } from './objectId';
 import { generateUser } from './user';
+import { numberBetween } from './utils';
 
 export function generateGamePassword(): string {
   let generatedPassword = '';
@@ -36,12 +38,12 @@ export function generateGamePassword(): string {
  */
 export function generateGame(
   withPassword = true,
-  overrides?: Object,
-): IGame & { save: jest.Mock } {
-  const hostChefId = new Types.ObjectId();
-  const hostUserId = new Types.ObjectId();
-  const game = {
-    _id: new Types.ObjectId(),
+  overrides?: object,
+): IGameDocument & MockedModel {
+  const hostChefId = generateObjectId();
+  const hostUserId = generateObjectId();
+  const gameData = {
+    _id: generateObjectId(),
     code: UtilityService.generateGameCode(),
     name: faker.lorem.words(3),
     ...(withPassword ? { password: generateGamePassword() } : {}),
@@ -60,10 +62,21 @@ export function generateGame(
     hostUserId: hostUserId,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
-    save: jest.fn(),
     ...(overrides ? overrides : {}),
-  };
-  game.save.mockImplementation(() => Promise.resolve(game));
+  } as Partial<IGameDocument>;
+
+  const game = {
+    find: jest.fn().mockReturnThis(),
+    findOne: jest.fn().mockReturnThis(),
+    findById: jest.fn().mockReturnThis(),
+    create: jest.fn().mockImplementation((doc) => Promise.resolve(doc)),
+    updateOne: jest.fn().mockResolvedValue({ nModified: 1 }),
+    deleteOne: jest.fn().mockResolvedValue({ deletedCount: 1 }),
+    populate: jest.fn().mockReturnThis(),
+    exec: jest.fn().mockResolvedValue(gameData),
+    save: jest.fn().mockImplementation(() => Promise.resolve(game)),
+    ...gameData,
+  } as IGameDocument & MockedModel;
   return game;
 }
 

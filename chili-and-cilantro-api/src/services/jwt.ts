@@ -26,7 +26,6 @@ export class JwtService {
     if (!userDoc._id) {
       throw new Error('User ID is required to sign JWT token');
     }
-    // look for roles the user is a member of (the role contains the user id in the user's roles array)
     const tokenUser: ITokenUser = {
       userId: userDoc._id.toString(),
     };
@@ -43,8 +42,8 @@ export class JwtService {
 
   /**
    * Verify a JWT token and return the user data
-   * @param token
-   * @returns
+   * @param token The JWT token
+   * @returns The user data
    */
   public async verifyToken(token: string): Promise<ITokenUser> {
     try {
@@ -55,8 +54,7 @@ export class JwtService {
       if (
         typeof decoded === 'object' &&
         decoded !== null &&
-        'userId' in decoded &&
-        'roles' in decoded
+        'userId' in decoded
       ) {
         return {
           userId: decoded.userId as string,

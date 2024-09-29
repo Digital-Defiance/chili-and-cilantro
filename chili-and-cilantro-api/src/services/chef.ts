@@ -1,18 +1,21 @@
 import {
   ChefState,
-  IChef,
+  DefaultIdType,
+  GetModelFunction,
   IChefDocument,
-  IGame,
   IGameDocument,
   IUserDocument,
+  ModelName,
+  NotInGameError,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { ChefModel } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
-import { Document, Types } from 'mongoose';
-import { NotInGameError } from '../errors/not-in-game';
+import { Types } from 'mongoose';
 import { UtilityService } from './utility';
 
 export class ChefService {
-  constructor() {}
+  public readonly getModel: GetModelFunction;
+  constructor(getModel: GetModelFunction) {
+    this.getModel = getModel;
+  }
 
   /**
    * Creates a new chef in the database
@@ -28,9 +31,10 @@ export class ChefService {
     user: IUserDocument,
     userName: string,
     host: boolean,
-    chefId?: Types.ObjectId,
+    chefId?: DefaultIdType,
   ): Promise<IChefDocument> {
-    const chef = await ChefModel.create({
+    const ChefModel = this.getModel<IChefDocument>(ModelName.Chef);
+    return ChefModel.create({
       _id: chefId ?? new Types.ObjectId(),
       gameId: game._id,
       name: userName,
@@ -41,7 +45,6 @@ export class ChefService {
       state: ChefState.LOBBY,
       host: host,
     });
-    return chef;
   }
 
   /**
@@ -54,9 +57,10 @@ export class ChefService {
   public async newChefFromExisting(
     newGame: IGameDocument,
     existingChef: IChefDocument,
-    newChefId?: Types.ObjectId,
+    newChefId?: DefaultIdType,
   ): Promise<IChefDocument> {
-    const newChef = await ChefModel.create({
+    const ChefModel = this.getModel<IChefDocument>(ModelName.Chef);
+    return ChefModel.create({
       _id: newChefId ?? new Types.ObjectId(),
       gameId: newGame._id,
       name: existingChef.name,
@@ -67,7 +71,6 @@ export class ChefService {
       state: ChefState.LOBBY,
       host: existingChef.host,
     });
-    return newChef;
   }
 
   /**
@@ -79,7 +82,8 @@ export class ChefService {
   public async getGameChefOrThrowAsync(
     game: IGameDocument,
     user: IUserDocument,
-  ): Promise<IChef & Document> {
+  ): Promise<IChefDocument> {
+    const ChefModel = this.getModel<IChefDocument>(ModelName.Chef);
     const chef = await ChefModel.findOne({
       gameId: game._id,
       userId: user._id,
@@ -96,14 +100,11 @@ export class ChefService {
    * @returns An array of chef documents
    */
   public async getGameChefsByGameOrIdAsync(
-    gameOrId: string | IGame,
-  ): Promise<(IChef & Document)[]> {
-    // verify that gameOrId is either a string or an IGame by checking whether there's an _id property
-    const hasId = (obj: any): obj is IGame => {
-      return obj._id !== undefined;
-    };
-    const gameId = hasId(gameOrId) ? gameOrId._id.toString() : gameOrId;
-    const chefs = await ChefModel.find({ gameId: gameId });
-    return chefs;
+    gameOrId: string | IGameDocument,
+  ): Promise<IChefDocument[]> {
+    const ChefModel = this.getModel<IChefDocument>(ModelName.Chef);
+    const gameId =
+      typeof gameOrId === 'string' ? gameOrId : gameOrId._id.toString();
+    return ChefModel.find({ gameId: new Types.ObjectId(gameId) });
   }
 }

@@ -2,7 +2,9 @@ import {
   ActionType,
   CardType,
   constants,
+  GetModelFunction,
   IAction,
+  IActionDocument,
   IChefDocument,
   ICreateGameAction,
   ICreateGameActionDocument,
@@ -23,6 +25,9 @@ import {
   IPlaceCardAction,
   IPlaceCardActionDocument,
   IPlaceCardDetails,
+  IQuitGameAction,
+  IQuitGameActionDocument,
+  IQuitGameDetails,
   IStartBiddingAction,
   IStartBiddingActionDocument,
   IStartBiddingDetails,
@@ -30,26 +35,31 @@ import {
   IStartGameActionDocument,
   IStartGameDetails,
   IUserDocument,
+  ModelName,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import {
-  ActionDiscriminatorsByActionType,
-  ActionModel,
-} from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import { ActionDiscriminatorsByActionType } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import { Connection, Model } from 'mongoose';
 
 export class ActionService {
-  constructor() {}
+  private readonly getModel: GetModelFunction;
+  private readonly actionDiscriminators: { [key in ActionType]: Model<any> };
+
+  constructor(getModel: GetModelFunction, connection: Connection) {
+    this.getModel = getModel;
+    this.actionDiscriminators = ActionDiscriminatorsByActionType(connection);
+  }
   public async getGameHistoryAsync(game: IGameDocument): Promise<IAction[]> {
-    const actions = await ActionModel.find({ gameId: game._id }).sort({
+    const ActionModel = this.getModel<IActionDocument>(ModelName.Action);
+    return ActionModel.find({ gameId: game._id }).sort({
       createdAt: 1,
     });
-    return actions;
   }
   public async createGameAsync(
     game: IGameDocument,
     chef: IChefDocument,
     user: IUserDocument,
   ): Promise<ICreateGameActionDocument> {
-    const result = await ActionDiscriminatorsByActionType.CREATE_GAME.create({
+    return this.actionDiscriminators.CREATE_GAME.create({
       gameId: game._id,
       chefId: chef._id,
       userId: user._id,
@@ -57,14 +67,13 @@ export class ActionService {
       details: {} as ICreateGameDetails,
       round: constants.NONE,
     } as ICreateGameAction);
-    return result;
   }
   public async joinGameAsync(
     game: IGameDocument,
     chef: IChefDocument,
     user: IUserDocument,
   ): Promise<IJoinGameActionDocument> {
-    const result = await ActionDiscriminatorsByActionType.JOIN_GAME.create({
+    return this.actionDiscriminators.JOIN_GAME.create({
       gameId: game._id,
       chefId: chef._id,
       userId: user._id,
@@ -72,12 +81,11 @@ export class ActionService {
       details: {} as IJoinGameDetails,
       round: constants.NONE,
     } as IJoinGameAction);
-    return result;
   }
   public async startGameAsync(
     game: IGameDocument,
   ): Promise<IStartGameActionDocument> {
-    const result = await ActionDiscriminatorsByActionType.START_GAME.create({
+    return this.actionDiscriminators.START_GAME.create({
       gameId: game._id,
       chefId: game.hostChefId,
       userId: game.hostUserId,
@@ -85,12 +93,11 @@ export class ActionService {
       details: {} as IStartGameDetails,
       round: game.currentRound,
     } as IStartGameAction);
-    return result;
   }
   public async expireGameAsync(
     game: IGameDocument,
   ): Promise<IExpireGameActionDocument> {
-    const result = ActionDiscriminatorsByActionType.EXPIRE_GAME.create({
+    return this.actionDiscriminators.EXPIRE_GAME.create({
       gameId: game._id,
       chefId: game.hostChefId,
       userId: game.hostUserId,
@@ -98,14 +105,13 @@ export class ActionService {
       details: {} as IExpireGameDetails,
       round: game.currentRound,
     } as IExpireGameAction);
-    return result;
   }
   public async sendMessageAsync(
     game: IGameDocument,
     chef: IChefDocument,
     message: string,
   ): Promise<IMessageActionDocument> {
-    const result = await ActionDiscriminatorsByActionType.MESSAGE.create({
+    return this.actionDiscriminators.MESSAGE.create({
       gameId: game._id,
       chefId: chef._id,
       userId: chef.userId,
@@ -115,14 +121,13 @@ export class ActionService {
       } as IMessageDetails,
       round: game.currentRound,
     } as IMessageAction);
-    return result;
   }
   public async startBiddingAsync(
     game: IGameDocument,
     chef: IChefDocument,
     bid: number,
   ): Promise<IStartBiddingActionDocument> {
-    const result = await ActionDiscriminatorsByActionType.START_BIDDING.create({
+    return this.actionDiscriminators.START_BIDDING.create({
       gameId: game._id,
       chefId: chef._id,
       userId: chef.userId,
@@ -132,13 +137,12 @@ export class ActionService {
       } as IStartBiddingDetails,
       round: game.currentRound,
     } as IStartBiddingAction);
-    return result;
   }
   public async passAsync(
     game: IGameDocument,
     chef: IChefDocument,
   ): Promise<IPassActionDocument> {
-    const result = await ActionDiscriminatorsByActionType.PASS.create({
+    return this.actionDiscriminators.PASS.create({
       gameId: game._id,
       chefId: chef._id,
       userId: chef.userId,
@@ -146,7 +150,6 @@ export class ActionService {
       details: {} as IPassDetails,
       round: game.currentRound,
     } as IPassAction);
-    return result;
   }
   public async placeCardAsync(
     game: IGameDocument,
@@ -154,7 +157,7 @@ export class ActionService {
     cardType: CardType,
     position: number,
   ): Promise<IPlaceCardActionDocument> {
-    const result = await ActionDiscriminatorsByActionType.PLACE_CARD.create({
+    return this.actionDiscriminators.PLACE_CARD.create({
       gameId: game._id,
       chefId: chef._id,
       userId: chef.userId,
@@ -165,6 +168,19 @@ export class ActionService {
       } as IPlaceCardDetails,
       round: game.currentRound,
     } as IPlaceCardAction);
-    return result;
+  }
+
+  public async quitGameAsync(
+    game: IGameDocument,
+    chef: IChefDocument,
+  ): Promise<IQuitGameActionDocument> {
+    return this.actionDiscriminators.QUIT_GAME.create({
+      gameId: game._id,
+      chefId: chef._id,
+      userId: chef.userId,
+      type: ActionType.QUIT_GAME,
+      details: {} as IQuitGameDetails,
+      round: game.currentRound,
+    } as IQuitGameAction);
   }
 }

@@ -4,6 +4,7 @@ import {
   QuitGameReason,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { Schema } from 'mongoose';
+import { ActionSchemaBase } from '../action';
 
 export const QuitGameDetailsSchema = new Schema<IQuitGameDetails>(
   {
@@ -17,5 +18,6 @@ export const QuitGameDetailsSchema = new Schema<IQuitGameDetails>(
 );
 
 export const QuitGameActionSchema = new Schema<IQuitGameActionDocument>({
+  ...ActionSchemaBase,
   details: { type: QuitGameDetailsSchema, required: true },
 });

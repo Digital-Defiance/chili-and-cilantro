@@ -1,12 +1,12 @@
 {
   "root": true,
   "ignorePatterns": ["**/*.test.ts", "**/build/**", "**/dist/**"],
-  "plugins": ["@nrwl/nx", "prettier"],
+  "plugins": ["@nx", "prettier"],
   "overrides": [
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
       "rules": {
-        "@nrwl/nx/enforce-module-boundaries": [
+        "@nx/enforce-module-boundaries": [
           "error",
           {
             "enforceBuildableLibDependency": true,
@@ -18,19 +18,24 @@
               }
             ]
           }
-        ]
+        ],
+        "@typescript-eslint/no-empty-function": [
+          "error",
+          { "allow": ["arrowFunctions", "functions", "methods"] }
+        ],
+        "@nx/dependency-checks": "error"
       }
     },
     {
       "files": ["*.ts", "*.tsx"],
-      "extends": ["plugin:@nrwl/nx/typescript", "plugin:prettier/recommended"],
+      "extends": ["plugin:@nx/typescript", "plugin:prettier/recommended"],
       "rules": {
         "prettier/prettier": "error"
       }
     },
     {
       "files": ["*.js", "*.jsx"],
-      "extends": ["plugin:@nrwl/nx/javascript", "plugin:prettier/recommended"],
+      "extends": ["plugin:@nx/javascript", "plugin:prettier/recommended"],
       "rules": {
         "prettier/prettier": "error"
       }

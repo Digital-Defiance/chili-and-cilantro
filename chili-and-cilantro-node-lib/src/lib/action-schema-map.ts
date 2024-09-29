@@ -1,5 +1,5 @@
 import { ActionType } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { Schema } from 'mongoose';
+import { ActionSchemaMapType } from '../types/shared-types';
 import { CreateGameActionSchema } from './schemas/actions/create-game';
 import { EndGameActionSchema } from './schemas/actions/end-game';
 import { EndRoundActionSchema } from './schemas/actions/end-round';
@@ -15,7 +15,7 @@ import { StartBiddingActionSchema } from './schemas/actions/start-bidding';
 import { StartGameActionSchema } from './schemas/actions/start-game';
 import { StartNewRoundActionSchema } from './schemas/actions/start-new-round';
 
-export const ActionSchemas: Record<string, Schema> = {
+export const ActionSchemas: ActionSchemaMapType = {
   [ActionType.CREATE_GAME]: CreateGameActionSchema,
   [ActionType.END_GAME]: EndGameActionSchema,
   [ActionType.END_ROUND]: EndRoundActionSchema,

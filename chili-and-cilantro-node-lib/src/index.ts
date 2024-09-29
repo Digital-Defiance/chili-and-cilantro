@@ -1,5 +1,8 @@
 export * from './lib/action-schema-map';
 export * from './lib/discriminators/action';
+export * from './lib/interfaces/application';
+export * from './lib/interfaces/schema-data';
+export * from './lib/interfaces/schema-model-data';
 export * from './lib/models/action';
 export * from './lib/models/chef';
 export * from './lib/models/email-token';
@@ -25,3 +28,7 @@ export * from './lib/schemas/chef';
 export * from './lib/schemas/email-token';
 export * from './lib/schemas/game';
 export * from './lib/schemas/user';
+export * from './lib/utils';
+export * from './types/shared-types';
+
+/// <reference path="./types/types.d.ts" />

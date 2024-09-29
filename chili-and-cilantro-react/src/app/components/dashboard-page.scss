@@ -1,0 +1,52 @@
+@import '../../styles.scss';
+
+// Dashboard styles
+.dashboard-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: $light-color;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.dashboard-title {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: $primary-color;
+}
+
+.create-game-button {
+  align-self: center;
+  margin-top: 1rem;
+}
+
+.game-list {
+  h2 {
+    color: $primary-color;
+    margin-bottom: 1rem;
+  }
+
+  ul {
+    list-style-type: none;
+    padding: 0;
+  }
+
+  li {
+    margin-bottom: 0.5rem;
+  }
+
+  a {
+    color: $text-color;
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

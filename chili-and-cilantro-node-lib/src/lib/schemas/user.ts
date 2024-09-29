@@ -24,10 +24,7 @@ export const UserSchema = new Schema<IUserDocument>(
       trim: true,
       validate: {
         validator: async function (value: any) {
-          if (!validator.isEmail(value)) {
-            return false;
-          }
-          return true;
+          return validator.isEmail(value);
         },
       },
     },

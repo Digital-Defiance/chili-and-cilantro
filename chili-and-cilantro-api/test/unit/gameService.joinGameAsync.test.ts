@@ -1,24 +1,29 @@
 import {
+  AlreadyJoinedOtherError,
   constants,
+  DefaultIdType,
+  GameFullError,
+  GameInProgressError,
+  GamePasswordMismatchError,
   GamePhase,
   IChef,
+  IChefDocument,
   IGame,
+  IGameDocument,
+  InvalidUserDisplayNameError,
+  IUserDocument,
   ModelName,
+  UsernameInUseError,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { faker } from '@faker-js/faker';
 import sinon from 'sinon';
-import { AlreadyJoinedOtherError } from '../../src/errors/already-joined-other';
-import { GameFullError } from '../../src/errors/game-full';
-import { GameInProgressError } from '../../src/errors/game-in-progress';
-import { GamePasswordMismatchError } from '../../src/errors/game-password-mismatch';
-import { InvalidUserDisplayNameError } from '../../src/errors/invalid-user-display-name';
-import { UsernameInUseError } from '../../src/errors/username-in-use';
 import { ActionService } from '../../src/services/action';
 import { ChefService } from '../../src/services/chef';
-import { Database } from '../../src/services/database';
 import { GameService } from '../../src/services/game';
 import { PlayerService } from '../../src/services/player';
 import { UtilityService } from '../../src/services/utility';
 import { generateChef } from '../fixtures/chef';
+import { Database } from '../fixtures/database';
 import { generateChefGameUser, generateGame } from '../fixtures/game';
 import { generateObjectId } from '../fixtures/objectId';
 import { mockedWithTransactionAsync } from '../fixtures/transactionManager';
@@ -34,7 +39,7 @@ describe('GameService', () => {
     const database = new Database();
     chefModel = database.getModel<IChef>(ModelName.Chef);
     gameModel = database.getModel<IGame>(ModelName.Game);
-    const actionService = new ActionService(database);
+    const actionService = new ActionService(database.getModel);
     const chefService = new ChefService(chefModel);
     const playerService = new PlayerService(gameModel);
     gameService = new GameService(
@@ -46,7 +51,11 @@ describe('GameService', () => {
   });
 
   describe('validateJoinGameOrThrowAsync', () => {
-    let gameId, game, chef, user, userDisplayName;
+    let gameId: DefaultIdType;
+    let game: IGameDocument;
+    let chef: IChefDocument;
+    let user: IUserDocument;
+    let userDisplayName: string;
 
     beforeEach(() => {
       // Setup initial valid parameters
@@ -55,10 +64,7 @@ describe('GameService', () => {
       user = generated.user;
       chef = generated.chef;
       game = generated.game;
-      userDisplayName = generateString(
-        constants.MIN_USER_DISPLAY_NAME_LENGTH,
-        constants.MAX_USER_DISPLAY_NAME_LENGTH,
-      );
+      userDisplayName = faker.person.firstName();
     });
 
     afterEach(() => {

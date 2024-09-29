@@ -1,12 +1,16 @@
-import { Types } from 'mongoose';
 import { ActionType } from '../../enumerations/action-type';
+import { DefaultIdType } from '../../shared-types';
 import { IHasTimestamps } from '../has-timestamps';
+import { IActionDetailsBase } from './actions/details/base';
 
-export interface IAction extends IHasTimestamps {
-  gameId: Types.ObjectId;
-  chefId: Types.ObjectId;
-  userId: Types.ObjectId;
+export interface IAction<
+  I = DefaultIdType,
+  D extends IActionDetailsBase = IActionDetailsBase,
+> extends IHasTimestamps {
+  gameId: I;
+  chefId: I;
+  userId: I;
   type: ActionType;
-  details: object;
+  details: D;
   round: number;
 }
