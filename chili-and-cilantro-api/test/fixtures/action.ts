@@ -2,6 +2,7 @@ import {
   ActionType,
   CardType,
   constants,
+  DefaultIdType,
   ICreateGameActionObject,
   ICreateGameDetails,
   IExpireGameActionObject,
@@ -22,9 +23,9 @@ import { faker } from '@faker-js/faker';
 import { Types } from 'mongoose';
 
 export function generateCreateGameAction(
-  gameId: Types.ObjectId,
-  chefId: Types.ObjectId,
-  userId: Types.ObjectId,
+  gameId: DefaultIdType,
+  chefId: DefaultIdType,
+  userId: DefaultIdType,
 ): ICreateGameActionObject {
   return {
     _id: new Types.ObjectId(),
@@ -40,9 +41,9 @@ export function generateCreateGameAction(
 }
 
 export function generateJoinGameAction(
-  gameId: Types.ObjectId,
-  chefId: Types.ObjectId,
-  userId: Types.ObjectId,
+  gameId: DefaultIdType,
+  chefId: DefaultIdType,
+  userId: DefaultIdType,
 ): IJoinGameActionObject {
   return {
     _id: new Types.ObjectId(),
@@ -58,9 +59,9 @@ export function generateJoinGameAction(
 }
 
 export function generateStartGameAction(
-  gameId: Types.ObjectId,
-  chefId: Types.ObjectId,
-  userId: Types.ObjectId,
+  gameId: DefaultIdType,
+  chefId: DefaultIdType,
+  userId: DefaultIdType,
 ): IStartGameActionObject {
   return {
     _id: new Types.ObjectId(),
@@ -76,9 +77,9 @@ export function generateStartGameAction(
 }
 
 export function generateExpireGameAction(
-  gameId: Types.ObjectId,
-  chefId: Types.ObjectId,
-  userId: Types.ObjectId,
+  gameId: DefaultIdType,
+  chefId: DefaultIdType,
+  userId: DefaultIdType,
 ): IExpireGameActionObject {
   return {
     _id: new Types.ObjectId(),
@@ -94,9 +95,9 @@ export function generateExpireGameAction(
 }
 
 export function generateSendMessageAction(
-  gameId: Types.ObjectId,
-  chefId: Types.ObjectId,
-  userId: Types.ObjectId,
+  gameId: DefaultIdType,
+  chefId: DefaultIdType,
+  userId: DefaultIdType,
   message: string,
 ): IMessageActionObject {
   return {
@@ -115,9 +116,9 @@ export function generateSendMessageAction(
 }
 
 export function generateStartBiddingAction(
-  gameId: Types.ObjectId,
-  chefId: Types.ObjectId,
-  userId: Types.ObjectId,
+  gameId: DefaultIdType,
+  chefId: DefaultIdType,
+  userId: DefaultIdType,
   round: number,
   bid: number,
 ): IStartBiddingActionObject {
@@ -137,9 +138,9 @@ export function generateStartBiddingAction(
 }
 
 export function generatePassAction(
-  gameId: Types.ObjectId,
-  chefId: Types.ObjectId,
-  userId: Types.ObjectId,
+  gameId: DefaultIdType,
+  chefId: DefaultIdType,
+  userId: DefaultIdType,
   round: number,
 ): IPassActionObject {
   return {
@@ -156,9 +157,9 @@ export function generatePassAction(
 }
 
 export function generatePlaceCardAction(
-  gameId: Types.ObjectId,
-  chefId: Types.ObjectId,
-  userId: Types.ObjectId,
+  gameId: DefaultIdType,
+  chefId: DefaultIdType,
+  userId: DefaultIdType,
   round: number,
   cardType: CardType,
   position: number,

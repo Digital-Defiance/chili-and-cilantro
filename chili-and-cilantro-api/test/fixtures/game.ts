@@ -11,9 +11,9 @@ import {
 import { faker } from '@faker-js/faker';
 import { Types } from 'mongoose';
 import { UtilityService } from '../../src/services/utility';
-import { numberBetween } from '../fixtures/utils';
 import { generateChef } from './chef';
 import { generateUser } from './user';
+import { numberBetween } from './utils';
 
 export function generateGamePassword(): string {
   let generatedPassword = '';

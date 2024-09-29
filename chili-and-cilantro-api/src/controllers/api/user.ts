@@ -3,14 +3,17 @@ import {
   constants,
   EmailTokenExpiredError,
   EmailTokenUsedOrInvalidError,
+  GetModelFunction,
   IApiMessageResponse,
+  ICreateUserBasics,
   InvalidCredentialsError,
   InvalidPasswordError,
   IRequestUser,
   ITokenResponse,
+  IUserDocument,
   IUserResponse,
+  ModelName,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { UserModel } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { Request, Response } from 'express';
 import { body, query } from 'express-validator';
 import { MongooseValidationError } from '../../errors/mongoose-validation-error';
@@ -28,10 +31,10 @@ export class UserController extends BaseController {
   private jwtService: JwtService;
   private userService: UserService;
 
-  constructor() {
-    super();
+  constructor(getModel: GetModelFunction) {
+    super(getModel);
     this.jwtService = new JwtService();
-    this.userService = new UserService();
+    this.userService = new UserService(getModel);
   }
 
   protected getRoutes(): RouteConfig[] {
@@ -248,6 +251,7 @@ export class UserController extends BaseController {
    * @returns
    */
   private async refreshToken(req: Request, res: Response) {
+    const UserModel = this.getModel<IUserDocument>(ModelName.User);
     try {
       const token = findAuthToken(req.headers);
       if (!token) {
@@ -297,9 +301,8 @@ export class UserController extends BaseController {
         {
           username: username.trim(),
           email: email.trim(),
-          languages: ['en'],
           timezone: timezone,
-        },
+        } as ICreateUserBasics,
         password,
       );
       this.sendApiMessageResponse(
@@ -393,6 +396,7 @@ export class UserController extends BaseController {
    * @param res
    */
   public async resendVerification(req: Request, res: Response): Promise<void> {
+    const UserModel = this.getModel<IUserDocument>(ModelName.User);
     try {
       const { username, email } = req.body;
 
@@ -543,5 +547,3 @@ export class UserController extends BaseController {
     }
   }
 }
-
-export default new UserController().router;

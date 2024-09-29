@@ -1,3 +1,3 @@
 import { IActionObject } from '../action';
 
-export interface ICreateGameActionObject extends IActionObject {}
+export type ICreateGameActionObject = IActionObject;

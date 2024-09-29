@@ -1,10 +1,10 @@
-import { Types } from 'mongoose';
+import { DefaultIdType } from '../shared-types';
 
 export interface IBid {
   /**
    * The chef who made the bid or pass
    */
-  chefId: Types.ObjectId;
+  chefId: DefaultIdType;
   /**
    * The new bid amount. If the chef is passing, the bid remains the same.
    */

@@ -3,6 +3,7 @@ import {
   IMakeBidDetails,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { Schema } from 'mongoose';
+import { ActionSchemaBase } from '../action';
 
 export const MakeBidDetailsSchema = new Schema<IMakeBidDetails>(
   {
@@ -12,5 +13,6 @@ export const MakeBidDetailsSchema = new Schema<IMakeBidDetails>(
 );
 
 export const MakeBidActionSchema = new Schema<IMakeBidActionDocument>({
+  ...ActionSchemaBase,
   details: { type: MakeBidDetailsSchema, required: true },
 });

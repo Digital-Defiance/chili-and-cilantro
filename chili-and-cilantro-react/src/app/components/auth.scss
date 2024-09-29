@@ -1,0 +1,74 @@
+@import '../../styles.scss';
+
+// Auth container (for login and registration)
+.auth-container {
+  max-width: 400px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: $light-color;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+
+  .auth-title {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: $primary-color;
+  }
+
+  .auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    .error-message {
+      color: $danger-color;
+      margin-bottom: 1rem;
+    }
+
+    .form-group {
+      position: relative;
+
+      .error {
+        color: $danger-color;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+      }
+    }
+
+    .form-errors {
+      color: $danger-color;
+      margin-bottom: 1rem;
+    }
+
+    button[type='submit'] {
+      @extend .btn;
+      @extend .btn-primary;
+      width: 100%;
+    }
+
+    .toggle-login-type {
+      text-align: center;
+      margin-top: 1rem;
+
+      a {
+        color: $primary-color;
+        text-decoration: none;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+
+    .resend-verification {
+      @extend .btn;
+      @extend .btn-primary;
+      margin-top: 1rem;
+    }
+  }
+
+  .auth-links {
+    display: flex;
+    flex-direction: column;
+  }
+}

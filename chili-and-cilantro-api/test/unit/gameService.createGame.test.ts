@@ -1,16 +1,16 @@
 import {
+  AlreadyJoinedOtherError,
   constants,
   IChef,
   IGame,
+  InvalidGameNameError,
+  InvalidGameParameterError,
+  InvalidGamePasswordError,
+  InvalidUserDisplayNameError,
   ModelName,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { InvalidGameNameError } from 'chili-and-cilantro-api/src/errors/invalidGameName';
-import { InvalidGameParameterError } from 'chili-and-cilantro-api/src/errors/invalidGameParameter';
-import { InvalidGamePasswordError } from 'chili-and-cilantro-api/src/errors/invalidGamePassword';
 import { UtilityService } from 'chili-and-cilantro-api/src/services/utility';
 import sinon from 'sinon';
-import { AlreadyJoinedOtherError } from '../../src/errors/already-joined-other';
-import { InvalidUserDisplayNameError } from '../../src/errors/invalid-user-display-name';
 import { ActionService } from '../../src/services/action';
 import { ChefService } from '../../src/services/chef';
 import { Database } from '../../src/services/database';

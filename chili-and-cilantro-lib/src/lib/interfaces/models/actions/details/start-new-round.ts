@@ -1,1 +1,3 @@
-export interface IStartNewRoundDetails {}
+import { IActionDetailsBase } from './base';
+
+export interface IStartNewRoundDetails extends IActionDetailsBase {}

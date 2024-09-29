@@ -1,1 +1,3 @@
-export interface IPassDetails {}
+import { IActionDetailsBase } from './base';
+
+export interface IPassDetails extends IActionDetailsBase {}

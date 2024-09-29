@@ -3,6 +3,7 @@ import {
   IStartGameDetails,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { Schema } from 'mongoose';
+import { ActionSchemaBase } from '../action';
 
 export const StartGameDetailsSchema = new Schema<IStartGameDetails>(
   {},
@@ -10,5 +11,6 @@ export const StartGameDetailsSchema = new Schema<IStartGameDetails>(
 );
 
 export const StartGameActionSchema = new Schema<IStartGameActionDocument>({
+  ...ActionSchemaBase,
   details: { type: StartGameDetailsSchema, required: true },
 });

@@ -1,16 +1,8 @@
-import {
-  IBaseDocument,
-  ModelName,
-  ModelNameCollection,
-} from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { Model, Schema } from 'mongoose';
+import { IBaseDocument } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { Model } from 'mongoose';
+import { ISchemaData } from './schema-data';
 
-export interface ISchemaModelData<T extends IBaseDocument<T>> {
-  name: ModelName;
-  description: string;
-  collection: ModelNameCollection;
+export interface ISchemaModelData<T extends IBaseDocument<any>>
+  extends ISchemaData<T> {
   model: Model<T>;
-  schema: Schema<T>;
-  path: string;
-  discriminators?: Array<Model<any>>;
 }

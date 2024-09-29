@@ -2,7 +2,9 @@ import {
   ActionType,
   CardType,
   constants,
+  GetModelFunction,
   IAction,
+  IActionDocument,
   IChefDocument,
   ICreateGameAction,
   ICreateGameActionDocument,
@@ -30,41 +32,46 @@ import {
   IStartGameActionDocument,
   IStartGameDetails,
   IUserDocument,
+  ModelName,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import {
-  ActionDiscriminatorsByActionType,
-  ActionModel,
-} from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import { ActionDiscriminatorsByActionType } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import { Connection } from 'mongoose';
 
 export class ActionService {
-  constructor() {}
+  private readonly getModel: GetModelFunction;
+  private readonly connection: Connection;
+  constructor(getModel: GetModelFunction, connection: Connection) {
+    this.getModel = getModel;
+    this.connection = connection;
+  }
   public async getGameHistoryAsync(game: IGameDocument): Promise<IAction[]> {
-    const actions = await ActionModel.find({ gameId: game._id }).sort({
+    const ActionModel = this.getModel<IActionDocument>(ModelName.Action);
+    return ActionModel.find({ gameId: game._id }).sort({
       createdAt: 1,
     });
-    return actions;
   }
   public async createGameAsync(
     game: IGameDocument,
     chef: IChefDocument,
     user: IUserDocument,
   ): Promise<ICreateGameActionDocument> {
-    const result = await ActionDiscriminatorsByActionType.CREATE_GAME.create({
-      gameId: game._id,
-      chefId: chef._id,
-      userId: user._id,
-      type: ActionType.CREATE_GAME,
-      details: {} as ICreateGameDetails,
-      round: constants.NONE,
-    } as ICreateGameAction);
-    return result;
+    return ActionDiscriminatorsByActionType(this.connection).CREATE_GAME.create(
+      {
+        gameId: game._id,
+        chefId: chef._id,
+        userId: user._id,
+        type: ActionType.CREATE_GAME,
+        details: {} as ICreateGameDetails,
+        round: constants.NONE,
+      } as ICreateGameAction,
+    );
   }
   public async joinGameAsync(
     game: IGameDocument,
     chef: IChefDocument,
     user: IUserDocument,
   ): Promise<IJoinGameActionDocument> {
-    const result = await ActionDiscriminatorsByActionType.JOIN_GAME.create({
+    return ActionDiscriminatorsByActionType(this.connection).JOIN_GAME.create({
       gameId: game._id,
       chefId: chef._id,
       userId: user._id,
@@ -72,12 +79,11 @@ export class ActionService {
       details: {} as IJoinGameDetails,
       round: constants.NONE,
     } as IJoinGameAction);
-    return result;
   }
   public async startGameAsync(
     game: IGameDocument,
   ): Promise<IStartGameActionDocument> {
-    const result = await ActionDiscriminatorsByActionType.START_GAME.create({
+    return ActionDiscriminatorsByActionType(this.connection).START_GAME.create({
       gameId: game._id,
       chefId: game.hostChefId,
       userId: game.hostUserId,
@@ -85,27 +91,27 @@ export class ActionService {
       details: {} as IStartGameDetails,
       round: game.currentRound,
     } as IStartGameAction);
-    return result;
   }
   public async expireGameAsync(
     game: IGameDocument,
   ): Promise<IExpireGameActionDocument> {
-    const result = ActionDiscriminatorsByActionType.EXPIRE_GAME.create({
-      gameId: game._id,
-      chefId: game.hostChefId,
-      userId: game.hostUserId,
-      type: ActionType.EXPIRE_GAME,
-      details: {} as IExpireGameDetails,
-      round: game.currentRound,
-    } as IExpireGameAction);
-    return result;
+    return ActionDiscriminatorsByActionType(this.connection).EXPIRE_GAME.create(
+      {
+        gameId: game._id,
+        chefId: game.hostChefId,
+        userId: game.hostUserId,
+        type: ActionType.EXPIRE_GAME,
+        details: {} as IExpireGameDetails,
+        round: game.currentRound,
+      } as IExpireGameAction,
+    );
   }
   public async sendMessageAsync(
     game: IGameDocument,
     chef: IChefDocument,
     message: string,
   ): Promise<IMessageActionDocument> {
-    const result = await ActionDiscriminatorsByActionType.MESSAGE.create({
+    return ActionDiscriminatorsByActionType(this.connection).MESSAGE.create({
       gameId: game._id,
       chefId: chef._id,
       userId: chef.userId,
@@ -115,14 +121,15 @@ export class ActionService {
       } as IMessageDetails,
       round: game.currentRound,
     } as IMessageAction);
-    return result;
   }
   public async startBiddingAsync(
     game: IGameDocument,
     chef: IChefDocument,
     bid: number,
   ): Promise<IStartBiddingActionDocument> {
-    const result = await ActionDiscriminatorsByActionType.START_BIDDING.create({
+    return ActionDiscriminatorsByActionType(
+      this.connection,
+    ).START_BIDDING.create({
       gameId: game._id,
       chefId: chef._id,
       userId: chef.userId,
@@ -132,13 +139,12 @@ export class ActionService {
       } as IStartBiddingDetails,
       round: game.currentRound,
     } as IStartBiddingAction);
-    return result;
   }
   public async passAsync(
     game: IGameDocument,
     chef: IChefDocument,
   ): Promise<IPassActionDocument> {
-    const result = await ActionDiscriminatorsByActionType.PASS.create({
+    return ActionDiscriminatorsByActionType(this.connection).PASS.create({
       gameId: game._id,
       chefId: chef._id,
       userId: chef.userId,
@@ -146,7 +152,6 @@ export class ActionService {
       details: {} as IPassDetails,
       round: game.currentRound,
     } as IPassAction);
-    return result;
   }
   public async placeCardAsync(
     game: IGameDocument,
@@ -154,7 +159,7 @@ export class ActionService {
     cardType: CardType,
     position: number,
   ): Promise<IPlaceCardActionDocument> {
-    const result = await ActionDiscriminatorsByActionType.PLACE_CARD.create({
+    return ActionDiscriminatorsByActionType(this.connection).PLACE_CARD.create({
       gameId: game._id,
       chefId: chef._id,
       userId: chef.userId,
@@ -165,6 +170,5 @@ export class ActionService {
       } as IPlaceCardDetails,
       round: game.currentRound,
     } as IPlaceCardAction);
-    return result;
   }
 }

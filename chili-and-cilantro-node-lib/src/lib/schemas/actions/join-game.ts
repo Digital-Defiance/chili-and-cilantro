@@ -3,6 +3,7 @@ import {
   IJoinGameDetails,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { Schema } from 'mongoose';
+import { ActionSchemaBase } from '../action';
 
 export const JoinGameDetailsSchema = new Schema<IJoinGameDetails>(
   {},
@@ -10,5 +11,6 @@ export const JoinGameDetailsSchema = new Schema<IJoinGameDetails>(
 );
 
 export const JoinGameActionSchema = new Schema<IJoinGameActionDocument>({
+  ...ActionSchemaBase,
   details: { type: JoinGameDetailsSchema, required: true },
 });
