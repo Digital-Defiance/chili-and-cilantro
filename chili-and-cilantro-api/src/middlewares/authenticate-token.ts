@@ -1,8 +1,10 @@
 import {
   AccountStatusTypeEnum,
   ITokenUser,
+  IUserDocument,
+  ModelName,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { UserModel } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import { GetModelFunction } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { NextFunction, Request, Response } from 'express';
 import { IncomingHttpHeaders } from 'http';
 import { JwtService } from '../services/jwt';
@@ -20,10 +22,12 @@ export function findAuthToken(headers: IncomingHttpHeaders): string | null {
 }
 
 export function authenticateToken(
+  getModel: GetModelFunction,
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
+  const UserModel = getModel<IUserDocument>(ModelName.User);
   const token = findAuthToken(req.headers);
   if (token == null) {
     return res.status(401).send('No token provided');

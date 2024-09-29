@@ -1,10 +1,8 @@
 import { Types } from 'mongoose';
 import { GamePhase } from '../../enumerations/game-phase';
 import { IBid } from '../bid';
-import { IHasID } from '../has-id';
-import { IHasTimestamps } from '../has-timestamps';
 
-export interface IGame extends IHasID, IHasTimestamps {
+export interface IGame {
   /**
    * The game code.
    */
