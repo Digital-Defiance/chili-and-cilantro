@@ -2,12 +2,7 @@ import { IEnvironment } from '../interfaces/environment';
 
 export const environment: IEnvironment = {
   production: true,
-  auth0: {
-    domain: 'digital-defiance-dev.us.auth0.com',
-    clientId: 'nKniP4feafxk1eNVpeWS2N1oJ0uPK9xF',
-    audience: 'http://localhost:3000/',
-    callbackUrl: 'http://localhost:3000/callback',
-  },
+  debugI18n: false,
   game: {
     apiUrl: 'http://localhost:3000/api',
     socketHost: 'http://localhost:3000',

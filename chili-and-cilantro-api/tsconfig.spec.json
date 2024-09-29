@@ -7,9 +7,14 @@
   },
   "include": [
     "jest.config.ts",
+    "__mocks__/**/*.ts",
+    "src/mocks/*.ts",
+    "src/mocks/models/**/*.ts",
     "src/**/*.test.ts",
     "src/**/*.spec.ts",
     "src/**/*.d.ts",
+    "src/types/jest.d.ts",
+    "test/fixtures/**/*.ts",
     "test/**/*.test.ts"
   ]
 }

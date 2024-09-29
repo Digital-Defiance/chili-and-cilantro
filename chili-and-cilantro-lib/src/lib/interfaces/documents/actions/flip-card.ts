@@ -1,6 +1,8 @@
+import { DefaultIdType } from '../../../shared-types';
+import { IFlipCardDetails } from '../../models/actions/details/flip-card';
 import { IFlipCardAction } from '../../models/actions/flip-card';
-import { IBaseDocument } from '../base';
+import { IActionDocument } from '../action';
 
-export interface IFlipCardActionDocument
-  extends IFlipCardAction,
-    IBaseDocument<IFlipCardAction> {}
+export interface IFlipCardActionDocument<I = DefaultIdType>
+  extends IActionDocument<I, IFlipCardDetails>,
+    IFlipCardAction<I> {}

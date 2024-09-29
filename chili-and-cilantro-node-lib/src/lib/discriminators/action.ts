@@ -1,54 +1,35 @@
 import {
-  ActionDocumentTypes,
-  ActionDocumentTypesMap,
   ActionType,
   ActionTypeRecordMap,
   IActionDocument,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import mongoose, { Model, Schema } from 'mongoose';
+import { Model, Schema } from 'mongoose';
 import { ActionSchemas } from '../action-schema-map';
+import { IDiscriminatorCollections } from '../interfaces/discriminator-collections';
 
-const BaseSchema = new Schema(
-  {},
-  { discriminatorKey: 'kind', timestamps: true },
-);
-const BaseModel = mongoose.model<IActionDocument>('Base', BaseSchema);
-
-function generateDiscriminators<T extends ActionType>(
-  baseModel: mongoose.Model<any>,
-  actionEnum: Record<string, T>,
-  actionSchemas: Record<T, Schema>,
-  actionDocumentTypeMap: ActionDocumentTypes,
-): {
-  discriminatorRecords: Record<string, mongoose.Model<any>>;
-  discriminatorArray: Array<mongoose.Model<any>>;
-} {
-  const discriminatorRecords: Record<string, mongoose.Model<any>> = {};
-  const discriminatorArray: Array<mongoose.Model<any>> = [];
+function generateDiscriminators<T extends IActionDocument>(
+  baseModel: Model<T>,
+  actionEnum: Record<string, ActionType>,
+  actionSchemas: Record<ActionType, Schema>,
+): IDiscriminatorCollections<T> {
+  const discriminatorRecords: Record<string, Model<T>> = {};
+  const discriminatorArray: Array<Model<T>> = [];
 
   Object.keys(actionEnum).forEach((actionKey) => {
     const action = actionEnum[actionKey as keyof typeof actionEnum];
     const schema = actionSchemas[action];
-    const type = actionDocumentTypeMap[action];
+    //const type = actionDocumentTypeMap[action];
 
     // Ensure the correct type is inferred here
-    const discriminator = baseModel.discriminator(action, schema);
+    const discriminator = baseModel.discriminator<T>(action, schema);
     discriminatorRecords[action] = discriminator;
     discriminatorArray.push(discriminator);
   });
 
-  return { discriminatorRecords, discriminatorArray };
+  return { byType: discriminatorRecords, array: discriminatorArray };
 }
 
-const ActionDiscriminators = generateDiscriminators(
-  BaseModel,
-  ActionTypeRecordMap,
-  ActionSchemas,
-  ActionDocumentTypesMap,
-);
-const ActionDiscriminatorsByActionType: { [key in ActionType]: Model<any> } =
-  ActionDiscriminators.discriminatorRecords as {
-    [key in ActionType]: Model<any>;
-  };
-
-export { ActionDiscriminators, ActionDiscriminatorsByActionType, BaseModel };
+export const ActionDiscriminators = <T extends IActionDocument>(
+  baseModel: Model<T>,
+): IDiscriminatorCollections<T> =>
+  generateDiscriminators<T>(baseModel, ActionTypeRecordMap, ActionSchemas);

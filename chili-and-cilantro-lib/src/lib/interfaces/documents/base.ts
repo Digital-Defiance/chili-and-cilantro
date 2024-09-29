@@ -1,4 +1,4 @@
-import { Document, Types } from 'mongoose';
+import { Document } from 'mongoose';
+import { DefaultIdType } from '../../shared-types';
 
-export interface IBaseDocument<T>
-  extends Document<Types.ObjectId, unknown, T> {}
+export type IBaseDocument<T, I = DefaultIdType> = Document<I, unknown, T> & T;

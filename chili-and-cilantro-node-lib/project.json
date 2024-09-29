@@ -13,7 +13,10 @@
         "outputPath": "dist/chili-and-cilantro-node-lib",
         "main": "chili-and-cilantro-node-lib/src/index.ts",
         "tsConfig": "chili-and-cilantro-node-lib/tsconfig.lib.json",
-        "assets": ["chili-and-cilantro-node-lib/*.md"]
+        "assets": [
+          "chili-and-cilantro-node-lib/*.md",
+          "chili-and-cilantro-node-lib/src/lib/types.d.ts"
+        ]
       }
     },
     "lint": {

@@ -1,0 +1,239 @@
+@use 'sass:color';
+// Color Base
+$logo-background-color: #fffdd0;
+$green-chili: #7edb0e;
+$green-chili-shadow: #0e683c;
+$red-chili: #ff081f;
+$red-chili-shadow: #9c0020;
+$cilantro-light: #e3fe2d;
+$cilantro-dark: #24b215;
+
+$new-dark: #05070b;
+$new-green: #375c4b;
+$new-lightGreen: #78bf33;
+$new-red: #cc2129;
+$new-gray: #cfcdc8;
+
+// Theme colors
+$primary-dark: $new-dark; // Darker shade for text
+$secondary-dark: $new-gray; // Medium gray for secondary text
+$highlight-color: $new-lightGreen; // Green chili as highlight
+$accent-color: $new-red; // Red chili as accent
+$text-color: #000000; // Black text for readability
+$text-color-light: #ffffff; // White text for contrast
+$text-color-muted: $new-gray; // Muted gray for secondary text
+$text-muted: #666666; // Muted gray for secondary text
+$danger-color: $new-red; // Red chili for danger/alerts
+$success-color: $new-lightGreen; // Green chili for success feedback
+$border-color: #e0e0e0; // Light gray for borders
+
+$primary-color: $new-green;
+$light-color: #ffffff; // White background color
+$background-color: $new-dark; // White background color
+
+// Button hover effects
+$highlight-hover: color.adjust($highlight-color, $lightness: 10%);
+$accent-hover: color.adjust($accent-color, $lightness: 10%);
+
+$font-family: 'Playfair Display', serif;
+$font-secondary: 'McFoodPoisoning', sans-serif;
+
+.btn-primary {
+  background-color: $new-gray;
+  color: $new-dark;
+
+  &:hover {
+    background-color: $new-red;
+  }
+}
+
+.btn-secondary {
+  background-color: $new-gray;
+  color: $new-dark;
+
+  &:hover {
+    background-color: $new-green;
+  }
+}
+
+// Reset and base styles
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: $font-family;
+  font-weight: 400;
+  line-height: 1.6;
+  color: $text-color;
+  background-color: $light-color;
+  padding-top: 30px;
+}
+
+@font-face {
+  font-family: 'Dosmilcatorce';
+  src: url('/assets/fonts/Dosmilcatorce.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Kingsbridge';
+  src: url('/assets/fonts/kingsbridge\ rg.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'McFoodPoisoning';
+  src: url('/assets/fonts/McFoodPoisoning1.woff2') format('woff2');
+  font-weight: 100;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'McFoodPoisoning';
+  src: url('/assets/fonts/McFoodPoisoning2.woff2') format('woff2');
+  font-weight: 200;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'McFoodPoisoning';
+  src: url('/assets/fonts/McFoodPoisoning3.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'McFoodPoisoning';
+  src: url('/assets/fonts/McFoodPoisoning4.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'McFoodPoisoning';
+  src: url('/assets/fonts/McFoodPoisoning5.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'McFoodPoisoning';
+  src: url('/assets/fonts/McFoodPoisoning6.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Playfair Display';
+  src: url('/assets/fonts/PlayfairDisplay-VariableFont_wght.woff2')
+    format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Playfair Display';
+  src: url('/assets/fonts/PlayfairDisplay-Italic-VariableFont_wght.woff2')
+    format('woff2');
+  font-weight: 100 900;
+  font-style: italic;
+}
+
+.playfair-display-regular {
+  font-family: 'Playfair Display', serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.roboto-subhead {
+  font-family: $font-family;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+.roboto-text {
+  font-family: $font-family;
+  font-weight: 400;
+}
+
+// Common form styles
+.form-group {
+  margin-bottom: 1rem;
+
+  label {
+    @extend .roboto-text;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+
+  .help-text {
+    @extend .roboto-text;
+    font-size: 0.875rem;
+    color: $secondary-dark;
+    margin-top: 0.25rem;
+  }
+}
+
+// Button styles
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+
+  &-primary {
+    background-color: $background-color;
+    color: white;
+    border: none;
+
+    &:hover {
+      background-color: color.adjust($background-color, $lightness: -10%);
+    }
+  }
+
+  &-secondary {
+    background-color: $secondary-dark;
+    color: white;
+    border: none;
+
+    &:hover {
+      background-color: color.adjust($secondary-dark, $lightness: -10%);
+    }
+  }
+}
+
+.success-message {
+  color: $success-color;
+  margin-top: 1rem;
+  font-weight: bold;
+}
+
+.error-message {
+  color: $danger-color;
+  margin-top: 1rem;
+  font-weight: bold;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}

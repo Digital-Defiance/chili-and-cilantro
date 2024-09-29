@@ -8,4 +8,5 @@ export default {
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../coverage/chili-and-cilantro-api',
+  setupFiles: ['<rootDir>/test/test-setup.ts'],
 };

@@ -1,14 +1,23 @@
 import {
+  IAction,
+  IActionDocument,
+  IBaseDocument,
+  IChef,
+  IChefDocument,
+  IEmailToken,
+  IEmailTokenDocument,
+  IGame,
+  IGameDocument,
+  IUser,
+  IUserDocument,
   ModelName,
   ModelNameCollection,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { Connection, Model, Schema as MongooseSchema } from 'mongoose';
+import { SchemaMap } from './shared-types';
 import { ActionDiscriminators } from './discriminators/action';
+import { ISchemaData } from './interfaces/schema-data';
 import { ISchemaModelData } from './interfaces/schema-model-data';
-import { ActionModel } from './models/action';
-import { ChefModel } from './models/chef';
-import { EmailTokenModel } from './models/email-token';
-import { GameModel } from './models/game';
-import { UserModel } from './models/user';
 import { ActionSchema } from './schemas/action';
 import { ChefSchema } from './schemas/chef';
 import { EmailTokenSchema } from './schemas/email-token';
@@ -21,25 +30,18 @@ function modelNameCollectionToPath(
   return `/${modelNameCollection as string}`;
 }
 
-/**
- * The schema for all models in the system.
- * This includes the name, description, plural name, and api name of each model.
- */
-export const Schema: Record<ModelName, ISchemaModelData<any>> = {
+export const Schema: { [key in ModelName]: ISchemaData<IBaseDocument<any>> } = {
   [ModelName.Action]: {
     name: ModelName.Action,
     description: 'An action taken by a chef in a game.',
     collection: ModelNameCollection.Action,
-    model: ActionModel,
     schema: ActionSchema,
     path: modelNameCollectionToPath(ModelNameCollection.Action),
-    discriminators: ActionDiscriminators.discriminatorArray,
   },
   [ModelName.Chef]: {
     name: ModelName.Chef,
     description: 'A chef in a game.',
     collection: ModelNameCollection.Chef,
-    model: ChefModel,
     schema: ChefSchema,
     path: modelNameCollectionToPath(ModelNameCollection.Chef),
   },
@@ -47,7 +49,6 @@ export const Schema: Record<ModelName, ISchemaModelData<any>> = {
     name: ModelName.EmailToken,
     description: 'An email token for email verification or password reset',
     collection: ModelNameCollection.EmailToken,
-    model: EmailTokenModel,
     schema: EmailTokenSchema,
     path: modelNameCollectionToPath(ModelNameCollection.EmailToken),
   },
@@ -55,7 +56,6 @@ export const Schema: Record<ModelName, ISchemaModelData<any>> = {
     name: ModelName.Game,
     description: 'A game in the system.',
     collection: ModelNameCollection.Game,
-    model: GameModel,
     schema: GameSchema,
     path: modelNameCollectionToPath(ModelNameCollection.Game),
   },
@@ -63,8 +63,58 @@ export const Schema: Record<ModelName, ISchemaModelData<any>> = {
     name: ModelName.User,
     description: 'A user in the system.',
     collection: ModelNameCollection.User,
-    model: UserModel,
     schema: UserSchema,
     path: modelNameCollectionToPath(ModelNameCollection.User),
   },
 };
+
+export function getSchemaModel<T extends IBaseDocument<D>, D>(
+  modelName: ModelName,
+  connection: Connection,
+  discriminatorCallback?: (model: Model<T>) => void,
+): ISchemaModelData<T> {
+  const value = Schema[modelName];
+  const newModel = connection.model<T>(
+    modelName,
+    value.schema as MongooseSchema<T>,
+    value.collection,
+  );
+  return {
+    ...value,
+    model: newModel,
+    ...(discriminatorCallback
+      ? { discriminators: discriminatorCallback(newModel) }
+      : {}),
+  };
+}
+
+/**
+ * The schema for all models in the system.
+ * This includes the name, description, plural name, and api name of each model.
+ */
+export function getSchemaMap(connection: Connection): SchemaMap {
+  return {
+    [ModelName.Action]: getSchemaModel<IActionDocument, IAction>(
+      ModelName.Action,
+      connection,
+      (baseModel: Model<IActionDocument>) =>
+        ActionDiscriminators<IActionDocument>(baseModel),
+    ),
+    [ModelName.Chef]: getSchemaModel<IChefDocument, IChef>(
+      ModelName.Chef,
+      connection,
+    ),
+    [ModelName.EmailToken]: getSchemaModel<IEmailTokenDocument, IEmailToken>(
+      ModelName.EmailToken,
+      connection,
+    ),
+    [ModelName.Game]: getSchemaModel<IGameDocument, IGame>(
+      ModelName.Game,
+      connection,
+    ),
+    [ModelName.User]: getSchemaModel<IUserDocument, IUser>(
+      ModelName.User,
+      connection,
+    ),
+  };
+}

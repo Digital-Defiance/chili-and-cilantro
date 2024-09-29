@@ -1,4 +1,7 @@
+import { DefaultIdType } from '../../shared-types';
 import { IGame } from '../models/game';
 import { IBaseDocument } from './base';
 
-export interface IGameDocument extends IGame, IBaseDocument<IGame> {}
+export interface IGameDocument<I = DefaultIdType>
+  extends IBaseDocument<IGame, I>,
+    IGame {}

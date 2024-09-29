@@ -1,6 +1,5 @@
+import { DefaultIdType } from '../../../shared-types';
 import { IAction } from '../action';
 import { IMessageDetails } from './details/message';
 
-export interface IMessageAction extends IAction {
-  details: IMessageDetails;
-}
+export type IMessageAction<I = DefaultIdType> = IAction<I, IMessageDetails>;

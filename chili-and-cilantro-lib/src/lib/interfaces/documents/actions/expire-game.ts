@@ -1,6 +1,8 @@
+import { DefaultIdType } from '../../../shared-types';
+import { IExpireGameDetails } from '../../models/actions/details/expire-game';
 import { IExpireGameAction } from '../../models/actions/expire-game';
-import { IBaseDocument } from '../base';
+import { IActionDocument } from '../action';
 
-export interface IExpireGameActionDocument
-  extends IExpireGameAction,
-    IBaseDocument<IExpireGameAction> {}
+export interface IExpireGameActionDocument<I = DefaultIdType>
+  extends IActionDocument<I, IExpireGameDetails>,
+    IExpireGameAction<I> {}

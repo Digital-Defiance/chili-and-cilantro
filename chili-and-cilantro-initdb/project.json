@@ -1,0 +1,74 @@
+{
+  "name": "chili-and-cilantro-initdb",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "chili-and-cilantro-initdb/src",
+  "projectType": "application",
+  "implicitDependencies": [
+    "chili-and-cilantro-lib",
+    "chili-and-cilantro-node-lib"
+  ],
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/esbuild:esbuild",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "platform": "node",
+        "outputPath": "dist/chili-and-cilantro-initdb",
+        "format": ["cjs"],
+        "bundle": false,
+        "main": "chili-and-cilantro-initdb/src/main.ts",
+        "tsConfig": "chili-and-cilantro-initdb/tsconfig.app.json",
+        "assets": ["chili-and-cilantro-initdb/src/assets"],
+        "generatePackageJson": true,
+        "esbuildOptions": {
+          "sourcemap": true,
+          "outExtension": {
+            ".js": ".js"
+          }
+        }
+      },
+      "configurations": {
+        "development": {},
+        "production": {
+          "esbuildOptions": {
+            "sourcemap": false,
+            "outExtension": {
+              ".js": ".js"
+            }
+          }
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "dependsOn": ["build"],
+      "options": {
+        "buildTarget": "chili-and-cilantro-initdb:build",
+        "runBuildTargetDependencies": false
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "chili-and-cilantro-initdb:build:development",
+          "watch": false
+        },
+        "production": {
+          "buildTarget": "chili-and-cilantro-initdb:build:production",
+          "watch": false
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "chili-and-cilantro-initdb/jest.config.ts"
+      }
+    }
+  }
+}

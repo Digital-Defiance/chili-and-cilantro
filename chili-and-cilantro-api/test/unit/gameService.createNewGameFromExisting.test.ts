@@ -10,7 +10,6 @@ import { GameService } from '../../src/services/game';
 import { generateChef } from '../fixtures/chef';
 import { generateChefGameUser, generateGame } from '../fixtures/game';
 import { generateObjectId } from '../fixtures/objectId';
-import { mockedWithTransactionAsync } from '../fixtures/transactionManager';
 
 describe('GameService', () => {
   describe('validateCreateNewGameFromExistingOrThrow', () => {

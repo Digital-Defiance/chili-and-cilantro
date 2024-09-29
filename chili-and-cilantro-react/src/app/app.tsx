@@ -1,103 +1,88 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { useAuth0 } from '@auth0/auth0-react';
-import ApiAccess from '../components/api-access';
-import { AuthenticationGuard } from '../components/authentication-required';
-import Callback from '../components/callback';
-import Game from '../components/game';
-import LoginLink from '../components/login-link';
-import LogoutLink from '../components/logout-link';
-import AccountError from '../pages/account-error';
-import Register from '../pages/register';
-import UserProfile from '../pages/user-profile';
+import { Container, CssBaseline, ThemeProvider } from '@mui/material';
+import { FC } from 'react';
+import { Route, Routes } from 'react-router-dom';
+import '../styles.scss';
+import theme from '../theme';
+import { AuthProvider } from './auth-provider';
+import ApiAccess from './components/api-access';
+import ChangePasswordPage from './components/change-password-page';
+import DashboardPage from './components/dashboard-page';
+import ForgotPasswordPage from './components/forgot-password-page';
+import Game from './components/game';
+import LoginPage from './components/login-page';
+import PrivateRoute from './components/private-route';
+import RegisterPage from './components/register-page';
+import SplashPage from './components/splash-page';
+import TopMenu from './components/top-menu';
+import TranslatedTitle from './components/translated-title';
+import VerifyEmailPage from './components/verify-email-page';
+import { TranslationProvider } from './i18n-provider';
+import { MenuProvider } from './menu-context';
+import { UserProvider } from './user-context';
 
-import { Link, Route, Routes } from 'react-router-dom';
-
-export function App() {
-  const { isAuthenticated } = useAuth0();
+const App: FC = () => {
   return (
-    <div>
-      {/* START: routes */}
-      {/* These routes and navigation have been generated for you */}
-      {/* Feel free to move and update them to fit your needs */}
-      <br />
-      <hr />
-      <br />
-      <div role="navigation">
-        <ul>
-          <li>
-            <Link to="/">Home</Link>
-          </li>
-          <li>
-            <Link to="/page-2">Page 2</Link>
-          </li>
-          {!isAuthenticated && (
-            <li>
-              <Link to="/register">Register</Link>
-            </li>
-          )}
-          {!isAuthenticated && (
-            <li>
-              <LoginLink />
-            </li>
-          )}
-          {isAuthenticated && (
-            <li>
-              <Link to="/game">Game</Link>
-            </li>
-          )}
-          {isAuthenticated && (
-            <li>
-              <Link to="/profile">Profile</Link>
-            </li>
-          )}
-          {isAuthenticated && (
-            <li>
-              <LogoutLink />
-            </li>
-          )}
-        </ul>
-      </div>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <div>
-              This is the generated root route.{' '}
-              <Link to="/page-2">Click here for page 2.</Link>
-            </div>
-          }
-        />
-        <Route path="/callback" element={<Callback />} />
-        <Route path="/register" element={<Register />} />
-        <Route
-          path="/profile"
-          element={
-            <div>
-              <AuthenticationGuard component={UserProfile} />
-            </div>
-          }
-        />
-        <Route
-          path="/api-access"
-          element={
-            <div>
-              <AuthenticationGuard component={ApiAccess} />
-            </div>
-          }
-        />
-        <Route
-          path="/game"
-          element={
-            <div>
-              <AuthenticationGuard component={Game} />
-            </div>
-          }
-        />
-        <Route path="/account-error" element={<AccountError />} />
-      </Routes>
-      {/* END: routes */}
-    </div>
+    <TranslationProvider>
+      <TranslatedTitle />
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <AuthProvider>
+          <UserProvider>
+            <InnerApp />
+          </UserProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </TranslationProvider>
   );
-}
+};
+
+const InnerApp: FC = () => {
+  return (
+    <MenuProvider>
+      <Container className="app-container" sx={{ paddingTop: '64px' }}>
+        <TopMenu />
+        <Routes>
+          <Route path="/" element={<SplashPage />} />
+          <Route
+            path="/api-access"
+            element={
+              <PrivateRoute>
+                <ApiAccess />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/change-password"
+            element={
+              <PrivateRoute>
+                <ChangePasswordPage />
+              </PrivateRoute>
+            }
+          />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route
+            path="/game"
+            element={
+              <PrivateRoute>
+                <Game />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <PrivateRoute>
+                <DashboardPage />
+              </PrivateRoute>
+            }
+          />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        </Routes>
+      </Container>
+    </MenuProvider>
+  );
+};
 
 export default App;

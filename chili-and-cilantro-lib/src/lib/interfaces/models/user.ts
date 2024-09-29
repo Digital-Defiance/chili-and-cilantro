@@ -1,4 +1,5 @@
 import { AccountStatusTypeEnum } from '../../enumerations/account-status-type';
+import { StringLanguages } from '../../enumerations/string-languages';
 import { IHasSoftDelete } from '../has-soft-delete';
 import { IHasSoftDeleter } from '../has-soft-deleter';
 import { IHasTimestampOwners } from '../has-timestamp-owners';
@@ -34,6 +35,10 @@ export interface IUser
    * The user's timezone.
    */
   timezone: string;
+  /**
+   * The user's site language.
+   */
+  siteLanguage: StringLanguages;
   /**
    * The date the user last logged in.
    */

@@ -4,6 +4,7 @@ import {
   IPlaceCardDetails,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { Schema } from 'mongoose';
+import { ActionSchemaBase } from '../action';
 
 export const PlaceCardDetailsSchema = new Schema<IPlaceCardDetails>(
   {
@@ -14,5 +15,6 @@ export const PlaceCardDetailsSchema = new Schema<IPlaceCardDetails>(
 );
 
 export const PlaceCardActionSchema = new Schema<IPlaceCardActionDocument>({
+  ...ActionSchemaBase,
   details: { type: PlaceCardDetailsSchema, required: true },
 });

@@ -3,6 +3,7 @@ import {
   CardType,
   constants,
   IAction,
+  IActionDocument,
   IChefDocument,
   ICreateGameAction,
   ICreateGameActionDocument,
@@ -23,6 +24,9 @@ import {
   IPlaceCardAction,
   IPlaceCardActionDocument,
   IPlaceCardDetails,
+  IQuitGameAction,
+  IQuitGameActionDocument,
+  IQuitGameDetails,
   IStartBiddingAction,
   IStartBiddingActionDocument,
   IStartBiddingDetails,
@@ -30,123 +34,158 @@ import {
   IStartGameActionDocument,
   IStartGameDetails,
   IUserDocument,
+  ModelName,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import {
-  ActionDiscriminatorsByActionType,
-  ActionModel,
-} from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import { IApplication } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import { Model } from 'mongoose';
+import { BaseService } from './base';
 
-export class ActionService {
-  constructor() {}
+export class ActionService extends BaseService {
+  private get actionDiscriminatorsByType(): Record<
+    ActionType,
+    Model<IActionDocument>
+  > {
+    return this.application.schemaMap.Action.discriminators.byType as Record<
+      ActionType,
+      Model<IActionDocument>
+    >;
+  }
+
+  constructor(application: IApplication, useTransactions = true) {
+    super(application, useTransactions);
+  }
+  private async createAction<T extends IActionDocument, U extends IAction>(
+    action: ActionType,
+    data: U,
+  ): Promise<T> {
+    return (await this.actionDiscriminatorsByType[action].create(data)) as T;
+  }
+
   public async getGameHistoryAsync(game: IGameDocument): Promise<IAction[]> {
-    const actions = await ActionModel.find({ gameId: game._id }).sort({
+    const ActionModel = this.application.getModel<IActionDocument>(
+      ModelName.Action,
+    );
+    return ActionModel.find({ gameId: game._id }).sort({
       createdAt: 1,
     });
-    return actions;
   }
   public async createGameAsync(
     game: IGameDocument,
     chef: IChefDocument,
     user: IUserDocument,
   ): Promise<ICreateGameActionDocument> {
-    const result = await ActionDiscriminatorsByActionType.CREATE_GAME.create({
-      gameId: game._id,
-      chefId: chef._id,
-      userId: user._id,
-      type: ActionType.CREATE_GAME,
-      details: {} as ICreateGameDetails,
-      round: constants.NONE,
-    } as ICreateGameAction);
-    return result;
+    return this.createAction<ICreateGameActionDocument, ICreateGameAction>(
+      ActionType.CREATE_GAME,
+      {
+        gameId: game._id,
+        chefId: chef._id,
+        userId: user._id,
+        type: ActionType.CREATE_GAME,
+        details: {} as ICreateGameDetails,
+        round: constants.NONE,
+      } as ICreateGameAction,
+    );
   }
   public async joinGameAsync(
     game: IGameDocument,
     chef: IChefDocument,
     user: IUserDocument,
   ): Promise<IJoinGameActionDocument> {
-    const result = await ActionDiscriminatorsByActionType.JOIN_GAME.create({
-      gameId: game._id,
-      chefId: chef._id,
-      userId: user._id,
-      type: ActionType.JOIN_GAME,
-      details: {} as IJoinGameDetails,
-      round: constants.NONE,
-    } as IJoinGameAction);
-    return result;
+    return this.createAction<IJoinGameActionDocument, IJoinGameAction>(
+      ActionType.JOIN_GAME,
+      {
+        gameId: game._id,
+        chefId: chef._id,
+        userId: user._id,
+        type: ActionType.JOIN_GAME,
+        details: {} as IJoinGameDetails,
+        round: constants.NONE,
+      } as IJoinGameAction,
+    );
   }
   public async startGameAsync(
     game: IGameDocument,
   ): Promise<IStartGameActionDocument> {
-    const result = await ActionDiscriminatorsByActionType.START_GAME.create({
-      gameId: game._id,
-      chefId: game.hostChefId,
-      userId: game.hostUserId,
-      type: ActionType.START_GAME,
-      details: {} as IStartGameDetails,
-      round: game.currentRound,
-    } as IStartGameAction);
-    return result;
+    return this.createAction<IStartGameActionDocument, IStartGameAction>(
+      ActionType.START_GAME,
+      {
+        gameId: game._id,
+        chefId: game.hostChefId,
+        userId: game.hostUserId,
+        type: ActionType.START_GAME,
+        details: {} as IStartGameDetails,
+        round: game.currentRound,
+      } as IStartGameAction,
+    );
   }
   public async expireGameAsync(
     game: IGameDocument,
   ): Promise<IExpireGameActionDocument> {
-    const result = ActionDiscriminatorsByActionType.EXPIRE_GAME.create({
-      gameId: game._id,
-      chefId: game.hostChefId,
-      userId: game.hostUserId,
-      type: ActionType.EXPIRE_GAME,
-      details: {} as IExpireGameDetails,
-      round: game.currentRound,
-    } as IExpireGameAction);
-    return result;
+    return this.createAction<IExpireGameActionDocument, IExpireGameAction>(
+      ActionType.EXPIRE_GAME,
+      {
+        gameId: game._id,
+        chefId: game.hostChefId,
+        userId: game.hostUserId,
+        type: ActionType.EXPIRE_GAME,
+        details: {} as IExpireGameDetails,
+        round: game.currentRound,
+      } as IExpireGameAction,
+    );
   }
   public async sendMessageAsync(
     game: IGameDocument,
     chef: IChefDocument,
     message: string,
   ): Promise<IMessageActionDocument> {
-    const result = await ActionDiscriminatorsByActionType.MESSAGE.create({
-      gameId: game._id,
-      chefId: chef._id,
-      userId: chef.userId,
-      type: ActionType.MESSAGE,
-      details: {
-        message: message,
-      } as IMessageDetails,
-      round: game.currentRound,
-    } as IMessageAction);
-    return result;
+    return this.createAction<IMessageActionDocument, IMessageAction>(
+      ActionType.MESSAGE,
+      {
+        gameId: game._id,
+        chefId: chef._id,
+        userId: chef.userId,
+        type: ActionType.MESSAGE,
+        details: {
+          message: message,
+        } as IMessageDetails,
+        round: game.currentRound,
+      } as IMessageAction,
+    );
   }
   public async startBiddingAsync(
     game: IGameDocument,
     chef: IChefDocument,
     bid: number,
   ): Promise<IStartBiddingActionDocument> {
-    const result = await ActionDiscriminatorsByActionType.START_BIDDING.create({
-      gameId: game._id,
-      chefId: chef._id,
-      userId: chef.userId,
-      type: ActionType.START_BIDDING,
-      details: {
-        bid: bid,
-      } as IStartBiddingDetails,
-      round: game.currentRound,
-    } as IStartBiddingAction);
-    return result;
+    return this.createAction<IStartBiddingActionDocument, IStartBiddingAction>(
+      ActionType.START_BIDDING,
+      {
+        gameId: game._id,
+        chefId: chef._id,
+        userId: chef.userId,
+        type: ActionType.START_BIDDING,
+        details: {
+          bid: bid,
+        } as IStartBiddingDetails,
+        round: game.currentRound,
+      } as IStartBiddingAction,
+    );
   }
   public async passAsync(
     game: IGameDocument,
     chef: IChefDocument,
   ): Promise<IPassActionDocument> {
-    const result = await ActionDiscriminatorsByActionType.PASS.create({
-      gameId: game._id,
-      chefId: chef._id,
-      userId: chef.userId,
-      type: ActionType.PASS,
-      details: {} as IPassDetails,
-      round: game.currentRound,
-    } as IPassAction);
-    return result;
+    return this.createAction<IPassActionDocument, IPassAction>(
+      ActionType.PASS,
+      {
+        gameId: game._id,
+        chefId: chef._id,
+        userId: chef.userId,
+        type: ActionType.PASS,
+        details: {} as IPassDetails,
+        round: game.currentRound,
+      } as IPassAction,
+    );
   }
   public async placeCardAsync(
     game: IGameDocument,
@@ -154,17 +193,36 @@ export class ActionService {
     cardType: CardType,
     position: number,
   ): Promise<IPlaceCardActionDocument> {
-    const result = await ActionDiscriminatorsByActionType.PLACE_CARD.create({
-      gameId: game._id,
-      chefId: chef._id,
-      userId: chef.userId,
-      type: ActionType.PLACE_CARD,
-      details: {
-        cardType: cardType,
-        position: position,
-      } as IPlaceCardDetails,
-      round: game.currentRound,
-    } as IPlaceCardAction);
-    return result;
+    return this.createAction<IPlaceCardActionDocument, IPlaceCardAction>(
+      ActionType.PLACE_CARD,
+      {
+        gameId: game._id,
+        chefId: chef._id,
+        userId: chef.userId,
+        type: ActionType.PLACE_CARD,
+        details: {
+          cardType: cardType,
+          position: position,
+        } as IPlaceCardDetails,
+        round: game.currentRound,
+      } as IPlaceCardAction,
+    );
+  }
+
+  public async quitGameAsync(
+    game: IGameDocument,
+    chef: IChefDocument,
+  ): Promise<IQuitGameActionDocument> {
+    return this.createAction<IQuitGameActionDocument, IQuitGameAction>(
+      ActionType.QUIT_GAME,
+      {
+        gameId: game._id,
+        chefId: chef._id,
+        userId: chef.userId,
+        type: ActionType.QUIT_GAME,
+        details: {} as IQuitGameDetails,
+        round: game.currentRound,
+      } as IQuitGameAction,
+    );
   }
 }

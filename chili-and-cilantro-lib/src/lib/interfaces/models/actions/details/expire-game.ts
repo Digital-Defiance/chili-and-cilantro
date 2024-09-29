@@ -1,1 +1,3 @@
-export interface IExpireGameDetails {}
+import { IActionDetailsBase } from './base';
+
+export type IExpireGameDetails = IActionDetailsBase;

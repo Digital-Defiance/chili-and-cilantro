@@ -1,5 +1,10 @@
 {
-  "extends": ["plugin:@nx/react", "../.eslintrc.json"],
+  "extends": [
+    "plugin:@nx/react",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
+    "../.eslintrc.json"
+  ],
   "ignorePatterns": ["!**/*"],
   "overrides": [
     {
@@ -8,11 +13,26 @@
     },
     {
       "files": ["*.ts", "*.tsx"],
+      "extends": ["plugin:@typescript-eslint/recommended"],
+      "parserOptions": {
+        "project": [
+          "chili-and-cilantro-react/tsconfig.app.json",
+          "chili-and-cilantro-react/tsconfig.spec.json"
+        ]
+      },
       "rules": {}
     },
     {
       "files": ["*.js", "*.jsx"],
       "rules": {}
     }
-  ]
+  ],
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
+  "rules": {
+    "react/react-in-jsx-scope": "off"
+  }
 }

@@ -1,6 +1,8 @@
+import { DefaultIdType } from '../../../shared-types';
+import { IMessageDetails } from '../../models/actions/details/message';
 import { IMessageAction } from '../../models/actions/message';
-import { IBaseDocument } from '../base';
+import { IActionDocument } from '../action';
 
-export interface IMessageActionDocument
-  extends IMessageAction,
-    IBaseDocument<IMessageAction> {}
+export interface IMessageActionDocument<I = DefaultIdType>
+  extends IActionDocument<I, IMessageDetails>,
+    IMessageAction<I> {}
