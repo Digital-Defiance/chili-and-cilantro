@@ -1,12 +1,20 @@
 {
   "root": true,
   "ignorePatterns": ["**/*.test.ts", "**/build/**", "**/dist/**"],
-  "plugins": ["@nrwl/nx", "prettier"],
+  "plugins": ["@nx", "prettier"],
+  "extends": ["plugin:@nx/typescript"],
+  "parserOptions": {
+    "project": ["./tsconfig.base.json", "./*/tsconfig.json"]
+  },
+  "rules": {
+    "prettier/prettier": "error",
+    "@typescript-eslint/no-unnecessary-type-assertion": "error"
+  },
   "overrides": [
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
       "rules": {
-        "@nrwl/nx/enforce-module-boundaries": [
+        "@nx/enforce-module-boundaries": [
           "error",
           {
             "enforceBuildableLibDependency": true,
@@ -18,21 +26,28 @@
               }
             ]
           }
-        ]
+        ],
+        "@typescript-eslint/no-empty-function": [
+          "error",
+          { "allow": ["arrowFunctions", "functions", "methods"] }
+        ],
+        "@nx/dependency-checks": "error"
       }
     },
     {
       "files": ["*.ts", "*.tsx"],
-      "extends": ["plugin:@nrwl/nx/typescript", "plugin:prettier/recommended"],
+      "extends": ["plugin:@nx/typescript", "plugin:prettier/recommended"],
       "rules": {
-        "prettier/prettier": "error"
+        "prettier/prettier": "error",
+        "@typescript-eslint/no-unnecessary-type-assertion": "error"
       }
     },
     {
       "files": ["*.js", "*.jsx"],
-      "extends": ["plugin:@nrwl/nx/javascript", "plugin:prettier/recommended"],
+      "extends": ["plugin:@nx/javascript", "plugin:prettier/recommended"],
       "rules": {
-        "prettier/prettier": "error"
+        "prettier/prettier": "error",
+        "@typescript-eslint/no-unnecessary-type-assertion": "error"
       }
     },
     {

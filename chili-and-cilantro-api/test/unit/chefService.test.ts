@@ -1,11 +1,12 @@
-import { NotInGameError } from 'chili-and-cilantro-api/src/errors/notInGame';
-import constants from 'chili-and-cilantro-lib/src/lib/constants';
+import {
+  ChefState,
+  constants,
+  NotInGameError,
+} from '@chili-and-cilantro/chili-and-cilantro-lib';
 import mongoose, { Types } from 'mongoose';
-import { ChefState } from '../../../chili-and-cilantro-lib/src';
 import { ChefService } from '../../src/services/chef';
 import { UtilityService } from '../../src/services/utility';
 import { generateChefGameUser } from '../fixtures/game';
-import { generateObjectId } from '../fixtures/objectId';
 import { generateUsername } from '../fixtures/user';
 
 // Mocks
@@ -29,7 +30,7 @@ describe('ChefService', () => {
 
   beforeEach(() => {
     mockChefModel = new mongoose.Model();
-    chefService = new ChefService(mockChefModel);
+    chefService = new ChefService();
   });
 
   describe('newChefAsync', () => {
@@ -233,8 +234,8 @@ describe('ChefService', () => {
 
     it('should throw NotInGameError if no chef is found', async () => {
       // Arrange
-      const gameId = generateObjectId();
-      const userId = generateObjectId();
+      const gameId = new Types.ObjectId();
+      const userId = new Types.ObjectId();
       const mockGame = { _id: gameId };
       const mockUser = { _id: userId };
 

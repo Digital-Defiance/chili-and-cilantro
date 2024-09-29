@@ -4,6 +4,7 @@ import {
   ModelName,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { Schema } from 'mongoose';
+import { ActionSchemaBase } from '../action';
 
 export const FlipCardDetailsSchema = new Schema<IFlipCardDetails>(
   {
@@ -15,5 +16,6 @@ export const FlipCardDetailsSchema = new Schema<IFlipCardDetails>(
 );
 
 export const FlipCardActionSchema = new Schema<IFlipCardActionDocument>({
+  ...ActionSchemaBase,
   details: { type: FlipCardDetailsSchema, required: true },
 });

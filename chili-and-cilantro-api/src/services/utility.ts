@@ -3,6 +3,7 @@ import {
   constants,
   ICard,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { randomBytes } from 'crypto';
 
 export abstract class UtilityService {
   /**
@@ -11,9 +12,10 @@ export abstract class UtilityService {
    */
   public static generateGameCode(): string {
     const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const bytes = randomBytes(constants.GAME_CODE_LENGTH);
     let code = '';
     for (let i = 0; i < constants.GAME_CODE_LENGTH; i++) {
-      code += letters.charAt(Math.floor(Math.random() * letters.length));
+      code += letters[bytes[i] % letters.length];
     }
     return code;
   }

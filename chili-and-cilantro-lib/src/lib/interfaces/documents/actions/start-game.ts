@@ -1,6 +1,8 @@
+import { DefaultIdType } from '../../../shared-types';
+import { IStartGameDetails } from '../../models/actions/details/start-game';
 import { IStartGameAction } from '../../models/actions/start-game';
-import { IBaseDocument } from '../base';
+import { IActionDocument } from '../action';
 
-export interface IStartGameActionDocument
-  extends IStartGameAction,
-    IBaseDocument<IStartGameAction> {}
+export interface IStartGameActionDocument<I = DefaultIdType>
+  extends IActionDocument<I, IStartGameDetails>,
+    IStartGameAction<I> {}

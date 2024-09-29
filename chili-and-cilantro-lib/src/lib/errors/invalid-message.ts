@@ -1,4 +1,4 @@
-import { constants } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import constants from '../constants';
 import { ValidationError } from './validation-error';
 
 export class InvalidMessageError extends ValidationError {

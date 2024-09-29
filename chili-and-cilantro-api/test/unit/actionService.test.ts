@@ -2,6 +2,7 @@ import {
   ActionType,
   CardType,
   constants,
+  DefaultIdType,
   IAction,
   IChef,
   ICreateGameAction,
@@ -16,7 +17,7 @@ import {
   IUser,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { faker } from '@faker-js/faker';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 import { IDatabase } from '../../src/interfaces/database';
 import { ActionService } from '../../src/services/action';
 import {
@@ -37,7 +38,7 @@ type MockModel<T = any> = Model<T> &
   };
 
 describe('ActionService', () => {
-  let gameId: Types.ObjectId;
+  let gameId: DefaultIdType;
   let mockGame: IGame;
   let hostChef: IChef;
   let hostUser: IUser;

@@ -1,10 +1,8 @@
-import { Types } from 'mongoose';
 import { GamePhase } from '../../enumerations/game-phase';
+import { DefaultIdType } from '../../shared-types';
 import { IBid } from '../bid';
-import { IHasID } from '../has-id';
-import { IHasTimestamps } from '../has-timestamps';
 
-export interface IGame extends IHasID, IHasTimestamps {
+export interface IGame<I = DefaultIdType> {
   /**
    * The game code.
    */
@@ -20,11 +18,11 @@ export interface IGame extends IHasID, IHasTimestamps {
   /**
    * Chef IDs in the game
    */
-  chefIds: Types.ObjectId[];
+  chefIds: I[];
   /**
    * Eliminated chefs.
    */
-  eliminatedChefIds: Types.ObjectId[];
+  eliminatedChefIds: I[];
   /**
    * Maximum number of chefs that can join the game.
    */
@@ -56,25 +54,25 @@ export interface IGame extends IHasID, IHasTimestamps {
   /**
    * The winning ChefIDs for each round.
    */
-  roundWinners: Record<number, Types.ObjectId>;
+  roundWinners: Record<number, I>;
   /**
    * The turn order for the game. ChefIDs shuffled randomly into a turn order when the game is started.
    */
-  turnOrder: Types.ObjectId[];
+  turnOrder: I[];
   /**
    * The chef ID of the host chef who makes game decisions.
    */
-  hostChefId: Types.ObjectId;
+  hostChefId: I;
   /**
    * The user ID of the host chef who created the game.
    */
-  hostUserId: Types.ObjectId;
+  hostUserId: I;
   /**
    * The ID of the last game this is a continuation of.
    */
-  lastGame?: Types.ObjectId;
+  lastGame?: I;
   /**
    * The winner of the game.
    */
-  winner?: Types.ObjectId;
+  winner?: I;
 }

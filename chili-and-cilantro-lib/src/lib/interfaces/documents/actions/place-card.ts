@@ -1,6 +1,8 @@
+import { DefaultIdType } from '../../../shared-types';
+import { IPlaceCardDetails } from '../../models/actions/details/place-card';
 import { IPlaceCardAction } from '../../models/actions/place-card';
-import { IBaseDocument } from '../base';
+import { IActionDocument } from '../action';
 
-export interface IPlaceCardActionDocument
-  extends IPlaceCardAction,
-    IBaseDocument<IPlaceCardAction> {}
+export interface IPlaceCardActionDocument<I = DefaultIdType>
+  extends IActionDocument<I, IPlaceCardDetails>,
+    IPlaceCardAction<I> {}
