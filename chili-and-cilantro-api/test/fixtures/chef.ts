@@ -1,6 +1,10 @@
-import { ChefState, IChef } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import {
+  ChefState,
+  IChefDocument,
+} from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { faker } from '@faker-js/faker';
 import { UtilityService } from '../../src/services/utility';
+import { MockedModel } from './mocked-model';
 import { generateObjectId } from './objectId';
 
 /**
@@ -8,8 +12,8 @@ import { generateObjectId } from './objectId';
  * @param overrides Any values to override the generated values
  * @returns
  */
-export function generateChef(overrides?: Object): IChef & { save: jest.Mock } {
-  const chef = {
+export function generateChef(overrides?: object): IChefDocument & MockedModel {
+  const chefData = {
     _id: generateObjectId(),
     gameId: generateObjectId(),
     name: faker.person.firstName(),
@@ -19,9 +23,21 @@ export function generateChef(overrides?: Object): IChef & { save: jest.Mock } {
     userId: generateObjectId(),
     state: ChefState.LOBBY,
     host: false,
-    save: jest.fn(),
     ...overrides,
-  };
-  chef.save.mockImplementation(() => Promise.resolve(chef));
+  } as Partial<IChefDocument>;
+
+  const chef = {
+    find: jest.fn().mockReturnThis(),
+    findOne: jest.fn().mockReturnThis(),
+    findById: jest.fn().mockReturnThis(),
+    create: jest.fn().mockImplementation((doc) => Promise.resolve(doc)),
+    updateOne: jest.fn().mockResolvedValue({ nModified: 1 }),
+    deleteOne: jest.fn().mockResolvedValue({ deletedCount: 1 }),
+    populate: jest.fn().mockReturnThis(),
+    exec: jest.fn().mockResolvedValue(chefData),
+    save: jest.fn().mockImplementation(() => Promise.resolve(chef)),
+    sort: jest.fn().mockReturnThis(),
+    ...chefData,
+  } as IChefDocument & MockedModel;
   return chef;
 }

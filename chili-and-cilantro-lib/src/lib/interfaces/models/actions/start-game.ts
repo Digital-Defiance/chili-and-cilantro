@@ -1,6 +1,5 @@
+import { DefaultIdType } from '../../../shared-types';
 import { IAction } from '../action';
 import { IStartGameDetails } from './details/start-game';
 
-export interface IStartGameAction extends IAction {
-  details: IStartGameDetails;
-}
+export type IStartGameAction<I = DefaultIdType> = IAction<I, IStartGameDetails>;

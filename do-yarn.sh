@@ -1,32 +1,25 @@
 #!/bin/bash
 
-# Find all package.json files, excluding node_modules, dist, and hidden directories
-PACKAGE_ROOTS=$(find . -type f -name "package.json" ! -path "*/node_modules/*" ! -path "*/dist/*" ! -path "*/.*/*")
+# Detect project root
+PROJECT_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+cd "$PROJECT_ROOT"
 
-# Make sure we start with the project root
-PROJECT_ROOT=$(pwd)
+# Find all package.json files excluding the project root's package.json
+PACKAGE_ROOTS=$(find . -type f -name "package.json" ! -path "*/node_modules/*" ! -path "*/dist/*" ! -path "*/.*/*" ! -path "./package.json")
 
 # Run yarn in the project root
-echo "Running yarn in $PROJECT_ROOT"
+echo "Running yarn \"$@\" in $PROJECT_ROOT"
 yarn "$@"
 
-# Loop through each package.json file
+# Process each package.json file in subdirectories
 for PACKAGE in $PACKAGE_ROOTS; do
-  # Get the directory containing the package.json file
   PACKAGE_DIR=$(dirname "$PACKAGE")
   
-  # Skip the project root directory
-  if [ "$PACKAGE_DIR" == "$PROJECT_ROOT" ]; then
-    continue
+  # Validate the package directory
+  if [ -f "$PACKAGE_DIR/yarn.lock" ] || [ -f "$PACKAGE_DIR/package.json" ]; then
+    echo "Running yarn in $PACKAGE_DIR"
+    (cd "$PACKAGE_DIR" && yarn "$@")
+  else
+    echo "Skipping invalid package directory: $PACKAGE_DIR"
   fi
-  
-  # Change to the package directory
-  cd "$PACKAGE_DIR" || exit
-  
-  # Run yarn
-  echo "Running yarn in $PACKAGE_DIR"
-  yarn "$@"
-  
-  # Return to the project root directory
-  cd "$PROJECT_ROOT" || exit
 done

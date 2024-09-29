@@ -1,0 +1,361 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildNestedI18n should handle English (UK) language 1`] = `
+{
+  "changePassword": {
+    "changePasswordButton": "Change Password",
+  },
+  "common": {
+    "changePassword": "Change Password",
+    "confirmNewPassword": "Confirm New Password",
+    "currentPassword": "Current Password",
+    "dashboard": "Dashboard",
+    "loading": "Loading...",
+    "logo": "logo",
+    "newPassword": "New Password",
+    "returnToKitchen": "Return to Kitchen",
+    "site": "Chili and Cilantro",
+    "startCooking": "Start Cooking",
+    "tagline": "A Spicy Bluffing Game",
+    "unauthorized": "Unauthorized",
+    "unexpectedError": "Unexpected Error",
+  },
+  "forgotPassword": {
+    "title": "Forgot Password",
+  },
+  "keyFeatures": {
+    "1": "Exciting bluffing gameplay with a culinary twist",
+    "2": "Strategic bidding and card placement",
+    "3": "Quick to learn, challenging to master",
+    "4": "Supports 2 or more players",
+    "5": "Rounds of suspenseful card flipping",
+    "6": "Risk management: avoid the dreaded chili!",
+    "7": "First to season two dishes or last chef standing wins",
+    "8": "Perfect for game nights and family gatherings",
+    "title": "Key Features",
+  },
+  "languageUpdate": {
+    "success": "Language updated successfully",
+  },
+  "login": {
+    "loginButton": "Login",
+  },
+  "logoutButton": "Logout",
+  "registerButton": "Register",
+  "splash": {
+    "description": "In Chili and Cilantro, aspiring chefs compete to create the perfect dish. Your goal is to add just the right amount of cilantro without ruining it with a scorching chili. Be the first to successfully season two dishes or be the last chef standing to win!",
+    "howToPlay": "How to Play",
+  },
+  "validation": {
+    "confirmNewPassword": "Confirm new password is required",
+    "currentPasswordRequired": "Current password is required",
+    "invalidLanguage": "Invalid Language",
+    "invalidToken": "Invalid Token",
+    "newPasswordRequired": "New password is required",
+    "passwordMatch": "Password and confirm must match",
+    "passwordRegexError": "Password must be at least 8 characters long and include at least one letter, one number, and one special character (!@#$%^&*()_+-=[]{};':"|,.<>/?)",
+    "passwordsDifferent": "New password must be different than the current password",
+  },
+  "validationError": "Validation Error",
+}
+`;
+
+exports[`buildNestedI18n should handle English (US) language 1`] = `
+{
+  "changePassword": {
+    "changePasswordButton": "Change Password",
+  },
+  "common": {
+    "changePassword": "Change Password",
+    "confirmNewPassword": "Confirm New Password",
+    "currentPassword": "Current Password",
+    "dashboard": "Dashboard",
+    "loading": "Loading...",
+    "logo": "logo",
+    "newPassword": "New Password",
+    "returnToKitchen": "Return to Kitchen",
+    "site": "Chili and Cilantro",
+    "startCooking": "Start Cooking",
+    "tagline": "A Spicy Bluffing Game",
+    "unauthorized": "Unauthorized",
+    "unexpectedError": "Unexpected Error",
+  },
+  "forgotPassword": {
+    "title": "Forgot Password",
+  },
+  "keyFeatures": {
+    "1": "Exciting bluffing gameplay with a culinary twist",
+    "2": "Strategic bidding and card placement",
+    "3": "Quick to learn, challenging to master",
+    "4": "Supports 2 or more players",
+    "5": "Rounds of suspenseful card flipping",
+    "6": "Risk management: avoid the dreaded chili!",
+    "7": "First to season two dishes or last chef standing wins",
+    "8": "Perfect for game nights and family gatherings",
+    "title": "Key Features",
+  },
+  "languageUpdate": {
+    "success": "Language updated successfully",
+  },
+  "login": {
+    "loginButton": "Login",
+  },
+  "logoutButton": "Logout",
+  "registerButton": "Register",
+  "splash": {
+    "description": "In Chili and Cilantro, aspiring chefs compete to create the perfect dish. Your goal is to add just the right amount of cilantro without ruining it with a scorching chili. Be the first to successfully season two dishes or be the last chef standing to win!",
+    "howToPlay": "How to Play",
+  },
+  "validation": {
+    "confirmNewPassword": "Confirm new password is required",
+    "currentPasswordRequired": "Current password is required",
+    "invalidLanguage": "Invalid Language",
+    "invalidToken": "Invalid Token",
+    "newPasswordRequired": "New password is required",
+    "passwordMatch": "Password and confirm must match",
+    "passwordRegexError": "Password must be at least 8 characters long and include at least one letter, one number, and one special character (!@#$%^&*()_+-=[]{};':"|,.<>/?)",
+    "passwordsDifferent": "New password must be different than the current password",
+  },
+  "validationError": "Validation Error",
+}
+`;
+
+exports[`buildNestedI18n should handle Español language 1`] = `
+{
+  "changePassword": {
+    "changePasswordButton": "Cambiar contraseña",
+  },
+  "common": {
+    "changePassword": "Cambiar contraseña",
+    "confirmNewPassword": "Confirmar nueva contraseña",
+    "currentPassword": "Contraseña actual",
+    "dashboard": "Tablero",
+    "loading": "Cargando...",
+    "logo": "logo",
+    "newPassword": "Nueva contraseña",
+    "returnToKitchen": "Volver a la Cocina",
+    "site": "Chili y Cilantro",
+    "startCooking": "Comenzar a cocinar",
+    "tagline": "Un Juego de Bluff Picante",
+    "unauthorized": "No autorizado",
+    "unexpectedError": "Error inesperado",
+  },
+  "forgotPassword": {
+    "title": "Contraseña olvidada",
+  },
+  "keyFeatures": {
+    "1": "Emocionante juego de faroleo con un toque culinario",
+    "2": "Pujas estratégicas y colocación de cartas",
+    "3": "Rápido de aprender, desafiante de dominar",
+    "4": "Admite 2 o más jugadores",
+    "5": "Rondas de volteo de cartas llenas de suspenso",
+    "6": "Gestión de riesgos: ¡evita el temido chile!",
+    "7": "El primero en condimentar dos platos o el último chef en pie gana",
+    "8": "Perfecto para noches de juegos y reuniones familiares",
+    "title": "Características Clave",
+  },
+  "languageUpdate": {
+    "success": "Idioma actualizado con éxito",
+  },
+  "login": {
+    "loginButton": "Iniciar sesión",
+  },
+  "logoutButton": "Cerrar sesión",
+  "registerButton": "Registrarse",
+  "splash": {
+    "description": "En Chili and Cilantro, los aspirantes a chef compiten para crear el plato perfecto. Tu objetivo es agregar la cantidad justa de cilantro sin arruinarlo con un chile abrasador. ¡Sé el primero en condimentar con éxito dos platos o sé el último chef en pie para ganar!",
+    "howToPlay": "Como Jugar",
+  },
+  "validation": {
+    "confirmNewPassword": "Se requiere la confirmación de la nueva contraseña",
+    "currentPasswordRequired": "Se requiere la contraseña actual",
+    "invalidLanguage": "Idioma inválido",
+    "invalidToken": "Token inválido",
+    "newPasswordRequired": "Se requiere la nueva contraseña",
+    "passwordMatch": "La contraseña y la confirmación deben coincidir",
+    "passwordRegexError": "La contraseña debe tener al menos 8 caracteres y incluir al menos una letra, un número y un carácter especial (!@#$%^&*()_+-=[]{};':"|,.<>/?)",
+    "passwordsDifferent": "La nueva contraseña debe ser diferente a la contraseña actual",
+  },
+  "validationError": "Error de validación",
+}
+`;
+
+exports[`buildNestedI18n should handle Français language 1`] = `
+{
+  "changePassword": {
+    "changePasswordButton": "Changer le mot de passe",
+  },
+  "common": {
+    "changePassword": "Changer le mot de passe",
+    "confirmNewPassword": "Confirmer le nouveau mot de passe",
+    "currentPassword": "Mot de passe actuel",
+    "dashboard": "Tableau de bord",
+    "loading": "Chargement...",
+    "logo": "logo",
+    "newPassword": "Nouveau mot de passe",
+    "returnToKitchen": "Retour à la Cuisine",
+    "site": "Piment et Coriandre",
+    "startCooking": "Commencer la Cuisine",
+    "tagline": "Un Jeu de Bluff Épicé",
+    "unauthorized": "Non autorisé",
+    "unexpectedError": "Erreur inattendue",
+  },
+  "forgotPassword": {
+    "title": "Mot de passe oublié",
+  },
+  "keyFeatures": {
+    "1": "Un jeu de bluff passionnant avec une touche culinaire",
+    "2": "Enchères stratégiques et placement de cartes",
+    "3": "Rapide à apprendre, difficile à maîtriser",
+    "4": "Prend en charge 2 joueurs ou plus",
+    "5": "Rondes de retournement de cartes pleines de suspense",
+    "6": "Gestion des risques : évitez le redoutable chili !",
+    "7": "Le premier à assaisonner deux plats ou le dernier chef debout gagne",
+    "8": "Parfait pour les soirées de jeux et les réunions de famille",
+    "title": "Caractéristiques Principales",
+  },
+  "languageUpdate": {
+    "success": "Langue mise à jour avec succès",
+  },
+  "login": {
+    "loginButton": "Connexion",
+  },
+  "logoutButton": "Déconnexion",
+  "registerButton": "S'inscrire",
+  "splash": {
+    "description": "Dans Chili and Cilantro, les chefs en herbe rivalisent pour créer le plat parfait. Votre objectif est d'ajouter juste la bonne quantité de coriandre sans gâcher le tout avec un piment brûlant. Soyez le premier à réussir à assaisonner deux plats ou soyez le dernier chef debout pour gagner !",
+    "howToPlay": "Comment Jouer",
+  },
+  "validation": {
+    "confirmNewPassword": "La confirmation du nouveau mot de passe est requise",
+    "currentPasswordRequired": "Le mot de passe actuel est requis",
+    "invalidLanguage": "Langue invalide",
+    "invalidToken": "Jeton invalide",
+    "newPasswordRequired": "Le nouveau mot de passe est requis",
+    "passwordMatch": "Le mot de passe et la confirmation doivent correspondre",
+    "passwordRegexError": "Le mot de passe doit comporter au moins 8 caractères et inclure au moins une lettre, un chiffre et un caractère spécial (!@#$%^&*()_+-=[]{};':"|,.<>/?)",
+    "passwordsDifferent": "Le nouveau mot de passe doit être différent du mot de passe actuel",
+  },
+  "validationError": "Erreur de validation",
+}
+`;
+
+exports[`buildNestedI18n should handle Український language 1`] = `
+{
+  "changePassword": {
+    "changePasswordButton": "Змінити пароль",
+  },
+  "common": {
+    "changePassword": "Змінити пароль",
+    "confirmNewPassword": "Підтвердити новий пароль",
+    "currentPassword": "Поточний пароль",
+    "dashboard": "Панель",
+    "loading": "Завантаження...",
+    "logo": "лого",
+    "newPassword": "Новий пароль",
+    "returnToKitchen": "Повернутися на Кухню",
+    "site": "Чілі та Коріандр",
+    "startCooking": "Почати приготування",
+    "tagline": "Пікантний Блеф",
+    "unauthorized": "Немає авторизації",
+    "unexpectedError": "Неочікувана помилка",
+  },
+  "forgotPassword": {
+    "title": "Забули пароль",
+  },
+  "keyFeatures": {
+    "1": "Захоплюючий геймплей блефу з кулінарним родзинкою",
+    "2": "Стратегічні ставки та розміщення карток",
+    "3": "Швидко навчатися, складно освоїти",
+    "4": "Підтримує 2 або більше гравців",
+    "5": "Раунди напруженого гортання карт",
+    "6": "Управління ризиками: уникайте страшного чилі!",
+    "7": "Перемагає перший, хто приправив дві страви, або останній шеф-кухар",
+    "8": "Ідеально підходить для вечірніх ігор і сімейних зустрічей",
+    "title": "Ключові Жарактеристики",
+  },
+  "languageUpdate": {
+    "success": "Мова оновлена успішно",
+  },
+  "login": {
+    "loginButton": "Увійти",
+  },
+  "logoutButton": "Вийти",
+  "registerButton": "Зареєструватися",
+  "splash": {
+    "description": "У Chili and Cilantro починаючі кухарі змагаються, щоб створити ідеальну страву. Ваша мета — додати потрібну кількість кінзи, не зіпсувавши її пекучим чилі. Будьте першим, хто успішно приправить дві страви, або будьте останнім шеф-кухарем, який виграє!",
+    "howToPlay": "Як Грати",
+  },
+  "validation": {
+    "confirmNewPassword": "Підтвердження нового пароля є обов’язковим",
+    "currentPasswordRequired": "Поточний пароль є обов’язковим",
+    "invalidLanguage": "Недійсна мова",
+    "invalidToken": "Недійсний токен",
+    "newPasswordRequired": "Новий пароль є обов’язковим",
+    "passwordMatch": "Пароль та підтвердження повинні співпадати",
+    "passwordRegexError": "Пароль повинен містити принаймні 8 символів, включаючи принаймні одну літеру, одну цифру та один спеціальний символ (!@#$%^&*()_+-=[]{};':"|,.<>/?)",
+    "passwordsDifferent": "Новий пароль повинен відрізнятися від поточного",
+  },
+  "validationError": "Помилка валідації",
+}
+`;
+
+exports[`buildNestedI18n should handle 中文 language 1`] = `
+{
+  "changePassword": {
+    "changePasswordButton": "更改密码",
+  },
+  "common": {
+    "changePassword": "更改密码",
+    "confirmNewPassword": "确认新密码",
+    "currentPassword": "当前密码",
+    "dashboard": "仪表板",
+    "loading": "加载中...",
+    "logo": "标志",
+    "newPassword": "新密码",
+    "returnToKitchen": "返回厨房",
+    "site": "辣椒和香菜",
+    "startCooking": "开始烹饪",
+    "tagline": "一款辛辣的虚张声势游戏",
+    "unauthorized": "未经授权",
+    "unexpectedError": "意外错误",
+  },
+  "forgotPassword": {
+    "title": "忘记密码",
+  },
+  "keyFeatures": {
+    "1": "令人兴奋的虚张声势游戏，带有烹饪的扭曲",
+    "2": "战略性出价和卡片放置",
+    "3": "易学，难以掌握",
+    "4": "支持2个或更多玩家",
+    "5": "一轮轮充满悬念的纸牌游戏",
+    "6": "风险管理：避免可怕的辣椒！",
+    "7": "首先调味两道菜或最后一位厨师站起来赢得胜利",
+    "8": "适合游戏之夜和家庭聚会",
+    "title": "主要特点",
+  },
+  "languageUpdate": {
+    "success": "语言更新成功",
+  },
+  "login": {
+    "loginButton": "登录",
+  },
+  "logoutButton": "注销",
+  "registerButton": "注册",
+  "splash": {
+    "description": "在《辣椒和香菜》中，有抱负的厨师们竞相制作完美的菜肴。你的目标是添加适量的香菜，而不会让辣椒烧焦。成为第一个成功调味两道菜的人，或者成为最后一个获胜的厨师",
+    "howToPlay": "如何玩",
+  },
+  "validation": {
+    "confirmNewPassword": "确认新密码是必需的",
+    "currentPasswordRequired": "当前密码是必需的",
+    "invalidLanguage": "无效语言",
+    "invalidToken": "无效令牌",
+    "newPasswordRequired": "新密码是必需的",
+    "passwordMatch": "密码和确认必须匹配",
+    "passwordRegexError": "密码必须至少8个字符长且包含至少一个字母、一个数字和一个特殊字符(!@#$%^&*()_+-=[]{};:"|,.<>/?)",
+    "passwordsDifferent": "新密码必须不同于当前密码",
+  },
+  "validationError": "验证错误",
+}
+`;

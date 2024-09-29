@@ -1,5 +1,4 @@
 import {
-  BaseModel,
   IUser,
   ModelName,
   constants,
@@ -11,7 +10,6 @@ import { InvalidPasswordError } from 'chili-and-cilantro-api/src/errors/invalidP
 import { InvalidUsernameError } from 'chili-and-cilantro-api/src/errors/invalidUsername';
 import { UsernameExistsError } from 'chili-and-cilantro-api/src/errors/usernameExists';
 import sinon from 'sinon';
-import { managementClient } from '../../src/auth0';
 import { UserService } from '../../src/services/user';
 import { generateGamePassword } from '../fixtures/game';
 import {
@@ -24,7 +22,7 @@ describe('userService', () => {
   let userService, userModel;
   beforeAll(() => {
     userService = new UserService();
-    userModel = BaseModel.getModel<IUser>(ModelName.User);
+    userModel = userService.getModel<IUser>(ModelName.User);
   });
   afterEach(() => {
     sinon.restore();

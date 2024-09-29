@@ -11,7 +11,6 @@ import { GameService } from '../../src/services/game';
 import { generateStartGameAction } from '../fixtures/action';
 import { generateChefGameUser } from '../fixtures/game';
 import { generateObjectId } from '../fixtures/objectId';
-import { mockedWithTransactionAsync } from '../fixtures/transactionManager';
 
 describe('gameService startGame', () => {
   describe('performStartGameAsync', () => {

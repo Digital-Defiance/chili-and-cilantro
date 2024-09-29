@@ -10,7 +10,6 @@ import { Database } from '../../src/services/database';
 import { GameService } from '../../src/services/game';
 import { generateChef } from '../fixtures/chef';
 import { generateGame } from '../fixtures/game';
-import { mockedWithTransactionAsync } from '../fixtures/transactionManager';
 
 describe('GameService', () => {
   let gameService;

@@ -1,24 +1,13 @@
-import {
-  IChef,
-  IGame,
-  ModelName,
-} from '@chili-and-cilantro/chili-and-cilantro-lib';
 import sinon from 'sinon';
 import { ActionService } from '../../src/services/action';
 import { ChefService } from '../../src/services/chef';
-import { Database } from '../../src/services/database';
 import { GameService } from '../../src/services/game';
 import { PlayerService } from '../../src/services/player';
 
 describe('GameService', () => {
   let gameService;
-  let mockChefModel;
-  let mockGameModel;
 
   beforeAll(() => {
-    const database = new Database();
-    mockChefModel = database.getModel<IChef>(ModelName.Chef);
-    mockGameModel = database.getModel<IGame>(ModelName.Game);
     const actionService = new ActionService(database);
     const chefService = new ChefService(mockChefModel);
     const playerService = new PlayerService(mockGameModel);

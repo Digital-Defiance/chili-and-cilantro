@@ -1,16 +1,14 @@
 import {
+  DefaultIdType,
   GamePhase,
+  IGameDocument,
   IUserDocument,
+  ModelName,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import {
-  GameModel,
-  Schema,
-} from '@chili-and-cilantro/chili-and-cilantro-node-lib';
-import { Types } from 'mongoose';
+import { Schema } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import { BaseService } from './base';
 
-export class PlayerService {
-  constructor() {}
-
+export class PlayerService extends BaseService {
   /**
    * Returns whether the specified user is the host of the specified game
    * @param userId
@@ -18,9 +16,10 @@ export class PlayerService {
    * @returns boolean
    */
   public async isGameHostAsync(
-    userId: Types.ObjectId,
-    gameId: Types.ObjectId,
+    userId: DefaultIdType,
+    gameId: DefaultIdType,
   ): Promise<boolean> {
+    const GameModel = this.application.getModel<IGameDocument>(ModelName.Game);
     try {
       const count = await GameModel.countDocuments({
         _id: gameId,
@@ -36,12 +35,13 @@ export class PlayerService {
 
   /**
    * Returns whether the specified user is in any active game
-   * @param userId
+   * @param user The user document
    * @returns boolean
    */
   public async userIsInAnyActiveGameAsync(
     user: IUserDocument,
   ): Promise<boolean> {
+    const GameModel = this.application.getModel<IGameDocument>(ModelName.Game);
     try {
       const result = await GameModel.aggregate([
         {
@@ -82,15 +82,17 @@ export class PlayerService {
 
   /**
    * Returns whether the user is in the specified game, regardless of game state
-   * @param userId
-   * @param gameId
+   * @param userId The user id
+   * @param gameId The game id
+   * @param active Whether the game must be active
    * @returns boolean
    */
   public async userIsInGameAsync(
-    userId: Types.ObjectId,
-    gameId: Types.ObjectId,
+    userId: DefaultIdType,
+    gameId: DefaultIdType,
     active = false,
   ): Promise<boolean> {
+    const GameModel = this.application.getModel<IGameDocument>(ModelName.Game);
     try {
       const result = await GameModel.aggregate([
         {

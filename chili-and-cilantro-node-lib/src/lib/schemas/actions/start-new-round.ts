@@ -3,6 +3,7 @@ import {
   IStartNewRoundDetails,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { Schema } from 'mongoose';
+import { ActionSchemaBase } from '../action';
 
 export const StartNewRoundDetailsSchema = new Schema<IStartNewRoundDetails>(
   {},
@@ -11,5 +12,6 @@ export const StartNewRoundDetailsSchema = new Schema<IStartNewRoundDetails>(
 
 export const StartNewRoundActionSchema =
   new Schema<IStartNewRoundActionDocument>({
+    ...ActionSchemaBase,
     details: { type: StartNewRoundDetailsSchema, required: true },
   });
