@@ -1,38 +1,38 @@
 import {
+  AllCardsPlacedError,
+  AlreadyJoinedOtherError,
   CardType,
   ChefState,
   constants,
+  GameFullError,
+  GameInProgressError,
+  GamePasswordMismatchError,
   GamePhase,
   IBid,
   IChefDocument,
   ICreateGameActionDocument,
   IGameDocument,
   IMessageActionDocument,
+  IncorrectGamePhaseError,
+  InvalidActionError,
+  InvalidGameError,
+  InvalidGameNameError,
+  InvalidGameParameterError,
+  InvalidGamePasswordError,
+  InvalidMessageError,
+  InvalidUserDisplayNameError,
   IStartGameActionDocument,
   IUserDocument,
+  NotEnoughChefsError,
+  NotHostError,
+  OutOfIngredientError,
+  OutOfOrderError,
   TurnAction,
+  UsernameInUseError,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { GameModel } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { Types } from 'mongoose';
 import validator from 'validator';
-import { AllCardsPlacedError } from '../errors/all-cards-placed';
-import { AlreadyJoinedOtherError } from '../errors/already-joined-other';
-import { GameFullError } from '../errors/game-full';
-import { GameInProgressError } from '../errors/game-in-progress';
-import { GamePasswordMismatchError } from '../errors/game-password-mismatch';
-import { IncorrectGamePhaseError } from '../errors/incorrect-game-phase';
-import { InvalidActionError } from '../errors/invalid-action';
-import { InvalidGameError } from '../errors/invalid-game';
-import { InvalidGameNameError } from '../errors/invalid-game-name';
-import { InvalidGameParameterError } from '../errors/invalid-game-parameter';
-import { InvalidGamePasswordError } from '../errors/invalid-game-password';
-import { InvalidMessageError } from '../errors/invalid-message';
-import { InvalidUserDisplayNameError } from '../errors/invalid-user-display-name';
-import { NotEnoughChefsError } from '../errors/not-enough-chefs';
-import { NotHostError } from '../errors/not-host';
-import { OutOfIngredientError } from '../errors/out-of-ingredient';
-import { OutOfOrderError } from '../errors/out-of-order';
-import { UsernameInUseError } from '../errors/username-in-use';
 import { ActionService } from './action';
 import { ChefService } from './chef';
 import { PlayerService } from './player';
@@ -128,8 +128,7 @@ export class GameService extends TransactionManager {
     }
     if (maxChefs < constants.MIN_CHEFS || maxChefs > constants.MAX_CHEFS) {
       throw new InvalidGameParameterError(
-        `Must be between ${constants.MIN_CHEFS} and ${constants.MAX_CHEFS}.`,
-        'maxChefs',
+        `Must be between ${constants.MIN_CHEFS} and ${constants.MAX_CHEFS}.`
       );
     }
   }

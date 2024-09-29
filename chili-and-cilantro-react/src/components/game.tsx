@@ -1,10 +1,9 @@
-import { IdToken, useAuth0 } from '@auth0/auth0-react';
 import { useEffect, useState } from 'react';
 import { environment } from '../environments/environment.prod';
 // import { connect, Socket } from 'socket.io-client';
 
 function GameComponent() {
-  const { isAuthenticated, getIdTokenClaims } = useAuth0();
+  const isAuthenticated = false;
   const [mode, setMode] = useState<'CREATE' | 'JOIN' | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [gameName, setGameName] = useState<string>('');
@@ -15,14 +14,6 @@ function GameComponent() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      getIdTokenClaims().then((claims: IdToken | undefined) => {
-        if (claims === undefined) {
-          return;
-        }
-        const idToken = claims.__raw;
-        setToken(idToken);
-        //connectToSocket(idToken);
-      });
     }
   }, [isAuthenticated]);
 

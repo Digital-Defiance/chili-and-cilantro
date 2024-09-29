@@ -5,10 +5,10 @@ import {
   IGame,
   IGameDocument,
   IUserDocument,
+  NotInGameError,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { ChefModel } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { Document, Types } from 'mongoose';
-import { NotInGameError } from '../errors/not-in-game';
 import { UtilityService } from './utility';
 
 export class ChefService {

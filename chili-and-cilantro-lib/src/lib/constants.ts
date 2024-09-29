@@ -129,7 +129,7 @@ export const EMAIL_FROM = 'noreply@chilicilantro.com';
 /**
  * The name of the application.
  */
-export const APPLICATION_NAME = 'Chili and Cilantro';
+export const APPLICATION_NAME = 'Chili & Cilantro';
 
 /**
  * Duration in milliseconds for which an email token is valid.

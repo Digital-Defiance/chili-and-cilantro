@@ -3,27 +3,31 @@ import {
   TurnAction,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { Request, Response, Router } from 'express';
-import { ValidationError } from '../errors/validation-error';
+import { ValidationError } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { ActionService } from '../services/action';
 import { ChefService } from '../services/chef';
 import { GameService } from '../services/game';
 import { JwtService } from '../services/jwt';
 import { PlayerService } from '../services/player';
 import { UserService } from '../services/user';
+import { authenticateToken } from '../middlewares/authenticate-token';
+import { UserModel } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 
 export const gamesRouter = Router();
 
 gamesRouter.post(
   '/create',
-  validateAccessToken,
+  authenticateToken,
   async (req: Request, res: Response) => {
     try {
       const userService = new UserService();
-      const jwtService = new JwtService(userService);
-      const token = req.headers.authorization?.split(' ')[1];
-      const user = await jwtService.getUserFromValidatedTokenAsync(token);
+      const jwtService = new JwtService();
+      if (!req.user) {
+        return res.status(401).json({ message: 'Invalid token' });
+      }
+      const user = await UserModel.findById(req.user.id);
       if (!user) {
-        return res.status(401).json({ message: 'User not found' });
+        return res.status(500).json({ message: 'User not found' });
       }
       const { name, userName, password, maxChefs } = req.body;
       const sanitizedName = (name as string)?.trim();
@@ -59,15 +63,17 @@ gamesRouter.post(
 
 gamesRouter.post(
   '/:code/join',
-  validateAccessToken,
+  authenticateToken,
   async (req: Request, res: Response) => {
     try {
       const userService = new UserService();
-      const jwtService = new JwtService(userService);
-      const token = req.headers.authorization?.split(' ')[1];
-      const user = await jwtService.getUserFromValidatedTokenAsync(token);
+      const jwtService = new JwtService();
+      if (!req.user) {
+        return res.status(401).json({ message: 'Invalid token' });
+      }
+      const user = await UserModel.findById(req.user.id);
       if (!user) {
-        return res.status(401).json({ message: 'User not found' });
+        return res.status(500).json({ message: 'User not found' });
       }
       const { userName, password } = req.body;
       const gameCode = req.params.code;
@@ -101,15 +107,17 @@ gamesRouter.post(
 
 gamesRouter.post(
   '/:code/message',
-  validateAccessToken,
+  authenticateToken,
   async (req: Request, res: Response) => {
     try {
       const userService = new UserService();
-      const jwtService = new JwtService(userService);
-      const token = req.headers.authorization?.split(' ')[1];
-      const user = await jwtService.getUserFromValidatedTokenAsync(token);
+      const jwtService = new JwtService();
+      if (!req.user) {
+        return res.status(401).json({ message: 'Invalid token' });
+      }
+      const user = await UserModel.findById(req.user.id);
       if (!user) {
-        return res.status(401).json({ message: 'User not found' });
+        return res.status(500).json({ message: 'User not found' });
       }
       const { message } = req.body;
       const gameCode = req.params.code;
@@ -140,15 +148,17 @@ gamesRouter.post(
 
 gamesRouter.get(
   '/:code/history',
-  validateAccessToken,
+  authenticateToken,
   async (req: Request, res: Response) => {
     try {
       const userService = new UserService();
-      const jwtService = new JwtService(userService);
-      const token = req.headers.authorization?.split(' ')[1];
-      const user = await jwtService.getUserFromValidatedTokenAsync(token);
+      const jwtService = new JwtService();
+      if (!req.user) {
+        return res.status(401).json({ message: 'Invalid token' });
+      }
+      const user = await UserModel.findById(req.user.id);
       if (!user) {
-        return res.status(401).json({ message: 'User not found' });
+        return res.status(500).json({ message: 'User not found' });
       }
       const gameCode = req.params.code;
       const actionService = new ActionService();
@@ -174,15 +184,18 @@ gamesRouter.get(
 
 gamesRouter.post(
   '/:code/start',
-  validateAccessToken,
+  authenticateToken,
   async (req: Request, res: Response) => {
     try {
       const userService = new UserService();
-      const jwtService = new JwtService(userService);
+      const jwtService = new JwtService();
       const token = req.headers.authorization?.split(' ')[1];
-      const user = await jwtService.getUserFromValidatedTokenAsync(token);
+      if (!req.user) {
+        return res.status(401).json({ message: 'Invalid token' });
+      }
+      const user = await UserModel.findById(req.user.id);
       if (!user) {
-        return res.status(401).json({ message: 'User not found' });
+        return res.status(500).json({ message: 'User not found' });
       }
       const gameCode = req.params.code;
       const actionService = new ActionService();
@@ -213,15 +226,17 @@ gamesRouter.post(
  */
 gamesRouter.get(
   '/:code/action',
-  validateAccessToken,
+  authenticateToken,
   async (req: Request, res: Response) => {
     try {
       const userService = new UserService();
-      const jwtService = new JwtService(userService);
-      const token = req.headers.authorization?.split(' ')[1];
-      const user = await jwtService.getUserFromValidatedTokenAsync(token);
+      const jwtService = new JwtService();
+      if (!req.user) {
+        return res.status(401).json({ message: 'Invalid token' });
+      }
+      const user = await UserModel.findById(req.user.id);
       if (!user) {
-        return res.status(401).json({ message: 'User not found' });
+        return res.status(500).json({ message: 'User not found' });
       }
       const gameCode = req.params.code;
       const actionService = new ActionService();
@@ -251,15 +266,18 @@ gamesRouter.get(
  */
 gamesRouter.post(
   '/:code/action',
-  validateAccessToken,
+  authenticateToken,
   async (req: Request, res: Response) => {
     try {
       const userService = new UserService();
-      const jwtService = new JwtService(userService);
+      const jwtService = new JwtService();
       const token = req.headers.authorization?.split(' ')[1];
-      const user = await jwtService.getUserFromValidatedTokenAsync(token);
+      if (!req.user) {
+        return res.status(401).json({ message: 'Invalid token' });
+      }
+      const user = await UserModel.findById(req.user.id);
       if (!user) {
-        return res.status(401).json({ message: 'User not found' });
+        return res.status(500).json({ message: 'User not found' });
       }
       const gameCode = req.params.code;
       const { action, ingredient, bid } = req.body;

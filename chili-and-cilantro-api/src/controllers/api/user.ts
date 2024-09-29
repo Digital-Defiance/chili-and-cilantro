@@ -4,6 +4,7 @@ import {
   EmailTokenExpiredError,
   EmailTokenUsedOrInvalidError,
   IApiMessageResponse,
+  ICreateUserBasics,
   InvalidCredentialsError,
   InvalidPasswordError,
   IRequestUser,
@@ -297,9 +298,8 @@ export class UserController extends BaseController {
         {
           username: username.trim(),
           email: email.trim(),
-          languages: ['en'],
           timezone: timezone,
-        },
+        } as ICreateUserBasics,
         password,
       );
       this.sendApiMessageResponse(
