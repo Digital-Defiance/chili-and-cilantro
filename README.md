@@ -1,3 +1,5 @@
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/63ca465b2e79454fa9bf75beb900d736)](https://app.codacy.com/gh/Digital-Defiance/chili-and-cilantro/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+
 **🌶️ Chili and Cilantro 🌿 - A Spicy Bluffing Game**
 
 **Welcome, Aspiring Chefs!**
