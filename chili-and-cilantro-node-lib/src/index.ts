@@ -28,7 +28,7 @@ export * from './lib/schemas/chef';
 export * from './lib/schemas/email-token';
 export * from './lib/schemas/game';
 export * from './lib/schemas/user';
-export * from './lib/types/types';
+export * from './lib/types/types.d';
 export * from './lib/utils';
 
 /// <reference path="./lib/types/types.d.ts" />

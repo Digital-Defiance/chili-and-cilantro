@@ -5,11 +5,11 @@ import { IHasCreation } from '../has-creation';
 /**
  * Base interface for email token collection documents
  */
-export interface IEmailToken extends IHasCreation {
+export interface IEmailToken<T = Types.ObjectId> extends IHasCreation {
   /**
    * The user ID associated with the token
    */
-  userId: Types.ObjectId;
+  userId: T;
   /**
    * The type of token
    */

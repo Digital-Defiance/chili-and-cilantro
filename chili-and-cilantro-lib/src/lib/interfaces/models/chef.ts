@@ -3,13 +3,13 @@ import { CardType } from '../../enumerations/card-type';
 import { ChefState } from '../../enumerations/chef-state';
 import { ICard } from '../card';
 
-export interface IChef {
-  gameId: Types.ObjectId;
+export interface IChef<T = Types.ObjectId> {
+  gameId: T;
   name: string;
   hand: ICard[];
   placedCards: ICard[];
   lostCards: CardType[];
-  userId: Types.ObjectId;
+  userId: T;
   state: ChefState;
   host: boolean;
 }

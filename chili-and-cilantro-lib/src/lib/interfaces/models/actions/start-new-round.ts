@@ -1,6 +1,7 @@
+import { Types } from 'mongoose';
 import { IAction } from '../action';
 import { IStartNewRoundDetails } from './details/start-new-round';
 
-export interface IStartNewRoundAction extends IAction {
+export interface IStartNewRoundAction<T = Types.ObjectId> extends IAction<T> {
   details: IStartNewRoundDetails;
 }

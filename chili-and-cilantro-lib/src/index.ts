@@ -145,3 +145,4 @@ export * from './lib/interfaces/objects/user';
 export * from './lib/interfaces/request-user';
 export * from './lib/interfaces/round-bids';
 export * from './lib/interfaces/token-user';
+export * from './lib/shared-types';
