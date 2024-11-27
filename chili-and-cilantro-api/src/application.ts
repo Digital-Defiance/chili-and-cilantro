@@ -137,7 +137,7 @@ export class App implements IApplication {
 
       // init all middlewares and routes
       Middlewares.init(this.expressApp);
-      this._apiRouter = new ApiRouter(this.getModel, this.db.connection);
+      this._apiRouter = new ApiRouter(this);
       this._appRouter = new AppRouter(this._apiRouter);
       this._appRouter.init(this.expressApp, debug);
       // if none of the above handle the request, pass it to error handler

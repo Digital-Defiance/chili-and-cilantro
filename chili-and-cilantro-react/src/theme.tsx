@@ -6,34 +6,46 @@ const theme = createTheme({
     primary: {
       main: '#7EDB0E', // green-chili
       dark: '#0E683C', // green-chili-shadow
-      contrastText: '#FFFDD0', // background-color
+      contrastText: '#FFFFFF', // white for better contrast
     },
     secondary: {
       main: '#FF081F', // red-chili
       dark: '#9C0020', // red-chili-shadow
-      contrastText: '#FFFDD0', // background-color
+      contrastText: '#FFFFFF', // white for better contrast
     },
     background: {
-      default: '#FFFDD0', // background-color
-      paper: '#FFFDD0',
+      default: '#FFFFFF', // white background
+      paper: '#FFFFFF',
     },
     text: {
       primary: '#000000',
-      secondary: '#000000',
+      secondary: '#333333',
     },
   },
   components: {
     MuiAppBar: {
       styleOverrides: {
         root: {
-          color: '#FFFDD0', // background-color for contrast
+          backgroundColor: '#7EDB0E', // green-chili for AppBar
+          color: '#FFFFFF', // white text for contrast
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#7EDB0E', // green-chili for buttons
+          color: '#FFFFFF', // white text for contrast
+          '&:hover': {
+            backgroundColor: '#0E683C', // darker green on hover
+          },
         },
       },
     },
     MuiInputLabel: {
       styleOverrides: {
         root: {
-          color: 'inherit',
+          color: '#333333', // darker text for better readability
         },
       },
     },

@@ -13,7 +13,7 @@ import {
   ModelName,
   ModelNameCollection,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { Connection, Schema as MongooseSchema } from 'mongoose';
+import { Connection, Model, Schema as MongooseSchema } from 'mongoose';
 import { SchemaMap } from '../types/shared-types';
 import { ActionDiscriminators } from './discriminators/action';
 import { ISchemaData } from './interfaces/schema-data';
@@ -71,13 +71,21 @@ export const Schema: { [key in ModelName]: ISchemaData<IBaseDocument<any>> } = {
 export function getSchemaModel<T extends IBaseDocument<D>, D>(
   modelName: ModelName,
   connection: Connection,
-) {
+  discriminatorCallback?: (model: Model<T>) => void,
+): ISchemaModelData<T> {
   const value = Schema[modelName];
-  return connection.model<T>(
+  const newModel = connection.model<T>(
     modelName,
     value.schema as MongooseSchema<T>,
     value.collection,
   );
+  return {
+    ...value,
+    model: newModel,
+    ...(discriminatorCallback
+      ? { discriminators: discriminatorCallback(newModel) }
+      : {}),
+  };
 }
 
 /**
@@ -85,35 +93,28 @@ export function getSchemaModel<T extends IBaseDocument<D>, D>(
  * This includes the name, description, plural name, and api name of each model.
  */
 export function getSchemaMap(connection: Connection): SchemaMap {
-  const { discriminatorArray: actionDiscriminatorArray } =
-    ActionDiscriminators(connection);
   return {
-    [ModelName.Action]: {
-      ...Schema[ModelName.Action],
-      model: getSchemaModel<IActionDocument, IAction>(
-        ModelName.Action,
-        connection,
-      ),
-      discriminators: actionDiscriminatorArray,
-    } as ISchemaModelData<IActionDocument>,
-    [ModelName.Chef]: {
-      ...Schema[ModelName.Chef],
-      model: getSchemaModel<IChefDocument, IChef>(ModelName.Chef, connection),
-    } as ISchemaModelData<IChefDocument>,
-    [ModelName.EmailToken]: {
-      ...Schema[ModelName.EmailToken],
-      model: getSchemaModel<IEmailTokenDocument, IEmailToken>(
-        ModelName.EmailToken,
-        connection,
-      ),
-    } as ISchemaModelData<IEmailTokenDocument>,
-    [ModelName.Game]: {
-      ...Schema[ModelName.Game],
-      model: getSchemaModel<IGameDocument, IGame>(ModelName.Game, connection),
-    } as ISchemaModelData<IGameDocument>,
-    [ModelName.User]: {
-      ...Schema[ModelName.User],
-      model: getSchemaModel<IUserDocument, IUser>(ModelName.User, connection),
-    } as ISchemaModelData<IUserDocument>,
+    [ModelName.Action]: getSchemaModel<IActionDocument, IAction>(
+      ModelName.Action,
+      connection,
+      (baseModel: Model<IActionDocument>) =>
+        ActionDiscriminators<IActionDocument>(baseModel),
+    ),
+    [ModelName.Chef]: getSchemaModel<IChefDocument, IChef>(
+      ModelName.Chef,
+      connection,
+    ),
+    [ModelName.EmailToken]: getSchemaModel<IEmailTokenDocument, IEmailToken>(
+      ModelName.EmailToken,
+      connection,
+    ),
+    [ModelName.Game]: getSchemaModel<IGameDocument, IGame>(
+      ModelName.Game,
+      connection,
+    ),
+    [ModelName.User]: getSchemaModel<IUserDocument, IUser>(
+      ModelName.User,
+      connection,
+    ),
   };
 }

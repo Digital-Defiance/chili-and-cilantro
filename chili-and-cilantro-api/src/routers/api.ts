@@ -1,5 +1,4 @@
-import { GetModelFunction } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { Connection } from 'mongoose';
+import { IApplication } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { GameController } from '../controllers/api/game';
 import { UserController } from '../controllers/api/user';
 import { BaseRouter } from './base';
@@ -10,10 +9,10 @@ import { BaseRouter } from './base';
 export class ApiRouter extends BaseRouter {
   private readonly userController: UserController;
   private readonly gameController: GameController;
-  constructor(getModel: GetModelFunction, connnection: Connection) {
-    super(getModel);
-    this.userController = new UserController(getModel);
-    this.gameController = new GameController(getModel, connnection);
+  constructor(application: IApplication) {
+    super(application.getModel);
+    this.userController = new UserController(application.getModel);
+    this.gameController = new GameController(application);
     this.router.use('/user', this.userController.router);
     this.router.use('/game', this.gameController.router);
   }

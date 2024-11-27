@@ -1,17 +1,18 @@
 import {
   CardType,
-  GetModelFunction,
   IUserDocument,
   ModelName,
   TurnAction,
   UserNotFoundError,
   ValidationError,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { RouteConfig } from 'chili-and-cilantro-api/src/interfaces/route-config';
+import {
+  IApplication,
+  RouteConfig,
+} from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { Request, Response } from 'express';
 import { InvalidTokenError } from 'express-oauth2-jwt-bearer';
 import { body } from 'express-validator';
-import { Connection } from 'mongoose';
 import { ActionService } from '../../services/action';
 import { ChefService } from '../../services/chef';
 import { GameService } from '../../services/game';
@@ -24,13 +25,13 @@ export class GameController extends BaseController {
   private readonly playerService;
   private readonly gameService;
 
-  constructor(getModel: GetModelFunction, connection: Connection) {
-    super(getModel);
-    this.actionService = new ActionService(getModel, connection);
-    this.chefService = new ChefService(getModel);
-    this.playerService = new PlayerService(getModel);
+  constructor(application: IApplication) {
+    super(application.getModel);
+    this.actionService = new ActionService(application);
+    this.chefService = new ChefService(application.getModel);
+    this.playerService = new PlayerService(application.getModel);
     this.gameService = new GameService(
-      getModel,
+      application.getModel,
       this.actionService,
       this.chefService,
       this.playerService,

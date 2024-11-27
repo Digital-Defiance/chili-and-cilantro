@@ -7,19 +7,19 @@ $red-chili: #ff081f;
 $red-chili-shadow: #9c0020;
 
 // Theme colors
-$primary-dark: #1b1b1f; // Dark slate (primary dark background)
-$secondary-dark: #292a2f; // Lighter dark shade (card background, headers)
-$highlight-color: #f39c12; // Spicy yellow-orange (highlight, links, buttons)
-$accent-color: #8e44ad; // Bold purple (secondary accents, decorative elements)
-$text-color: #eaeaea; // Light gray for readability
-$text-muted: #b3b3b3; // Muted gray for secondary text
-$danger-color: #e74c3c; // Chili danger red (warnings, alerts)
-$success-color: #27ae60; // Cilantro green (success feedback)
-$border-color: #3c3c43; // Subtle borders and dividers
-//
-$primary-color: $primary-dark;
-$light-color: $logo-background-color; // Light background color
-$background-color: $logo-background-color; // Light background color
+$primary-dark: #333333; // Darker shade for text
+$secondary-dark: #666666; // Medium gray for secondary text
+$highlight-color: #7edb0e; // Green chili as highlight
+$accent-color: #ff081f; // Red chili as accent
+$text-color: #000000; // Black text for readability
+$text-muted: #666666; // Muted gray for secondary text
+$danger-color: #ff081f; // Red chili for danger/alerts
+$success-color: #7edb0e; // Green chili for success feedback
+$border-color: #e0e0e0; // Light gray for borders
+
+$primary-color: $green-chili;
+$light-color: #ffffff; // White background color
+$background-color: #ffffff; // White background color
 
 // Button hover effects
 $highlight-hover: lighten($highlight-color, 10%);

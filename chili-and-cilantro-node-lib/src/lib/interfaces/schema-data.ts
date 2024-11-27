@@ -3,7 +3,8 @@ import {
   ModelName,
   ModelNameCollection,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { Model, Schema } from 'mongoose';
+import { Schema } from 'mongoose';
+import { IDiscriminatorCollections } from './discriminator-collections';
 
 export interface ISchemaData<T extends IBaseDocument<any>> {
   name: ModelName;
@@ -11,5 +12,5 @@ export interface ISchemaData<T extends IBaseDocument<any>> {
   collection: ModelNameCollection;
   schema: Schema<T>;
   path: string;
-  discriminators?: Array<Model<any>>;
+  discriminators?: IDiscriminatorCollections<T>;
 }

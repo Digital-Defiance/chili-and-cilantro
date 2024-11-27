@@ -7,6 +7,7 @@ import {
   IMongoErrors,
   IRequestUser,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { RouteConfig } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { NextFunction, Request, Response, Router } from 'express';
 import {
   matchedData,
@@ -14,7 +15,6 @@ import {
   ValidationError,
   validationResult,
 } from 'express-validator';
-import { RouteConfig } from '../interfaces/route-config';
 import { authenticateToken } from '../middlewares/authenticate-token';
 
 export abstract class BaseController {

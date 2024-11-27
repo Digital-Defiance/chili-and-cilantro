@@ -14,10 +14,10 @@ import {
   IUserResponse,
   ModelName,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { RouteConfig } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { Request, Response } from 'express';
 import { body, query } from 'express-validator';
 import { MongooseValidationError } from '../../errors/mongoose-validation-error';
-import { RouteConfig } from '../../interfaces/route-config';
 import { findAuthToken } from '../../middlewares/authenticate-token';
 import { JwtService } from '../../services/jwt';
 import { RequestUserService } from '../../services/request-user';
