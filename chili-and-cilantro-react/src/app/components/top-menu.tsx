@@ -1,4 +1,4 @@
-import { faSackDollar, faUserCircle } from '@fortawesome/free-solid-svg-icons';
+import { faPepperHot, faUserCircle } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -56,7 +56,7 @@ const TopMenu: React.FC = () => {
             alt="CurseFund"
             className="logo-symbol"
           />
-          <span className="logo-text montserrat-heading">
+          <span className="logo-text playfair-display-regular">
             Chili and Cilantro
           </span>
         </div>
@@ -70,7 +70,7 @@ const TopMenu: React.FC = () => {
                     className="menu-icon"
                     onClick={() => setGameDropdownOpen(!gameDropdownOpen)}
                   >
-                    <FontAwesomeIcon icon={faSackDollar} />
+                    <FontAwesomeIcon icon={faPepperHot} />
                   </button>
                   {gameDropdownOpen && (
                     <div className="game-dropdown-menu">

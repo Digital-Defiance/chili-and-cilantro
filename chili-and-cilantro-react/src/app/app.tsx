@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom';
 import '../styles.scss';
+import ApiAccess from './components/api-access';
 import ChangePasswordPage from './components/change-password-page';
 import DashboardPage from './components/dashboard-page';
 import ForgotPasswordPage from './components/forgot-password-page';
@@ -19,6 +20,14 @@ function App() {
         <TopMenu />
         <Routes>
           <Route path="/" element={<SplashPage />} />
+          <Route
+            path="/api-access"
+            element={
+              <PrivateRoute>
+                <ApiAccess />
+              </PrivateRoute>
+            }
+          />
           <Route
             path="/change-password"
             element={

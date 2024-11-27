@@ -1,44 +1,37 @@
 import { constants } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { isAxiosError } from 'axios';
-import { FormikHelpers, useFormik } from 'formik';
-import React, { useEffect, useState } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import {
+  Box,
+  Button,
+  Container,
+  Link as MuiLink,
+  TextField,
+  Typography,
+} from '@mui/material';
+import { useFormik } from 'formik';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
-import { AuthContext } from '../auth-provider';
 import authService from '../services/auth-service';
-import './auth.scss';
 
 interface FormValues {
   username: string;
   email: string;
   password: string;
-  timezone: string;
 }
 
 const RegisterPage: React.FC = () => {
-  const navigate = useNavigate();
-  const { isAuthenticated } = React.useContext(AuthContext);
   const [registrationError, setRegistrationError] = useState<string | null>(
     null,
   );
-  const [registrationSuccess, setRegistrationSuccess] =
-    useState<boolean>(false);
-  const [userTimezone, setUserTimezone] = useState<string>('');
-
-  useEffect(() => {
-    // Get the user's timezone
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    setUserTimezone(timezone);
-  }, []);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const navigate = useNavigate();
 
   const formik = useFormik<FormValues>({
     initialValues: {
       username: '',
       email: '',
       password: '',
-      timezone: userTimezone,
     },
-    enableReinitialize: true,
     validationSchema: Yup.object({
       username: Yup.string()
         .matches(constants.USERNAME_REGEX, constants.USERNAME_REGEX_ERROR)
@@ -47,15 +40,15 @@ const RegisterPage: React.FC = () => {
       password: Yup.string()
         .matches(constants.PASSWORD_REGEX, constants.PASSWORD_REGEX_ERROR)
         .required('Required'),
-      timezone: Yup.string().required('Timezone is required'),
     }),
-    onSubmit: async (values, { setSubmitting }: FormikHelpers<FormValues>) => {
+    onSubmit: async (values, { setSubmitting }) => {
       try {
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         await authService.register(
           values.username,
           values.email,
           values.password,
-          values.timezone,
+          timezone,
         );
         setRegistrationError(null);
         setRegistrationSuccess(true);
@@ -64,9 +57,9 @@ const RegisterPage: React.FC = () => {
         }, 3000);
       } catch (error: unknown) {
         console.error(error);
-        if (isAxiosError(error) && error.response) {
+        if (error instanceof Error) {
           setRegistrationError(
-            error.response.data?.message ||
+            error.message ||
               'An error occurred during registration. Please try again.',
           );
         } else {
@@ -81,74 +74,96 @@ const RegisterPage: React.FC = () => {
     },
   });
 
-  if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
   return (
-    <div className="auth-container">
-      <h2 className="auth-title">Register</h2>
-      {registrationSuccess && (
-        <div className="success-message">
-          Registration successful! You will be redirected to the login page
-          shortly.
-        </div>
-      )}
-      <form onSubmit={formik.handleSubmit} className="auth-form">
-        <div className="form-group">
-          <label htmlFor="username">Username</label>
-          <input
+    <Container maxWidth="xs">
+      <Box
+        sx={{
+          marginTop: 8,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <Typography component="h1" variant="h5">
+          Register
+        </Typography>
+        <Box
+          component="form"
+          onSubmit={formik.handleSubmit}
+          noValidate
+          sx={{ mt: 1 }}
+        >
+          <TextField
+            margin="normal"
+            required
+            fullWidth
             id="username"
+            label="Username"
             name="username"
-            type="text"
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
+            autoComplete="username"
+            autoFocus
             value={formik.values.username}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.username && Boolean(formik.errors.username)}
+            helperText={formik.touched.username && formik.errors.username}
           />
-          {formik.touched.username && formik.errors.username ? (
-            <div className="error">{formik.errors.username}</div>
-          ) : null}
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="email">Email</label>
-          <input
+          <TextField
+            margin="normal"
+            required
+            fullWidth
             id="email"
+            label="Email Address"
             name="email"
-            type="email"
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
+            autoComplete="email"
             value={formik.values.email}
-          />
-          {formik.touched.email && formik.errors.email ? (
-            <div className="error">{formik.errors.email}</div>
-          ) : null}
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="password">Password</label>
-          <input
-            id="password"
-            name="password"
-            type="password"
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            value={formik.values.password}
+            error={formik.touched.email && Boolean(formik.errors.email)}
+            helperText={formik.touched.email && formik.errors.email}
           />
-          {formik.touched.password && formik.errors.password ? (
-            <div className="error">{formik.errors.password}</div>
-          ) : null}
-        </div>
-
-        {registrationError && (
-          <div className="error-message">{registrationError}</div>
-        )}
-
-        <button type="submit" disabled={formik.isSubmitting}>
-          {formik.isSubmitting ? 'Registering...' : 'Register'}
-        </button>
-      </form>
-    </div>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="Password"
+            type="password"
+            id="password"
+            autoComplete="new-password"
+            value={formik.values.password}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.password && Boolean(formik.errors.password)}
+            helperText={formik.touched.password && formik.errors.password}
+          />
+          {registrationError && (
+            <Typography color="error" variant="body2" sx={{ mt: 1 }}>
+              {registrationError}
+            </Typography>
+          )}
+          {registrationSuccess && (
+            <Typography color="success.main" variant="body2" sx={{ mt: 1 }}>
+              Registration successful! Redirecting to login page...
+            </Typography>
+          )}
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+            disabled={formik.isSubmitting}
+          >
+            {formik.isSubmitting ? 'Registering...' : 'Register'}
+          </Button>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <MuiLink component={Link} to="/login" variant="body2">
+              Already have an account? Sign in
+            </MuiLink>
+          </Box>
+        </Box>
+      </Box>
+    </Container>
   );
 };
 

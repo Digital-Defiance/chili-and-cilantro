@@ -1,6 +1,14 @@
 import { constants } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import {
+  Box,
+  Button,
+  Container,
+  Link as MuiLink,
+  TextField,
+  Typography,
+} from '@mui/material';
 import axios from 'axios';
-import { ErrorMessage, Field, Form, Formik, FormikProps } from 'formik';
+import { useFormik } from 'formik';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
@@ -20,71 +28,48 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const getInitialValues = (): FormValues => ({
-    email: '',
-    username: '',
-    password: '',
-  });
-
-  const validationSchema = Yup.object({
-    [loginType]:
-      loginType === 'email'
-        ? Yup.string().email('Invalid email address').required('Required')
-        : Yup.string()
-            .matches(constants.USERNAME_REGEX, constants.USERNAME_REGEX_ERROR)
-            .required('Required'),
-    password: Yup.string()
-      .matches(constants.PASSWORD_REGEX, constants.PASSWORD_REGEX_ERROR)
-      .required('Required'),
-  });
-
-  const handleSubmit = async (
-    values: FormValues,
-    {
-      setSubmitting,
-      resetForm,
-    }: {
-      setSubmitting: (isSubmitting: boolean) => void;
-      resetForm: () => void;
-    },
-  ) => {
-    try {
-      const loginResult = await login(
-        loginType === 'email' ? values.email : values.username,
-        values.password,
-        loginType === 'email',
-      );
-      if ('error' in loginResult) {
-        setLoginError(loginResult.error);
-        return;
-      }
-
-      // Wait for a short time to ensure state is updated
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      resetForm();
-      navigate('/dashboard');
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        setLoginError(error.response.data.message);
-        if (
-          error.response.data.message ===
-          'Account status is PendingEmailVerification'
-        ) {
-          setResendStatus(null);
+  const formik = useFormik({
+    initialValues: {
+      email: '',
+      username: '',
+      password: '',
+    } as FormValues,
+    validationSchema: Yup.object({
+      [loginType]:
+        loginType === 'email'
+          ? Yup.string().email('Invalid email address').required('Required')
+          : Yup.string()
+              .matches(constants.USERNAME_REGEX, constants.USERNAME_REGEX_ERROR)
+              .required('Required'),
+      password: Yup.string()
+        .matches(constants.PASSWORD_REGEX, constants.PASSWORD_REGEX_ERROR)
+        .required('Required'),
+    }),
+    onSubmit: async (values, { setSubmitting, resetForm }) => {
+      try {
+        const loginResult = await login(
+          loginType === 'email' ? values.email : values.username,
+          values.password,
+          loginType === 'email',
+        );
+        if ('error' in loginResult) {
+          setLoginError(loginResult.error);
+          return;
         }
-      } else {
+        resetForm();
+        navigate('/dashboard');
+      } catch (error) {
         setLoginError('An unexpected error occurred');
+      } finally {
+        setSubmitting(false);
       }
-    } finally {
-      setSubmitting(false);
-    }
-  };
+    },
+  });
 
-  const handleResendVerification = async (identifier: string) => {
+  const handleResendVerification = async () => {
     try {
       await axios.post('/user/resend-verification', {
-        [loginType]: identifier,
+        [loginType]: formik.values[loginType],
       });
       setResendStatus('Verification email sent successfully');
     } catch (error) {
@@ -101,92 +86,104 @@ const LoginPage = () => {
   }, [loginType]);
 
   return (
-    <div className="auth-container">
-      <h2 className="auth-title">Login</h2>
-      <Formik<FormValues>
-        key={formKey}
-        initialValues={getInitialValues()}
-        validationSchema={validationSchema}
-        onSubmit={handleSubmit}
-        enableReinitialize
+    <Container maxWidth="xs">
+      <Box
+        sx={{
+          marginTop: 8,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
       >
-        {({
-          isSubmitting,
-          values,
-          errors,
-          touched,
-        }: FormikProps<FormValues>) => (
-          <Form className="auth-form">
-            <div className="form-group">
-              <label htmlFor={loginType}>
-                {loginType === 'email' ? 'Email' : 'Username'}
-              </label>
-              <Field
-                type={loginType === 'email' ? 'email' : 'text'}
-                id={loginType}
-                name={loginType}
-                required
-                aria-invalid={touched[loginType] && !!errors[loginType]}
-              />
-              <ErrorMessage
-                name={loginType}
-                component="div"
-                className="error"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="password">Password</label>
-              <Field
-                type="password"
-                id="password"
-                name="password"
-                required
-                aria-invalid={touched.password && !!errors.password}
-              />
-              <ErrorMessage name="password" component="div" className="error" />
-              {loginError && <div className="error">{loginError}</div>}
-            </div>
-
-            {resendStatus && <div className="info">{resendStatus}</div>}
-
-            {loginError === 'Account status is PendingEmailVerification' && (
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={() => handleResendVerification(values[loginType])}
-                disabled={isSubmitting || !values[loginType]}
-              >
-                {isSubmitting ? 'Sending...' : 'Resend Verification Email'}
-              </button>
-            )}
-
-            <button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Logging in...' : 'Login'}
-            </button>
-          </Form>
-        )}
-      </Formik>
-      <div className="auth-links">
-        <div className="toggle-login-type">
-          <Link
-            to="#"
-            onClick={(e) => {
-              e.preventDefault();
-              setLoginType(loginType === 'email' ? 'username' : 'email');
-            }}
+        <Typography component="h1" variant="h5">
+          Login
+        </Typography>
+        <Box
+          component="form"
+          onSubmit={formik.handleSubmit}
+          noValidate
+          sx={{ mt: 1 }}
+        >
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id={loginType}
+            label={loginType === 'email' ? 'Email Address' : 'Username'}
+            name={loginType}
+            autoComplete={loginType === 'email' ? 'email' : 'username'}
+            autoFocus
+            value={formik.values[loginType]}
+            onChange={formik.handleChange}
+            error={
+              formik.touched[loginType] && Boolean(formik.errors[loginType])
+            }
+            helperText={formik.touched[loginType] && formik.errors[loginType]}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="Password"
+            type="password"
+            id="password"
+            autoComplete="current-password"
+            value={formik.values.password}
+            onChange={formik.handleChange}
+            error={formik.touched.password && Boolean(formik.errors.password)}
+            helperText={formik.touched.password && formik.errors.password}
+          />
+          {loginError && (
+            <Typography color="error" variant="body2">
+              {loginError}
+            </Typography>
+          )}
+          {resendStatus && (
+            <Typography color="info" variant="body2">
+              {resendStatus}
+            </Typography>
+          )}
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            color="primary"
+            sx={{ mt: 3, mb: 2 }}
+            disabled={formik.isSubmitting}
           >
-            Switch to {loginType === 'email' ? 'Username' : 'Email'} Login
-          </Link>
-        </div>
-        <div className="auth-links">
-          <Link to="/forgot-password">Forgot Password?</Link>
-          <Link to="/register" className="register-link">
-            Don&apos;t have an account? Register
-          </Link>
-        </div>
-      </div>
-    </div>
+            {formik.isSubmitting ? 'Logging in...' : 'Login'}
+          </Button>
+          {loginError === 'Account status is PendingEmailVerification' && (
+            <Button
+              fullWidth
+              variant="outlined"
+              onClick={handleResendVerification}
+              disabled={formik.isSubmitting}
+              sx={{ mb: 2 }}
+            >
+              Resend Verification Email
+            </Button>
+          )}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <MuiLink
+              component={Link}
+              to="#"
+              variant="body2"
+              onClick={(e) => {
+                e.preventDefault();
+                setLoginType(loginType === 'email' ? 'username' : 'email');
+              }}
+            >
+              {`Use ${loginType === 'email' ? 'Username' : 'Email'}`}
+            </MuiLink>
+            <MuiLink component={Link} to="/register" variant="body2">
+              {"Don't have an account? Sign Up"}
+            </MuiLink>
+          </Box>
+        </Box>
+      </Box>
+    </Container>
   );
 };
 

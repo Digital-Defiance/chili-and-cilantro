@@ -14,7 +14,9 @@ const SplashPage: React.FC = () => {
       />
       <p className="splash-subdescription">A Spicy Bluffing Game</p>
       <div className="feature-list">
-        <h2 className="feature-title montserrat-heading">Key Features:</h2>
+        <h2 className="feature-title playfair-display-regular">
+          Key Features:
+        </h2>
         <ul className="feature-bullets">
           <li>Exciting bluffing gameplay with a culinary twist</li>
           <li>Strategic bidding and card placement</li>

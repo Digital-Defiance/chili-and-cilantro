@@ -1,32 +1,60 @@
 @use 'sass:color';
-// Variables
+// Color Base
 $logo-background-color: #fffdd0;
 $green-chili: #7edb0e;
 $green-chili-shadow: #0e683c;
 $red-chili: #ff081f;
 $red-chili-shadow: #9c0020;
+$cilantro-light: #e3fe2d;
+$cilantro-dark: #24b215;
+
+$new-dark: #05070b;
+$new-green: #375c4b;
+$new-lightGreen: #78bf33;
+$new-red: #cc2129;
+$new-gray: #cfcdc8;
 
 // Theme colors
-$primary-dark: #333333; // Darker shade for text
-$secondary-dark: #666666; // Medium gray for secondary text
-$highlight-color: #7edb0e; // Green chili as highlight
-$accent-color: #ff081f; // Red chili as accent
+$primary-dark: $new-dark; // Darker shade for text
+$secondary-dark: $new-gray; // Medium gray for secondary text
+$highlight-color: $new-lightGreen; // Green chili as highlight
+$accent-color: $new-red; // Red chili as accent
 $text-color: #000000; // Black text for readability
+$text-color-light: #ffffff; // White text for contrast
+$text-color-muted: $new-gray; // Muted gray for secondary text
 $text-muted: #666666; // Muted gray for secondary text
-$danger-color: #ff081f; // Red chili for danger/alerts
-$success-color: #7edb0e; // Green chili for success feedback
+$danger-color: $new-red; // Red chili for danger/alerts
+$success-color: $new-lightGreen; // Green chili for success feedback
 $border-color: #e0e0e0; // Light gray for borders
 
-$primary-color: $green-chili;
+$primary-color: $new-green;
 $light-color: #ffffff; // White background color
-$background-color: #ffffff; // White background color
+$background-color: $new-dark; // White background color
 
 // Button hover effects
-$highlight-hover: lighten($highlight-color, 10%);
-$accent-hover: lighten($accent-color, 10%);
+$highlight-hover: color.adjust($highlight-color, $lightness: 10%);
+$accent-hover: color.adjust($accent-color, $lightness: 10%);
 
 $font-family: 'Playfair Display', serif;
 $font-secondary: 'McFoodPoisoning', sans-serif;
+
+.btn-primary {
+  background-color: $new-gray;
+  color: $new-dark;
+
+  &:hover {
+    background-color: $new-red;
+  }
+}
+
+.btn-secondary {
+  background-color: $new-gray;
+  color: $new-dark;
+
+  &:hover {
+    background-color: $new-green;
+  }
+}
 
 // Reset and base styles
 * {

@@ -1,11 +1,11 @@
 import { constants } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { Box, Button, Container, TextField, Typography } from '@mui/material';
 import { isAxiosError } from 'axios';
 import { useFormik } from 'formik';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
 import api from '../services/api';
-import './auth.scss';
 
 type FormValues = {
   email?: string;
@@ -60,115 +60,161 @@ const ForgotPasswordPage: React.FC = () => {
         email: Yup.string().email('Invalid email address').required('Required'),
       });
 
-  const handleSubmit = async (values: FormValues) => {
-    try {
-      if (values.email) {
-        // Handle forgot password
-        const response = await api.post('/user/forgot-password', {
-          email: values.email,
-        });
-        if (response.status === 200) {
-          setSuccessMessage(response.data.message);
-          setErrorMessage('');
-        } else {
-          setErrorMessage(response.data.message);
-          setSuccessMessage('');
-        }
-      } else if (values.password && values.confirmPassword) {
-        // Handle password reset
-        const params = new URLSearchParams(location.search);
-        const token = params.get('token');
-        if (!token) {
-          setErrorMessage(
-            'Invalid token. Please try the password reset process again.',
-          );
-          return;
-        }
-        const response = await api.post('/user/reset-password', {
-          token,
-          password: values.password,
-        });
-        if (response.status === 200) {
-          setSuccessMessage(
-            'Your password has been successfully reset. You can now log in with your new password.',
-          );
-          setErrorMessage('');
-          setTimeout(() => navigate('/login'), 3000);
-        } else {
-          setErrorMessage(response.data.message);
-          setSuccessMessage('');
-        }
-      }
-    } catch (error) {
-      if (isAxiosError(error) && error.response) {
-        setErrorMessage(
-          error.response.data.message ||
-            'An error occurred while processing your request.',
-        );
-        setSuccessMessage('');
-      } else {
-        setErrorMessage('An unexpected error occurred');
-        setSuccessMessage('');
-      }
-    }
-  };
-
   const formik = useFormik({
     initialValues,
     validationSchema,
-    onSubmit: handleSubmit,
+    onSubmit: async (values) => {
+      try {
+        if (values.email) {
+          // Handle forgot password
+          const response = await api.post('/user/forgot-password', {
+            email: values.email,
+          });
+          if (response.status === 200) {
+            setSuccessMessage(response.data.message);
+            setErrorMessage('');
+          } else {
+            setErrorMessage(response.data.message);
+            setSuccessMessage('');
+          }
+        } else if (values.password && values.confirmPassword) {
+          // Handle password reset
+          const params = new URLSearchParams(location.search);
+          const token = params.get('token');
+          if (!token) {
+            setErrorMessage(
+              'Invalid token. Please try the password reset process again.',
+            );
+            return;
+          }
+          const response = await api.post('/user/reset-password', {
+            token,
+            password: values.password,
+          });
+          if (response.status === 200) {
+            setSuccessMessage(
+              'Your password has been successfully reset. You can now log in with your new password.',
+            );
+            setErrorMessage('');
+            setTimeout(() => navigate('/login'), 3000);
+          } else {
+            setErrorMessage(response.data.message);
+            setSuccessMessage('');
+          }
+        }
+      } catch (error) {
+        if (isAxiosError(error) && error.response) {
+          setErrorMessage(
+            error.response.data.message ||
+              'An error occurred while processing your request.',
+          );
+          setSuccessMessage('');
+        } else {
+          setErrorMessage('An unexpected error occurred');
+          setSuccessMessage('');
+        }
+      }
+    },
   });
 
   return (
-    <div className="auth-container">
-      <h2 className="auth-title">
-        {isTokenValid ? 'Reset Password' : 'Forgot Password'}
-      </h2>
-      <form className="auth-form" onSubmit={formik.handleSubmit}>
-        {isTokenValid ? (
-          <>
-            <div className="form-group">
-              <label htmlFor="password">New Password</label>
-              <input
+    <Container maxWidth="xs">
+      <Box
+        sx={{
+          marginTop: 8,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <Typography component="h1" variant="h5">
+          {isTokenValid ? 'Reset Password' : 'Forgot Password'}
+        </Typography>
+        <Box
+          component="form"
+          onSubmit={formik.handleSubmit}
+          noValidate
+          sx={{ mt: 1 }}
+        >
+          {isTokenValid ? (
+            <>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                name="password"
+                label="New Password"
                 type="password"
                 id="password"
-                {...formik.getFieldProps('password')}
+                autoComplete="new-password"
+                value={formik.values.password}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={
+                  formik.touched.password && Boolean(formik.errors.password)
+                }
+                helperText={formik.touched.password && formik.errors.password}
               />
-              {formik.errors.password && (
-                <div className="error">{formik.errors.password}</div>
-              )}
-            </div>
-            <div className="form-group">
-              <label htmlFor="confirmPassword">Confirm New Password</label>
-              <input
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                name="confirmPassword"
+                label="Confirm New Password"
                 type="password"
                 id="confirmPassword"
-                {...formik.getFieldProps('confirmPassword')}
+                autoComplete="new-password"
+                value={formik.values.confirmPassword}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={
+                  formik.touched.confirmPassword &&
+                  Boolean(formik.errors.confirmPassword)
+                }
+                helperText={
+                  formik.touched.confirmPassword &&
+                  formik.errors.confirmPassword
+                }
               />
-              {formik.errors.confirmPassword && (
-                <div className="error">{formik.errors.confirmPassword}</div>
-              )}
-            </div>
-          </>
-        ) : (
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input type="email" id="email" {...formik.getFieldProps('email')} />
-            {formik.errors.email && (
-              <div className="error">{formik.errors.email}</div>
-            )}
-          </div>
+            </>
+          ) : (
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="email"
+              label="Email Address"
+              name="email"
+              autoComplete="email"
+              autoFocus
+              value={formik.values.email}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.email && Boolean(formik.errors.email)}
+              helperText={formik.touched.email && formik.errors.email}
+            />
+          )}
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+          >
+            {isTokenValid ? 'Reset Password' : 'Send Reset Email'}
+          </Button>
+        </Box>
+        {successMessage && (
+          <Typography color="success.main" variant="body2">
+            {successMessage}
+          </Typography>
         )}
-
-        <button type="submit" className="btn btn-primary">
-          {isTokenValid ? 'Reset Password' : 'Send Reset Email'}
-        </button>
-      </form>
-      {successMessage && (
-        <div className="success-message">{successMessage}</div>
-      )}
-      {errorMessage && <div className="error-message">{errorMessage}</div>}
-    </div>
+        {errorMessage && (
+          <Typography color="error.main" variant="body2">
+            {errorMessage}
+          </Typography>
+        )}
+      </Box>
+    </Container>
   );
 };
 

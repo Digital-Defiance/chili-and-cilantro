@@ -1,135 +1,158 @@
 import { constants } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { Box, Button, Container, TextField, Typography } from '@mui/material';
 import { useFormik } from 'formik';
-import React, { useContext, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import * as Yup from 'yup';
-import { AuthContext } from '../auth-provider';
-import './auth.scss';
+import api from '../services/api';
+
+interface FormValues {
+  currentPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
+}
 
 const ChangePasswordPage: React.FC = () => {
-  const { isAuthenticated, user, loading, error, changePassword } =
-    useContext(AuthContext);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string>('');
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
-  const validationSchema = Yup.object({
-    currentPassword: Yup.string()
-      .matches(constants.PASSWORD_REGEX, constants.PASSWORD_REGEX_ERROR)
-      .required('Current password is required'),
-    newPassword: Yup.string()
-      .matches(constants.PASSWORD_REGEX, constants.PASSWORD_REGEX_ERROR)
-      .notOneOf(
-        [Yup.ref('currentPassword')],
-        'New password must be different from the current password',
-      )
-      .required('New password is required'),
-    confirmNewPassword: Yup.string()
-      .oneOf([Yup.ref('newPassword')], 'Passwords must match')
-      .required('Please confirm your new password'),
-  });
-
-  const formik = useFormik({
+  const formik = useFormik<FormValues>({
     initialValues: {
       currentPassword: '',
       newPassword: '',
       confirmNewPassword: '',
     },
-    validationSchema,
+    validationSchema: Yup.object({
+      currentPassword: Yup.string().required('Required'),
+      newPassword: Yup.string()
+        .matches(constants.PASSWORD_REGEX, constants.PASSWORD_REGEX_ERROR)
+        .required('Required'),
+      confirmNewPassword: Yup.string()
+        .oneOf([Yup.ref('newPassword')], 'Passwords must match')
+        .required('Required'),
+    }),
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       try {
-        const result = await changePassword(
-          values.currentPassword,
-          values.newPassword,
-        );
-        if (result.success) {
-          setSuccessMessage(result.message);
-          setErrorMessage(null);
-          resetForm();
-        }
-      } catch (err) {
-        console.error('Error changing password:', err);
-        if (err instanceof Error) {
-          setErrorMessage(err.message);
+        const response = await api.post('/user/change-password', {
+          currentPassword: values.currentPassword,
+          newPassword: values.newPassword,
+        });
+        setSuccessMessage('Password changed successfully');
+        setErrorMessage('');
+        resetForm();
+      } catch (error) {
+        if (error instanceof Error) {
+          setErrorMessage(
+            error.message || 'An error occurred while changing the password',
+          );
         } else {
           setErrorMessage('An unexpected error occurred');
         }
-        setSuccessMessage(null);
+        setSuccessMessage('');
       } finally {
         setSubmitting(false);
       }
     },
   });
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (!isAuthenticated || !user) {
-    return <Navigate to="/login" replace />;
-  }
-
   return (
-    <div className="auth-container">
-      <h2 className="auth-title">Change Password</h2>
-      <form onSubmit={formik.handleSubmit} className="auth-form">
-        <div className="form-group">
-          <label htmlFor="currentPassword">Current Password</label>
-          <input
-            id="currentPassword"
+    <Container maxWidth="xs">
+      <Box
+        sx={{
+          marginTop: 8,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <Typography component="h1" variant="h5">
+          Change Password
+        </Typography>
+        <Box
+          component="form"
+          onSubmit={formik.handleSubmit}
+          noValidate
+          sx={{ mt: 1 }}
+        >
+          <TextField
+            margin="normal"
+            required
+            fullWidth
             name="currentPassword"
+            label="Current Password"
             type="password"
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
+            id="currentPassword"
+            autoComplete="current-password"
             value={formik.values.currentPassword}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={
+              formik.touched.currentPassword &&
+              Boolean(formik.errors.currentPassword)
+            }
+            helperText={
+              formik.touched.currentPassword && formik.errors.currentPassword
+            }
           />
-          {formik.touched.currentPassword && formik.errors.currentPassword ? (
-            <div className="error">{formik.errors.currentPassword}</div>
-          ) : null}
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="newPassword">New Password</label>
-          <input
-            id="newPassword"
+          <TextField
+            margin="normal"
+            required
+            fullWidth
             name="newPassword"
+            label="New Password"
             type="password"
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
+            id="newPassword"
+            autoComplete="new-password"
             value={formik.values.newPassword}
-          />
-          {formik.touched.newPassword && formik.errors.newPassword ? (
-            <div className="error">{formik.errors.newPassword}</div>
-          ) : null}
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="confirmNewPassword">Confirm New Password</label>
-          <input
-            id="confirmNewPassword"
-            name="confirmNewPassword"
-            type="password"
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            value={formik.values.confirmNewPassword}
+            error={
+              formik.touched.newPassword && Boolean(formik.errors.newPassword)
+            }
+            helperText={formik.touched.newPassword && formik.errors.newPassword}
           />
-          {formik.touched.confirmNewPassword &&
-          formik.errors.confirmNewPassword ? (
-            <div className="error">{formik.errors.confirmNewPassword}</div>
-          ) : null}
-        </div>
-
-        {(error || errorMessage) && (
-          <div className="error-message">{error || errorMessage}</div>
-        )}
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="confirmNewPassword"
+            label="Confirm New Password"
+            type="password"
+            id="confirmNewPassword"
+            autoComplete="new-password"
+            value={formik.values.confirmNewPassword}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={
+              formik.touched.confirmNewPassword &&
+              Boolean(formik.errors.confirmNewPassword)
+            }
+            helperText={
+              formik.touched.confirmNewPassword &&
+              formik.errors.confirmNewPassword
+            }
+          />
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+            disabled={formik.isSubmitting}
+          >
+            {formik.isSubmitting ? 'Changing Password...' : 'Change Password'}
+          </Button>
+        </Box>
         {successMessage && (
-          <div className="success-message">{successMessage}</div>
+          <Typography color="success.main" variant="body2" sx={{ mt: 2 }}>
+            {successMessage}
+          </Typography>
         )}
-
-        <button type="submit" disabled={formik.isSubmitting}>
-          {formik.isSubmitting ? 'Changing Password...' : 'Change Password'}
-        </button>
-      </form>
-    </div>
+        {errorMessage && (
+          <Typography color="error" variant="body2" sx={{ mt: 2 }}>
+            {errorMessage}
+          </Typography>
+        )}
+      </Box>
+    </Container>
   );
 };
 

@@ -1,4 +1,4 @@
-@import '../../styles.scss';
+@use '../../styles' as *;
 
 .verification-container {
   max-width: 400px;

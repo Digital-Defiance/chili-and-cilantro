@@ -1,7 +1,13 @@
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Container,
+  Typography,
+} from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link as RouterLink, useLocation } from 'react-router-dom';
 import api from '../services/api';
-import './verify-email-page.scss';
 
 const VerifyEmailPage: React.FC = () => {
   const [message, setMessage] = useState('');
@@ -17,9 +23,7 @@ const VerifyEmailPage: React.FC = () => {
     const tokenFromQuery = query.get('token');
 
     if (tokenFromQuery) {
-      (async () => {
-        await verifyEmail(tokenFromQuery);
-      })();
+      verifyEmail(tokenFromQuery);
     } else {
       setLoading(false);
       setMessage('No verification token provided.');
@@ -37,7 +41,7 @@ const VerifyEmailPage: React.FC = () => {
         setMessage('Email verification failed. Please try again.');
         setVerificationStatus('error');
       }
-    } catch {
+    } catch (error) {
       setMessage(
         'An error occurred during email verification. Please try again.',
       );
@@ -47,25 +51,58 @@ const VerifyEmailPage: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return <div className="verification-container">Verifying email...</div>;
-  }
-
   return (
-    <div className="verification-container">
-      <h2 className="verification-title">Email Verification</h2>
-      <p className={`verification-message ${verificationStatus}`}>{message}</p>
-      {verificationStatus === 'success' && (
-        <div className="verification-action">
-          <Link to="/login">Proceed to Login</Link>
-        </div>
-      )}
-      {verificationStatus === 'error' && (
-        <div className="verification-action">
-          <Link to="/">Return to Home</Link>
-        </div>
-      )}
-    </div>
+    <Container maxWidth="sm">
+      <Box
+        sx={{
+          marginTop: 8,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <Typography component="h1" variant="h4" gutterBottom>
+          Email Verification
+        </Typography>
+        {loading ? (
+          <CircularProgress />
+        ) : (
+          <>
+            <Typography
+              variant="body1"
+              color={
+                verificationStatus === 'success' ? 'success.main' : 'error.main'
+              }
+              gutterBottom
+            >
+              {message}
+            </Typography>
+            {verificationStatus === 'success' && (
+              <Button
+                component={RouterLink}
+                to="/login"
+                variant="contained"
+                color="primary"
+                sx={{ mt: 2 }}
+              >
+                Proceed to Login
+              </Button>
+            )}
+            {verificationStatus === 'error' && (
+              <Button
+                component={RouterLink}
+                to="/"
+                variant="contained"
+                color="primary"
+                sx={{ mt: 2 }}
+              >
+                Return to Home
+              </Button>
+            )}
+          </>
+        )}
+      </Box>
+    </Container>
   );
 };
 
