@@ -14,10 +14,13 @@ import {
   IUserResponse,
   ModelName,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { RouteConfig } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import {
+  MongooseValidationError,
+  routeConfig,
+  RouteConfig,
+} from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { Request, Response } from 'express';
 import { body, query } from 'express-validator';
-import { MongooseValidationError } from '../../errors/mongoose-validation-error';
 import { findAuthToken } from '../../middlewares/authenticate-token';
 import { JwtService } from '../../services/jwt';
 import { RequestUserService } from '../../services/request-user';
@@ -37,9 +40,9 @@ export class UserController extends BaseController {
     this.userService = new UserService(getModel);
   }
 
-  protected getRoutes(): RouteConfig[] {
+  protected getRoutes(): RouteConfig<unknown[]>[] {
     return [
-      {
+      routeConfig<unknown[]>({
         method: 'post',
         path: '/change-password',
         handler: this.changePassword,
@@ -52,8 +55,8 @@ export class UserController extends BaseController {
             .matches(constants.PASSWORD_REGEX)
             .withMessage(constants.PASSWORD_REGEX_ERROR),
         ],
-      },
-      {
+      }),
+      routeConfig<unknown[]>({
         method: 'post',
         path: '/register',
         handler: this.register,
@@ -68,8 +71,8 @@ export class UserController extends BaseController {
           body('timezone').optional().isString(),
         ],
         useAuthentication: false,
-      },
-      {
+      }),
+      routeConfig<unknown[]>({
         method: 'post',
         path: '/login',
         handler: this.login,
@@ -93,14 +96,14 @@ export class UserController extends BaseController {
             .withMessage(constants.PASSWORD_REGEX_ERROR),
         ],
         useAuthentication: false,
-      },
-      {
+      }),
+      routeConfig<unknown[]>({
         method: 'get',
         path: '/refresh-token',
         handler: this.refreshToken,
         useAuthentication: true,
-      },
-      {
+      }),
+      routeConfig<unknown[]>({
         method: 'get',
         path: '/verify-email',
         handler: this.verifyEmailToken,
@@ -114,14 +117,14 @@ export class UserController extends BaseController {
             .withMessage('Invalid token'),
         ],
         useAuthentication: false,
-      },
-      {
+      }),
+      routeConfig<unknown[]>({
         method: 'get',
         path: '/verify',
         handler: this.tokenVerifiedResponse,
         useAuthentication: true,
-      },
-      {
+      }),
+      routeConfig<unknown[]>({
         method: 'post',
         path: '/resend-verification',
         handler: this.resendVerification,
@@ -136,8 +139,8 @@ export class UserController extends BaseController {
           body('email').optional().isEmail(),
         ],
         useAuthentication: false,
-      },
-      {
+      }),
+      routeConfig<unknown[]>({
         method: 'post',
         path: '/forgot-password',
         handler: this.forgotPassword,
@@ -148,8 +151,8 @@ export class UserController extends BaseController {
             .withMessage('Invalid email address'),
         ],
         useAuthentication: false,
-      },
-      {
+      }),
+      routeConfig<unknown[]>({
         method: 'get',
         path: '/verify-reset-token',
         handler: this.verifyResetToken,
@@ -163,8 +166,8 @@ export class UserController extends BaseController {
             .withMessage('Invalid token'),
         ],
         useAuthentication: false,
-      },
-      {
+      }),
+      routeConfig<unknown[]>({
         method: 'post',
         path: '/reset-password',
         handler: this.resetPassword,
@@ -175,7 +178,7 @@ export class UserController extends BaseController {
             .withMessage(constants.PASSWORD_REGEX_ERROR),
         ],
         useAuthentication: false,
-      },
+      }),
     ];
   }
 

@@ -56,7 +56,7 @@ export class ActionService {
     action: ActionType,
     data: U,
   ): Promise<T> {
-    return this.actionDiscriminatorsByType[action].create(data) as Promise<T>;
+    return (await this.actionDiscriminatorsByType[action].create(data)) as T;
   }
 
   public async getGameHistoryAsync(game: IGameDocument): Promise<IAction[]> {

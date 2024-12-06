@@ -4,6 +4,13 @@
     "esbenp.prettier-vscode",
     "firsttris.vscode-jest-runner",
     "dbaeumer.vscode-eslint",
-    "bruno-api-client.bruno"
+    "bruno-api-client.bruno",
+    "github.vscode-github-actions",
+    "github.vscode-pull-request-github",
+    "eamodio.gitlens",
+    "mongodb.mongodb-vscode",
+    "ms-playwright.playwright",
+    "mermaidchart.vscode-mermaid-chart",
+    "graphite.gti-vscode"
   ]
 }

@@ -40,7 +40,10 @@
         "GitHub.copilot",
         "GitHub.copilot-chat",
         "Codeium.codeium",
-        "bruno-api-client.bruno"
+        "bruno-api-client.bruno",
+        "GitHub.vscode-pull-request-github",
+        "MermaidChart.vscode-mermaid-chart",
+        "Graphite.gti-vscode"
       ],
       // Set *default* container specific settings.json values on container create.
       "settings": {

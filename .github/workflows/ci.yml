@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - dev
   pull_request:
 
 permissions:
@@ -26,21 +27,25 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.9.0
-          cache: 'yarn'
+          node-version: 22.x
+
+      - name: Enable Yarn Berry
+        run: |
+          corepack enable
+          yarn set version 4.5.3
 
       - name: Clear Yarn cache
         run: yarn cache clean
 
       - name: Setup FontAwesome
         run: |
-          ./fontawesome-npmrc.sh
+          ./fontawesome-npmrc.sh --ci
         env:
           FONTAWESOME_KEY: ${{ secrets.FONTAWESOME_KEY }}
 
       - name: Install dependencies
         run: |
-          ./do-yarn.sh --frozen-lockfile --ignore-scripts
+          ./do-yarn.sh --immutable
 
       - uses: nrwl/nx-set-shas@v4
 

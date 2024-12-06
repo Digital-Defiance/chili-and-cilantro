@@ -8,6 +8,7 @@ import {
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import {
   IApplication,
+  routeConfig,
   RouteConfig,
 } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { Request, Response } from 'express';
@@ -38,9 +39,9 @@ export class GameController extends BaseController {
     );
   }
 
-  protected getRoutes(): RouteConfig[] {
+  protected getRoutes(): RouteConfig<unknown[]>[] {
     return [
-      {
+      routeConfig<unknown[]>({
         method: 'post',
         path: '/create',
         handler: this.createGame,
@@ -51,8 +52,8 @@ export class GameController extends BaseController {
           body('password').optional().isString().trim(),
           body('maxChefs').isInt({ min: 2, max: 8 }),
         ],
-      },
-      {
+      }),
+      routeConfig<unknown[]>({
         method: 'post',
         path: '/:code/join',
         handler: this.joinGame,
@@ -61,33 +62,33 @@ export class GameController extends BaseController {
           body('userName').isString().trim().notEmpty(),
           body('password').optional().isString().trim(),
         ],
-      },
-      {
+      }),
+      routeConfig<unknown[]>({
         method: 'post',
         path: '/:code/message',
         handler: this.sendMessage,
         useAuthentication: true,
         validation: [body('message').isString().trim().notEmpty()],
-      },
-      {
+      }),
+      routeConfig<unknown[]>({
         method: 'get',
         path: '/:code/history',
         handler: this.getGameHistory,
         useAuthentication: true,
-      },
-      {
+      }),
+      routeConfig<unknown[]>({
         method: 'post',
         path: '/:code/start',
         handler: this.startGame,
         useAuthentication: true,
-      },
-      {
+      }),
+      routeConfig<unknown[]>({
         method: 'get',
         path: '/:code/action',
         handler: this.getAvailableActions,
         useAuthentication: true,
-      },
-      {
+      }),
+      routeConfig<unknown[]>({
         method: 'post',
         path: '/:code/action',
         handler: this.performTurnAction,
@@ -96,7 +97,7 @@ export class GameController extends BaseController {
           body('action').isString().isIn(Object.values(TurnAction)),
           body('cardType').optional().isString().isIn(Object.values(CardType)),
         ],
-      },
+      }),
     ];
   }
 

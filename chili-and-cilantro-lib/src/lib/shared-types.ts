@@ -1,5 +1,7 @@
 import { ClientSession, Model, Types } from 'mongoose';
 import ModelName from './enumerations/model-name';
+import { StringLanguages } from './enumerations/string-languages';
+import { StringNames } from './enumerations/string-names';
 import { IBaseDocument } from './interfaces/documents/base';
 import { IMakeBidAction } from './interfaces/models/actions/make-bid';
 import { IMessageAction } from './interfaces/models/actions/message';
@@ -51,3 +53,14 @@ export type ValidatedBody<T extends string> = {
   [K in T]: any;
 };
 export type DefaultIdType = Types.ObjectId;
+
+export type StringsCollection = { [key in StringNames]: string };
+export type MasterStringsCollection = {
+  [key in StringLanguages]: StringsCollection;
+};
+
+export type LanguageFlagCollection = { [key in StringLanguages]: string };
+
+export type LanguageCodeCollection = { [key in StringLanguages]: string };
+
+export const DefaultLanguage: StringLanguages = StringLanguages.EnglishUS;

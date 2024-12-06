@@ -1,6 +1,6 @@
 import { GetModelFunction } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { SchemaMap } from 'chili-and-cilantro-node-lib/src/types/shared-types';
 import mongoose from 'mongoose';
+import { SchemaMap } from '../../types/shared-types';
 
 export interface IApplication {
   get db(): typeof mongoose;

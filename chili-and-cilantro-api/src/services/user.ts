@@ -27,12 +27,12 @@ import {
   UsernameOrEmailRequiredError,
   UserNotFoundError,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { MongooseValidationError } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { MailDataRequired, MailService } from '@sendgrid/mail';
 import { compare, hashSync } from 'bcrypt';
 import { randomBytes } from 'crypto';
 import { Types } from 'mongoose';
 import { environment } from '../environment';
-import { MongooseValidationError } from '../errors/mongoose-validation-error';
 
 export class UserService {
   private readonly getModel: GetModelFunction;
