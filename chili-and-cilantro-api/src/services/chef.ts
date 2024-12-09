@@ -1,20 +1,20 @@
 import {
   ChefState,
   DefaultIdType,
-  GetModelFunction,
   IChefDocument,
   IGameDocument,
   IUserDocument,
   ModelName,
   NotInGameError,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { IApplication } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { Types } from 'mongoose';
+import { BaseService } from './base';
 import { UtilityService } from './utility';
 
-export class ChefService {
-  public readonly getModel: GetModelFunction;
-  constructor(getModel: GetModelFunction) {
-    this.getModel = getModel;
+export class ChefService extends BaseService {
+  constructor(application: IApplication) {
+    super(application);
   }
 
   /**
@@ -33,7 +33,7 @@ export class ChefService {
     host: boolean,
     chefId?: DefaultIdType,
   ): Promise<IChefDocument> {
-    const ChefModel = this.getModel<IChefDocument>(ModelName.Chef);
+    const ChefModel = this.application.getModel<IChefDocument>(ModelName.Chef);
     return ChefModel.create({
       _id: chefId ?? new Types.ObjectId(),
       gameId: game._id,
@@ -59,7 +59,7 @@ export class ChefService {
     existingChef: IChefDocument,
     newChefId?: DefaultIdType,
   ): Promise<IChefDocument> {
-    const ChefModel = this.getModel<IChefDocument>(ModelName.Chef);
+    const ChefModel = this.application.getModel<IChefDocument>(ModelName.Chef);
     return ChefModel.create({
       _id: newChefId ?? new Types.ObjectId(),
       gameId: newGame._id,
@@ -83,7 +83,7 @@ export class ChefService {
     game: IGameDocument,
     user: IUserDocument,
   ): Promise<IChefDocument> {
-    const ChefModel = this.getModel<IChefDocument>(ModelName.Chef);
+    const ChefModel = this.application.getModel<IChefDocument>(ModelName.Chef);
     const chef = await ChefModel.findOne({
       gameId: game._id,
       userId: user._id,
@@ -102,7 +102,7 @@ export class ChefService {
   public async getGameChefsByGameOrIdAsync(
     gameOrId: string | IGameDocument,
   ): Promise<IChefDocument[]> {
-    const ChefModel = this.getModel<IChefDocument>(ModelName.Chef);
+    const ChefModel = this.application.getModel<IChefDocument>(ModelName.Chef);
     const gameId =
       typeof gameOrId === 'string' ? gameOrId : gameOrId._id.toString();
     return ChefModel.find({ gameId: new Types.ObjectId(gameId) });

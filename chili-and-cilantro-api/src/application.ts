@@ -7,7 +7,7 @@ import {
   IApplication,
   SchemaMap,
 } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
-import express, { Application, Request, Response } from 'express';
+import express, { Application, NextFunction, Request, Response } from 'express';
 import { Server } from 'http';
 import mongoose, { connect, connection, Model } from 'mongoose';
 import { environment } from './environment';
@@ -47,20 +47,6 @@ export class App implements IApplication {
    * HTTP server instance
    */
   private server: Server | null = null;
-  private _appRouter: AppRouter | undefined;
-  public get appRouter(): AppRouter {
-    if (!this._appRouter) {
-      throw new Error('appRouter is not loaded yet. call start() first');
-    }
-    return this._appRouter;
-  }
-  private _apiRouter: ApiRouter | undefined;
-  public get apiRouter(): ApiRouter {
-    if (!this._apiRouter) {
-      throw new Error('apiRouter is not loaded yet. call start() first');
-    }
-    return this._apiRouter;
-  }
 
   public static getInstance(): App {
     if (!App.instance) {
@@ -85,6 +71,7 @@ export class App implements IApplication {
   public get ready(): boolean {
     return this._ready;
   }
+
   constructor() {
     if (App.instance) {
       throw new Error('App instance already exists, use getInstance()');
@@ -137,14 +124,30 @@ export class App implements IApplication {
 
       // init all middlewares and routes
       Middlewares.init(this.expressApp);
-      this._apiRouter = new ApiRouter(this);
-      this._appRouter = new AppRouter(this._apiRouter);
-      this._appRouter.init(this.expressApp, debug);
+      const apiRouter = new ApiRouter(this);
+      const appRouter = new AppRouter(apiRouter);
+
+      appRouter.init(this.expressApp, debug);
       // if none of the above handle the request, pass it to error handler
-      this.expressApp.use((err: Error, req: Request, res: Response) => {
-        console.error('Unhandled error:', err);
-        res.status(500).send('Internal Server Error');
-      });
+      this.expressApp.use(
+        (err: Error, req: Request, res: Response, next: NextFunction) => {
+          console.error('Unhandled error:', err);
+
+          // Check if headers have already been sent
+          if (res.headersSent) {
+            return next(err);
+          }
+
+          // You could add more detailed error handling here
+          // For example, checking err.status or err.statusCode if you're using a custom error class
+
+          res.status(500).json({
+            error: 'Internal Server Error',
+            message:
+              process.env.NODE_ENV === 'production' ? undefined : err.message,
+          });
+        },
+      );
 
       this.server = this.expressApp.listen(
         environment.developer.port,
@@ -170,7 +173,7 @@ export class App implements IApplication {
     if (this.server) {
       if (debug) console.log('[ stopping ] Application server');
       await new Promise<void>((resolve, reject) => {
-        this.server!.close((err) => {
+        this.server.close((err) => {
           if (err) {
             reject(err);
           } else {

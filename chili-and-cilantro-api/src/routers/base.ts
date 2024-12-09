@@ -1,11 +1,11 @@
-import { GetModelFunction } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { IApplication } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { Router } from 'express';
 
 export abstract class BaseRouter {
   public readonly router: Router;
-  public readonly getModel: GetModelFunction;
-  protected constructor(getModel: GetModelFunction) {
+  public readonly application: IApplication;
+  protected constructor(application: IApplication) {
     this.router = Router();
-    this.getModel = getModel;
+    this.application = application;
   }
 }

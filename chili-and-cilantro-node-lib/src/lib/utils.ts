@@ -1,6 +1,6 @@
 import { TransactionCallback } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { Request, Response } from 'express';
-import { Types, startSession } from 'mongoose';
+import { ClientSession, Connection, Types } from 'mongoose';
 import { MissingValidatedDataError } from './errors/missing-validated-data';
 
 /**
@@ -104,24 +104,38 @@ export function requireValidatedFieldsOrThrow<T = void>(
   return callback();
 }
 
+/**
+ * Wraps a callback in a transaction if necessary
+ * @param connection The mongoose connection
+ * @param useTransaction Whether to use a transaction
+ * @param session The session to use
+ * @param callback The callback to wrap
+ * @param args The arguments to pass to the callback
+ * @returns The result of the callback
+ */
 export async function withTransaction<T>(
+  connection: Connection,
   useTransaction: boolean,
+  session: ClientSession | undefined,
   callback: TransactionCallback<T>,
   ...args: any
-) {
+): Promise<T> {
   if (!useTransaction) {
-    return callback(undefined, ...args);
+    return await callback(session, undefined, ...args);
   }
-  const session = await startSession();
+  const needSession = useTransaction && session === undefined;
+  const client = connection.getClient();
+  const s = needSession ? await client.startSession() : session;
   try {
-    session.startTransaction();
-    const result = await callback(session, ...args);
-    await session.commitTransaction();
+    if (needSession && s !== undefined) await s.startTransaction();
+    const result = await callback(s, ...args);
+    if (needSession && s !== undefined) await s.commitTransaction();
     return result;
   } catch (error) {
-    await session.abortTransaction();
+    if (needSession && s !== undefined && s.inTransaction())
+      await s.abortTransaction();
     throw error;
   } finally {
-    await session.endSession();
+    if (needSession && s !== undefined) await s.endSession();
   }
 }

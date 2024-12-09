@@ -1,6 +1,5 @@
 import {
   DefaultLanguage,
-  GetModelFunction,
   GlobalLanguageContext,
   IApiErrorResponse,
   IApiExpressValidationErrorResponse,
@@ -9,12 +8,22 @@ import {
   IMongoErrors,
   IRequestUser,
   StringLanguages,
+  StringNames,
+  translate,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import {
   ExpressValidationError,
+  FlexibleValidationChain,
+  IApplication,
   RouteConfig,
 } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
-import { NextFunction, Request, Response, Router } from 'express';
+import {
+  NextFunction,
+  Request,
+  RequestHandler,
+  Response,
+  Router,
+} from 'express';
 import {
   matchedData,
   ValidationChain,
@@ -22,23 +31,115 @@ import {
   validationResult,
 } from 'express-validator';
 import { authenticateToken } from '../middlewares/authenticate-token';
+import { setGlobalContextLanguageFromRequest } from '../middlewares/set-global-context-language';
 
 export abstract class BaseController {
   public readonly router: Router;
   private activeRequest: Request | null = null;
   private activeResponse: Response | null = null;
-  public readonly getModel: GetModelFunction;
+  public readonly application: IApplication;
 
-  protected constructor(getModel: GetModelFunction) {
+  protected constructor(application: IApplication) {
+    this.application = application;
     this.router = Router();
     this.initializeRoutes();
-    this.getModel = getModel;
   }
 
   /**
    * Returns the routes that the controller will handle.
    */
   protected abstract getRoutes(): RouteConfig<unknown[]>[];
+
+  private getAuthenticationMiddleware(
+    useAuthentication: boolean,
+  ): RequestHandler[] {
+    return useAuthentication ? [this.authenticateRequest.bind(this)] : [];
+  }
+
+  private getValidationMiddleware(
+    validation: FlexibleValidationChain,
+  ): RequestHandler[] {
+    if (Array.isArray(validation) && validation.length > 0) {
+      return [...validation, this.createValidationHandler(validation)];
+    } else if (typeof validation === 'function') {
+      return [this.createDynamicValidationHandler(validation)];
+    }
+    return [];
+  }
+
+  private createValidationHandler(
+    validation: ValidationChain[],
+  ): RequestHandler {
+    return (req: Request, res: Response, next: NextFunction) => {
+      try {
+        this.checkRequestValidationAndThrow(req, res, next, validation);
+      } catch (error) {
+        next(error);
+      }
+    };
+  }
+
+  private createDynamicValidationHandler(
+    validationFn: (lang: StringLanguages) => ValidationChain[],
+  ): RequestHandler {
+    return async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const validationArray = validationFn(GlobalLanguageContext.language);
+        await Promise.all(validationArray.map((v) => v.run(req)));
+        await this.checkRequestValidationAndThrow(
+          req,
+          res,
+          next,
+          validationArray,
+        );
+      } catch (error) {
+        next(error);
+      }
+    };
+  }
+
+  private createRequestHandler(
+    handler: RequestHandler,
+    useAuthentication: boolean,
+    handlerArgs: any[],
+  ): RequestHandler {
+    return async (req: Request, res: Response, next: NextFunction) => {
+      this.activeRequest = req;
+      this.activeResponse = res;
+      // if req.user wasn't added above, return an unauthorized response
+      if (useAuthentication && !req.user) {
+        this.sendApiMessageResponse(
+          401,
+          {
+            message: translate(StringNames.Common_Unauthorized),
+          } as IApiMessageResponse,
+          res,
+        );
+        return;
+      }
+
+      // Check if handler is defined before calling it
+      if (typeof handler !== 'function') {
+        throw new Error('Handler is not a function');
+      }
+
+      try {
+        await handler.call(
+          this,
+          req,
+          res,
+          next,
+          ...(handlerArgs ? handlerArgs : []),
+        );
+
+        if (!res.headersSent) {
+          next();
+        }
+      } catch (error) {
+        next(error);
+      }
+    };
+  }
 
   /**
    * Initializes the routes for the controller.
@@ -54,72 +155,20 @@ export abstract class BaseController {
         middleware = [],
         validation = [],
       } = route;
-      const routeHandlers = [
-        ...(useAuthentication
-          ? [
-              (req: Request, res: Response, next: NextFunction) =>
-                this.authenticateRequest(this.getModel, req, res, next),
-            ]
-          : []),
-        ...(Array.isArray(validation) && validation.length > 0
-          ? [
-              ...validation,
-              (req: Request, res: Response, next: NextFunction) => {
-                try {
-                  this.checkRequestValidationAndThrow(
-                    req,
-                    res,
-                    next,
-                    validation,
-                  );
-                } catch (error) {
-                  next(error);
-                }
-              },
-            ]
-          : []),
-        ...(typeof validation === 'function'
-          ? [
-              async (req: Request, res: Response, next: NextFunction) => {
-                try {
-                  const validationArray = validation(
-                    GlobalLanguageContext.language,
-                  );
-                  await Promise.all(
-                    validationArray.map((validation: ValidationChain) =>
-                      validation.run(req),
-                    ),
-                  );
-                  await this.checkRequestValidationAndThrow(
-                    req,
-                    res,
-                    next,
-                    validationArray,
-                  );
-                } catch (error) {
-                  next(error);
-                }
-              },
-            ]
-          : []),
-        ...middleware,
-        (req: Request, res: Response, next: NextFunction) => {
-          this.activeRequest = req;
-          this.activeResponse = res;
-          // if req.user wasn't added above, return an unauthorized response
-          if (useAuthentication && !req.user) {
-            this.sendApiMessageResponse(
-              401,
-              { message: 'Unauthorized' } as IApiMessageResponse,
-              res,
-            );
-            return;
-          }
-          handler.call(this, req, res, next);
-        },
-      ];
-
-      this.router[method](path, ...routeHandlers);
+      this.router[method](
+        path,
+        ...[
+          ...this.getAuthenticationMiddleware(useAuthentication),
+          setGlobalContextLanguageFromRequest,
+          ...this.getValidationMiddleware(validation),
+          ...middleware,
+          this.createRequestHandler(
+            handler,
+            useAuthentication,
+            route.handlerArgs,
+          ),
+        ],
+      );
     });
   }
 
@@ -193,12 +242,12 @@ export abstract class BaseController {
    * @param next The next function
    */
   protected authenticateRequest(
-    getModel: GetModelFunction,
+    application: IApplication,
     req: Request,
     res: Response,
     next: NextFunction,
   ): void {
-    authenticateToken(getModel, req, res, (err) => {
+    authenticateToken(application, req, res, (err) => {
       if (err || !req.user) {
         this.sendApiMessageResponse(
           401,
@@ -252,9 +301,7 @@ export abstract class BaseController {
     req: Request,
     res: Response,
     next: NextFunction,
-    validationArray:
-      | ValidationChain[]
-      | ((language: StringLanguages) => ValidationChain[]) = [],
+    validationArray: FlexibleValidationChain = [],
   ): void {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

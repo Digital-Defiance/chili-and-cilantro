@@ -2,7 +2,6 @@ import {
   ActionType,
   CardType,
   constants,
-  GetModelFunction,
   IAction,
   IActionDocument,
   IChefDocument,
@@ -39,16 +38,16 @@ import {
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { IApplication } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { Model } from 'mongoose';
+import { BaseService } from './base';
 
-export class ActionService {
-  private readonly getModel: GetModelFunction;
+export class ActionService extends BaseService {
   private readonly actionDiscriminatorsByType: Record<
     ActionType,
     Model<IActionDocument>
   >;
 
   constructor(application: IApplication) {
-    this.getModel = application.getModel;
+    super(application);
     this.actionDiscriminatorsByType = application.schemaMap.Action
       .discriminators.byType as Record<ActionType, Model<IActionDocument>>;
   }
@@ -60,7 +59,9 @@ export class ActionService {
   }
 
   public async getGameHistoryAsync(game: IGameDocument): Promise<IAction[]> {
-    const ActionModel = this.getModel<IActionDocument>(ModelName.Action);
+    const ActionModel = this.application.getModel<IActionDocument>(
+      ModelName.Action,
+    );
     return ActionModel.find({ gameId: game._id }).sort({
       createdAt: 1,
     });

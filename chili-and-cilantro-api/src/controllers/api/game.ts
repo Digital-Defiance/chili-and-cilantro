@@ -27,12 +27,12 @@ export class GameController extends BaseController {
   private readonly gameService;
 
   constructor(application: IApplication) {
-    super(application.getModel);
+    super(application);
     this.actionService = new ActionService(application);
-    this.chefService = new ChefService(application.getModel);
-    this.playerService = new PlayerService(application.getModel);
+    this.chefService = new ChefService(application);
+    this.playerService = new PlayerService(application);
     this.gameService = new GameService(
-      application.getModel,
+      application,
       this.actionService,
       this.chefService,
       this.playerService,
@@ -108,7 +108,7 @@ export class GameController extends BaseController {
    * @returns
    */
   private async createGame(req: Request, res: Response) {
-    const UserModel = this.getModel<IUserDocument>(ModelName.User);
+    const UserModel = this.application.getModel<IUserDocument>(ModelName.User);
     try {
       if (!req.user) {
         this.sendApiErrorResponse(
@@ -159,7 +159,7 @@ export class GameController extends BaseController {
    * @returns
    */
   private async joinGame(req: Request, res: Response) {
-    const UserModel = this.getModel<IUserDocument>(ModelName.User);
+    const UserModel = this.application.getModel<IUserDocument>(ModelName.User);
     try {
       if (!req.user) {
         this.sendApiErrorResponse(
@@ -208,7 +208,7 @@ export class GameController extends BaseController {
    * @returns
    */
   private async sendMessage(req: Request, res: Response) {
-    const UserModel = this.getModel<IUserDocument>(ModelName.User);
+    const UserModel = this.application.getModel<IUserDocument>(ModelName.User);
     try {
       if (!req.user) {
         this.sendApiErrorResponse(
@@ -254,7 +254,7 @@ export class GameController extends BaseController {
    * @returns
    */
   private async getGameHistory(req: Request, res: Response) {
-    const UserModel = this.getModel<IUserDocument>(ModelName.User);
+    const UserModel = this.application.getModel<IUserDocument>(ModelName.User);
     try {
       if (!req.user) {
         this.sendApiErrorResponse(
@@ -298,7 +298,7 @@ export class GameController extends BaseController {
    * @returns
    */
   private async startGame(req: Request, res: Response) {
-    const UserModel = this.getModel<IUserDocument>(ModelName.User);
+    const UserModel = this.application.getModel<IUserDocument>(ModelName.User);
     try {
       if (!req.user) {
         this.sendApiErrorResponse(
@@ -341,7 +341,7 @@ export class GameController extends BaseController {
    * @returns
    */
   private async getAvailableActions(req: Request, res: Response) {
-    const UserModel = this.getModel<IUserDocument>(ModelName.User);
+    const UserModel = this.application.getModel<IUserDocument>(ModelName.User);
     try {
       if (!req.user) {
         this.sendApiErrorResponse(
@@ -386,7 +386,7 @@ export class GameController extends BaseController {
    * @returns
    */
   private async performTurnAction(req: Request, res: Response) {
-    const UserModel = this.getModel<IUserDocument>(ModelName.User);
+    const UserModel = this.application.getModel<IUserDocument>(ModelName.User);
     try {
       if (!req.user) {
         this.sendApiErrorResponse(

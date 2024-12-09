@@ -8,6 +8,7 @@ import { JwtPayload, sign, verify, VerifyOptions } from 'jsonwebtoken';
 import { promisify } from 'util';
 import { environment } from '../environment';
 import { ISignedToken } from '../interfaces/signed-token';
+import { BaseService } from './base';
 
 const verifyAsync = promisify<
   string,
@@ -16,7 +17,7 @@ const verifyAsync = promisify<
   JwtPayload | string
 >(verify);
 
-export class JwtService {
+export class JwtService extends BaseService {
   /**
    * Sign a JWT token for a user
    * @param userDoc

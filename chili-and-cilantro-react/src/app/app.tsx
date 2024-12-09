@@ -1,5 +1,9 @@
+import { Container, CssBaseline, ThemeProvider } from '@mui/material';
+import { FC } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import '../styles.scss';
+import theme from '../theme';
+import { AuthProvider } from './auth-provider';
 import ApiAccess from './components/api-access';
 import ChangePasswordPage from './components/change-password-page';
 import DashboardPage from './components/dashboard-page';
@@ -11,12 +15,29 @@ import RegisterPage from './components/register-page';
 import SplashPage from './components/splash-page';
 import TopMenu from './components/top-menu';
 import VerifyEmailPage from './components/verify-email-page';
+import { TranslationProvider } from './i18n-provider';
 import { MenuProvider } from './menu-context';
+import { UserProvider } from './user-context';
 
-function App() {
+const App: FC = () => {
   return (
-    <div className="app-container">
-      <MenuProvider>
+    <TranslationProvider>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <AuthProvider>
+          <UserProvider>
+            <InnerApp />
+          </UserProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </TranslationProvider>
+  );
+};
+
+const InnerApp: FC = () => {
+  return (
+    <MenuProvider>
+      <Container className="app-container" sx={{ paddingTop: '64px' }}>
         <TopMenu />
         <Routes>
           <Route path="/" element={<SplashPage />} />
@@ -57,9 +78,9 @@ function App() {
           <Route path="/verify-email" element={<VerifyEmailPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         </Routes>
-      </MenuProvider>
-    </div>
+      </Container>
+    </MenuProvider>
   );
-}
+};
 
 export default App;

@@ -10,8 +10,8 @@ export class ApiRouter extends BaseRouter {
   private readonly userController: UserController;
   private readonly gameController: GameController;
   constructor(application: IApplication) {
-    super(application.getModel);
-    this.userController = new UserController(application.getModel);
+    super(application);
+    this.userController = new UserController(application);
     this.gameController = new GameController(application);
     this.router.use('/user', this.userController.router);
     this.router.use('/game', this.gameController.router);

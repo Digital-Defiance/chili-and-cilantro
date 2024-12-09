@@ -1,18 +1,20 @@
 // src/app/menuContext.tsx
 import React, {
   createContext,
+  ReactNode,
   useCallback,
   useContext,
   useMemo,
   useState,
 } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from './auth-provider';
 
 export type GameMenuOption = {
   id: string;
   label: string;
-  action: () => void;
+  icon?: ReactNode;
+  link?: string;
+  action?: () => void;
   isGlobal?: boolean;
 };
 
@@ -30,7 +32,6 @@ interface MenuContextType {
 const MenuContext = createContext<MenuContextType | undefined>(undefined);
 
 export const MenuProvider: React.FC<MenuProviderProps> = ({ children }) => {
-  const { user } = useAuth();
   const navigate = useNavigate();
 
   const initialGameOptions: GameMenuOption[] = [

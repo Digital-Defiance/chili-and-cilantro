@@ -3,7 +3,6 @@ import {
   constants,
   EmailTokenExpiredError,
   EmailTokenUsedOrInvalidError,
-  GetModelFunction,
   IApiMessageResponse,
   ICreateUserBasics,
   InvalidCredentialsError,
@@ -15,6 +14,7 @@ import {
   ModelName,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import {
+  IApplication,
   MongooseValidationError,
   routeConfig,
   RouteConfig,
@@ -34,10 +34,10 @@ export class UserController extends BaseController {
   private jwtService: JwtService;
   private userService: UserService;
 
-  constructor(getModel: GetModelFunction) {
-    super(getModel);
-    this.jwtService = new JwtService();
-    this.userService = new UserService(getModel);
+  constructor(application: IApplication) {
+    super(application);
+    this.jwtService = new JwtService(application);
+    this.userService = new UserService(application);
   }
 
   protected getRoutes(): RouteConfig<unknown[]>[] {
@@ -254,7 +254,7 @@ export class UserController extends BaseController {
    * @returns
    */
   private async refreshToken(req: Request, res: Response) {
-    const UserModel = this.getModel<IUserDocument>(ModelName.User);
+    const UserModel = this.application.getModel<IUserDocument>(ModelName.User);
     try {
       const token = findAuthToken(req.headers);
       if (!token) {
@@ -399,7 +399,7 @@ export class UserController extends BaseController {
    * @param res
    */
   public async resendVerification(req: Request, res: Response): Promise<void> {
-    const UserModel = this.getModel<IUserDocument>(ModelName.User);
+    const UserModel = this.application.getModel<IUserDocument>(ModelName.User);
     try {
       const { username, email } = req.body;
 

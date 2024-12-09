@@ -1,17 +1,19 @@
 import {
   DefaultIdType,
   GamePhase,
-  GetModelFunction,
   IGameDocument,
   IUserDocument,
   ModelName,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { Schema } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import {
+  IApplication,
+  Schema,
+} from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import { BaseService } from './base';
 
-export class PlayerService {
-  private readonly getModel: GetModelFunction;
-  constructor(getModel: GetModelFunction) {
-    this.getModel = getModel;
+export class PlayerService extends BaseService {
+  constructor(application: IApplication) {
+    super(application);
   }
 
   /**
@@ -24,7 +26,7 @@ export class PlayerService {
     userId: DefaultIdType,
     gameId: DefaultIdType,
   ): Promise<boolean> {
-    const GameModel = this.getModel<IGameDocument>(ModelName.Game);
+    const GameModel = this.application.getModel<IGameDocument>(ModelName.Game);
     try {
       const count = await GameModel.countDocuments({
         _id: gameId,
@@ -46,7 +48,7 @@ export class PlayerService {
   public async userIsInAnyActiveGameAsync(
     user: IUserDocument,
   ): Promise<boolean> {
-    const GameModel = this.getModel<IGameDocument>(ModelName.Game);
+    const GameModel = this.application.getModel<IGameDocument>(ModelName.Game);
     try {
       const result = await GameModel.aggregate([
         {
@@ -97,7 +99,7 @@ export class PlayerService {
     gameId: DefaultIdType,
     active = false,
   ): Promise<boolean> {
-    const GameModel = this.getModel<IGameDocument>(ModelName.Game);
+    const GameModel = this.application.getModel<IGameDocument>(ModelName.Game);
     try {
       const result = await GameModel.aggregate([
         {

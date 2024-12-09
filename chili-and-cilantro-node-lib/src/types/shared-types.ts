@@ -2,10 +2,12 @@ import {
   ActionDocumentTypes,
   ActionType,
   ModelName,
+  StringLanguages,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { Schema } from 'mongoose';
 
 import { IBaseDocument } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { ValidationChain } from 'express-validator';
 import { ClientSession, Document, Model } from 'mongoose';
 import { ISchemaData } from '../lib/interfaces/schema-data';
 
@@ -46,3 +48,7 @@ export type HandlerArgs<T extends unknown[]> = T;
 export type ActionSchemaMapType = {
   [K in ActionType]: Schema<ActionDocumentTypes[K]>;
 };
+
+export type FlexibleValidationChain =
+  | ValidationChain[]
+  | ((lang: StringLanguages) => ValidationChain[]);

@@ -34,7 +34,7 @@ export class I18nController extends BaseController {
   private async i18n(req: Request, res: Response): Promise<void> {
     const { languageCode } = req.params;
 
-    const language = languageCodeToStringLanguages(languageCode as string);
+    const language = languageCodeToStringLanguages(languageCode);
 
     res.status(200).json(buildNestedI18nForLanguage(language));
   }

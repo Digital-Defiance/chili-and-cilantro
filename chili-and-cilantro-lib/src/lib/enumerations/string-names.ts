@@ -5,6 +5,13 @@
  * For consistency, the left side should match the right, give or take CamelCase on the left and snake case (e.g. common_blahBlah) on the right
  */
 export enum StringNames {
+  Common_ChangePassword = 'common_changePassword',
+  Common_Dashboard = 'common_dashboard',
   Common_Site = 'common_site',
+  Common_Unauthorized = 'common_unauthorized',
+  ForgotPassword_Title = 'forgotPassword_title',
+  Login_LoginButton = 'login_loginButton',
+  LogoutButton = 'logoutButton',
+  RegisterButton = 'registerButton',
   ValidationError = 'validation_error',
 }
