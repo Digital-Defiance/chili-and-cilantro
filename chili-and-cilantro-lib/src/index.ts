@@ -1,5 +1,4 @@
 export * from './lib/action-document-types';
-export * from './lib/action-type-record-map';
 export * as constants from './lib/constants';
 export * from './lib/enumeration-translations/account-status-type';
 export * from './lib/enumeration-translations/action-type';
@@ -44,6 +43,7 @@ export * from './lib/errors/handleable-error';
 export * from './lib/errors/incorrect-game-phase';
 export * from './lib/errors/invalid-action';
 export * from './lib/errors/invalid-credentials';
+export * from './lib/errors/invalid-email';
 export * from './lib/errors/invalid-game';
 export * from './lib/errors/invalid-game-name';
 export * from './lib/errors/invalid-game-parameter';

@@ -65,7 +65,7 @@ export class ActionService extends BaseService {
     const ActionModel = this.application.getModel<IActionDocument>(
       ModelName.Action,
     );
-    return ActionModel.find({ gameId: game._id }).sort({
+    return await ActionModel.find({ gameId: game._id }).sort({
       createdAt: 1,
     });
   }

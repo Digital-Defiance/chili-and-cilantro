@@ -44,6 +44,7 @@ export const AmericanEnglishStrings: StringsCollection = {
     'In Chili and Cilantro, aspiring chefs compete to create the perfect dish. Your goal is to add just the right amount of cilantro without ruining it with a scorching chili. Be the first to successfully season two dishes or be the last chef standing to win!',
   [StringNames.Splash_HowToPlay]: 'How to Play',
   [StringNames.ValidationError]: 'Validation Error',
+  [StringNames.Validation_InvalidEmail]: 'Invalid Email',
   [StringNames.Validation_InvalidLanguage]: 'Invalid Language',
   [StringNames.Validation_InvalidToken]: 'Invalid Token',
   [StringNames.Validation_PasswordRegexError]:

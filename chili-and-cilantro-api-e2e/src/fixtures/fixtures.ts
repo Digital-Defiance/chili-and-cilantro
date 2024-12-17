@@ -1,9 +1,9 @@
 import { IUserDocument } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { IApplication } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
-import { ISignedToken } from 'chili-and-cilantro-api/src/interfaces/signed-token';
 import { MongoMemoryReplSet } from 'mongodb-memory-server';
 import { disconnect } from 'mongoose';
 import { App } from '../../../chili-and-cilantro-api/src/application';
+import { ISignedToken } from '../../../chili-and-cilantro-api/src/interfaces/signed-token';
 import { JwtService } from '../../../chili-and-cilantro-api/src/services/jwt';
 
 export interface ITestEnvironment {

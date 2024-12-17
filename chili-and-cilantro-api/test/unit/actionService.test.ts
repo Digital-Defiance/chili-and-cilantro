@@ -3,22 +3,67 @@ import {
   CardType,
   constants,
   DefaultIdType,
+  IActionDocument,
   IChefDocument,
   IGameDocument,
+  IPlaceCardDetails,
   IUserDocument,
+  ModelName,
+  ModelNameCollection,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { IApplication } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import {
+  ActionSchema,
+  IApplication,
+  IDiscriminatorCollections,
+  ISchemaData,
+  modelNameCollectionToPath,
+  SchemaMap,
+} from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { faker } from '@faker-js/faker';
 import { Model } from 'mongoose';
-import { ActionModel } from '../../src/mocks/models/action-model';
+import {
+  makeCreateGameAction,
+  makeExpireGameAction,
+  makeJoinGameAction,
+  makeMessageAction,
+  makePassAction,
+  makePlaceCardAction,
+  makeStartBiddingAction,
+  makeStartGameAction,
+} from '../../src/fixtures/action';
 import { ActionService } from '../../src/services/action';
 import { MockApplication } from '../fixtures/application';
 import { generateChefGameUser } from '../fixtures/game';
 
-type MockModel<T = any> = Model<T> &
-  jest.Mocked<Model<T>> & {
-    sort: jest.Mock;
-  };
+function makeMockApplicationForDiscriminator(
+  actionType: ActionType,
+  createFn: jest.MockedFunction<any>,
+): IApplication {
+  const discriminators = {
+    byType: {
+      [actionType]: {
+        create: createFn,
+      } as unknown as Model<IActionDocument>,
+    } as unknown as Record<string, Model<IActionDocument>>,
+    array: [{ create: createFn }] as unknown as Model<IActionDocument>[],
+  } as IDiscriminatorCollections<IActionDocument>;
+  const mockApplication = {
+    getModel: jest.fn().mockReturnValue(discriminators),
+  } as unknown as IApplication;
+  Object.defineProperty(mockApplication, 'schemaMap', {
+    value: {
+      Action: {
+        name: ModelName.Action,
+        collection: ModelNameCollection.Action,
+        schema: ActionSchema,
+        description: 'An action taken by a chef in a game.',
+        path: modelNameCollectionToPath(ModelNameCollection.Action),
+        discriminators: discriminators,
+      } as ISchemaData<IActionDocument>,
+    } as unknown as SchemaMap,
+  });
+  return mockApplication;
+}
 
 describe('ActionService', () => {
   let application: IApplication;
@@ -41,13 +86,24 @@ describe('ActionService', () => {
     it('should retrieve game history', async () => {
       // Arrange
       const actionService = new ActionService(application);
+      const ActionModel = application.getModel<IActionDocument>(
+        ModelName.Action,
+      );
+      const mockActions: IActionDocument[] = [
+        makeCreateGameAction({ gameId: gameId }),
+      ];
+      const mockQuery = {
+        sort: jest.fn().mockReturnValue(Promise.resolve(mockActions)),
+      };
+
+      jest.spyOn(ActionModel, 'find').mockReturnValue(mockQuery as any);
 
       // Act
       const result = await actionService.getGameHistoryAsync(mockGame);
 
       // Assert
       expect(ActionModel.find).toHaveBeenCalledWith({ gameId: gameId });
-      expect(ActionModel.sort).toHaveBeenCalledWith({ createdAt: 1 });
+      expect(ActionModel.find().sort).toHaveBeenCalledWith({ createdAt: 1 });
       expect(result).toEqual([
         expect.objectContaining({
           gameId: gameId,
@@ -59,7 +115,17 @@ describe('ActionService', () => {
 
   describe('createGameAsync', () => {
     it('should create a game action', async () => {
-      const actionService = new ActionService(application);
+      const createGame = jest.fn().mockResolvedValue(
+        makeCreateGameAction({
+          gameId: gameId,
+          chefId: hostChef._id,
+          userId: hostUser._id,
+        }),
+      );
+
+      const actionService = new ActionService(
+        makeMockApplicationForDiscriminator(ActionType.CREATE_GAME, createGame),
+      );
 
       const result = await actionService.createGameAsync(
         mockGame,
@@ -67,7 +133,7 @@ describe('ActionService', () => {
         hostUser,
       );
 
-      expect(ActionModel.create).toHaveBeenCalledWith({
+      expect(createGame).toHaveBeenCalledWith({
         gameId: gameId,
         chefId: hostChef._id,
         userId: hostUser._id,
@@ -84,7 +150,16 @@ describe('ActionService', () => {
   describe('joinGameAsync', () => {
     it('should create a join game action', async () => {
       // Arrange
-      const actionService = new ActionService(application);
+      const joinGame = jest.fn().mockResolvedValue(
+        makeJoinGameAction({
+          gameId: gameId,
+          chefId: hostChef._id,
+          userId: hostUser._id,
+        }),
+      );
+      const actionService = new ActionService(
+        makeMockApplicationForDiscriminator(ActionType.JOIN_GAME, joinGame),
+      );
 
       // Act
       const result = await actionService.joinGameAsync(
@@ -94,7 +169,7 @@ describe('ActionService', () => {
       );
 
       // Assert
-      expect(ActionModel.create).toHaveBeenCalledWith({
+      expect(joinGame).toHaveBeenCalledWith({
         gameId: gameId,
         chefId: hostChef._id,
         userId: hostUser._id,
@@ -111,13 +186,22 @@ describe('ActionService', () => {
   describe('startGameAsync', () => {
     it('should create a start game action', async () => {
       // Arrange
-      const actionService = new ActionService(application);
+      const startGame = jest.fn().mockResolvedValue(
+        makeStartGameAction({
+          gameId: gameId,
+          chefId: hostChef._id,
+          userId: hostUser._id,
+        }),
+      );
+      const actionService = new ActionService(
+        makeMockApplicationForDiscriminator(ActionType.START_GAME, startGame),
+      );
 
       // Act
       const result = await actionService.startGameAsync(mockGame);
 
       // Assert
-      expect(ActionModel.create).toHaveBeenCalledWith({
+      expect(startGame).toHaveBeenCalledWith({
         gameId: gameId,
         chefId: hostChef._id,
         userId: hostUser._id,
@@ -134,13 +218,22 @@ describe('ActionService', () => {
   describe('expireGameAsync', () => {
     it('should create an expire game action', async () => {
       // Arrange
-      const actionService = new ActionService(application);
+      const expireGame = jest.fn().mockResolvedValue(
+        makeExpireGameAction({
+          gameId: gameId,
+          chefId: hostChef._id,
+          userId: hostUser._id,
+        }),
+      );
+      const actionService = new ActionService(
+        makeMockApplicationForDiscriminator(ActionType.EXPIRE_GAME, expireGame),
+      );
 
       // Act
       const result = await actionService.expireGameAsync(mockGame);
 
       // Assert
-      expect(ActionModel.create).toHaveBeenCalledWith({
+      expect(expireGame).toHaveBeenCalledWith({
         gameId: gameId,
         chefId: hostChef._id,
         userId: hostUser._id,
@@ -158,7 +251,17 @@ describe('ActionService', () => {
     it('should create a message action', async () => {
       // Arrange
       const message = faker.lorem.sentence();
-      const actionService = new ActionService(application);
+      const messageAction = jest.fn().mockResolvedValue(
+        makeMessageAction({
+          gameId: gameId,
+          chefId: hostChef._id,
+          userId: hostUser._id,
+          details: { message },
+        }),
+      );
+      const actionService = new ActionService(
+        makeMockApplicationForDiscriminator(ActionType.MESSAGE, messageAction),
+      );
 
       // Act
       const result = await actionService.sendMessageAsync(
@@ -168,7 +271,7 @@ describe('ActionService', () => {
       );
 
       // Assert
-      expect(ActionModel.create).toHaveBeenCalledWith({
+      expect(messageAction).toHaveBeenCalledWith({
         gameId: gameId,
         chefId: hostChef._id,
         userId: hostUser._id,
@@ -189,7 +292,20 @@ describe('ActionService', () => {
     it('should create a start bidding action', async () => {
       // Arrange
       const bid = faker.number.int({ min: 1, max: 10 });
-      const actionService = new ActionService(application);
+      const startBidding = jest.fn().mockResolvedValue(
+        makeStartBiddingAction({
+          gameId: gameId,
+          chefId: hostChef._id,
+          userId: hostUser._id,
+          details: { bid },
+        }),
+      );
+      const actionService = new ActionService(
+        makeMockApplicationForDiscriminator(
+          ActionType.START_BIDDING,
+          startBidding,
+        ),
+      );
 
       // Act
       const result = await actionService.startBiddingAsync(
@@ -199,7 +315,7 @@ describe('ActionService', () => {
       );
 
       // Assert
-      expect(ActionModel.create).toHaveBeenCalledWith({
+      expect(startBidding).toHaveBeenCalledWith({
         gameId: gameId,
         chefId: hostChef._id,
         userId: hostUser._id,
@@ -220,13 +336,22 @@ describe('ActionService', () => {
   describe('passAsync', () => {
     it('should create a pass action', async () => {
       // Arrange
-      const actionService = new ActionService(application);
+      const passAction = jest.fn().mockResolvedValue(
+        makePassAction({
+          gameId: gameId,
+          chefId: hostChef._id,
+          userId: hostUser._id,
+        }),
+      );
+      const actionService = new ActionService(
+        makeMockApplicationForDiscriminator(ActionType.PASS, passAction),
+      );
 
       // Act
       const result = await actionService.passAsync(mockGame, hostChef);
 
       // Assert
-      expect(ActionModel.create).toHaveBeenCalledWith({
+      expect(passAction).toHaveBeenCalledWith({
         gameId: gameId,
         chefId: hostChef._id,
         userId: hostUser._id,
@@ -246,7 +371,20 @@ describe('ActionService', () => {
       // Arrange
       const cardType = faker.helpers.enumValue(CardType);
       const position: number = faker.number.int({ min: 0, max: 4 });
-      const actionService = new ActionService(application);
+      const placeCard = jest.fn().mockResolvedValue(
+        makePlaceCardAction({
+          gameId: gameId,
+          chefId: hostChef._id,
+          userId: hostUser._id,
+          details: {
+            cardType: cardType,
+            position: position,
+          } as IPlaceCardDetails,
+        }),
+      );
+      const actionService = new ActionService(
+        makeMockApplicationForDiscriminator(ActionType.PLACE_CARD, placeCard),
+      );
 
       // Act
       const result = await actionService.placeCardAsync(
@@ -257,7 +395,7 @@ describe('ActionService', () => {
       );
 
       // Assert
-      expect(ActionModel.create).toHaveBeenCalledWith({
+      expect(placeCard).toHaveBeenCalledWith({
         gameId: gameId,
         chefId: hostChef._id,
         userId: hostUser._id,

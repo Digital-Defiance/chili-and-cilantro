@@ -1,3 +1,4 @@
+import { DefaultIdType } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { mock, MockProxy } from 'jest-mock-extended';
 import { Document, SaveOptions, Types } from 'mongoose';
 
@@ -28,7 +29,7 @@ export function createMockDocument<T extends Document>(
 
   Object.assign(doc, data);
 
-  (doc._id as unknown) = data._id || new Types.ObjectId();
+  (doc._id as DefaultIdType) = data._id || new Types.ObjectId();
   (doc.isNew as boolean) = false;
 
   // Mock toObject as a function

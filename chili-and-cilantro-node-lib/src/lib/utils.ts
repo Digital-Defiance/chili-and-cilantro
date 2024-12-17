@@ -136,6 +136,9 @@ export async function withTransaction<T>(
   }
   const needSession = useTransaction && session === undefined;
   const client = connection.getClient();
+  if (!client) {
+    throw new Error('No client found on the connection');
+  }
   const s = needSession ? await client.startSession() : session;
   try {
     if (needSession && s !== undefined) await s.startTransaction();

@@ -47,6 +47,7 @@ export const FrenchStrings: StringsCollection = {
     "Dans Chili and Cilantro, les chefs en herbe rivalisent pour créer le plat parfait. Votre objectif est d'ajouter juste la bonne quantité de coriandre sans gâcher le tout avec un piment brûlant. Soyez le premier à réussir à assaisonner deux plats ou soyez le dernier chef debout pour gagner !",
   [StringNames.Splash_HowToPlay]: 'Comment Jouer',
   [StringNames.ValidationError]: 'Erreur de validation',
+  [StringNames.Validation_InvalidEmail]: 'Courriel invalide',
   [StringNames.Validation_InvalidLanguage]: 'Langue invalide',
   [StringNames.Validation_InvalidToken]: 'Jeton invalide',
   [StringNames.Validation_PasswordRegexError]:

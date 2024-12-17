@@ -139,7 +139,6 @@ export const GameSchema = new Schema<IGameDocument>(
       of: {
         type: Schema.Types.ObjectId,
         ref: ModelName.Chef,
-        required: true,
       },
       required: true,
     },

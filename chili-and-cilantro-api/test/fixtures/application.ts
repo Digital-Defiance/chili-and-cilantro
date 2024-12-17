@@ -1,17 +1,34 @@
-import { GetModelFunction } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import {
-  getSchemaMap,
+  GetModelFunction,
+  ModelName,
+} from '@chili-and-cilantro/chili-and-cilantro-lib';
+import {
+  ActionModel,
+  ChefModel,
+  EmailTokenModel,
+  GameModel,
   IApplication,
   SchemaMap,
+  UserModel,
+  getSchemaMap,
 } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
-import mongoose from 'mongoose';
-import { getModel as mockGetModel } from '../../src/mocks/models/get-model';
+import mongoose, { Connection, Model, createConnection } from 'mongoose';
 
 export class MockApplication implements IApplication {
+  private readonly mockConnection: Connection = createConnection();
+  private readonly getModelTable: { [key in ModelName]: Model<any> } = {
+    [ModelName.User]: UserModel(this.mockConnection),
+    [ModelName.Chef]: ChefModel(this.mockConnection),
+    [ModelName.EmailToken]: EmailTokenModel(this.mockConnection),
+    [ModelName.Action]: ActionModel(this.mockConnection),
+    [ModelName.Game]: GameModel(this.mockConnection),
+  };
+
   public get db(): typeof mongoose {
-    return mongoose;
+    const mongooseMock = { ...mongoose, connection: this.mockConnection };
+    return mongooseMock;
   }
-  private _schemaMap: SchemaMap | undefined;
+  private _schemaMap: SchemaMap | undefined = getSchemaMap(this.mockConnection);
   public get schemaMap(): SchemaMap {
     return this._schemaMap;
   }
@@ -21,9 +38,10 @@ export class MockApplication implements IApplication {
   public get useTransactions(): boolean {
     return true;
   }
-  public getModel: GetModelFunction = mockGetModel;
+  public getModel: GetModelFunction = <T>(modelName: ModelName) => {
+    return this.getModelTable[modelName] as Model<T>;
+  };
   public start(mongoUri?: string): Promise<void> {
-    this._schemaMap = getSchemaMap(this.db.connection);
     return Promise.resolve();
   }
 }

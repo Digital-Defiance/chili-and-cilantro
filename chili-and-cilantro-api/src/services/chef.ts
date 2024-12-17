@@ -82,7 +82,7 @@ export class ChefService extends BaseService {
     const chef = await ChefModel.findOne({
       gameId: game._id,
       userId: user._id,
-    }).exec();
+    });
     if (!chef) {
       throw new NotInGameError();
     }

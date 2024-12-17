@@ -42,6 +42,7 @@ export enum StringNames {
   Splash_Description = 'splash_description',
   Splash_HowToPlay = 'splash_howToPlay',
   ValidationError = 'validationError',
+  Validation_InvalidEmail = 'validation_invalidEmail',
   Validation_InvalidLanguage = 'validation_invalidLanguage',
   Validation_InvalidToken = 'validation_invalidToken',
   Validation_PasswordRegexError = 'validation_passwordRegexError',

@@ -1,16 +1,17 @@
 import {
-  IUser,
-  ModelName,
+  EmailInUseError,
+  InvalidEmailError,
+  InvalidPasswordError,
+  InvalidUsernameError,
+  UsernameInUseError,
   constants,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { IApplication } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { faker } from '@faker-js/faker';
-import { EmailExistsError } from 'chili-and-cilantro-api/src/errors/emailExists';
-import { InvalidEmailError } from 'chili-and-cilantro-api/src/errors/invalidEmail';
-import { InvalidPasswordError } from 'chili-and-cilantro-api/src/errors/invalidPassword';
-import { InvalidUsernameError } from 'chili-and-cilantro-api/src/errors/invalidUsername';
-import { UsernameExistsError } from 'chili-and-cilantro-api/src/errors/usernameExists';
 import sinon from 'sinon';
+import { MockedUserModel, UserModel } from '../../src/mocks/models/user-model';
 import { UserService } from '../../src/services/user';
+import { MockApplication } from '../fixtures/application';
 import { generateGamePassword } from '../fixtures/game';
 import {
   generateUser,
@@ -19,10 +20,13 @@ import {
 } from '../fixtures/user';
 
 describe('userService', () => {
-  let userService, userModel;
+  let application: IApplication;
+  let userService: UserService;
+  let userModel: MockedUserModel;
   beforeAll(() => {
-    userService = new UserService();
-    userModel = userService.getModel<IUser>(ModelName.User);
+    application = new MockApplication();
+    userService = new UserService(application);
+    userModel = UserModel;
   });
   afterEach(() => {
     sinon.restore();
@@ -46,7 +50,7 @@ describe('userService', () => {
       });
       await expect(
         userService.validateRegisterOrThrowAsync(email, username, password),
-      ).rejects.toThrow(EmailExistsError);
+      ).rejects.toThrow(EmailInUseError);
     });
     it('should throw an error if the username is too short', async () => {
       sinon.stub(userModel, 'findOne').returns(null);
@@ -74,7 +78,7 @@ describe('userService', () => {
         });
       await expect(
         userService.validateRegisterOrThrowAsync(email, username, password),
-      ).rejects.toThrow(UsernameExistsError);
+      ).rejects.toThrow(UsernameInUseError);
     });
     it('should throw an error if the password is missing', async () => {
       sinon.stub(userModel, 'findOne').returns(null);

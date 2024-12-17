@@ -1,4 +1,4 @@
-export * from './lib/action-schema-map';
+export * from './lib/action-discriminator-schemas';
 export * from './lib/discriminators/action';
 export * from './lib/errors/express-validation-error';
 export * from './lib/errors/mongoose-validation-error';

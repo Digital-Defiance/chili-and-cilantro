@@ -14,8 +14,8 @@ import {
   ModelNameCollection,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { Connection, Model, Schema as MongooseSchema } from 'mongoose';
-import { SchemaMap } from './shared-types';
 import { ActionDiscriminators } from './discriminators/action';
+import { IDiscriminatorCollections } from './interfaces/discriminator-collections';
 import { ISchemaData } from './interfaces/schema-data';
 import { ISchemaModelData } from './interfaces/schema-model-data';
 import { ActionSchema } from './schemas/action';
@@ -23,8 +23,9 @@ import { ChefSchema } from './schemas/chef';
 import { EmailTokenSchema } from './schemas/email-token';
 import { GameSchema } from './schemas/game';
 import { UserSchema } from './schemas/user';
+import { SchemaMap } from './shared-types';
 
-function modelNameCollectionToPath(
+export function modelNameCollectionToPath(
   modelNameCollection: ModelNameCollection,
 ): string {
   return `/${modelNameCollection as string}`;
@@ -71,7 +72,7 @@ export const Schema: { [key in ModelName]: ISchemaData<IBaseDocument<any>> } = {
 export function getSchemaModel<T extends IBaseDocument<D>, D>(
   modelName: ModelName,
   connection: Connection,
-  discriminatorCallback?: (model: Model<T>) => void,
+  discriminatorCallback?: (model: Model<T>) => IDiscriminatorCollections<T>,
 ): ISchemaModelData<T> {
   const value = Schema[modelName];
   const newModel = connection.model<T>(

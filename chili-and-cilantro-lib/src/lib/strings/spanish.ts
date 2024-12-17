@@ -45,6 +45,7 @@ export const SpanishStrings: StringsCollection = {
     'En Chili and Cilantro, los aspirantes a chef compiten para crear el plato perfecto. Tu objetivo es agregar la cantidad justa de cilantro sin arruinarlo con un chile abrasador. ¡Sé el primero en condimentar con éxito dos platos o sé el último chef en pie para ganar!',
   [StringNames.Splash_HowToPlay]: 'Como Jugar',
   [StringNames.ValidationError]: 'Error de validación',
+  [StringNames.Validation_InvalidEmail]: 'Correo electrónica inválido',
   [StringNames.Validation_InvalidLanguage]: 'Idioma inválido',
   [StringNames.Validation_InvalidToken]: 'Token inválido',
   [StringNames.Validation_PasswordRegexError]:

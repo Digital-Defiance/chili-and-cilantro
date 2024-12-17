@@ -24,7 +24,7 @@ export class PlayerService extends BaseService {
       const count = await GameModel.countDocuments({
         _id: gameId,
         hostUserId: userId,
-      }).exec();
+      });
 
       return count > 0;
     } catch (err) {

@@ -4,36 +4,37 @@ import {
   ChiliCilantroActions,
   constants,
   DefaultIdType,
-  ICreateGameActionObject,
+  ICreateGameActionDocument,
   ICreateGameDetails,
-  IEndGameActionObject,
+  IEndGameActionDocument,
   IEndGameDetails,
-  IEndRoundActionObject,
+  IEndRoundActionDocument,
   IEndRoundDetails,
-  IExpireGameActionObject,
+  IExpireGameActionDocument,
   IExpireGameDetails,
-  IFlipCardActionObject,
+  IFlipCardActionDocument,
   IFlipCardDetails,
-  IJoinGameActionObject,
+  IJoinGameActionDocument,
   IJoinGameDetails,
-  IMakeBidActionObject,
+  IMakeBidActionDocument,
   IMakeBidDetails,
-  IMessageActionObject,
+  IMessageActionDocument,
   IMessageDetails,
-  IPassActionObject,
+  IPassActionDocument,
   IPassDetails,
-  IPlaceCardActionObject,
+  IPlaceCardActionDocument,
   IPlaceCardDetails,
-  IQuitGameActionObject,
+  IQuitGameActionDocument,
   IQuitGameDetails,
-  IStartBiddingActionObject,
+  IStartBiddingActionDocument,
   IStartBiddingDetails,
-  IStartGameActionObject,
+  IStartGameActionDocument,
   IStartGameDetails,
-  IStartNewRoundActionObject,
+  IStartNewRoundActionDocument,
   IStartNewRoundDetails,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { faker } from '@faker-js/faker';
+import { createMockDocument } from '../../src/mocks/create-mock-document';
 import { MockedModel } from './mocked-model';
 import { generateObjectId } from './objectId';
 
@@ -41,8 +42,8 @@ export function generateCreateGameAction(
   gameId: DefaultIdType,
   chefId: DefaultIdType,
   userId: DefaultIdType,
-): ICreateGameActionObject {
-  return {
+): ICreateGameActionDocument {
+  return createMockDocument<ICreateGameActionDocument>(() => ({
     _id: generateObjectId(),
     gameId: gameId,
     chefId: chefId,
@@ -52,15 +53,15 @@ export function generateCreateGameAction(
     round: constants.NONE,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
-  };
+  }));
 }
 
 export function generateJoinGameAction(
   gameId: DefaultIdType,
   chefId: DefaultIdType,
   userId: DefaultIdType,
-): IJoinGameActionObject {
-  return {
+): IJoinGameActionDocument {
+  return createMockDocument<IJoinGameActionDocument>(() => ({
     _id: generateObjectId(),
     gameId: gameId,
     chefId: chefId,
@@ -70,15 +71,15 @@ export function generateJoinGameAction(
     round: constants.NONE,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
-  };
+  }));
 }
 
 export function generateStartGameAction(
   gameId: DefaultIdType,
   chefId: DefaultIdType,
   userId: DefaultIdType,
-): IStartGameActionObject {
-  return {
+): IStartGameActionDocument {
+  return createMockDocument<IStartGameActionDocument>(() => ({
     _id: generateObjectId(),
     gameId: gameId,
     chefId: chefId,
@@ -88,15 +89,15 @@ export function generateStartGameAction(
     round: constants.NONE,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
-  };
+  }));
 }
 
 export function generateEndGameAction(
   gameId: DefaultIdType,
   chefId: DefaultIdType,
   userId: DefaultIdType,
-): IEndGameActionObject {
-  return {
+): IEndGameActionDocument {
+  return createMockDocument<IEndGameActionDocument>(() => ({
     _id: generateObjectId(),
     gameId: gameId,
     chefId: chefId,
@@ -106,15 +107,15 @@ export function generateEndGameAction(
     round: constants.NONE,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
-  };
+  }));
 }
 
 export function generateEndRoundAction(
   gameId: DefaultIdType,
   chefId: DefaultIdType,
   userId: DefaultIdType,
-): IEndRoundActionObject {
-  return {
+): IEndRoundActionDocument {
+  return createMockDocument<IEndRoundActionDocument>(() => ({
     _id: generateObjectId(),
     gameId: gameId,
     chefId: chefId,
@@ -124,15 +125,15 @@ export function generateEndRoundAction(
     round: constants.NONE,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
-  };
+  }));
 }
 
 export function generateExpireGameAction(
   gameId: DefaultIdType,
   chefId: DefaultIdType,
   userId: DefaultIdType,
-): IExpireGameActionObject {
-  return {
+): IExpireGameActionDocument {
+  return createMockDocument<IExpireGameActionDocument>(() => ({
     _id: generateObjectId(),
     gameId: gameId,
     chefId: chefId,
@@ -142,7 +143,7 @@ export function generateExpireGameAction(
     round: constants.NONE,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
-  };
+  }));
 }
 
 export function generateSendMessageAction(
@@ -150,8 +151,8 @@ export function generateSendMessageAction(
   chefId: DefaultIdType,
   userId: DefaultIdType,
   message: string,
-): IMessageActionObject {
-  return {
+): IMessageActionDocument {
+  return createMockDocument<IMessageActionDocument>(() => ({
     _id: generateObjectId(),
     gameId: gameId,
     chefId: chefId,
@@ -163,7 +164,7 @@ export function generateSendMessageAction(
     round: constants.NONE,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
-  };
+  }));
 }
 
 export function generateMakeBidAction(
@@ -172,8 +173,8 @@ export function generateMakeBidAction(
   userId: DefaultIdType,
   round: number,
   bid: number,
-): IMakeBidActionObject {
-  return {
+): IMakeBidActionDocument {
+  return createMockDocument<IMakeBidActionDocument>(() => ({
     _id: generateObjectId(),
     gameId: gameId,
     chefId: chefId,
@@ -185,7 +186,7 @@ export function generateMakeBidAction(
     round: round,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
-  };
+  }));
 }
 
 export function generateStartBiddingAction(
@@ -194,8 +195,8 @@ export function generateStartBiddingAction(
   userId: DefaultIdType,
   round: number,
   bid: number,
-): IStartBiddingActionObject {
-  return {
+): IStartBiddingActionDocument {
+  return createMockDocument<IStartBiddingActionDocument>(() => ({
     _id: generateObjectId(),
     gameId: gameId,
     chefId: chefId,
@@ -207,7 +208,7 @@ export function generateStartBiddingAction(
     round: round,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
-  };
+  }));
 }
 
 export function generatePassAction(
@@ -215,8 +216,8 @@ export function generatePassAction(
   chefId: DefaultIdType,
   userId: DefaultIdType,
   round: number,
-): IPassActionObject {
-  return {
+): IPassActionDocument {
+  return createMockDocument<IPassActionDocument>(() => ({
     _id: generateObjectId(),
     gameId: gameId,
     chefId: chefId,
@@ -226,7 +227,7 @@ export function generatePassAction(
     round: round,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
-  };
+  }));
 }
 
 export function generateFlipCardAction(
@@ -235,8 +236,8 @@ export function generateFlipCardAction(
   userId: DefaultIdType,
   round: number,
   cardIndex: number,
-): IFlipCardActionObject {
-  return {
+): IFlipCardActionDocument {
+  return createMockDocument<IFlipCardActionDocument>(() => ({
     _id: generateObjectId(),
     gameId: gameId,
     chefId: chefId,
@@ -250,7 +251,7 @@ export function generateFlipCardAction(
     round: round,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
-  };
+  }));
 }
 
 export function generatePlaceCardAction(
@@ -260,8 +261,8 @@ export function generatePlaceCardAction(
   round: number,
   cardType: CardType,
   position: number,
-): IPlaceCardActionObject {
-  return {
+): IPlaceCardActionDocument {
+  return createMockDocument<IPlaceCardActionDocument>(() => ({
     _id: generateObjectId(),
     gameId: gameId,
     chefId: chefId,
@@ -274,15 +275,15 @@ export function generatePlaceCardAction(
     round: round,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
-  };
+  }));
 }
 
 export function generateQuitGameAction(
   gameId: DefaultIdType,
   chefId: DefaultIdType,
   userId: DefaultIdType,
-): IQuitGameActionObject {
-  return {
+): IQuitGameActionDocument {
+  return createMockDocument<IQuitGameActionDocument>(() => ({
     _id: generateObjectId(),
     gameId: gameId,
     chefId: chefId,
@@ -292,7 +293,7 @@ export function generateQuitGameAction(
     round: constants.NONE,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
-  };
+  }));
 }
 
 export function generateStartRoundAction(
@@ -300,8 +301,8 @@ export function generateStartRoundAction(
   chefId: DefaultIdType,
   userId: DefaultIdType,
   round: number,
-): IStartNewRoundActionObject {
-  return {
+): IStartNewRoundActionDocument {
+  return createMockDocument<IStartNewRoundActionDocument>(() => ({
     _id: generateObjectId(),
     gameId: gameId,
     chefId: chefId,
@@ -313,7 +314,7 @@ export function generateStartRoundAction(
     round: constants.NONE,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
-  };
+  }));
 }
 
 export function generateAction(

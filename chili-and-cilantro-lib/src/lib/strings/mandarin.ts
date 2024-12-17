@@ -42,6 +42,7 @@ export const MandarinStrings: StringsCollection = {
     '在《辣椒和香菜》中，有抱负的厨师们竞相制作完美的菜肴。你的目标是添加适量的香菜，而不会让辣椒烧焦。成为第一个成功调味两道菜的人，或者成为最后一个获胜的厨师',
   [StringNames.Splash_HowToPlay]: '如何玩',
   [StringNames.ValidationError]: '验证错误',
+  [StringNames.Validation_InvalidEmail]: '无效电子邮件',
   [StringNames.Validation_InvalidLanguage]: '无效语言',
   [StringNames.Validation_InvalidToken]: '无效令牌',
   [StringNames.Validation_PasswordRegexError]:

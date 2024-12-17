@@ -186,14 +186,14 @@ export class GameService extends BaseService {
     gameName: string,
     password: string,
     maxChefs: number,
+    gameId: DefaultIdType = new Types.ObjectId(),
+    chefId: DefaultIdType = new Types.ObjectId(),
   ): Promise<{
     game: IGameDocument;
     chef: IChefDocument;
     action: ICreateGameActionDocument;
   }> {
     const GameModel = this.application.getModel<IGameDocument>(ModelName.Game);
-    const gameId = new Types.ObjectId();
-    const chefId = new Types.ObjectId();
     const gameCode = await this.generateNewGameCodeAsync();
     const game = await GameModel.create({
       _id: gameId,
@@ -210,7 +210,7 @@ export class GameService extends BaseService {
       name: gameName,
       ...(password ? { password: password } : {}),
       roundBids: [],
-      roundWinners: [],
+      roundWinners: {},
       turnOrder: [], // will be chosen when the game is started
     });
     const chef = await this.chefService.newChefAsync(
@@ -380,7 +380,7 @@ export class GameService extends BaseService {
         name: existingGame.name,
         ...(existingGame.password ? { password: existingGame.password } : {}),
         roundBids: [],
-        roundWinners: [],
+        roundWinners: {},
         turnOrder: [], // will be chosen when the game is started
       });
 
@@ -504,7 +504,7 @@ export class GameService extends BaseService {
     userId: DefaultIdType,
     session?: ClientSession,
   ): Promise<IGameAction> {
-    return this.withTransaction(async () => {
+    return this.withTransaction<IGameAction>(async () => {
       const game = await this.getGameByCodeOrThrowAsync(gameCode, true);
       await this.validateStartGameOrThrowAsync(game, userId);
       return this.startGameAsync(game);
@@ -1117,7 +1117,7 @@ export class GameService extends BaseService {
     value?: IBidIngredient,
     session?: ClientSession,
   ): Promise<IGameChef> {
-    return this.withTransaction(async () => {
+    return this.withTransaction<IGameChef>(async () => {
       const game = await this.getGameByCodeOrThrowAsync(gameCode, true);
       if (game.chefIds[game.currentChef].toString() !== user._id.toString()) {
         throw new OutOfOrderError();

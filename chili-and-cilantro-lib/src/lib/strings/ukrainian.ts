@@ -45,6 +45,7 @@ export const UkrainianStrings: StringsCollection = {
     'У Chili and Cilantro починаючі кухарі змагаються, щоб створити ідеальну страву. Ваша мета — додати потрібну кількість кінзи, не зіпсувавши її пекучим чилі. Будьте першим, хто успішно приправить дві страви, або будьте останнім шеф-кухарем, який виграє!',
   [StringNames.Splash_HowToPlay]: 'Як Грати',
   [StringNames.ValidationError]: 'Помилка валідації',
+  [StringNames.Validation_InvalidEmail]: 'Недійсний електронній адрес',
   [StringNames.Validation_InvalidLanguage]: 'Недійсна мова',
   [StringNames.Validation_InvalidToken]: 'Недійсний токен',
   [StringNames.Validation_PasswordRegexError]:

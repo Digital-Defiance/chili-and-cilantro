@@ -20,8 +20,18 @@ exports[`buildNestedI18n should handle English (UK) language 1`] = `
     "unauthorized": "Unauthorized",
     "unexpectedError": "Unexpected Error",
   },
+  "dashboard": {
+    "gamesCreated": "Games You've Created",
+    "gamesParticipating": "Games You're Participating in",
+    "noGames": "No games available.",
+    "title": "Your Dashboard",
+  },
   "forgotPassword": {
     "title": "Forgot Password",
+  },
+  "game": {
+    "createGame": "Create Game",
+    "listSuccess": "Retrieved game list successfully",
   },
   "keyFeatures": {
     "1": "Exciting bluffing gameplay with a culinary twist",
@@ -49,6 +59,7 @@ exports[`buildNestedI18n should handle English (UK) language 1`] = `
   "validation": {
     "confirmNewPassword": "Confirm new password is required",
     "currentPasswordRequired": "Current password is required",
+    "invalidEmail": "Invalid Email",
     "invalidLanguage": "Invalid Language",
     "invalidToken": "Invalid Token",
     "newPasswordRequired": "New password is required",
@@ -80,8 +91,18 @@ exports[`buildNestedI18n should handle English (US) language 1`] = `
     "unauthorized": "Unauthorized",
     "unexpectedError": "Unexpected Error",
   },
+  "dashboard": {
+    "gamesCreated": "Games You've Created",
+    "gamesParticipating": "Games You're Participating in",
+    "noGames": "No games available.",
+    "title": "Your Dashboard",
+  },
   "forgotPassword": {
     "title": "Forgot Password",
+  },
+  "game": {
+    "createGame": "Create Game",
+    "listSuccess": "Retrieved game list successfully",
   },
   "keyFeatures": {
     "1": "Exciting bluffing gameplay with a culinary twist",
@@ -109,6 +130,7 @@ exports[`buildNestedI18n should handle English (US) language 1`] = `
   "validation": {
     "confirmNewPassword": "Confirm new password is required",
     "currentPasswordRequired": "Current password is required",
+    "invalidEmail": "Invalid Email",
     "invalidLanguage": "Invalid Language",
     "invalidToken": "Invalid Token",
     "newPasswordRequired": "New password is required",
@@ -140,8 +162,18 @@ exports[`buildNestedI18n should handle Español language 1`] = `
     "unauthorized": "No autorizado",
     "unexpectedError": "Error inesperado",
   },
+  "dashboard": {
+    "gamesCreated": "Juegos que has creado",
+    "gamesParticipating": "Juegos en los que participas",
+    "noGames": "No hay juegos disponibles.",
+    "title": "Tu Tablero",
+  },
   "forgotPassword": {
     "title": "Contraseña olvidada",
+  },
+  "game": {
+    "createGame": "Crear juego",
+    "listSuccess": "Lista de juegos recuperada con éxito",
   },
   "keyFeatures": {
     "1": "Emocionante juego de faroleo con un toque culinario",
@@ -169,6 +201,7 @@ exports[`buildNestedI18n should handle Español language 1`] = `
   "validation": {
     "confirmNewPassword": "Se requiere la confirmación de la nueva contraseña",
     "currentPasswordRequired": "Se requiere la contraseña actual",
+    "invalidEmail": "Correo electrónica inválido",
     "invalidLanguage": "Idioma inválido",
     "invalidToken": "Token inválido",
     "newPasswordRequired": "Se requiere la nueva contraseña",
@@ -200,8 +233,18 @@ exports[`buildNestedI18n should handle Français language 1`] = `
     "unauthorized": "Non autorisé",
     "unexpectedError": "Erreur inattendue",
   },
+  "dashboard": {
+    "gamesCreated": "Jeux que vous avez créé",
+    "gamesParticipating": "Jeux que vous participez",
+    "noGames": "Aucun jeu disponible.",
+    "title": "Votre Tableau de Bord",
+  },
   "forgotPassword": {
     "title": "Mot de passe oublié",
+  },
+  "game": {
+    "createGame": "Créer un Jeu",
+    "listSuccess": "Liste de jeux récupérée avec succès",
   },
   "keyFeatures": {
     "1": "Un jeu de bluff passionnant avec une touche culinaire",
@@ -229,6 +272,7 @@ exports[`buildNestedI18n should handle Français language 1`] = `
   "validation": {
     "confirmNewPassword": "La confirmation du nouveau mot de passe est requise",
     "currentPasswordRequired": "Le mot de passe actuel est requis",
+    "invalidEmail": "Courriel invalide",
     "invalidLanguage": "Langue invalide",
     "invalidToken": "Jeton invalide",
     "newPasswordRequired": "Le nouveau mot de passe est requis",
@@ -260,8 +304,18 @@ exports[`buildNestedI18n should handle Український language 1`] = `
     "unauthorized": "Немає авторизації",
     "unexpectedError": "Неочікувана помилка",
   },
+  "dashboard": {
+    "gamesCreated": "Гри, які ти створив",
+    "gamesParticipating": "Гри, в яких ти береш участь",
+    "noGames": "Немає доступних ігор.",
+    "title": "Ваша Панель",
+  },
   "forgotPassword": {
     "title": "Забули пароль",
+  },
+  "game": {
+    "createGame": "Створити гру",
+    "listSuccess": "Список ігор успішно отримано",
   },
   "keyFeatures": {
     "1": "Захоплюючий геймплей блефу з кулінарним родзинкою",
@@ -289,6 +343,7 @@ exports[`buildNestedI18n should handle Український language 1`] = `
   "validation": {
     "confirmNewPassword": "Підтвердження нового пароля є обов’язковим",
     "currentPasswordRequired": "Поточний пароль є обов’язковим",
+    "invalidEmail": "Недійсний електронній адрес",
     "invalidLanguage": "Недійсна мова",
     "invalidToken": "Недійсний токен",
     "newPasswordRequired": "Новий пароль є обов’язковим",
@@ -320,8 +375,18 @@ exports[`buildNestedI18n should handle 中文 language 1`] = `
     "unauthorized": "未经授权",
     "unexpectedError": "意外错误",
   },
+  "dashboard": {
+    "gamesCreated": "您创建的游戏",
+    "gamesParticipating": "您参与的游戏",
+    "noGames": "没有可用的游戏。",
+    "title": "您的仪表板",
+  },
   "forgotPassword": {
     "title": "忘记密码",
+  },
+  "game": {
+    "createGame": "创建游戏",
+    "listSuccess": "成功检索游戏列表",
   },
   "keyFeatures": {
     "1": "令人兴奋的虚张声势游戏，带有烹饪的扭曲",
@@ -349,6 +414,7 @@ exports[`buildNestedI18n should handle 中文 language 1`] = `
   "validation": {
     "confirmNewPassword": "确认新密码是必需的",
     "currentPasswordRequired": "当前密码是必需的",
+    "invalidEmail": "无效电子邮件",
     "invalidLanguage": "无效语言",
     "invalidToken": "无效令牌",
     "newPasswordRequired": "新密码是必需的",

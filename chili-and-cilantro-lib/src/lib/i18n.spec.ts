@@ -1,16 +1,22 @@
 import { StringLanguages } from './enumerations/string-languages';
+import { StringNames } from './enumerations/string-names';
 import { buildNestedI18n } from './i18n'; // Adjust the import path as needed
 import { StringsCollection } from './shared-types';
 import { Strings } from './strings';
-import AmericanEnglishStrings from './strings/english-us';
 
 describe('buildNestedI18n', () => {
   it('should handle flat strings', () => {
+    const input: StringsCollection = {
+      [StringNames.Common_Site]: 'Chili and Cilantro',
+      [StringNames.Common_Tagline]: 'A Spicy Bluffing Game',
+    } as unknown as StringsCollection;
     const expected = {
-      site: 'Chili and Cilantro',
-      siteTagline: 'A Spicy Bluffing Game',
+      common: {
+        site: 'Chili and Cilantro',
+        tagline: 'A Spicy Bluffing Game',
+      },
     };
-    expect(buildNestedI18n(AmericanEnglishStrings)).toEqual(expected);
+    expect(buildNestedI18n(input)).toEqual(expected);
   });
 
   it('should create nested objects for keys with underscores', () => {
