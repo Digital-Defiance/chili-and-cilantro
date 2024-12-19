@@ -47,6 +47,7 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
       // Update i18n and localStorage when language changes
       await i18n.changeLanguage(LanguageCodes[language]);
       localStorage.setItem('language', language);
+      localStorage.setItem('languageCode', LanguageCodes[language]);
     })();
   }, [language]);
 

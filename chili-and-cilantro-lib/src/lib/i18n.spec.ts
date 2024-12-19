@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker';
+import constants from './constants';
 import { AccountStatusTypeEnum } from './enumerations/account-status-type';
 import ActionType from './enumerations/action-type';
 import CardType from './enumerations/card-type';
@@ -11,17 +12,18 @@ import { StringLanguages } from './enumerations/string-languages';
 import { StringNames } from './enumerations/string-names';
 import { TranslatableEnumType } from './enumerations/translatable-enum';
 import TurnAction from './enumerations/turn-action';
-import {
+import i18nModule, {
   buildNestedI18n,
   buildNestedI18nForLanguage,
   getLanguageCode,
   GlobalLanguageContext,
+  replaceVariables,
   stringNameToI18nKey,
-  TranslatableEnum,
   translate,
   translateEnum,
   translationsMap,
 } from './i18n';
+import { TranslatableEnum } from './i18n.types';
 import { LanguageCodes } from './language-codes';
 import { StringsCollection } from './shared-types';
 import { Strings } from './strings';
@@ -187,6 +189,7 @@ describe('translate', () => {
 
   afterEach(() => {
     console.warn = originalConsoleWarn;
+    jest.restoreAllMocks();
   });
 
   it('should return the correct translation for a given string name', () => {
@@ -229,6 +232,32 @@ describe('translate', () => {
     expect(console.warn).toHaveBeenCalledWith(
       `String ${invalidStringName} not found for language ${StringLanguages.EnglishUS}`,
     );
+  });
+
+  it('should call replaceVariables for StringNames ending with "template"', () => {
+    const language = StringLanguages.EnglishUS;
+    const replacedValue = Strings[
+      language
+    ].validation_passwordRegexErrorTemplate
+      .replace('{MIN_PASSWORD_LENGTH}', `${constants.MIN_PASSWORD_LENGTH}`)
+      .replace('{MAX_PASSWORD_LENGTH}', `${constants.MAX_PASSWORD_LENGTH}`);
+
+    const result = i18nModule.translate(
+      StringNames.Validation_PasswordRegexErrorTemplate,
+      language,
+    );
+
+    expect(result).toBe(replacedValue);
+  });
+
+  it('should not call replaceVariables for StringNames not ending with "template"', () => {
+    // Mock the Strings object
+    const language = StringLanguages.EnglishUS;
+    const replaceVariablesSpy = jest.spyOn(i18nModule, 'replaceVariables');
+    const result = i18nModule.translate(StringNames.Common_Site, language);
+
+    expect(replaceVariablesSpy).not.toHaveBeenCalled();
+    expect(result).toBe(Strings[language][StringNames.Common_Site]);
   });
 });
 
@@ -389,5 +418,55 @@ describe('getLanguageCode', () => {
     expect(() => getLanguageCode(undefined as unknown as string)).toThrow(
       'Unknown language code: undefined',
     );
+  });
+});
+
+describe('replaceVariables', () => {
+  it('should replace a single variable with its constant value', () => {
+    const input =
+      'Password must be at least {MIN_PASSWORD_LENGTH} characters long';
+    const expected = `Password must be at least ${constants.MIN_PASSWORD_LENGTH} characters long`;
+    expect(replaceVariables(input)).toBe(expected);
+  });
+
+  it('should replace multiple variables with their constant values', () => {
+    const input =
+      'Username must be between {MIN_USERNAME_LENGTH} and {MAX_USERNAME_LENGTH} characters';
+    const expected = `Username must be between ${constants.MIN_USERNAME_LENGTH} and ${constants.MAX_USERNAME_LENGTH} characters`;
+    expect(replaceVariables(input)).toBe(expected);
+  });
+
+  it('should return the original string if no variables are found', () => {
+    const input = 'This string has no variables';
+    expect(replaceVariables(input)).toBe(input);
+  });
+
+  it('should handle variables at the beginning and end of the string', () => {
+    const input =
+      '{MIN_PASSWORD_LENGTH} is the prefix and {MAX_PASSWORD_LENGTH} is the suffix';
+    const expected = `${constants.MIN_PASSWORD_LENGTH} is the prefix and ${constants.MAX_PASSWORD_LENGTH} is the suffix`;
+    expect(replaceVariables(input)).toBe(expected);
+  });
+
+  it('should remove unmatched variables', () => {
+    const input = 'This {NONEXISTENT_VARIABLE} should be removed';
+    const expected = 'This  should be removed';
+    expect(replaceVariables(input)).toBe(expected);
+  });
+
+  it('should handle a mix of existing and non-existing variables', () => {
+    const input =
+      '{MIN_PASSWORD_LENGTH} is valid, {NONEXISTENT} is not, and {MAX_PASSWORD_LENGTH} is valid again';
+    const expected = `${constants.MIN_PASSWORD_LENGTH} is valid,  is not, and ${constants.MAX_PASSWORD_LENGTH} is valid again`;
+    expect(replaceVariables(input)).toBe(expected);
+  });
+
+  it('should handle empty strings', () => {
+    expect(replaceVariables('')).toBe('');
+  });
+
+  it('should handle strings with only unmatched variables', () => {
+    const input = '{UNMATCHED1} {UNMATCHED2}';
+    expect(replaceVariables(input)).toBe(' ');
   });
 });

@@ -1,9 +1,10 @@
 // src/app/components/i18n-provider.tsx
 import {
+  replaceVariables,
   StringNames,
   stringNameToI18nKey,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { FC, ReactNode, createContext, useCallback, useContext } from 'react';
+import { createContext, FC, ReactNode, useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface TranslationProviderProps {
@@ -26,7 +27,7 @@ export const TranslationProvider: FC<TranslationProviderProps> = ({
 
   const value = {
     t: useCallback(
-      (key: StringNames) => typedT(stringNameToI18nKey(key)),
+      (key: StringNames) => replaceVariables(typedT(stringNameToI18nKey(key))),
       [typedT],
     ),
   };

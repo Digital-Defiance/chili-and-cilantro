@@ -1,5 +1,9 @@
 // services/authService.js
-import { IRequestUser } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import {
+  IRequestUser,
+  StringNames,
+  translate,
+} from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { isAxiosError } from 'axios';
 import api from './api';
 import authenticatedApi from './authenticated-api';
@@ -8,25 +12,33 @@ const login = async (
   identifier: string,
   password: string,
   isEmail: boolean,
-): Promise<{ token: string } | { error: string; status?: number }> => {
+): Promise<
+  { token: string } | { error: string; errorType?: string; status?: number }
+> => {
   try {
     const response = await api.post('/user/login', {
       [isEmail ? 'email' : 'username']: identifier,
       password,
     });
-    if (response.data.token) {
-      return { token: response.data.token };
+    if (!response.data.token) {
+      return { error: translate(StringNames.Validation_InvalidToken) };
     }
-    return { error: 'Login failed: No token received' };
+    return { token: response.data.token };
   } catch (error) {
-    console.error('Login error:', error);
     if (isAxiosError(error) && error.response) {
       return {
-        error: error.response.data.message || 'Login failed',
+        error:
+          error.response.data.error?.message ??
+          error.response.data.message ??
+          translate(StringNames.Common_UnexpectedError),
+        errorType: error.response.data.errorType,
         status: error.response.status,
       };
+    } else {
+      return {
+        error: translate(StringNames.Common_UnexpectedError),
+      };
     }
-    return { error: 'An unexpected error occurred during login' };
   }
 };
 
@@ -44,6 +56,13 @@ const register = async (
     password,
     timezone,
   });
+  if (response.status !== 200) {
+    throw new Error(
+      response.data.error?.message ??
+        response.data.message ??
+        translate(StringNames.Common_UnexpectedError),
+    );
+  }
   return response.data;
 };
 

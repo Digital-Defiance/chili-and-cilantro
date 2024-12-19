@@ -25,6 +25,7 @@ export interface AuthContextData {
   isAuthenticated: boolean;
   loading: boolean;
   error: string | null;
+  errorType: string | null;
   login: (
     identifier: string,
     password: string,
@@ -59,6 +60,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [errorType, setErrorType] = useState<string | null>(null);
   const [authState, setAuthState] = useState(0);
   const navigate = useNavigate();
 
@@ -123,33 +125,27 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       password: string,
       isEmail: boolean,
     ): Promise<{ token: string } | { error: string; status?: number }> => {
-      try {
-        setLoading(true);
-        const loginResult = await authService.login(
-          identifier,
-          password,
-          isEmail,
-        );
-        // if loginResult is an object with an error, setError with it
-        if (typeof loginResult === 'object' && 'error' in loginResult) {
-          setError(loginResult.error);
-        } else if (typeof loginResult === 'object' && 'token' in loginResult) {
-          localStorage.setItem('authToken', loginResult.token);
-          setAuthState((prev) => prev + 1);
-          setToken(loginResult.token);
+      setLoading(true);
+      const loginResult = await authService.login(
+        identifier,
+        password,
+        isEmail,
+      );
+      setLoading(false);
+      // if loginResult is an object with an error, setError with it
+      if (typeof loginResult === 'object' && 'error' in loginResult) {
+        setError(loginResult.error);
+        if ('errorType' in loginResult && loginResult.errorType) {
+          setErrorType(loginResult.errorType ?? null);
         }
-        return loginResult;
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-          setError(error.message);
-          setLoading(false);
-          return { error: error.message };
-        } else {
-          setError('An unknown error occurred');
-          setLoading(false);
-          return { error: 'An unknown error occurred' };
-        }
+      } else if (typeof loginResult === 'object' && 'token' in loginResult) {
+        localStorage.setItem('authToken', loginResult.token);
+        setAuthState((prev) => prev + 1);
+        setToken(loginResult.token);
+        setError(null);
+        setErrorType(null);
       }
+      return loginResult;
     },
     [],
   );
@@ -231,6 +227,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       isAuthenticated,
       loading,
       error,
+      errorType,
       changePassword,
       login,
       logout,
@@ -248,6 +245,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     isAuthenticated,
     loading,
     error,
+    errorType,
     changePassword,
     login,
     logout,

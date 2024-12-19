@@ -1,9 +1,12 @@
-import constants from '../constants';
+import { StringNames } from '../enumerations/string-names';
+import { translate } from '../i18n';
 import { HandleableError } from './handleable-error';
 
 export class InvalidPasswordError extends HandleableError {
   constructor() {
-    super(constants.PASSWORD_REGEX_ERROR, { statusCode: 401 });
+    super(translate(StringNames.Validation_PasswordRegexErrorTemplate), {
+      statusCode: 401,
+    });
     this.name = 'InvalidPassword';
     Object.setPrototypeOf(this, InvalidPasswordError.prototype);
   }

@@ -1,4 +1,7 @@
-import { constants } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import {
+  constants,
+  StringNames,
+} from '@chili-and-cilantro/chili-and-cilantro-lib';
 import {
   Box,
   Button,
@@ -7,12 +10,15 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import axios from 'axios';
+import { isAxiosError } from 'axios';
 import { useFormik } from 'formik';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
 import { useAuth } from '../auth-provider';
+import { useAppTranslation } from '../i18n-provider';
+import api from '../services/api';
+import MultilineHelperText from './multi-line-helper-text';
 
 interface FormValues {
   email: string;
@@ -25,7 +31,8 @@ const LoginPage = () => {
   const [loginError, setLoginError] = useState<string | null>(null);
   const [resendStatus, setResendStatus] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, errorType } = useAuth();
+  const { t } = useAppTranslation();
 
   const formik = useFormik({
     initialValues: {
@@ -36,13 +43,21 @@ const LoginPage = () => {
     validationSchema: Yup.object({
       [loginType]:
         loginType === 'email'
-          ? Yup.string().email('Invalid email address').required('Required')
+          ? Yup.string()
+              .email(t(StringNames.Validation_InvalidEmail))
+              .required(t(StringNames.Validation_Required))
           : Yup.string()
-              .matches(constants.USERNAME_REGEX, constants.USERNAME_REGEX_ERROR)
-              .required('Required'),
+              .matches(
+                constants.USERNAME_REGEX,
+                t(StringNames.Validation_UsernameRegexErrorTemplate),
+              )
+              .required(t(StringNames.Validation_Required)),
       password: Yup.string()
-        .matches(constants.PASSWORD_REGEX, constants.PASSWORD_REGEX_ERROR)
-        .required('Required'),
+        .matches(
+          constants.PASSWORD_REGEX,
+          t(StringNames.Validation_PasswordRegexErrorTemplate),
+        )
+        .required(t(StringNames.Validation_Required)),
     }),
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       try {
@@ -52,13 +67,14 @@ const LoginPage = () => {
           loginType === 'email',
         );
         if ('error' in loginResult) {
+          console.error(loginResult);
           setLoginError(loginResult.error);
           return;
         }
         resetForm();
         navigate('/dashboard');
       } catch (error) {
-        setLoginError('An unexpected error occurred');
+        setLoginError(t(StringNames.Common_UnexpectedError));
       } finally {
         setSubmitting(false);
       }
@@ -67,15 +83,15 @@ const LoginPage = () => {
 
   const handleResendVerification = async () => {
     try {
-      await axios.post('/user/resend-verification', {
+      await api.post('/user/resend-verification', {
         [loginType]: formik.values[loginType],
       });
-      setResendStatus('Verification email sent successfully');
+      setResendStatus(t(StringNames.Login_ResentPasswordSuccess));
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
+      if (isAxiosError(error) && error.response) {
         setResendStatus(error.response.data.message);
       } else {
-        setResendStatus('Failed to resend verification email');
+        setResendStatus(t(StringNames.Login_ResentPasswordFailure));
       }
     }
   };
@@ -100,7 +116,7 @@ const LoginPage = () => {
         }}
       >
         <Typography component="h1" variant="h5">
-          Login
+          {t(StringNames.Login_Title)}
         </Typography>
         <Box
           component="form"
@@ -113,7 +129,11 @@ const LoginPage = () => {
             required
             fullWidth
             id={loginType}
-            label={loginType === 'email' ? 'Email Address' : 'Username'}
+            label={
+              loginType === 'email'
+                ? t(StringNames.Common_Email)
+                : t(StringNames.Common_Username)
+            }
             name={loginType}
             autoComplete={loginType === 'email' ? 'email' : 'username'}
             autoFocus
@@ -122,21 +142,31 @@ const LoginPage = () => {
             error={
               formik.touched[loginType] && Boolean(formik.errors[loginType])
             }
-            helperText={formik.touched[loginType] && formik.errors[loginType]}
+            helperText={
+              formik.touched[loginType] && (
+                <MultilineHelperText
+                  text={formik.errors[loginType] as string}
+                />
+              )
+            }
           />
           <TextField
             margin="normal"
             required
             fullWidth
             name="password"
-            label="Password"
+            label={t(StringNames.Common_Password)}
             type="password"
             id="password"
-            autoComplete="current-password"
+            autoComplete="password"
             value={formik.values.password}
             onChange={formik.handleChange}
             error={formik.touched.password && Boolean(formik.errors.password)}
-            helperText={formik.touched.password && formik.errors.password}
+            helperText={
+              formik.touched.password && (
+                <MultilineHelperText text={formik.errors.password as string} />
+              )
+            }
           />
           {loginError && (
             <Typography color="error" variant="body2">
@@ -156,9 +186,11 @@ const LoginPage = () => {
             sx={{ mt: 3, mb: 2 }}
             disabled={formik.isSubmitting}
           >
-            {formik.isSubmitting ? 'Logging in...' : 'Login'}
+            {formik.isSubmitting
+              ? t(StringNames.Login_Progress)
+              : t(StringNames.Login_LoginButton)}
           </Button>
-          {loginError === 'Account status is PendingEmailVerification' && (
+          {errorType === 'PendingEmailVerification' && (
             <Button
               fullWidth
               variant="outlined"

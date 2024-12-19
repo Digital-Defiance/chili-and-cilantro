@@ -205,20 +205,6 @@ export const USERNAME_REGEX = createUsernameRegex(
   MAX_USERNAME_LENGTH,
 );
 
-const createUsernameRegexError = (minLength: number, maxLength: number) => {
-  return `Username must be between ${minLength} and ${maxLength} characters, and:
-  • Start with a letter, number, or Unicode character
-  • Can contain letters, numbers, underscores, hyphens, and Unicode characters
-  • Cannot contain spaces or special characters other than underscores and hyphens`;
-};
-/**
- * The error message for invalid usernames.
- */
-export const USERNAME_REGEX_ERROR = createUsernameRegexError(
-  MIN_USERNAME_LENGTH,
-  MAX_USERNAME_LENGTH,
-);
-
 const createPasswordRegex = (minLength: number, maxLength: number) => {
   return new RegExp(
     `^(?=.*\\p{Ll})(?=.*\\p{Lu})(?=.*\\p{Nd})(?=.*[\\p{P}\\p{S}])[\\p{L}\\p{M}\\p{Nd}\\p{P}\\p{S}]{${minLength},${maxLength}}$`,
@@ -229,21 +215,6 @@ const createPasswordRegex = (minLength: number, maxLength: number) => {
  * The regular expression for valid passwords.
  */
 export const PASSWORD_REGEX = createPasswordRegex(
-  MIN_PASSWORD_LENGTH,
-  MAX_PASSWORD_LENGTH,
-);
-
-const createPasswordRegexError = (minLength: number, maxLength: number) => {
-  return `Password must be between ${minLength} and ${maxLength} characters, and contain at least:
-  • One lowercase character (any script)
-  • One uppercase character (any script)
-  • One number (any numeral system)
-  • One special character (punctuation or symbol)`;
-};
-/**
- * The error message for invalid passwords.
- */
-export const PASSWORD_REGEX_ERROR = createPasswordRegexError(
   MIN_PASSWORD_LENGTH,
   MAX_PASSWORD_LENGTH,
 );
@@ -281,10 +252,8 @@ export default {
   MIN_PASSWORD_LENGTH,
   MULTILINGUAL_STRING_REGEX,
   PASSWORD_REGEX,
-  PASSWORD_REGEX_ERROR,
   ROUNDS_TO_WIN,
   USERNAME_REGEX,
-  USERNAME_REGEX_ERROR,
   SITE_DOMAIN,
   NONE: NONE,
 };

@@ -24,6 +24,7 @@ import {
 import { MailService } from '@sendgrid/mail';
 import { NextFunction, Request, Response } from 'express';
 import { body, query } from 'express-validator';
+import moment from 'moment-timezone';
 import { findAuthToken } from '../../middlewares/authenticate-token';
 import { JwtService } from '../../services/jwt';
 import { RequestUserService } from '../../services/request-user';
@@ -58,7 +59,9 @@ export class UserController extends BaseController {
             .withMessage('Current password is required'),
           body('newPassword')
             .matches(constants.PASSWORD_REGEX)
-            .withMessage(constants.PASSWORD_REGEX_ERROR),
+            .withMessage(
+              translate(StringNames.Validation_PasswordRegexErrorTemplate),
+            ),
         ],
       }),
       routeConfig<unknown[]>({
@@ -68,15 +71,24 @@ export class UserController extends BaseController {
         validation: [
           body('username')
             .matches(constants.USERNAME_REGEX)
-            .withMessage(constants.USERNAME_REGEX_ERROR),
+            .withMessage(
+              translate(StringNames.Validation_UsernameRegexErrorTemplate),
+            ),
           body('displayname')
             .matches(constants.USER_DISPLAY_NAME_REGEX)
             .withMessage(constants.USER_DISPLAY_NAME_REGEX_ERROR),
-          body('email').isEmail().withMessage('Invalid email address'),
+          body('email')
+            .isEmail()
+            .withMessage(translate(StringNames.Validation_InvalidEmail)),
           body('password')
             .matches(constants.PASSWORD_REGEX)
-            .withMessage(constants.PASSWORD_REGEX_ERROR),
-          body('timezone').optional().isString(),
+            .withMessage(
+              translate(StringNames.Validation_PasswordRegexErrorTemplate),
+            ),
+          body('timezone')
+            .optional()
+            .isIn(moment.tz.names())
+            .withMessage(translate(StringNames.Validation_InvalidTimezone)),
         ],
         useAuthentication: false,
       }),
@@ -87,21 +99,27 @@ export class UserController extends BaseController {
         validation: [
           body().custom((value, { req }) => {
             if (!req.body.username && !req.body.email) {
-              throw new Error('Either username or email is required');
+              throw new Error(
+                translate(StringNames.Login_UsernameOrEmailRequired),
+              );
             }
             return true;
           }),
           body('username')
             .optional()
             .matches(constants.USERNAME_REGEX)
-            .withMessage(constants.USERNAME_REGEX_ERROR),
+            .withMessage(
+              translate(StringNames.Validation_UsernameRegexErrorTemplate),
+            ),
           body('email')
             .optional()
             .isEmail()
-            .withMessage('Invalid email address'),
+            .withMessage(translate(StringNames.Validation_InvalidEmail)),
           body('password')
             .matches(constants.PASSWORD_REGEX)
-            .withMessage(constants.PASSWORD_REGEX_ERROR),
+            .withMessage(
+              translate(StringNames.Validation_PasswordRegexErrorTemplate),
+            ),
         ],
         useAuthentication: false,
       }),
@@ -116,13 +134,16 @@ export class UserController extends BaseController {
         path: '/verify-email',
         handler: this.verifyEmailToken,
         validation: [
-          query('token').not().isEmpty().withMessage('Token is required'),
+          query('token')
+            .not()
+            .isEmpty()
+            .withMessage(translate(StringNames.Validation_Required)),
           query('token')
             .isLength({
               min: constants.EMAIL_TOKEN_LENGTH * 2,
               max: constants.EMAIL_TOKEN_LENGTH * 2,
             })
-            .withMessage('Invalid token'),
+            .withMessage(translate(StringNames.Validation_InvalidToken)),
         ],
         useAuthentication: false,
       }),
@@ -139,7 +160,9 @@ export class UserController extends BaseController {
         validation: [
           body().custom((value, { req }) => {
             if (!req.body.username && !req.body.email) {
-              throw new Error('Either username or email is required');
+              throw new Error(
+                translate(StringNames.Login_UsernameOrEmailRequired),
+              );
             }
             return true;
           }),
@@ -156,7 +179,7 @@ export class UserController extends BaseController {
           body('email')
             .isEmail()
             .normalizeEmail()
-            .withMessage('Invalid email address'),
+            .withMessage(translate(StringNames.Validation_InvalidEmail)),
         ],
         useAuthentication: false,
       }),
@@ -165,13 +188,16 @@ export class UserController extends BaseController {
         path: '/verify-reset-token',
         handler: this.verifyResetToken,
         validation: [
-          query('token').not().isEmpty().withMessage('Token is required'),
+          query('token')
+            .not()
+            .isEmpty()
+            .withMessage(translate(StringNames.Validation_Required)),
           query('token')
             .isLength({
               min: constants.EMAIL_TOKEN_LENGTH * 2,
               max: constants.EMAIL_TOKEN_LENGTH * 2,
             })
-            .withMessage('Invalid token'),
+            .withMessage(translate(StringNames.Validation_InvalidToken)),
         ],
         useAuthentication: false,
       }),
@@ -183,7 +209,9 @@ export class UserController extends BaseController {
           body('token').notEmpty(),
           body('password')
             .matches(constants.PASSWORD_REGEX)
-            .withMessage(constants.PASSWORD_REGEX_ERROR),
+            .withMessage(
+              translate(StringNames.Validation_PasswordRegexErrorTemplate),
+            ),
         ],
         useAuthentication: false,
       }),

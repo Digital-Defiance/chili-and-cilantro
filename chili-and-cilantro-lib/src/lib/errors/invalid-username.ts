@@ -1,9 +1,12 @@
-import constants from '../constants';
+import { StringNames } from '../enumerations/string-names';
+import { translate } from '../i18n';
 import { HandleableError } from './handleable-error';
 
 export class InvalidUsernameError extends HandleableError {
   constructor() {
-    super(constants.USERNAME_REGEX_ERROR, { statusCode: 400 });
+    super(translate(StringNames.Validation_UsernameRegexErrorTemplate), {
+      statusCode: 400,
+    });
     this.name = 'InvalidUsernameError';
     Object.setPrototypeOf(this, InvalidUsernameError.prototype);
   }

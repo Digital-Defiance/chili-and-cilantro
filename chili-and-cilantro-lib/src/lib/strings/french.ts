@@ -14,18 +14,33 @@ export const FrenchStrings: StringsCollection = {
   [StringNames.Common_GoToSplash]: "Retourner aucran d'accueil",
   [StringNames.Common_NewPassword]: 'Nouveau mot de passe',
   [StringNames.Common_Dashboard]: 'Tableau de bord',
+  [StringNames.Common_Email]: 'Courriel',
   [StringNames.Common_Loading]: 'Chargement...',
   [StringNames.Common_Logo]: 'logo',
+  [StringNames.Common_Password]: 'Mot de passe',
   [StringNames.Common_ReturnToKitchen]: 'Retour à la Cuisine',
   [StringNames.Common_Site]: site,
   [StringNames.Common_StartCooking]: 'Commencer la Cuisine',
   [StringNames.Common_Tagline]: 'Un Jeu de Bluff Épicé',
   [StringNames.Common_Unauthorized]: 'Non autorisé',
   [StringNames.Common_UnexpectedError]: 'Erreur inattendue',
+  [StringNames.Common_Username]: 'Nom d’utilisateur',
+  [StringNames.Error_AccountStatusIsDeleted]: 'Compte supprimé',
+  [StringNames.Error_AccountStatusIsLocked]: 'Compte verrouillé',
+  [StringNames.Error_AccountStatusIsPendingEmailVerification]:
+    'Compte en attente de confirmation de courriel',
   [StringNames.Dashboard_GamesCreated]: 'Jeux que vous avez créé',
   [StringNames.Dashboard_GamesParticipating]: 'Jeux que vous participez',
   [StringNames.Dashboard_NoGames]: 'Aucun jeu disponible.',
   [StringNames.Dashboard_Title]: 'Votre Tableau de Bord',
+  [StringNames.ForgotPassword_ForgotPassword]: 'Mot de passe oublié',
+  [StringNames.ForgotPassword_InvalidToken]:
+    'Jeton invalide ou expiré. Veuillez demander un nouveau mot de passe.',
+  [StringNames.ForgotPassword_ResetPassword]: 'Réinitialiser le mot de passe',
+  [StringNames.ForgotPassword_SendResetToken]:
+    'Envoyer le mot de passe par courriel',
+  [StringNames.ForgotPassword_Success]:
+    'Votre mot de passe a bien été changé. Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.',
   [StringNames.ForgotPassword_Title]: 'Mot de passe oublié',
   [StringNames.Game_CreateGame]: 'Créer un Jeu',
   [StringNames.Game_CreateGameSuccess]: 'Jeu créé avec succès',
@@ -48,6 +63,14 @@ export const FrenchStrings: StringsCollection = {
     'Parfait pour les soirées de jeux et les réunions de famille',
   [StringNames.LanguageUpdate_Success]: 'Langue mise à jour avec succès',
   [StringNames.Login_LoginButton]: 'Connexion',
+  [StringNames.Login_Progress]: 'Connexion en cours...',
+  [StringNames.Login_ResentPasswordFailure]:
+    'Échec de l’envoi du courriel de verification',
+  [StringNames.Login_ResentPasswordSuccess]:
+    'Courriel de verification envoyé avec успех',
+  [StringNames.Login_Title]: 'Connexion',
+  [StringNames.Login_UsernameOrEmailRequired]:
+    'Nom d’utilisateur ou courriel requis',
   [StringNames.LogoutButton]: 'Déconnexion',
   [StringNames.RegisterButton]: "S'inscrire",
   [StringNames.Splash_Description]:
@@ -56,9 +79,14 @@ export const FrenchStrings: StringsCollection = {
   [StringNames.ValidationError]: 'Erreur de validation',
   [StringNames.Validation_InvalidEmail]: 'Courriel invalide',
   [StringNames.Validation_InvalidLanguage]: 'Langue invalide',
+  [StringNames.Validation_InvalidTimezone]: 'Fuseau horaire invalide',
   [StringNames.Validation_InvalidToken]: 'Jeton invalide',
-  [StringNames.Validation_PasswordRegexError]:
-    'Le mot de passe doit comporter au moins 8 caractères et inclure au moins une lettre, un chiffre et un caractère spécial (!@#$%^&*()_+-=[]{};\':"|,.<>/?)',
+  [StringNames.Validation_PasswordRegexErrorTemplate]: `Le mot de passe doit contenir entre {MIN_PASSWORD_LENGTH} et {MAX_PASSWORD_LENGTH} caractères, et contenir au moins :
+  • Une lettre minuscule (tout script)
+  • Une lettre majuscule (tout script)
+  • Un chiffre (tout système numérique)
+  • Un caractère spécial (ponctuation ou symbole)`,
+
   [StringNames.Validation_CurrentPasswordRequired]:
     'Le mot de passe actuel est requis',
   [StringNames.Validation_PasswordsDifferent]:
@@ -69,6 +97,11 @@ export const FrenchStrings: StringsCollection = {
     'Le mot de passe et la confirmation doivent correspondre',
   [StringNames.Validation_ConfirmNewPassword]:
     'La confirmation du nouveau mot de passe est requise',
+  [StringNames.Validation_Required]: 'Champ obligatoire',
+  [StringNames.Validation_UsernameRegexErrorTemplate]: `Le nom d'utilisateur doit contenir entre {MIN_USERNAME_LENGTH} et {MAX_USERNAME_LENGTH} caractères, et :
+  • Commencer par une lettre, un chiffre, ou un caractère Unicode
+  • Peut contenir des lettres, des chiffres, des underscores, des tirets, et des caractères Unicode
+  • Ne peut contenir des espaces ou des caractères spéciaux autre que des underscores et des tirets`,
 };
 
 export default FrenchStrings;

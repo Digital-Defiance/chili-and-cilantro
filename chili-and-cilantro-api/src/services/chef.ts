@@ -16,7 +16,7 @@ export class ChefService extends BaseService {
    * Creates a new chef in the database
    * @param game The game the chef is joining
    * @param user The user joining the game
-   * @param userName The display name of the chef
+   * @param displayName The display name of the chef
    * @param host Whether the chef is the host of the game
    * @param chefId The id of the chef to create. If not provided, a new id will be generated
    * @returns A new chef document
@@ -24,7 +24,7 @@ export class ChefService extends BaseService {
   public async newChefAsync(
     game: IGameDocument,
     user: IUserDocument,
-    userName: string,
+    displayName: string,
     host: boolean,
     chefId?: DefaultIdType,
   ): Promise<IChefDocument> {
@@ -33,7 +33,7 @@ export class ChefService extends BaseService {
       {
         _id: chefId ?? new Types.ObjectId(),
         gameId: game._id,
-        name: userName,
+        name: displayName,
         userId: user._id,
         hand: UtilityService.makeHand(),
         placedCards: [],

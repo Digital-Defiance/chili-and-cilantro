@@ -10,7 +10,11 @@
       "files": ["*.ts", "*.tsx"],
       "rules": {},
       "parserOptions": {
-        "project": ["chili-and-cilantro-lib/tsconfig.json"]
+        "project": [
+          "chili-and-cilantro-lib/tsconfig.json",
+          "chili-and-cilantro-lib/tsconfig.spec.json",
+          "chili-and-cilantro-lib/tsconfig.lib.json"
+        ]
       }
     },
     {

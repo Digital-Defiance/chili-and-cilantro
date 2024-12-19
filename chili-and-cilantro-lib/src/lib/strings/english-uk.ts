@@ -11,21 +11,35 @@ export const BritishEnglishStrings: StringsCollection = {
   [StringNames.Common_ChangePassword]: 'Change Password',
   [StringNames.Common_ConfirmNewPassword]: 'Confirm New Password',
   [StringNames.Common_CurrentPassword]: 'Current Password',
+  [StringNames.Common_Email]: 'Email',
   [StringNames.Common_GoToSplash]: 'Return to Welcome Screen',
   [StringNames.Common_NewPassword]: 'New Password',
   [StringNames.Common_Dashboard]: 'Dashboard',
   [StringNames.Common_Loading]: 'Loading...',
   [StringNames.Common_Logo]: 'logo',
+  [StringNames.Common_Password]: 'Password',
   [StringNames.Common_ReturnToKitchen]: 'Return to Kitchen',
   [StringNames.Common_Site]: site,
   [StringNames.Common_StartCooking]: 'Start Cooking',
   [StringNames.Common_Tagline]: 'A Spicy Bluffing Game',
   [StringNames.Common_Unauthorized]: 'Unauthorized',
   [StringNames.Common_UnexpectedError]: 'Unexpected Error',
+  [StringNames.Common_Username]: 'Username',
+  [StringNames.Error_AccountStatusIsDeleted]: 'Account deleted',
+  [StringNames.Error_AccountStatusIsLocked]: 'Account locked',
+  [StringNames.Error_AccountStatusIsPendingEmailVerification]:
+    'Account pending email verification',
   [StringNames.Dashboard_GamesCreated]: "Games You've Created",
   [StringNames.Dashboard_GamesParticipating]: "Games You're Participating in",
   [StringNames.Dashboard_NoGames]: 'No games available.',
   [StringNames.Dashboard_Title]: 'Your Dashboard',
+  [StringNames.ForgotPassword_ForgotPassword]: 'Forgot Password',
+  [StringNames.ForgotPassword_InvalidToken]:
+    'Invalid or expired token. Please request a new password reset.',
+  [StringNames.ForgotPassword_ResetPassword]: 'Reset Password',
+  [StringNames.ForgotPassword_SendResetToken]: 'Send Reset Email',
+  [StringNames.ForgotPassword_Success]:
+    'Your password has been successfully reset. You can now log in with your new password.',
   [StringNames.ForgotPassword_Title]: 'Forgot Password',
   [StringNames.Game_CreateGame]: 'Create Game',
   [StringNames.Game_CreateGameSuccess]: 'Game created successfully',
@@ -45,6 +59,14 @@ export const BritishEnglishStrings: StringsCollection = {
   [StringNames.KeyFeatures_8]: 'Perfect for game nights and family gatherings',
   [StringNames.LanguageUpdate_Success]: 'Language updated successfully',
   [StringNames.Login_LoginButton]: 'Login',
+  [StringNames.Login_Progress]: 'Logging in...',
+  [StringNames.Login_ResentPasswordFailure]:
+    'Failed to resend verification email',
+  [StringNames.Login_ResentPasswordSuccess]:
+    'Verification email sent successfully',
+  [StringNames.Login_Title]: 'Login',
+  [StringNames.Login_UsernameOrEmailRequired]:
+    'Either username or email is required',
   [StringNames.LogoutButton]: 'Logout',
   [StringNames.RegisterButton]: 'Register',
   [StringNames.Splash_Description]:
@@ -53,9 +75,13 @@ export const BritishEnglishStrings: StringsCollection = {
   [StringNames.ValidationError]: 'Validation Error',
   [StringNames.Validation_InvalidEmail]: 'Invalid Email',
   [StringNames.Validation_InvalidLanguage]: 'Invalid Language',
+  [StringNames.Validation_InvalidTimezone]: 'Invalid Timezone',
   [StringNames.Validation_InvalidToken]: 'Invalid Token',
-  [StringNames.Validation_PasswordRegexError]:
-    'Password must be at least 8 characters long and include at least one letter, one number, and one special character (!@#$%^&*()_+-=[]{};\':"|,.<>/?)',
+  [StringNames.Validation_PasswordRegexErrorTemplate]: `Password must be between {MIN_PASSWORD_LENGTH} and {MAX_PASSWORD_LENGTH} characters, and contain at least:
+  • One lowercase character (any script)
+  • One uppercase character (any script)
+  • One number (any numeral system)
+  • One special character (punctuation or symbol)`,
   [StringNames.Validation_CurrentPasswordRequired]:
     'Current password is required',
   [StringNames.Validation_PasswordsDifferent]:
@@ -64,6 +90,11 @@ export const BritishEnglishStrings: StringsCollection = {
   [StringNames.Validation_PasswordMatch]: 'Password and confirm must match',
   [StringNames.Validation_ConfirmNewPassword]:
     'Confirm new password is required',
+  [StringNames.Validation_Required]: 'Required',
+  [StringNames.Validation_UsernameRegexErrorTemplate]: `Username must be between {MIN_USERNAME_LENGTH} and {MAX_USERNAME_LENGTH} characters, and:
+  • Start with a letter, number, or Unicode character
+  • Can contain letters, numbers, underscores, hyphens, and Unicode characters
+  • Cannot contain spaces or special characters other than underscores and hyphens`,
 };
 
 export default BritishEnglishStrings;

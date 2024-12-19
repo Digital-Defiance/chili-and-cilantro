@@ -77,7 +77,10 @@ export class GameController extends BaseController {
             .isString()
             .trim()
             .notEmpty()
-            .matches(constants.USERNAME_REGEX, constants.USERNAME_REGEX_ERROR),
+            .matches(
+              constants.USERNAME_REGEX,
+              translate(StringNames.Validation_UsernameRegexErrorTemplate),
+            ),
           body('displayname')
             .isString()
             .trim()
@@ -90,7 +93,10 @@ export class GameController extends BaseController {
             .optional()
             .isString()
             .trim()
-            .matches(constants.PASSWORD_REGEX, constants.PASSWORD_REGEX_ERROR),
+            .matches(
+              constants.PASSWORD_REGEX,
+              translate(StringNames.Validation_PasswordRegexErrorTemplate),
+            ),
           body('maxChefs').isInt({ min: 2, max: 8 }),
         ],
       }),
@@ -104,12 +110,18 @@ export class GameController extends BaseController {
             .isString()
             .trim()
             .notEmpty()
-            .matches(constants.USERNAME_REGEX, constants.USERNAME_REGEX_ERROR),
+            .matches(
+              constants.USERNAME_REGEX,
+              translate(StringNames.Validation_UsernameRegexErrorTemplate),
+            ),
           body('password')
             .optional()
             .isString()
             .trim()
-            .matches(constants.PASSWORD_REGEX, constants.PASSWORD_REGEX_ERROR),
+            .matches(
+              constants.PASSWORD_REGEX,
+              translate(StringNames.Validation_PasswordRegexErrorTemplate),
+            ),
           body('displayname')
             .isString()
             .trim()

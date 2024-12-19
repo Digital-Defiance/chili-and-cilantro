@@ -161,14 +161,17 @@ export function handleError(
 ): void {
   let handleableError: HandleableError;
   let alreadyHandled = false;
+  let errorType = 'UnexpectedError';
   if (error instanceof HandleableError) {
     handleableError = error;
     alreadyHandled = error.handled;
+    errorType = error.name;
   } else if (error instanceof Error) {
     handleableError = new HandleableError(error.message, {
       cause: error,
       handled: true,
     });
+    errorType = error.name;
   } else {
     handleableError = new HandleableError(
       (error as any).message ?? translate(StringNames.Common_UnexpectedError),
@@ -191,6 +194,7 @@ export function handleError(
       res.status(handleableError.statusCode).json({
         message: handleableError.message,
         error: handleableError,
+        errorType: errorType,
       } as IApiErrorResponse);
     }
     handleableError.handled = true;

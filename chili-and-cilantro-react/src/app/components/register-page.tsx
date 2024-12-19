@@ -1,4 +1,7 @@
-import { constants } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import {
+  constants,
+  StringNames,
+} from '@chili-and-cilantro/chili-and-cilantro-lib';
 import {
   Box,
   Button,
@@ -7,11 +10,14 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { AxiosError } from 'axios';
 import { useFormik } from 'formik';
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
+import { useAppTranslation } from '../i18n-provider';
 import authService from '../services/auth-service';
+import MultilineHelperText from './multi-line-helper-text';
 
 interface FormValues {
   username: string;
@@ -26,6 +32,7 @@ const RegisterPage: React.FC = () => {
   );
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const navigate = useNavigate();
+  const { t } = useAppTranslation();
 
   const formik = useFormik<FormValues>({
     initialValues: {
@@ -36,17 +43,25 @@ const RegisterPage: React.FC = () => {
     },
     validationSchema: Yup.object({
       username: Yup.string()
-        .matches(constants.USERNAME_REGEX, constants.USERNAME_REGEX_ERROR)
-        .required('Required'),
+        .matches(
+          constants.USERNAME_REGEX,
+          t(StringNames.Validation_UsernameRegexErrorTemplate),
+        )
+        .required(t(StringNames.Validation_Required)),
       displayname: Yup.string()
         .matches(
           constants.USER_DISPLAY_NAME_REGEX,
           constants.USER_DISPLAY_NAME_REGEX_ERROR,
         )
-        .required('Required'),
-      email: Yup.string().email('Invalid email address').required('Required'),
+        .required(t(StringNames.Validation_Required)),
+      email: Yup.string()
+        .email(t(StringNames.Validation_InvalidEmail))
+        .required(t(StringNames.Validation_Required)),
       password: Yup.string()
-        .matches(constants.PASSWORD_REGEX, constants.PASSWORD_REGEX_ERROR)
+        .matches(
+          constants.PASSWORD_REGEX,
+          t(StringNames.Validation_PasswordRegexErrorTemplate),
+        )
         .required('Required'),
     }),
     onSubmit: async (values, { setSubmitting }) => {
@@ -65,16 +80,18 @@ const RegisterPage: React.FC = () => {
           navigate('/login');
         }, 3000);
       } catch (error: unknown) {
-        console.error(error);
-        if (error instanceof Error) {
+        if (error instanceof AxiosError) {
           setRegistrationError(
-            error.message ||
-              'An error occurred during registration. Please try again.',
+            error.response?.data.message ??
+              error.message ??
+              t(StringNames.Common_UnexpectedError),
+          );
+        } else if (error instanceof Error) {
+          setRegistrationError(
+            error.message || t(StringNames.Common_UnexpectedError),
           );
         } else {
-          setRegistrationError(
-            'An unexpected error occurred. Please try again.',
-          );
+          setRegistrationError(t(StringNames.Common_UnexpectedError));
         }
         setRegistrationSuccess(false);
       } finally {
@@ -161,7 +178,11 @@ const RegisterPage: React.FC = () => {
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             error={formik.touched.password && Boolean(formik.errors.password)}
-            helperText={formik.touched.password && formik.errors.password}
+            helperText={
+              formik.touched.password && (
+                <MultilineHelperText text={formik.errors.password as string} />
+              )
+            }
           />
           {registrationError && (
             <Typography color="error" variant="body2" sx={{ mt: 1 }}>

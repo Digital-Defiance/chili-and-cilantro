@@ -11,21 +11,36 @@ export const SpanishStrings: StringsCollection = {
   [StringNames.Common_ChangePassword]: 'Cambiar contraseña',
   [StringNames.Common_ConfirmNewPassword]: 'Confirmar nueva contraseña',
   [StringNames.Common_CurrentPassword]: 'Contraseña actual',
+  [StringNames.Common_Email]: 'Correo electrónica',
   [StringNames.Common_GoToSplash]: 'Volver a la pantalla de bienvenida',
   [StringNames.Common_NewPassword]: 'Nueva contraseña',
   [StringNames.Common_Dashboard]: 'Tablero',
   [StringNames.Common_Loading]: 'Cargando...',
   [StringNames.Common_Logo]: 'logo',
+  [StringNames.Common_Password]: 'Contraseña',
   [StringNames.Common_ReturnToKitchen]: 'Volver a la Cocina',
   [StringNames.Common_Site]: site,
   [StringNames.Common_StartCooking]: 'Comenzar a cocinar',
   [StringNames.Common_Tagline]: 'Un Juego de Bluff Picante',
   [StringNames.Common_Unauthorized]: 'No autorizado',
   [StringNames.Common_UnexpectedError]: 'Error inesperado',
+  [StringNames.Common_Username]: 'Nombre de usuario',
+  [StringNames.Error_AccountStatusIsDeleted]: 'Cuenta eliminada',
+  [StringNames.Error_AccountStatusIsLocked]: 'Cuenta bloqueada',
+  [StringNames.Error_AccountStatusIsPendingEmailVerification]:
+    'Cuenta en espera de verificación de correo electrónico',
   [StringNames.Dashboard_GamesCreated]: 'Juegos que has creado',
   [StringNames.Dashboard_GamesParticipating]: 'Juegos en los que participas',
   [StringNames.Dashboard_NoGames]: 'No hay juegos disponibles.',
   [StringNames.Dashboard_Title]: 'Tu Tablero',
+  [StringNames.ForgotPassword_ForgotPassword]: 'Olvidé mi contraseña',
+  [StringNames.ForgotPassword_InvalidToken]:
+    'Token inválido o expirado. Por favor, solicita un nuevo restablecimiento de contraseña.',
+  [StringNames.ForgotPassword_ResetPassword]: 'Restablecer contraseña',
+  [StringNames.ForgotPassword_SendResetToken]:
+    'Enviar restablecimiento de contraseña',
+  [StringNames.ForgotPassword_Success]:
+    'Tu contraseña ha sido restablecida con éxito. Ahora puedes usar tu nueva contraseña para ingresar.',
   [StringNames.ForgotPassword_Title]: 'Contraseña olvidada',
   [StringNames.Game_CreateGame]: 'Crear juego',
   [StringNames.Game_CreateGameSuccess]: 'Juego creado con éxito',
@@ -46,6 +61,12 @@ export const SpanishStrings: StringsCollection = {
     'Perfecto para noches de juegos y reuniones familiares',
   [StringNames.LanguageUpdate_Success]: 'Idioma actualizado con éxito',
   [StringNames.Login_LoginButton]: 'Iniciar sesión',
+  [StringNames.Login_Progress]: 'Iniciando sesión...',
+  [StringNames.Login_ResentPasswordFailure]: 'Reenviar contraseña fallido',
+  [StringNames.Login_ResentPasswordSuccess]: 'Reenviar contraseña con éxito',
+  [StringNames.Login_Title]: 'Iniciar sesión',
+  [StringNames.Login_UsernameOrEmailRequired]:
+    'Se requiere un nombre de usuario o correo electrónica',
   [StringNames.LogoutButton]: 'Cerrar sesión',
   [StringNames.RegisterButton]: 'Registrarse',
   [StringNames.Splash_Description]:
@@ -54,9 +75,13 @@ export const SpanishStrings: StringsCollection = {
   [StringNames.ValidationError]: 'Error de validación',
   [StringNames.Validation_InvalidEmail]: 'Correo electrónica inválido',
   [StringNames.Validation_InvalidLanguage]: 'Idioma inválido',
+  [StringNames.Validation_InvalidTimezone]: 'Fuseau horaire invático',
   [StringNames.Validation_InvalidToken]: 'Token inválido',
-  [StringNames.Validation_PasswordRegexError]:
-    'La contraseña debe tener al menos 8 caracteres y incluir al menos una letra, un número y un carácter especial (!@#$%^&*()_+-=[]{};\':"|,.<>/?)',
+  [StringNames.Validation_PasswordRegexErrorTemplate]: `La contraseña debe estar entre {MIN_PASSWORD_LENGTH} y {MAX_PASSWORD_LENGTH} caracteres, y contener al menos:
+  • Una letra minuscula (cualquier script)
+  • Una letra mayúscula (cualquier script)
+  • Un número (cualquier sistema numérico)
+  • Un caracter especial (puntuación o símbolo)`,
   [StringNames.Validation_CurrentPasswordRequired]:
     'Se requiere la contraseña actual',
   [StringNames.Validation_PasswordsDifferent]:
@@ -67,6 +92,11 @@ export const SpanishStrings: StringsCollection = {
     'La contraseña y la confirmación deben coincidir',
   [StringNames.Validation_ConfirmNewPassword]:
     'Se requiere la confirmación de la nueva contraseña',
+  [StringNames.Validation_Required]: 'Requerido',
+  [StringNames.Validation_UsernameRegexErrorTemplate]: `El nombre de usuario debe tener entre {MIN_USERNAME_LENGTH} y {MAX_USERNAME_LENGTH} caracteres, y:
+  • Comenzar con una letra, un número, o un carácter Unicode
+  • Puede contener letras, números, guiones bajos, guiones, y carácteres Unicode
+  • No puede contener espacios o carácteres especiales excepto guiones bajos y guiones`,
 };
 
 export default SpanishStrings;

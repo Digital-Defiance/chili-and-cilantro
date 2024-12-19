@@ -16,6 +16,7 @@ import { Navigate } from 'react-router-dom';
 import * as Yup from 'yup';
 import { AuthContext } from '../auth-provider';
 import { useAppTranslation } from '../i18n-provider';
+import MultilineHelperText from './multi-line-helper-text';
 
 const ChangePasswordPage: FC = () => {
   const { isAuthenticated, user, loading, changePassword } =
@@ -28,13 +29,13 @@ const ChangePasswordPage: FC = () => {
     currentPassword: Yup.string()
       .matches(
         constants.PASSWORD_REGEX,
-        t(StringNames.Validation_PasswordRegexError),
+        t(StringNames.Validation_PasswordRegexErrorTemplate),
       )
       .required(t(StringNames.Validation_CurrentPasswordRequired)),
     newPassword: Yup.string()
       .matches(
         constants.PASSWORD_REGEX,
-        t(StringNames.Validation_PasswordRegexError),
+        t(StringNames.Validation_PasswordRegexErrorTemplate),
       )
       .notOneOf(
         [Yup.ref('currentPassword')],
@@ -127,7 +128,11 @@ const ChangePasswordPage: FC = () => {
               Boolean(formik.errors.currentPassword)
             }
             helperText={
-              formik.touched.currentPassword && formik.errors.currentPassword
+              formik.touched.currentPassword && (
+                <MultilineHelperText
+                  text={formik.errors.currentPassword as string}
+                />
+              )
             }
           />
           <TextField
@@ -145,7 +150,13 @@ const ChangePasswordPage: FC = () => {
             error={
               formik.touched.newPassword && Boolean(formik.errors.newPassword)
             }
-            helperText={formik.touched.newPassword && formik.errors.newPassword}
+            helperText={
+              formik.touched.newPassword && (
+                <MultilineHelperText
+                  text={formik.errors.newPassword as string}
+                />
+              )
+            }
           />
           <TextField
             margin="normal"

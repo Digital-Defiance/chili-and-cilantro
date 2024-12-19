@@ -1,7 +1,6 @@
 import {
   AccountDeletedError,
   AccountLockedError,
-  AccountStatusError,
   AccountStatusTypeEnum,
   constants,
   DefaultIdType,
@@ -11,6 +10,7 @@ import {
   EmailTokenType,
   EmailTokenUsedOrInvalidError,
   EmailVerifiedError,
+  HandleableError,
   ICreateUserBasics,
   IEmailTokenDocument,
   InvalidCredentialsError,
@@ -24,6 +24,8 @@ import {
   ModelName,
   PendingEmailVerificationError,
   StringLanguages,
+  StringNames,
+  translate,
   UsernameInUseError,
   UsernameOrEmailRequiredError,
   UserNotFoundError,
@@ -185,9 +187,11 @@ export class UserService extends BaseService {
       case AccountStatusTypeEnum.AdminDelete:
       case AccountStatusTypeEnum.SelfDelete:
       case AccountStatusTypeEnum.SelfDeleteWaitPeriod:
-        throw new AccountDeletedError();
+        throw new AccountDeletedError(userDoc.accountStatusType);
       default:
-        throw new AccountStatusError(userDoc.accountStatusType);
+        throw new HandleableError(
+          translate(StringNames.Common_UnexpectedError),
+        );
     }
 
     return userDoc;

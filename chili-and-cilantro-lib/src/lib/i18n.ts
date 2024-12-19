@@ -1,3 +1,4 @@
+import constants from './constants';
 import { AccountStatusTypeTranslations } from './enumeration-translations/account-status-type';
 import { ActionTypeTranslations } from './enumeration-translations/action-type';
 import { ActionTypePastTenseTranslations } from './enumeration-translations/action-type-past-tense';
@@ -10,23 +11,20 @@ import { GamePhaseTranslations } from './enumeration-translations/game-phase';
 import { QuitGameReasonTranslations } from './enumeration-translations/quit-game-reason';
 import { TurnActionTranslations } from './enumeration-translations/turn-action';
 import { TurnActionPastTenseTranslations } from './enumeration-translations/turn-action-past-tense';
-import { AccountStatusTypeEnum } from './enumerations/account-status-type';
-import ActionType from './enumerations/action-type';
-import CardType from './enumerations/card-type';
-import ChallengeResponse from './enumerations/challenge-response';
-import ChefState from './enumerations/chef-state';
-import { EmailTokenType } from './enumerations/email-token-type';
-import GamePhase from './enumerations/game-phase';
-import QuitGameReason from './enumerations/quit-game-reason';
 import { StringLanguages } from './enumerations/string-languages';
 import { StringNames } from './enumerations/string-names';
 import { TranslatableEnumType } from './enumerations/translatable-enum';
-import TurnAction from './enumerations/turn-action';
+import { TranslatableEnum, TranslationsMap } from './i18n.types';
 import { ILanguageContext } from './interfaces/language-context';
 import { LanguageCodes } from './language-codes';
 import { DefaultLanguage, StringsCollection } from './shared-types';
 import { Strings } from './strings';
 
+/**
+ * Builds a nested object from a flat object.
+ * @param strings The flat object to build the nested object from
+ * @returns The nested object
+ */
 export const buildNestedI18n = (
   strings: StringsCollection,
 ): Record<string, any> => {
@@ -63,6 +61,11 @@ export const buildNestedI18n = (
   return result;
 };
 
+/**
+ * Builds nested I18n object for a specific language
+ * @param language The language to build the nested I18n object for
+ * @returns The nested I18n object
+ */
 export const buildNestedI18nForLanguage = (language: StringLanguages) => {
   if (!Strings[language]) {
     throw new Error(`Strings not found for language: ${language}`);
@@ -71,9 +74,45 @@ export const buildNestedI18nForLanguage = (language: StringLanguages) => {
   return buildNestedI18n(Strings[language]);
 };
 
+/**
+ * Replaces underscores with dots
+ * @param name The string name
+ * @returns The string name with underscores replaced with dots
+ */
 export const stringNameToI18nKey = (name: StringNames) =>
   name.replace('_', '.'); // only replace the first underscore
 
+/**
+ * Replaces variables in a string with their corresponding values from the constants object
+ * @param str The string with variables to replace
+ * @returns The string with variables replaced
+ */
+export function replaceVariables(str: string): string {
+  const variables = str.match(/\{(.+?)\}/g);
+  if (!variables) {
+    return str;
+  }
+  return variables
+    .map((variable) => variable.replace('{', '').replace('}', ''))
+    .reduce(
+      (acc, variable) =>
+        acc.replace(
+          `{${variable}}`,
+          variable in constants
+            ? (constants as Record<string, any>)[variable]
+            : `{${variable}}`,
+        ),
+      str,
+    )
+    .replace(/\{(.+?)\}/g, '');
+}
+
+/**
+ * Translates a string
+ * @param name The string name
+ * @param language The language to translate the string to
+ * @returns The translated string
+ */
 export const translate = (
   name: StringNames,
   language?: StringLanguages,
@@ -87,67 +126,14 @@ export const translate = (
     console.warn(`String ${name} not found for language ${lang}`);
     return name; // Fallback to the string name itself
   }
-  return Strings[lang][name];
+  return (name as string).toLowerCase().endsWith('template')
+    ? replaceVariables(Strings[lang][name])
+    : Strings[lang][name];
 };
 
-export type TranslatableEnum =
-  | { type: TranslatableEnumType.AccountStatus; value: AccountStatusTypeEnum }
-  | { type: TranslatableEnumType.ActionType; value: ActionType }
-  | { type: TranslatableEnumType.ActionTypePastTense; value: ActionType }
-  | { type: TranslatableEnumType.CardType; value: CardType }
-  | { type: TranslatableEnumType.ChallengeResponse; value: ChallengeResponse }
-  | {
-      type: TranslatableEnumType.ChallengeResponsePastTense;
-      value: ChallengeResponse;
-    }
-  | { type: TranslatableEnumType.ChefState; value: ChefState }
-  | { type: TranslatableEnumType.EmailTokenType; value: EmailTokenType }
-  | { type: TranslatableEnumType.GamePhase; value: GamePhase }
-  | { type: TranslatableEnumType.QuitGameReason; value: QuitGameReason }
-  | { type: TranslatableEnumType.TurnAction; value: TurnAction }
-  | { type: TranslatableEnumType.TurnActionPastTense; value: TurnAction };
-
-export type TranslationsMap = {
-  [TranslatableEnumType.AccountStatus]: {
-    [key in StringLanguages]: { [key in AccountStatusTypeEnum]: string };
-  };
-  [TranslatableEnumType.ActionType]: {
-    [key in StringLanguages]: { [key in ActionType]: string };
-  };
-  [TranslatableEnumType.ActionTypePastTense]: {
-    [key in StringLanguages]: { [key in ActionType]: string };
-  };
-  [TranslatableEnumType.CardType]: {
-    [key in StringLanguages]: { [key in CardType]: string };
-  };
-  [TranslatableEnumType.ChallengeResponse]: {
-    [key in StringLanguages]: {
-      [key in ChallengeResponse]: string;
-    };
-  };
-  [TranslatableEnumType.ChallengeResponsePastTense]: {
-    [key in StringLanguages]: { [key in ChallengeResponse]: string };
-  };
-  [TranslatableEnumType.ChefState]: {
-    [key in StringLanguages]: { [key in ChefState]: string };
-  };
-  [TranslatableEnumType.EmailTokenType]: {
-    [key in StringLanguages]: { [key in EmailTokenType]: string };
-  };
-  [TranslatableEnumType.GamePhase]: {
-    [key in StringLanguages]: { [key in GamePhase]: string };
-  };
-  [TranslatableEnumType.QuitGameReason]: {
-    [key in StringLanguages]: { [key in QuitGameReason]: string };
-  };
-  [TranslatableEnumType.TurnAction]: {
-    [key in StringLanguages]: { [key in TurnAction]: string };
-  };
-  [TranslatableEnumType.TurnActionPastTense]: {
-    [key in StringLanguages]: { [key in TurnAction]: string };
-  };
-};
-
+/**
+ * Translation map
+ */
 export const translationsMap: TranslationsMap = {
   [TranslatableEnumType.AccountStatus]: AccountStatusTypeTranslations,
   [TranslatableEnumType.ActionType]: ActionTypeTranslations,
@@ -164,6 +150,12 @@ export const translationsMap: TranslationsMap = {
   [TranslatableEnumType.TurnActionPastTense]: TurnActionPastTenseTranslations,
 };
 
+/**
+ * Translates an enum value
+ * @param param0 A translatable enum
+ * @param language The language to translate to
+ * @returns The translated enum value
+ */
 export const translateEnum = (
   { type, value }: TranslatableEnum,
   language?: StringLanguages,
@@ -181,10 +173,18 @@ export const translateEnum = (
   );
 };
 
+/**
+ * Global language context
+ */
 export const GlobalLanguageContext: ILanguageContext = {
   language: DefaultLanguage,
 };
 
+/**
+ * Gets the language code from a language name
+ * @param language The language name
+ * @returns The language code
+ */
 export function getLanguageCode(language: string): StringLanguages {
   for (const [key, value] of Object.entries(LanguageCodes)) {
     if (value === language) {
@@ -193,3 +193,16 @@ export function getLanguageCode(language: string): StringLanguages {
   }
   throw new Error(`Unknown language code: ${language}`);
 }
+
+export default {
+  buildNestedI18n,
+  buildNestedI18nForLanguage,
+  stringNameToI18nKey,
+  translate,
+  translateEnum,
+  GlobalLanguageContext,
+  getLanguageCode,
+  replaceVariables,
+  translationsMap,
+  TranslatableEnumType,
+};
