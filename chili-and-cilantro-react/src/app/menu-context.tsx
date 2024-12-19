@@ -1,6 +1,5 @@
 // src/app/menuContext.tsx
 import { StringNames } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, {
   ReactNode,
   createContext,
@@ -45,7 +44,7 @@ export const MenuProvider: React.FC<MenuProviderProps> = ({ children }) => {
       action: () => navigate('/create-game'),
       isGlobal: true,
       link: '/create-game',
-      icon: <FontAwesomeIcon icon={['fas', 'pepper-hot']} />,
+      icon: <i className="fa-duotone fa-pepper-hot" />,
     },
   ];
   const [globalOptions, setGlobalOptions] =

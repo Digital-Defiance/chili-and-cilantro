@@ -3,7 +3,6 @@ import {
   StringNames,
   constants,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   Box,
   Button,
@@ -11,6 +10,7 @@ import {
   Switch,
   TextField,
   Typography,
+  styled,
 } from '@mui/material';
 import { AxiosResponse } from 'axios';
 import { useFormik } from 'formik';
@@ -34,6 +34,7 @@ interface IFormValues {
 const GameSetup: React.FC = () => {
   const { t } = useAppTranslation();
   const { user } = useAuth();
+
   const validationSchema = Yup.object().shape({
     gameName: Yup.string().test(
       'gameName',
@@ -173,6 +174,28 @@ const GameSetup: React.FC = () => {
     formik.setFieldValue('maxChefs', newValue);
   };
 
+  const StyledButtonPrimary = styled(Button)(({ theme }) => ({
+    minWidth: '50px',
+    minHeight: '50px',
+    fontSize: '1.5rem',
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.primary.contrastText,
+    '&:hover': {
+      backgroundColor: theme.palette.primary.dark,
+    },
+  }));
+
+  const StyledButtonSecondary = styled(Button)(({ theme }) => ({
+    minWidth: '50px',
+    minHeight: '50px',
+    fontSize: '1.5rem',
+    backgroundColor: theme.palette.secondary.main,
+    color: theme.palette.secondary.contrastText,
+    '&:hover': {
+      backgroundColor: theme.palette.secondary.dark,
+    },
+  }));
+
   return (
     <Box
       component="form"
@@ -256,14 +279,15 @@ const GameSetup: React.FC = () => {
           <Typography variant="body1" mr={2}>
             Max Chefs:
           </Typography>
-          <Button
+          <StyledButtonSecondary
             size="small"
             variant="outlined"
             onClick={handleChefDecrement}
             disabled={formik.values.maxChefs <= constants.MIN_CHEFS}
+            style={{ minWidth: '50px', minHeight: '50px' }}
           >
-            <FontAwesomeIcon icon={['fas', 'knife-kitchen']} />
-          </Button>
+            <i className="fa-duotone fa-knife-kitchen" />
+          </StyledButtonSecondary>
           <TextField
             name="maxChefs"
             value={formik.values.maxChefs}
@@ -272,14 +296,14 @@ const GameSetup: React.FC = () => {
             }}
             sx={{ width: '60px', mx: 1, '& input': { textAlign: 'center' } }}
           />
-          <Button
+          <StyledButtonPrimary
             size="small"
             variant="outlined"
             onClick={handleChefIncrement}
             disabled={formik.values.maxChefs >= constants.MAX_CHEFS}
           >
-            <FontAwesomeIcon icon={['fas', 'user-chef']} />
-          </Button>
+            <i className="fa-duotone fa-user-chef" />
+          </StyledButtonPrimary>
         </Box>
       )}
       <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
@@ -287,7 +311,6 @@ const GameSetup: React.FC = () => {
           ? t(StringNames.Game_CreateGame)
           : t(StringNames.Game_JoinGame)}
       </Button>
-      <FontAwesomeIcon icon={['fas', 'user-chef']} />
     </Box>
   );
 };

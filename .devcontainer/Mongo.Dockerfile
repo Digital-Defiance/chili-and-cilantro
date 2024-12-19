@@ -14,6 +14,9 @@ RUN rm -rf /docker-entrypoint-initdb.d/*
 COPY mongodb_entrypoint.sh /usr/local/bin/mongodb_entrypoint.sh
 RUN chmod +x /usr/local/bin/mongodb_entrypoint.sh
 
+COPY mongodb_healthcheck.sh /usr/local/bin/mongodb_healthcheck.sh
+RUN chmod +x /usr/local/bin/mongodb_healthcheck.sh
+
 # Override the default entrypoint
 ENTRYPOINT ["/usr/local/bin/mongodb_entrypoint.sh"]
 

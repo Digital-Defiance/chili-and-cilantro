@@ -1,4 +1,3 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Box, IconButton, Menu, MenuItem } from '@mui/material';
 import {
   FC,
@@ -50,7 +49,7 @@ export const GameMenu: FC = () => {
   return (
     <Box ref={dropdownRef}>
       <IconButton color="inherit" onClick={handleClick}>
-        <FontAwesomeIcon icon={['fas', 'pepper-hot']} />
+        <i className="fa-duotone fa-pepper-hot" />
       </IconButton>
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
         {gameOptions.map((option, index) => (

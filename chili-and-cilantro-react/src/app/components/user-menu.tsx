@@ -1,5 +1,4 @@
 import { StringNames } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   ExitToApp as LogoutIcon,
   VpnKey as VpnKeyIcon,
@@ -27,7 +26,7 @@ export const UserMenu: FC = () => {
   return (
     <Box>
       <IconButton color="inherit" onClick={handleClick}>
-        <FontAwesomeIcon icon={['fas', 'user-circle']} />
+        <i className="fa-duotone fa-user-circle" />
       </IconButton>
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
         <MenuItem

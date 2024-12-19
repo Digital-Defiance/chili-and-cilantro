@@ -20,10 +20,11 @@ services:
     hostname: db                 # Sets the internal hostname to 'db'
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
+      test: ["CMD", "bash", "/usr/local/bin/mongodb_healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
       retries: 5
+      start_period: 40s
     ports:
       - "27017:27017"
     volumes:

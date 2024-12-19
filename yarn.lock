@@ -22,15 +22,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@awesome.me/kit-8e0fe4e815@npm:^1.0.4":
-  version: 1.0.4
-  resolution: "@awesome.me/kit-8e0fe4e815@npm:1.0.4::__archiveUrl=https%3A%2F%2Fnpm.fontawesome.com%2F%40awesome.me%2Fkit-8e0fe4e815%2F-%2F1.0.4%2Fkit-8e0fe4e815-1.0.4.tgz"
-  dependencies:
-    "@fortawesome/fontawesome-common-types": "npm:^6.6.0"
-  checksum: 10c0/b75d5ed6f48297e78031d2d3a232b4d940013ff7d229fa941ea88e6e2e5c60906a4074f5b31b51e8dbd6de7e5018c8160729a1a3bc75bf348f6893f3c5690c7f
-  languageName: node
-  linkType: hard
-
 "@babel/code-frame@npm:^7.0.0, @babel/code-frame@npm:^7.10.4, @babel/code-frame@npm:^7.12.13, @babel/code-frame@npm:^7.16.7, @babel/code-frame@npm:^7.25.9, @babel/code-frame@npm:^7.26.0, @babel/code-frame@npm:^7.26.2":
   version: 7.26.2
   resolution: "@babel/code-frame@npm:7.26.2"
@@ -1476,15 +1467,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@chili-and-cilantro/source@workspace:."
   dependencies:
-    "@awesome.me/kit-8e0fe4e815": "npm:^1.0.4"
     "@babel/core": "npm:^7.14.5"
     "@babel/preset-react": "npm:^7.14.5"
     "@emotion/react": "npm:^11.13.3"
     "@emotion/styled": "npm:^11.13.0"
     "@faker-js/faker": "npm:^8.2.0"
-    "@fortawesome/fontawesome-common-types": "npm:^6.6.0"
-    "@fortawesome/fontawesome-svg-core": "npm:^6.6.0"
-    "@fortawesome/react-fontawesome": "npm:^0.2.2"
     "@jest/globals": "npm:^29.7.0"
     "@mui/icons-material": "npm:^6.1.1"
     "@mui/material": "npm:^6.1.8"
@@ -2019,34 +2006,6 @@ __metadata:
   version: 8.4.1
   resolution: "@faker-js/faker@npm:8.4.1"
   checksum: 10c0/4f2aecddcfdc2cc8b50b2d15d1e37302a7c7a5bbd184ae910a9d271bc11248533ca74dcdd4a9ccbe20410553e7af0f6a4d334c5b955635e09a32ddf4a64942d4
-  languageName: node
-  linkType: hard
-
-"@fortawesome/fontawesome-common-types@npm:6.7.2, @fortawesome/fontawesome-common-types@npm:^6.6.0":
-  version: 6.7.2
-  resolution: "@fortawesome/fontawesome-common-types@npm:6.7.2::__archiveUrl=https%3A%2F%2Fnpm.fontawesome.com%2F%40fortawesome%2Ffontawesome-common-types%2F-%2F6.7.2%2Ffontawesome-common-types-6.7.2.tgz"
-  checksum: 10c0/0785df560542d9c08a0ba07bb7a39902274a3cd65c018672eb2520a99efccce18bdb7f7f4b1c6089763bc5627bf0f0837c3af963a8427eaeb535bd57c820a723
-  languageName: node
-  linkType: hard
-
-"@fortawesome/fontawesome-svg-core@npm:^6.6.0":
-  version: 6.7.2
-  resolution: "@fortawesome/fontawesome-svg-core@npm:6.7.2::__archiveUrl=https%3A%2F%2Fnpm.fontawesome.com%2F%40fortawesome%2Ffontawesome-svg-core%2F-%2F6.7.2%2Ffontawesome-svg-core-6.7.2.tgz"
-  dependencies:
-    "@fortawesome/fontawesome-common-types": "npm:6.7.2"
-  checksum: 10c0/9e4e2992b341d2d11cd6ab8cf001e2cb9be4266ce200b307d15c0618e7d2cf11c1c4c67a1f95f3cc70feed2380fa66672132c32078674d5f9cb2cb0b7703f3ac
-  languageName: node
-  linkType: hard
-
-"@fortawesome/react-fontawesome@npm:^0.2.2":
-  version: 0.2.2
-  resolution: "@fortawesome/react-fontawesome@npm:0.2.2::__archiveUrl=https%3A%2F%2Fnpm.fontawesome.com%2F%40fortawesome%2Freact-fontawesome%2F-%2F0.2.2%2Freact-fontawesome-0.2.2.tgz"
-  dependencies:
-    prop-types: "npm:^15.8.1"
-  peerDependencies:
-    "@fortawesome/fontawesome-svg-core": ~1 || ~6
-    react: ">=16.3"
-  checksum: 10c0/824f96cd9be2e637738de3073450b30fe6b5a91b4f95df804c162b47ddf7d1a43df5ed7439a01e7236e888edc093efad1e61322ac693ddc3ae01147b90318745
   languageName: node
   linkType: hard
 
