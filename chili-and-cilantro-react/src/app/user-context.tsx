@@ -48,6 +48,7 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
       await i18n.changeLanguage(LanguageCodes[language]);
       localStorage.setItem('language', language);
       localStorage.setItem('languageCode', LanguageCodes[language]);
+      GlobalLanguageContext.language = language;
     })();
   }, [language]);
 

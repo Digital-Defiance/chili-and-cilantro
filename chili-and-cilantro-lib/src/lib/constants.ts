@@ -178,18 +178,37 @@ export const EMAIL_FROM = `noreply@${SITE_DOMAIN}`;
 export const APPLICATION_NAME = 'Chili & Cilantro';
 
 /**
- * Duration in milliseconds for which an email token is valid.
+ * Duration in milliseconds for which an email token is valid, in minutes
  */
-export const EMAIL_TOKEN_EXPIRATION = 24 * 60 * 60 * 1000;
+export const EMAIL_TOKEN_EXPIRATION_MIN = 15;
+/**
+ * Duration in milliseconds for which an email token is valid, in seconds
+ */
+export const EMAIL_TOKEN_EXPIRATION_SEC = EMAIL_TOKEN_EXPIRATION_MIN * 60;
+/**
+ * Duration in milliseconds for which an email token is valid, in milliseconds
+ */
+export const EMAIL_TOKEN_EXPIRATION_MS = EMAIL_TOKEN_EXPIRATION_SEC * 1000;
+
 /**
  * Length in bytes of the email token generated (is represented as a hex string of twice as many)
  */
 export const EMAIL_TOKEN_LENGTH = 32;
 
 /**
- * The regular expression for valid email addresses.
+ * The regular expression for valid email addresses, in minutes.
  */
-export const EMAIL_TOKEN_RESEND_INTERVAL = 5 * 60 * 1000; // 5 minutes
+export const EMAIL_TOKEN_RESEND_INTERVAL_MINS = 15;
+/**
+ * The regular expression for valid email addresses, in seconds.
+ */
+export const EMAIL_TOKEN_RESEND_INTERVAL_SEC =
+  EMAIL_TOKEN_RESEND_INTERVAL_MINS * 60;
+/**
+ * The regular expression for valid email addresses, in milliseconds.
+ */
+export const EMAIL_TOKEN_RESEND_INTERVAL_MS =
+  EMAIL_TOKEN_RESEND_INTERVAL_SEC * 1000;
 
 const createUsernameRegex = (minLength: number, maxLength: number) => {
   return new RegExp(
@@ -223,7 +242,7 @@ export default {
   BCRYPT_ROUNDS,
   CHILI_PER_HAND,
   EMAIL_FROM,
-  EMAIL_TOKEN_RESEND_INTERVAL,
+  EMAIL_TOKEN_RESEND_INTERVAL: EMAIL_TOKEN_RESEND_INTERVAL_MS,
   GAME_CODE_LENGTH,
   GAME_CODE_REGEX,
   JWT_ALGO,

@@ -81,11 +81,11 @@ export class UserService extends BaseService {
         token: randomBytes(constants.EMAIL_TOKEN_LENGTH).toString('hex'),
         lastSent: null,
         createdAt: Date.now(),
-        expiresAt: new Date(Date.now() + constants.EMAIL_TOKEN_EXPIRATION),
+        expiresAt: new Date(Date.now() + constants.EMAIL_TOKEN_EXPIRATION_MS),
       },
     ]);
     if (emailTokens.length !== 1) {
-      throw new Error('Failed to create email token');
+      throw new Error(translate(StringNames.Error_FailedToCreateEmailToken));
     }
     return emailTokens[0];
   }
@@ -97,7 +97,7 @@ export class UserService extends BaseService {
   public async sendEmailToken(emailToken: IEmailTokenDocument): Promise<void> {
     if (
       emailToken.lastSent &&
-      emailToken.lastSent.getTime() + constants.EMAIL_TOKEN_RESEND_INTERVAL >
+      emailToken.lastSent.getTime() + constants.EMAIL_TOKEN_RESEND_INTERVAL_MS >
         Date.now()
     ) {
       throw new EmailTokenSentTooRecentlyError(emailToken.lastSent);
@@ -110,18 +110,18 @@ export class UserService extends BaseService {
         msg = {
           to: emailToken.email,
           from: constants.EMAIL_FROM,
-          subject: `${constants.APPLICATION_NAME} email confirmation`,
-          text: `Please click the link below to confirm your email.\r\n\r\n${verifyUrl}`,
-          html: `<p>Please click the link below to confirm your email.</p><br/><p><a href="${verifyUrl}">${verifyUrl}</a></p><p>Link expires in ${constants.EMAIL_TOKEN_RESEND_INTERVAL / 1000} minutes.</p>`,
+          subject: `${translate(StringNames.Common_Site)} ${translate(StringNames.EmailToken_TitleEmailConfirm)}`,
+          text: `${translate(StringNames.EmailToken_ClickLinkEmailConfirm)}\r\n\r\n${verifyUrl}`,
+          html: `<p>${translate(StringNames.EmailToken_ClickLinkEmailConfirm)}</p><br/><p><a href="${verifyUrl}">${verifyUrl}</a></p><p>${translate(StringNames.EmailToken_ExpiresInTemplate)}</p>`,
         };
         break;
       case EmailTokenType.PasswordReset:
         msg = {
           to: emailToken.email,
           from: constants.EMAIL_FROM,
-          subject: `${constants.APPLICATION_NAME} password reset`,
-          text: `Please click the link below to reset your password.\r\n\r\n${passwordUrl}`,
-          html: `<p>Please click the link below to reset your password.</p><br/><p><a href="${passwordUrl}">${passwordUrl}</a></p><p>Link expires in ${constants.EMAIL_TOKEN_RESEND_INTERVAL / 1000} minutes.</p>`,
+          subject: `${translate(StringNames.Common_Site)} ${translate(StringNames.EmailToken_TitleResetPassword)}`,
+          text: `${translate(StringNames.EmailToken_ClickLinkResetPassword)}\r\n\r\n${passwordUrl}`,
+          html: `<p>${translate(StringNames.EmailToken_ClickLinkResetPassword)}</p><br/><p><a href="${passwordUrl}">${passwordUrl}</a></p><p>${translate(StringNames.EmailToken_ExpiresInTemplate)}</p>`,
         };
         break;
       default:
@@ -133,12 +133,12 @@ export class UserService extends BaseService {
       // update lastSent/expiration
       emailToken.lastSent = new Date();
       emailToken.expiresAt = new Date(
-        Date.now() + constants.EMAIL_TOKEN_EXPIRATION,
+        Date.now() + constants.EMAIL_TOKEN_EXPIRATION_MS,
       );
       await emailToken.save();
     } catch (error) {
       console.error('Error sending email:', error);
-      throw new Error('Failed to send verification email');
+      throw new Error(translate(StringNames.Error_SendTokenFailure));
     }
   }
 
@@ -308,7 +308,7 @@ export class UserService extends BaseService {
     );
     const now = new Date();
     const minLastSentTime = new Date(
-      now.getTime() - constants.EMAIL_TOKEN_RESEND_INTERVAL,
+      now.getTime() - constants.EMAIL_TOKEN_RESEND_INTERVAL_MS,
     );
 
     // look up the most recent email token for a given user, then send it
@@ -438,8 +438,7 @@ export class UserService extends BaseService {
         // We don't want to reveal whether an email exists in our system
         return {
           success: true,
-          message:
-            'If an account with that email exists, a password reset link has been sent.',
+          message: translate(StringNames.ResetPassword_Sent),
         };
       }
 
@@ -447,8 +446,7 @@ export class UserService extends BaseService {
       if (!user.emailVerified) {
         return {
           success: false,
-          message:
-            'Please verify your email address before resetting your password.',
+          message: translate(StringNames.ResetPassword_ChangeEmailFirst),
         };
       }
 

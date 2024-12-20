@@ -118,8 +118,8 @@ export class ActionService extends BaseService {
       ActionType.START_GAME,
       {
         gameId: game._id,
-        chefId: game.hostChefId,
-        userId: game.hostUserId,
+        chefId: game.masterChefId,
+        userId: game.masterChefUserId,
         type: ActionType.START_GAME,
         details: {} as IStartGameDetails,
         round: game.currentRound,
@@ -133,8 +133,8 @@ export class ActionService extends BaseService {
       ActionType.EXPIRE_GAME,
       {
         gameId: game._id,
-        chefId: game.hostChefId,
-        userId: game.hostUserId,
+        chefId: game.masterChefId,
+        userId: game.masterChefUserId,
         type: ActionType.EXPIRE_GAME,
         details: {} as IExpireGameDetails,
         round: game.currentRound,

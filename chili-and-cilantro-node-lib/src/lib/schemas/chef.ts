@@ -55,7 +55,7 @@ export const ChefSchema = new Schema<IChefDocument>(
       ref: ModelName.User,
     },
     state: { type: String, enum: Object.values(ChefState), required: true },
-    host: { type: Boolean, required: true, default: false },
+    masterChef: { type: Boolean, required: true, default: false },
   },
   { timestamps: true },
 );

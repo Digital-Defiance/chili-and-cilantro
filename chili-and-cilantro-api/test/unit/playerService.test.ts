@@ -20,7 +20,7 @@ describe('PlayerService', () => {
     playerService = new PlayerService(application);
   });
 
-  describe('isGameHostAsync', () => {
+  describe('isMasterChefAsync', () => {
     beforeEach(() => {
       jest.spyOn(console, 'error').mockImplementation(() => {});
     });
@@ -33,12 +33,12 @@ describe('PlayerService', () => {
       jest.spyOn(mockGameModel, 'countDocuments').mockResolvedValue(1);
       const gameId = generateObjectId();
       const userId = generateObjectId();
-      const result = await playerService.isGameHostAsync(userId, gameId);
+      const result = await playerService.isMasterChefAsync(userId, gameId);
       expect(result).toBe(true);
       expect(mockGameModel.countDocuments).toHaveBeenCalledTimes(1);
       expect(mockGameModel.countDocuments).toHaveBeenCalledWith({
         _id: gameId,
-        hostUserId: userId,
+        masterChefUserId: userId,
       });
     });
 
@@ -46,12 +46,12 @@ describe('PlayerService', () => {
       jest.spyOn(mockGameModel, 'countDocuments').mockResolvedValue(0);
       const gameId = generateObjectId();
       const userId = generateObjectId();
-      const result = await playerService.isGameHostAsync(userId, gameId);
+      const result = await playerService.isMasterChefAsync(userId, gameId);
       expect(result).toBe(false);
       expect(mockGameModel.countDocuments).toHaveBeenCalledTimes(1);
       expect(mockGameModel.countDocuments).toHaveBeenCalledWith({
         _id: gameId,
-        hostUserId: userId,
+        masterChefUserId: userId,
       });
     });
     it('should log an error when the aggregate call fails', async () => {
@@ -62,7 +62,7 @@ describe('PlayerService', () => {
       const gameId = generateObjectId();
       const userId = generateObjectId();
       expect(async () =>
-        playerService.isGameHostAsync(userId, gameId),
+        playerService.isMasterChefAsync(userId, gameId),
       ).rejects.toThrow(error);
 
       expect(console.error).toHaveBeenCalledWith(

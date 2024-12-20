@@ -15,7 +15,7 @@ export class PlayerService extends BaseService {
    * @param gameId
    * @returns boolean
    */
-  public async isGameHostAsync(
+  public async isMasterChefAsync(
     userId: DefaultIdType,
     gameId: DefaultIdType,
   ): Promise<boolean> {
@@ -23,7 +23,7 @@ export class PlayerService extends BaseService {
     try {
       const count = await GameModel.countDocuments({
         _id: gameId,
-        hostUserId: userId,
+        masterChefUserId: userId,
       });
 
       return count > 0;

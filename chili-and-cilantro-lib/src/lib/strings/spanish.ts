@@ -8,6 +8,7 @@ export const SpanishStrings: StringsCollection = {
     'Parece que hay un problema con tu cuenta. Por favor, contacta con soporte.',
   [StringNames.AccountError_Title]: 'Error de cuenta',
   [StringNames.ChangePassword_ChangePasswordButton]: 'Cambiar contraseña',
+  [StringNames.ChangePassword_Success]: 'Contraseña cambiada con éxito',
   [StringNames.Common_ChangePassword]: 'Cambiar contraseña',
   [StringNames.Common_ConfirmNewPassword]: 'Confirmar nueva contraseña',
   [StringNames.Common_CurrentPassword]: 'Contraseña actual',
@@ -17,18 +18,45 @@ export const SpanishStrings: StringsCollection = {
   [StringNames.Common_Dashboard]: 'Tablero',
   [StringNames.Common_Loading]: 'Cargando...',
   [StringNames.Common_Logo]: 'logo',
+  [StringNames.Common_MasterChef]: 'Chef Maestro',
   [StringNames.Common_Password]: 'Contraseña',
   [StringNames.Common_ReturnToKitchen]: 'Volver a la Cocina',
   [StringNames.Common_Site]: site,
   [StringNames.Common_StartCooking]: 'Comenzar a cocinar',
   [StringNames.Common_Tagline]: 'Un Juego de Bluff Picante',
+  [StringNames.Common_TokenValid]: 'Token válido',
   [StringNames.Common_Unauthorized]: 'No autorizado',
   [StringNames.Common_UnexpectedError]: 'Error inesperado',
   [StringNames.Common_Username]: 'Nombre de usuario',
+  [StringNames.EmailToken_ExpiresInTemplate]:
+    'El enlace caducará en {EMAIL_TOKEN_EXPIRATION_MIN} minutos.',
+  [StringNames.EmailToken_TitleEmailConfirm]:
+    'Confirmación de correo electrónico',
+  [StringNames.EmailToken_TitleResetPassword]: 'Restablecimiento de contraseña',
+  [StringNames.EmailToken_ClickLinkEmailConfirm]:
+    'Por favor, haz clic en el enlace de abajo para confirmar tu correo electrónica.',
+  [StringNames.EmailToken_ClickLinkResetPassword]:
+    'Por favor, haz clic en el enlace de abajo para restablecer tu contraseña.',
   [StringNames.Error_AccountStatusIsDeleted]: 'Cuenta eliminada',
   [StringNames.Error_AccountStatusIsLocked]: 'Cuenta bloqueada',
   [StringNames.Error_AccountStatusIsPendingEmailVerification]:
     'Cuenta en espera de verificación de correo electrónico',
+  [StringNames.Error_AllCardsPlaced]: 'Todas las cartas han sido colocadas.',
+  [StringNames.Error_ChefAlreadyInGame]: 'El chef ya está en un juego activo.',
+  [StringNames.Error_EmailAlreadyVerified]:
+    'El correo electrónico ya ha sido verificado',
+  [StringNames.Error_EmailInUse]: 'El correo electrónica ya esta en uso.',
+  [StringNames.Error_EmailTokenAlreadyUsed]:
+    'El enlace de verificación de correo electrónica ya ha sido usado o es inválido.',
+  [StringNames.Error_EmailTokenExpired]:
+    'El enlace de verificación ha caducado. Por favor, solicita uno nuevo.',
+  [StringNames.Error_EmailTokenSentTooRecentlyTemplate]:
+    'El token de correo electrónico se envió hace muy poco. Inténtalo de nuevo en {TIME_REMAINING} segundos.',
+  [StringNames.Error_FailedToCreateEmailToken]:
+    'Fallo al crear el token de correo',
+  [StringNames.Error_SendTokenFailure]: 'Fallo al enviar el token de correo',
+  [StringNames.Error_TooManyChefs]: 'Demasiados chefs en la cocina',
+  [StringNames.Error_YouAlreadyJoined]: 'Ya te has unido a este juego',
   [StringNames.Dashboard_GamesCreated]: 'Juegos que has creado',
   [StringNames.Dashboard_GamesParticipating]: 'Juegos en los que participas',
   [StringNames.Dashboard_NoGames]: 'No hay juegos disponibles.',
@@ -69,6 +97,11 @@ export const SpanishStrings: StringsCollection = {
     'Se requiere un nombre de usuario o correo electrónica',
   [StringNames.LogoutButton]: 'Cerrar sesión',
   [StringNames.RegisterButton]: 'Registrarse',
+  [StringNames.ResetPassword_ChangeEmailFirst]:
+    'Antes de restablecer la contraseña, verifica tu dirección de correo electrónico.',
+  [StringNames.ResetPassword_Sent]:
+    'Si existe una cuenta con ese correo electrónico, se ha enviado un enlace para restablecer la contraseña.',
+  [StringNames.ResetPassword_Success]: 'Contraseña restablecida con éxito',
   [StringNames.Splash_Description]:
     'En Chili and Cilantro, los aspirantes a chef compiten para crear el plato perfecto. Tu objetivo es agregar la cantidad justa de cilantro sin arruinarlo con un chile abrasador. ¡Sé el primero en condimentar con éxito dos platos o sé el último chef en pie para ganar!',
   [StringNames.Splash_HowToPlay]: 'Como Jugar',
@@ -97,6 +130,7 @@ export const SpanishStrings: StringsCollection = {
   • Comenzar con una letra, un número, o un carácter Unicode
   • Puede contener letras, números, guiones bajos, guiones, y carácteres Unicode
   • No puede contener espacios o carácteres especiales excepto guiones bajos y guiones`,
+  [StringNames.TEST_TESTTEMPLATE]: 'Probando {VARIABLE1} {VARIABLE2}',
 };
 
 export default SpanishStrings;

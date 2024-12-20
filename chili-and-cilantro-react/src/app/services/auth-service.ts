@@ -48,7 +48,7 @@ const register = async (
   email: string,
   password: string,
   timezone: string,
-) => {
+): Promise<void> => {
   const response = await api.post('/user/register', {
     username,
     displayname,
@@ -56,28 +56,31 @@ const register = async (
     password,
     timezone,
   });
-  if (response.status !== 200) {
+  if (response.status !== 201) {
     throw new Error(
       response.data.error?.message ??
         response.data.message ??
         translate(StringNames.Common_UnexpectedError),
     );
   }
-  return response.data;
 };
 
-const changePassword = async (currentPassword: string, newPassword: string) => {
+const changePassword = async (
+  currentPassword: string,
+  newPassword: string,
+): Promise<string> => {
   // if we get a 200 response, the password was changed successfully
   // else, we throw an error with the response message
   const response = await authenticatedApi.post('/user/change-password', {
     currentPassword,
     newPassword,
   });
-  if (response.status === 200) {
-    return response.data;
-  } else {
-    throw new Error(response.data.message || 'An unexpected error occurred');
+  if (response.status !== 200) {
+    throw new Error(
+      response.data.message || translate(StringNames.Common_UnexpectedError),
+    );
   }
+  return response.data.message ?? translate(StringNames.ChangePassword_Success);
 };
 const logout = () => {
   localStorage.removeItem('user');

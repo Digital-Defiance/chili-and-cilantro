@@ -149,12 +149,12 @@ export const GameSchema = new Schema<IGameDocument>(
         required: true,
       },
     ],
-    hostChefId: {
+    masterChefId: {
       type: Schema.Types.ObjectId,
       ref: ModelName.Chef,
       required: true,
     },
-    hostUserId: {
+    masterChefUserId: {
       type: Schema.Types.ObjectId,
       ref: ModelName.User,
       required: true,

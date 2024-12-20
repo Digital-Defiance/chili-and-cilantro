@@ -7,7 +7,7 @@ import {
   IUserDocument,
   ModelName,
   NotEnoughChefsError,
-  NotHostError,
+  NotMasterChefError,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { IApplication } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { Model } from 'mongoose';
@@ -120,15 +120,15 @@ describe('gameService startGame', () => {
     let mockActionService: ActionService;
     let mockChefService: ChefService;
     let mockPlayerService: PlayerService;
-    let isGameHostAsync: jest.Mock;
+    let isMasterChefAsync: jest.Mock;
 
     beforeEach(() => {
       application = new MockApplication();
       gameModel = application.getModel<IGameDocument>(ModelName.Game);
       mockActionService = {} as unknown as ActionService;
-      isGameHostAsync = jest.fn();
+      isMasterChefAsync = jest.fn();
       mockPlayerService = {
-        isGameHostAsync: isGameHostAsync,
+        isMasterChefAsync: isMasterChefAsync,
       } as unknown as PlayerService;
       mockChefService = {} as unknown as ChefService;
       gameService = new GameService(
@@ -147,7 +147,7 @@ describe('gameService startGame', () => {
       gameCode = game.code;
     });
     it('should validate successfully for a valid game start', async () => {
-      isGameHostAsync.mockResolvedValue(true);
+      isMasterChefAsync.mockResolvedValue(true);
       game.currentPhase = GamePhase.LOBBY;
 
       await expect(
@@ -155,14 +155,14 @@ describe('gameService startGame', () => {
       ).resolves.not.toThrow();
     });
     it('should throw if the user is not the host', async () => {
-      isGameHostAsync.mockResolvedValue(false);
+      isMasterChefAsync.mockResolvedValue(false);
 
       await expect(async () =>
         gameService.validateStartGameOrThrowAsync(game, userId),
-      ).rejects.toThrow(NotHostError);
+      ).rejects.toThrow(NotMasterChefError);
     });
     it('should throw if the game phase is not LOBBY', async () => {
-      isGameHostAsync.mockResolvedValue(true);
+      isMasterChefAsync.mockResolvedValue(true);
       game.currentPhase = GamePhase.SETUP;
 
       await expect(async () =>
@@ -170,7 +170,7 @@ describe('gameService startGame', () => {
       ).rejects.toThrow(GameInProgressError);
     });
     it('should throw if there are not enough chefs', async () => {
-      isGameHostAsync.mockResolvedValue(true);
+      isMasterChefAsync.mockResolvedValue(true);
       game.chefIds = [chef._id];
 
       await expect(async () =>

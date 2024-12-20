@@ -8,6 +8,7 @@ export const FrenchStrings: StringsCollection = {
     'Il semble y avoir un problème avec votre compte. Veuillez contacter le support.',
   [StringNames.AccountError_Title]: 'Erreur de compte',
   [StringNames.ChangePassword_ChangePasswordButton]: 'Changer le mot de passe',
+  [StringNames.ChangePassword_Success]: 'Mot de passe changé avec succès',
   [StringNames.Common_ChangePassword]: 'Changer le mot de passe',
   [StringNames.Common_ConfirmNewPassword]: 'Confirmer le nouveau mot de passe',
   [StringNames.Common_CurrentPassword]: 'Mot de passe actuel',
@@ -17,18 +18,45 @@ export const FrenchStrings: StringsCollection = {
   [StringNames.Common_Email]: 'Courriel',
   [StringNames.Common_Loading]: 'Chargement...',
   [StringNames.Common_Logo]: 'logo',
+  [StringNames.Common_MasterChef]: 'Chef de cuisine',
   [StringNames.Common_Password]: 'Mot de passe',
   [StringNames.Common_ReturnToKitchen]: 'Retour à la Cuisine',
   [StringNames.Common_Site]: site,
   [StringNames.Common_StartCooking]: 'Commencer la Cuisine',
   [StringNames.Common_Tagline]: 'Un Jeu de Bluff Épicé',
+  [StringNames.Common_TokenValid]: 'Jeton valide',
   [StringNames.Common_Unauthorized]: 'Non autorisé',
   [StringNames.Common_UnexpectedError]: 'Erreur inattendue',
   [StringNames.Common_Username]: 'Nom d’utilisateur',
+  [StringNames.EmailToken_ExpiresInTemplate]:
+    'Le lien expire dans {EMAIL_TOKEN_EXPIRATION_MIN} minutes.',
+  [StringNames.EmailToken_TitleEmailConfirm]: 'Confirmation de courriel',
+  [StringNames.EmailToken_TitleResetPassword]:
+    'Réinitialisation du mot de passe',
+  [StringNames.EmailToken_ClickLinkEmailConfirm]:
+    'Veuillez cliquer sur le lien ci-dessous pour confirmer votre courriel.',
+  [StringNames.EmailToken_ClickLinkResetPassword]:
+    'Veuillez cliquer sur le lien ci-dessous pour réinitialiser votre mot de passe.',
   [StringNames.Error_AccountStatusIsDeleted]: 'Compte supprimé',
   [StringNames.Error_AccountStatusIsLocked]: 'Compte verrouillé',
   [StringNames.Error_AccountStatusIsPendingEmailVerification]:
     'Compte en attente de confirmation de courriel',
+  [StringNames.Error_AllCardsPlaced]: 'Toutes les cartes ont été placées',
+  [StringNames.Error_ChefAlreadyInGame]: 'Chef deja dans le jeu',
+  [StringNames.Error_EmailAlreadyVerified]: 'Courriel déjà vérifié',
+  [StringNames.Error_EmailInUse]: 'Courriel déjà utilisé',
+  [StringNames.Error_EmailTokenAlreadyUsed]:
+    'Le lien de vérification par courriel a déjà été utilisé ou est invalide',
+  [StringNames.Error_EmailTokenExpired]:
+    'Le lien de vérification a expiré. Veuillez en demander un nouveau.',
+  [StringNames.Error_EmailTokenSentTooRecentlyTemplate]:
+    'Le jeton de courrier électronique a été envoyé trop récemment. Veuillez réessayer dans {TIME_REMAINING} secondes.',
+  [StringNames.Error_FailedToCreateEmailToken]:
+    'Échec de la création du jeton par courriel',
+  [StringNames.Error_SendTokenFailure]:
+    'Échec de l’envoi du jeton par courriel',
+  [StringNames.Error_TooManyChefs]: 'Trop de chefs dans la cuisine',
+  [StringNames.Error_YouAlreadyJoined]: 'Vous avez déjà rejoint ce jeu',
   [StringNames.Dashboard_GamesCreated]: 'Jeux que vous avez créé',
   [StringNames.Dashboard_GamesParticipating]: 'Jeux que vous participez',
   [StringNames.Dashboard_NoGames]: 'Aucun jeu disponible.',
@@ -73,6 +101,12 @@ export const FrenchStrings: StringsCollection = {
     'Nom d’utilisateur ou courriel requis',
   [StringNames.LogoutButton]: 'Déconnexion',
   [StringNames.RegisterButton]: "S'inscrire",
+  [StringNames.ResetPassword_ChangeEmailFirst]:
+    'Vous devez changer votre courriel avant de pouvoir changer votre mot de passe.',
+  [StringNames.ResetPassword_Sent]:
+    'Si un compte avec cet courriel existe, un lien de réinitialisation du mot de passe a été envoyé.',
+  [StringNames.ResetPassword_Success]:
+    'Réinitialisation du mot de passe réussie',
   [StringNames.Splash_Description]:
     "Dans Chili and Cilantro, les chefs en herbe rivalisent pour créer le plat parfait. Votre objectif est d'ajouter juste la bonne quantité de coriandre sans gâcher le tout avec un piment brûlant. Soyez le premier à réussir à assaisonner deux plats ou soyez le dernier chef debout pour gagner !",
   [StringNames.Splash_HowToPlay]: 'Comment Jouer',
@@ -102,6 +136,7 @@ export const FrenchStrings: StringsCollection = {
   • Commencer par une lettre, un chiffre, ou un caractère Unicode
   • Peut contenir des lettres, des chiffres, des underscores, des tirets, et des caractères Unicode
   • Ne peut contenir des espaces ou des caractères spéciaux autre que des underscores et des tirets`,
+  [StringNames.TEST_TESTTEMPLATE]: 'Essai {VARIABLE1} {VARIABLE2}',
 };
 
 export default FrenchStrings;

@@ -94,7 +94,7 @@ describe('GameService', () => {
       existingGame = generated.game;
       mockChefs = [chef, ...generated.additionalChefs];
       const newChef = generateChef({
-        host: true,
+        masterChef: true,
         gameId: newGameId,
         userId: user._id,
       });
@@ -108,8 +108,8 @@ describe('GameService', () => {
       mockPlayerService = {} as unknown as PlayerService;
       newGame = generateGame(true, {
         _id: newGameId,
-        hostUserId: user._id,
-        hostChefId: newChef._id,
+        masterChefUserId: user._id,
+        masterChefId: newChef._id,
       });
       mockGameModel = application.getModel<IGameDocument>(
         ModelName.Game,
@@ -170,7 +170,7 @@ describe('GameService', () => {
       mockUser = generated.user;
       mockNewGame = generateGame();
       mockNewChef = generateChef({
-        host: true,
+        masterChef: true,
         gameId: mockNewGame._id,
         userId: mockUser._id,
       });

@@ -67,7 +67,6 @@ const LoginPage = () => {
           loginType === 'email',
         );
         if ('error' in loginResult) {
-          console.error(loginResult);
           setLoginError(loginResult.error);
           return;
         }

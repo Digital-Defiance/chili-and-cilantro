@@ -7,6 +7,7 @@ export const MandarinStrings: StringsCollection = {
   [StringNames.AccountError_Message]: '您的帐户似乎有问题。请联系支持。',
   [StringNames.AccountError_Title]: '帐户错误',
   [StringNames.ChangePassword_ChangePasswordButton]: '更改密码',
+  [StringNames.ChangePassword_Success]: '密码更改成功',
   [StringNames.Common_ChangePassword]: '更改密码',
   [StringNames.Common_ConfirmNewPassword]: '确认新密码',
   [StringNames.Common_CurrentPassword]: '当前密码',
@@ -16,18 +17,39 @@ export const MandarinStrings: StringsCollection = {
   [StringNames.Common_Dashboard]: '仪表板',
   [StringNames.Common_Loading]: '加载中...',
   [StringNames.Common_Logo]: '标志',
+  [StringNames.Common_MasterChef]: '大厨',
   [StringNames.Common_Password]: '密码',
   [StringNames.Common_ReturnToKitchen]: '返回厨房',
   [StringNames.Common_Site]: site,
   [StringNames.Common_StartCooking]: '开始烹饪',
   [StringNames.Common_Tagline]: '一款辛辣的虚张声势游戏',
+  [StringNames.Common_TokenValid]: '令牌有效',
   [StringNames.Common_Unauthorized]: '未经授权',
   [StringNames.Common_UnexpectedError]: '意外错误',
   [StringNames.Common_Username]: '用户名',
+  [StringNames.EmailToken_ExpiresInTemplate]:
+    '链接在{EMAIL_TOKEN_EXPIRATION_MIN}分钟后过期。',
+  [StringNames.EmailToken_TitleEmailConfirm]: '电子邮件确认',
+  [StringNames.EmailToken_TitleResetPassword]: '密码重置',
+  [StringNames.EmailToken_ClickLinkEmailConfirm]:
+    '请单击下面的链接确认您的电子邮件。',
+  [StringNames.EmailToken_ClickLinkResetPassword]: '请单击下面的链接重置密码。',
   [StringNames.Error_AccountStatusIsDeleted]: '帐户已删除',
   [StringNames.Error_AccountStatusIsLocked]: '帐户已锁定',
   [StringNames.Error_AccountStatusIsPendingEmailVerification]:
     '帐户待电子邮件验证',
+  [StringNames.Error_AllCardsPlaced]: '所有卡片已放置',
+  [StringNames.Error_ChefAlreadyInGame]: '厨师已经在游戏中',
+  [StringNames.Error_EmailAlreadyVerified]: '电子邮件已验证',
+  [StringNames.Error_EmailInUse]: '电子邮件已在使用中',
+  [StringNames.Error_EmailTokenAlreadyUsed]: '电子邮件验证链接已被使用或无效',
+  [StringNames.Error_EmailTokenExpired]: '验证链接已过期。请请求一个新的。',
+  [StringNames.Error_EmailTokenSentTooRecentlyTemplate]:
+    '电子邮件令牌发送太频繁。请在{TIME_REMAINING}秒后重试。',
+  [StringNames.Error_FailedToCreateEmailToken]: '无法创建电子邮件令牌',
+  [StringNames.Error_SendTokenFailure]: '无法发送电子邮件令牌',
+  [StringNames.Error_TooManyChefs]: '厨房里有太多厨师',
+  [StringNames.Error_YouAlreadyJoined]: '您已经加入该游戏',
   [StringNames.Dashboard_GamesCreated]: '您创建的游戏',
   [StringNames.Dashboard_GamesParticipating]: '您参与的游戏',
   [StringNames.Dashboard_NoGames]: '没有可用的游戏。',
@@ -63,6 +85,11 @@ export const MandarinStrings: StringsCollection = {
   [StringNames.Login_UsernameOrEmailRequired]: '需要用户名或电子邮件',
   [StringNames.LogoutButton]: '注销',
   [StringNames.RegisterButton]: '注册',
+  [StringNames.ResetPassword_ChangeEmailFirst]:
+    '在重置密码之前，请验证您的电子邮件地址。',
+  [StringNames.ResetPassword_Sent]:
+    '如果有帐户与此电子邮件相关,密码重置链接已发送。',
+  [StringNames.ResetPassword_Success]: '密码重置成功',
   [StringNames.Splash_Description]:
     '在《辣椒和香菜》中，有抱负的厨师们竞相制作完美的菜肴。你的目标是添加适量的香菜，而不会让辣椒烧焦。成为第一个成功调味两道菜的人，或者成为最后一个获胜的厨师',
   [StringNames.Splash_HowToPlay]: '如何玩',
@@ -86,6 +113,7 @@ export const MandarinStrings: StringsCollection = {
   • 以字母，数字，或Unicode字符开头
   • 可以包含字母，数字，下划线，短横线，或Unicode字符
   • 不能包含空格或特殊字符，除下划线和短横线外`,
+  [StringNames.TEST_TESTTEMPLATE]: '测试 {VARIABLE1} {VARIABLE2}',
 };
 
 export default MandarinStrings;

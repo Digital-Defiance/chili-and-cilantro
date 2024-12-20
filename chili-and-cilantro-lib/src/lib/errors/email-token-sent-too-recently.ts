@@ -1,4 +1,6 @@
 import constants from '../constants';
+import { StringNames } from '../enumerations/string-names';
+import { translate } from '../i18n';
 import { HandleableError } from './handleable-error';
 
 export class EmailTokenSentTooRecentlyError extends HandleableError {
@@ -16,7 +18,11 @@ export class EmailTokenSentTooRecentlyError extends HandleableError {
     );
 
     super(
-      `Email token sent too recently. Please try again in ${timeRemaining} seconds.`,
+      translate(
+        StringNames.Error_EmailTokenSentTooRecentlyTemplate,
+        undefined,
+        { TIME_REMAINING: `${timeRemaining}` },
+      ),
       { statusCode: 429 },
     );
     this.name = 'EmailTokenSentTooRecentlyError';

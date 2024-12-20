@@ -24,7 +24,7 @@ export function generateChef(
     lostCards: [],
     userId: generateObjectId(),
     state: ChefState.LOBBY,
-    host: false,
+    masterChef: false,
     ...overrides,
   } as Partial<IChefDocument>;
 

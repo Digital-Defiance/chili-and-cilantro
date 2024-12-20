@@ -17,7 +17,7 @@ export class ChefService extends BaseService {
    * @param game The game the chef is joining
    * @param user The user joining the game
    * @param displayName The display name of the chef
-   * @param host Whether the chef is the host of the game
+   * @param masterChef Whether the chef is the host of the game
    * @param chefId The id of the chef to create. If not provided, a new id will be generated
    * @returns A new chef document
    */
@@ -25,7 +25,7 @@ export class ChefService extends BaseService {
     game: IGameDocument,
     user: IUserDocument,
     displayName: string,
-    host: boolean,
+    masterChef: boolean,
     chefId?: DefaultIdType,
   ): Promise<IChefDocument> {
     const ChefModel = this.application.getModel<IChefDocument>(ModelName.Chef);
@@ -39,7 +39,7 @@ export class ChefService extends BaseService {
         placedCards: [],
         lostCards: [],
         state: ChefState.LOBBY,
-        host: host,
+        masterChef: masterChef,
       },
     ]);
     if (chefs.length !== 1) {
@@ -71,7 +71,7 @@ export class ChefService extends BaseService {
         placedCards: [],
         lostCards: [],
         state: ChefState.LOBBY,
-        host: existingChef.host,
+        masterChef: existingChef.masterChef,
       },
     ]);
     if (chefs.length !== 1) {

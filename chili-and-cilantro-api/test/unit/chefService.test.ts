@@ -35,7 +35,7 @@ describe('ChefService', () => {
         chef: mockChef,
       } = generateChefGameUser(true);
       const username = generateUsername();
-      const host = true;
+      const masterChef = true;
 
       const expectedHand = UtilityService.makeHand();
       (ChefModel as any).create = jest.fn().mockResolvedValueOnce([mockChef]);
@@ -45,7 +45,7 @@ describe('ChefService', () => {
         mockGame,
         mockUser,
         username,
-        host,
+        masterChef,
         mockChef._id,
       );
 
@@ -60,7 +60,7 @@ describe('ChefService', () => {
           placedCards: [],
           lostCards: [],
           state: ChefState.LOBBY,
-          host: host,
+          masterChef: masterChef,
         },
       ]);
       expect(result).toBeDefined();
@@ -74,7 +74,7 @@ describe('ChefService', () => {
         game: mockGame,
       } = generateChefGameUser(true);
       const username = generateUsername();
-      const host = true;
+      const masterChef = true;
 
       const expectedHand = UtilityService.makeHand();
       (ChefModel as any).create = jest.fn().mockResolvedValueOnce([mockChef]);
@@ -84,7 +84,7 @@ describe('ChefService', () => {
         mockGame,
         mockUser,
         username,
-        host,
+        masterChef,
       );
 
       // Assert
@@ -97,7 +97,7 @@ describe('ChefService', () => {
           placedCards: [],
           lostCards: [],
           state: ChefState.LOBBY,
-          host: host,
+          masterChef: masterChef,
         }),
       ]);
       expect(result).toBeDefined();
@@ -142,7 +142,7 @@ describe('ChefService', () => {
           placedCards: [],
           lostCards: [],
           state: ChefState.LOBBY,
-          host: existingChef.host,
+          masterChef: existingChef.masterChef,
         },
       ]);
       expect(result).toBeDefined();
@@ -186,7 +186,7 @@ describe('ChefService', () => {
           placedCards: [],
           lostCards: [],
           state: ChefState.LOBBY,
-          host: existingChef.host,
+          masterChef: existingChef.masterChef,
         }),
       ]);
       expect(result).toBeDefined();
@@ -227,7 +227,7 @@ describe('ChefService', () => {
           _id: mockChef._id,
           gameId: mockGame._id,
           hand: mockChef.hand,
-          host: mockChef.host,
+          masterChef: mockChef.masterChef,
           name: mockChef.name,
           placedCards: mockChef.placedCards,
           lostCards: mockChef.lostCards,

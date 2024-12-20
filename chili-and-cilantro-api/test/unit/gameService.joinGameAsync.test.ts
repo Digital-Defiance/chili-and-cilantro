@@ -140,8 +140,8 @@ describe('GameService', () => {
         .resolves([chef.name]);
       game = generateGame(true, {
         _id: gameId,
-        hostUserId: user._id,
-        hostChefId: chef._id,
+        masterChefUserId: user._id,
+        masterChefId: chef._id,
         currentPhase: GamePhase.SETUP,
       });
 
@@ -347,7 +347,11 @@ describe('GameService', () => {
 
     it('should successfully join a game', async () => {
       // Setup mocks
-      const mockChef = generateChef({ host: false, gameId, userId: user._id });
+      const mockChef = generateChef({
+        masterChef: false,
+        gameId,
+        userId: user._id,
+      });
       (mockChefService.newChefAsync as jest.Mock).mockResolvedValue(mockChef);
       game.save = jest.fn().mockResolvedValue(game);
 

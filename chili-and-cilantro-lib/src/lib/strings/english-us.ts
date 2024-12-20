@@ -8,6 +8,7 @@ export const AmericanEnglishStrings: StringsCollection = {
     'There seems to be an issue with your account. Please contact support.',
   [StringNames.AccountError_Title]: 'Account Error',
   [StringNames.ChangePassword_ChangePasswordButton]: 'Change Password',
+  [StringNames.ChangePassword_Success]: 'Password changed successfully',
   [StringNames.Common_ChangePassword]: 'Change Password',
   [StringNames.Common_ConfirmNewPassword]: 'Confirm New Password',
   [StringNames.Common_CurrentPassword]: 'Current Password',
@@ -17,18 +18,42 @@ export const AmericanEnglishStrings: StringsCollection = {
   [StringNames.Common_Dashboard]: 'Dashboard',
   [StringNames.Common_Loading]: 'Loading...',
   [StringNames.Common_Logo]: 'logo',
+  [StringNames.Common_MasterChef]: 'Master Chef',
   [StringNames.Common_Password]: 'Password',
   [StringNames.Common_ReturnToKitchen]: 'Return to Kitchen',
   [StringNames.Common_Site]: site,
   [StringNames.Common_StartCooking]: 'Start Cooking',
   [StringNames.Common_Tagline]: 'A Spicy Bluffing Game',
+  [StringNames.Common_TokenValid]: 'Token is valid',
   [StringNames.Common_Unauthorized]: 'Unauthorized',
   [StringNames.Common_UnexpectedError]: 'Unexpected Error',
   [StringNames.Common_Username]: 'Username',
+  [StringNames.EmailToken_ExpiresInTemplate]:
+    'Link expires in {EMAIL_TOKEN_EXPIRATION_MIN} minutes.',
+  [StringNames.EmailToken_TitleEmailConfirm]: 'Email Confirmation',
+  [StringNames.EmailToken_TitleResetPassword]: 'Password Reset',
+  [StringNames.EmailToken_ClickLinkEmailConfirm]:
+    'Please click the link below to confirm your email.',
+  [StringNames.EmailToken_ClickLinkResetPassword]:
+    'Please click the link below to reset your password.',
   [StringNames.Error_AccountStatusIsDeleted]: 'Account deleted',
   [StringNames.Error_AccountStatusIsLocked]: 'Account locked',
   [StringNames.Error_AccountStatusIsPendingEmailVerification]:
     'Account pending email verification',
+  [StringNames.Error_AllCardsPlaced]: 'All cards placed',
+  [StringNames.Error_ChefAlreadyInGame]: 'Chef is already in an active game',
+  [StringNames.Error_EmailAlreadyVerified]: 'Email has already been verified',
+  [StringNames.Error_EmailInUse]: 'Email is already in use',
+  [StringNames.Error_EmailTokenAlreadyUsed]:
+    'Email verification link has already been used or is invalid',
+  [StringNames.Error_EmailTokenExpired]:
+    'Verification link has expired. Please request a new one.',
+  [StringNames.Error_EmailTokenSentTooRecentlyTemplate]:
+    'Email token sent too recently. Please try again in {TIME_REMAINING} seconds.',
+  [StringNames.Error_FailedToCreateEmailToken]: 'Failed to create email token',
+  [StringNames.Error_SendTokenFailure]: 'Failed to send email token',
+  [StringNames.Error_TooManyChefs]: 'Too many chefs in the kitchen',
+  [StringNames.Error_YouAlreadyJoined]: 'You have already joined this game',
   [StringNames.Dashboard_GamesCreated]: "Games You've Created",
   [StringNames.Dashboard_GamesParticipating]: "Games You're Participating in",
   [StringNames.Dashboard_NoGames]: 'No games available.',
@@ -69,6 +94,11 @@ export const AmericanEnglishStrings: StringsCollection = {
     'Either username or email is required',
   [StringNames.LogoutButton]: 'Logout',
   [StringNames.RegisterButton]: 'Register',
+  [StringNames.ResetPassword_ChangeEmailFirst]:
+    'Please verify your email address before resetting your password.',
+  [StringNames.ResetPassword_Sent]:
+    'If an account with that email exists, a password reset link has been sent.',
+  [StringNames.ResetPassword_Success]: 'Password reset successfully',
   [StringNames.Splash_Description]:
     'In Chili and Cilantro, aspiring chefs compete to create the perfect dish. Your goal is to add just the right amount of cilantro without ruining it with a scorching chili. Be the first to successfully season two dishes or be the last chef standing to win!',
   [StringNames.Splash_HowToPlay]: 'How to Play',
@@ -95,6 +125,7 @@ export const AmericanEnglishStrings: StringsCollection = {
   • Start with a letter, number, or Unicode character
   • Can contain letters, numbers, underscores, hyphens, and Unicode characters
   • Cannot contain spaces or special characters other than underscores and hyphens`,
+  [StringNames.TEST_TESTTEMPLATE]: 'Testing {VARIABLE1} {VARIABLE2}',
 };
 
 export default AmericanEnglishStrings;

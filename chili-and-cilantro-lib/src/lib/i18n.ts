@@ -87,23 +87,29 @@ export const stringNameToI18nKey = (name: StringNames) =>
  * @param str The string with variables to replace
  * @returns The string with variables replaced
  */
-export function replaceVariables(str: string): string {
+export function replaceVariables(
+  str: string,
+  otherVars?: Record<string, string>,
+): string {
   const variables = str.match(/\{(.+?)\}/g);
   if (!variables) {
     return str;
   }
   return variables
     .map((variable) => variable.replace('{', '').replace('}', ''))
-    .reduce(
-      (acc, variable) =>
-        acc.replace(
+    .reduce((acc, variable) => {
+      if (otherVars && variable in otherVars) {
+        return acc.replace(`{${variable}}`, otherVars[variable]);
+      } else if (variable in constants) {
+        return acc.replace(
           `{${variable}}`,
-          variable in constants
-            ? (constants as Record<string, any>)[variable]
-            : `{${variable}}`,
-        ),
-      str,
-    )
+          (constants as Record<string, any>)[variable],
+        );
+      } else {
+        // Variable not found in constants or otherVars, so return the original string
+        return acc;
+      }
+    }, str)
     .replace(/\{(.+?)\}/g, '');
 }
 
@@ -116,6 +122,7 @@ export function replaceVariables(str: string): string {
 export const translate = (
   name: StringNames,
   language?: StringLanguages,
+  otherVars?: Record<string, string>,
 ): string => {
   const lang = language ?? GlobalLanguageContext.language;
   if (!Strings[lang]) {
@@ -127,7 +134,7 @@ export const translate = (
     return name; // Fallback to the string name itself
   }
   return (name as string).toLowerCase().endsWith('template')
-    ? replaceVariables(Strings[lang][name])
+    ? replaceVariables(Strings[lang][name], otherVars)
     : Strings[lang][name];
 };
 

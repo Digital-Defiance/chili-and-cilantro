@@ -66,11 +66,11 @@ export interface IGame<I = DefaultIdType>
   /**
    * The chef ID of the host chef who makes game decisions.
    */
-  hostChefId: I;
+  masterChefId: I;
   /**
    * The user ID of the host chef who created the game.
    */
-  hostUserId: I;
+  masterChefUserId: I;
   /**
    * The ID of the last game this is a continuation of.
    */

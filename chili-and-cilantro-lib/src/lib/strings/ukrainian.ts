@@ -8,6 +8,7 @@ export const UkrainianStrings: StringsCollection = {
     'Здається, у вас проблеми з обліковим записом. Будь ласка, зв’яжіться з підтримкою.',
   [StringNames.AccountError_Title]: 'Помилка облікового запису',
   [StringNames.ChangePassword_ChangePasswordButton]: 'Змінити пароль',
+  [StringNames.ChangePassword_Success]: 'Пароль успішно змінено',
   [StringNames.Common_ChangePassword]: 'Змінити пароль',
   [StringNames.Common_ConfirmNewPassword]: 'Підтвердити новий пароль',
   [StringNames.Common_CurrentPassword]: 'Поточний пароль',
@@ -17,18 +18,44 @@ export const UkrainianStrings: StringsCollection = {
   [StringNames.Common_Dashboard]: 'Панель',
   [StringNames.Common_Loading]: 'Завантаження...',
   [StringNames.Common_Logo]: 'лого',
+  [StringNames.Common_MasterChef]: 'Майстер-кухар',
   [StringNames.Common_Password]: 'Пароль',
   [StringNames.Common_ReturnToKitchen]: 'Повернутися на Кухню',
   [StringNames.Common_Site]: site,
   [StringNames.Common_StartCooking]: 'Почати приготування',
   [StringNames.Common_Tagline]: 'Пікантний Блеф',
+  [StringNames.Common_TokenValid]: 'Токен діїдженний',
   [StringNames.Common_Unauthorized]: 'Немає авторизації',
   [StringNames.Common_UnexpectedError]: 'Неочікувана помилка',
   [StringNames.Common_Username]: 'Ім’я користувача',
+  [StringNames.EmailToken_ExpiresInTemplate]:
+    'Посилання дійсне протягом {EMAIL_TOKEN_EXPIRATION_MIN} хвилин.',
+  [StringNames.EmailToken_TitleEmailConfirm]: 'Підтвердження електронної пошти',
+  [StringNames.EmailToken_TitleResetPassword]: 'Скидання пароля',
+  [StringNames.EmailToken_ClickLinkEmailConfirm]:
+    'Натисніть на посилання для підтвердження електронної пошти',
+  [StringNames.EmailToken_ClickLinkResetPassword]:
+    'Натисніть на посилання для скидання пароля',
   [StringNames.Error_AccountStatusIsDeleted]: 'Обліковий запис видалено',
   [StringNames.Error_AccountStatusIsLocked]: 'Обліковий запис заблоковано',
   [StringNames.Error_AccountStatusIsPendingEmailVerification]:
     'Обліковий запис очікує підтвердження електронної пошти',
+  [StringNames.Error_AllCardsPlaced]: 'Всі картки розміщені',
+  [StringNames.Error_ChefAlreadyInGame]: 'Шеф-кухар вже в грі',
+  [StringNames.Error_EmailAlreadyVerified]: 'Електронна пошта вже підтверджена',
+  [StringNames.Error_EmailInUse]: 'Електронна пошта вже використовується',
+  [StringNames.Error_EmailTokenAlreadyUsed]:
+    'Посилання для підтвердження електронної пошти вже використано або недійсне',
+  [StringNames.Error_EmailTokenExpired]:
+    'Термін дії посилання закінчився. Будь ласка, запросіть новий.',
+  [StringNames.Error_EmailTokenSentTooRecentlyTemplate]:
+    'Маркер електронної пошти надіслано занадто недавно. Повторіть спробу через {TIME_REMAINING} с.',
+  [StringNames.Error_FailedToCreateEmailToken]:
+    'Неможливо створити електронний токен',
+  [StringNames.Error_SendTokenFailure]:
+    'Неможливо відправити електронний токен',
+  [StringNames.Error_TooManyChefs]: 'Забагато шеф-кухарів на кухні',
+  [StringNames.Error_YouAlreadyJoined]: 'Ви вже приєдналися до цієї гри',
   [StringNames.Dashboard_GamesCreated]: 'Гри, які ти створив',
   [StringNames.Dashboard_GamesParticipating]: 'Гри, в яких ти береш участь',
   [StringNames.Dashboard_NoGames]: 'Немає доступних ігор.',
@@ -71,6 +98,11 @@ export const UkrainianStrings: StringsCollection = {
     'Необхідно вказати ім’я користувача або електронну пошту',
   [StringNames.LogoutButton]: 'Вийти',
   [StringNames.RegisterButton]: 'Зареєструватися',
+  [StringNames.ResetPassword_ChangeEmailFirst]:
+    'Будь ласка, підтвердіть вашу електронну адресу перед скиданням пароля.',
+  [StringNames.ResetPassword_Sent]:
+    'Якщо обліковий запис із такою електронною адресою існує, було надіслано посилання для зміни пароля.',
+  [StringNames.ResetPassword_Success]: 'Пароль успішно скинуто',
   [StringNames.Splash_Description]:
     'У Chili and Cilantro починаючі кухарі змагаються, щоб створити ідеальну страву. Ваша мета — додати потрібну кількість кінзи, не зіпсувавши її пекучим чилі. Будьте першим, хто успішно приправить дві страви, або будьте останнім шеф-кухарем, який виграє!',
   [StringNames.Splash_HowToPlay]: 'Як Грати',
@@ -98,6 +130,7 @@ export const UkrainianStrings: StringsCollection = {
   • Починатися з літери, числа, або Unicode-символу
   • Містити літери, числа, підкреслення, тире, та Unicode-символи
   • Не містити пробілів або спеціальних символів, крім підкреслення і тире`,
+  [StringNames.TEST_TESTTEMPLATE]: 'Тестування {VARIABLE1} {VARIABLE2}',
 };
 
 export default UkrainianStrings;

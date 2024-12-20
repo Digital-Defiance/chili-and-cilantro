@@ -4,6 +4,8 @@ import {
   ISuccessMessage,
   LanguageCodes,
   StringLanguages,
+  StringNames,
+  translate,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { isAxiosError } from 'axios';
 import {
@@ -40,6 +42,13 @@ export interface AuthContextData {
   checkAuth: () => void;
   authState: number;
   language: StringLanguages;
+  register: (
+    username: string,
+    displayname: string,
+    email: string,
+    password: string,
+    timezone: string,
+  ) => Promise<void>;
   setUser: (user: IRequestUser | null) => void;
   setLanguage: (lang: StringLanguages) => void;
   token: string | null;
@@ -98,8 +107,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setUser(userData);
       setIsAuthenticated(true);
       setToken(token);
+      setError(null);
+      setErrorType(null);
     } catch (error) {
-      console.error('Token verification failed:', error);
       setUser(null);
       setIsAuthenticated(false);
       localStorage.removeItem('authToken');
@@ -107,6 +117,27 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setLoading(false);
     }
   }, []);
+
+  const register = useCallback(
+    async (
+      username: string,
+      displayname: string,
+      email: string,
+      password: string,
+      timezone: string,
+    ) => {
+      await authService.register(
+        username,
+        displayname,
+        email,
+        password,
+        timezone,
+      );
+      setError(null);
+      setErrorType(null);
+    },
+    [],
+  );
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
@@ -156,16 +187,30 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setToken(null);
     setIsAuthenticated(false);
     setError(null);
+    setErrorType(null);
     setAuthState((prev) => prev + 1);
     navigate('/');
   }, [navigate]);
 
   const verifyToken = useCallback(async (token: string) => {
     try {
-      await authService.verifyToken(token);
+      const user = await authService.verifyToken(token);
+      setUser(user);
+      setIsAuthenticated(true);
+      setError(null);
+      setErrorType(null);
     } catch (error) {
-      console.error('Token verification failed:', error);
-      setError('Invalid token');
+      if (isAxiosError(error) || error instanceof Error) {
+        setError(error.message);
+        if (isAxiosError(error) && error.response?.data.errorType) {
+          setErrorType(error.response.data.errorType);
+        }
+      } else {
+        setError(translate(StringNames.Common_UnexpectedError));
+        setErrorType(null);
+      }
+      setIsAuthenticated(false);
+      setUser(null);
     }
   }, []);
 
@@ -175,22 +220,32 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       newPassword: string,
     ): Promise<ISuccessMessage> => {
       try {
-        await authService.changePassword(currentPassword, newPassword);
+        const response = await authService.changePassword(
+          currentPassword,
+          newPassword,
+        );
         // Handle success (e.g., show a message)
-        return { success: true, message: 'Password changed successfully' };
+        setError(null);
+        setErrorType(null);
+        return {
+          success: true,
+          message: response,
+        };
       } catch (error) {
         // Handle error (e.g., set error state)
         if (isAxiosError(error)) {
+          setError(error.response?.data?.message ?? error.message);
+          if (error.response?.data.errorType) {
+            setErrorType(error.response.data.errorType);
+          }
           throw new Error(
             error.response?.data?.message ||
-              'An error occurred while changing the password',
+              translate(StringNames.Common_UnexpectedError),
           );
         } else if (error instanceof Error) {
           throw error;
         } else {
-          throw new Error(
-            'An unexpected error occurred while changing the password',
-          );
+          throw new Error(translate(StringNames.Common_UnexpectedError));
         }
       }
     },
@@ -212,18 +267,34 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       if (user) {
         try {
           // Make API call to update user language
-          api.post('/user/language', { language: newLanguage }).then(() => {
-            console.log('User language updated');
-          });
-          setUser({ ...user, siteLanguage: newLanguage });
+          api
+            .post('/user/language', { language: newLanguage })
+            .then((response) => {
+              const user = response.data as IRequestUser;
+              setUser(user);
+              setError(null);
+              setErrorType(null);
+            });
         } catch (error) {
-          console.error('Failed to update user language:', error);
+          if (isAxiosError(error)) {
+            setError(error.response?.data?.message ?? error.message);
+            if (error.response?.data.errorType) {
+              setErrorType(error.response.data.errorType);
+            }
+          } else if (error instanceof Error) {
+            setError(error.message);
+            setErrorType(null);
+          } else {
+            setError(translate(StringNames.Common_UnexpectedError));
+            setErrorType(null);
+          }
         }
       }
     };
 
     return {
       user,
+      setUser: setUserAndLanguage,
       isAuthenticated,
       loading,
       error,
@@ -234,14 +305,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       verifyToken,
       checkAuth,
       authState,
-      setUser: setUserAndLanguage,
-      language,
-      setLanguage: setLanguageAndUpdateUser,
       token,
       setToken,
+      language,
+      setLanguage: setLanguageAndUpdateUser,
+      register,
     };
   }, [
     user,
+    setUser,
     isAuthenticated,
     loading,
     error,
@@ -252,9 +324,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     verifyToken,
     checkAuth,
     authState,
-    language,
     token,
     setToken,
+    language,
+    setLanguage,
+    register,
   ]);
 
   return (

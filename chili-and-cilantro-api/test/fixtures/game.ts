@@ -39,14 +39,14 @@ export function generateGame(
   withPassword = true,
   overrides?: Partial<IGameDocument>,
 ): IGameDocument & MockedModel {
-  const hostChefId = generateObjectId();
-  const hostUserId = generateObjectId();
+  const masterChefId = generateObjectId();
+  const masterChefUserId = generateObjectId();
   const gameData = {
     _id: generateObjectId(),
     code: UtilityService.generateGameCode(),
     name: faker.lorem.words(3),
     ...(withPassword ? { password: generateGamePassword() } : {}),
-    chefIds: [hostChefId],
+    chefIds: [masterChefId],
     eliminatedChefIds: [],
     maxChefs: faker.number.int({
       min: constants.MIN_CHEFS,
@@ -59,9 +59,9 @@ export function generateGame(
     currentRound: constants.NONE,
     roundBids: {},
     roundWinners: {},
-    turnOrder: [hostChefId],
-    hostChefId: hostChefId,
-    hostUserId: hostUserId,
+    turnOrder: [masterChefId],
+    masterChefId: masterChefId,
+    masterUserId: masterChefUserId,
     createdAt: faker.date.past(),
     updatedAt: faker.date.past(),
     ...(overrides ? overrides : {}),
@@ -104,7 +104,7 @@ export function generateChefGameUser(
   const user = generateUser(overrides?.user);
   const chef = generateChef({
     gameId,
-    host: true,
+    masterChef: true,
     userId: user._id,
     ...overrides?.chef,
   });
@@ -114,8 +114,8 @@ export function generateChefGameUser(
   const chefIds = [chef._id, ...additionalChefs.map((c) => c._id)];
   const game = generateGame(withPassword, {
     _id: gameId,
-    hostUserId: user._id,
-    hostChefId: chef._id,
+    masterChefUserId: user._id,
+    masterChefId: chef._id,
     chefIds: chefIds,
     turnOrder: chefIds,
     ...overrides?.game,

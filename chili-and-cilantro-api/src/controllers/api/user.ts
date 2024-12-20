@@ -274,7 +274,9 @@ export class UserController extends BaseController {
       );
       this.sendApiMessageResponse(
         200,
-        { message: 'Password changed successfully' } as IApiMessageResponse,
+        {
+          message: translate(StringNames.ChangePassword_Success),
+        } as IApiMessageResponse,
         res,
       );
     } catch (error) {
@@ -535,7 +537,9 @@ export class UserController extends BaseController {
       await this.userService.verifyEmailToken(token as string);
       this.sendApiMessageResponse(
         200,
-        { message: 'Token is valid' } as IApiMessageResponse,
+        {
+          message: translate(StringNames.Common_TokenValid),
+        } as IApiMessageResponse,
         res,
       );
     } catch (error) {
@@ -564,7 +568,7 @@ export class UserController extends BaseController {
         RequestUserService.makeRequestUser(user);
       res.header('Authorization', `Bearer ${newToken}`);
       res.status(200).json({
-        message: 'Password reset successfully',
+        message: translate(StringNames.ResetPassword_Success),
         user: requestUser,
       } as IUserResponse);
     } catch (error) {

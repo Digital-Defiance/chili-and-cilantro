@@ -15,8 +15,8 @@ import { useFormik } from 'formik';
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
+import { useAuth } from '../auth-provider';
 import { useAppTranslation } from '../i18n-provider';
-import authService from '../services/auth-service';
 import MultilineHelperText from './multi-line-helper-text';
 
 interface FormValues {
@@ -33,6 +33,7 @@ const RegisterPage: React.FC = () => {
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const navigate = useNavigate();
   const { t } = useAppTranslation();
+  const { register } = useAuth();
 
   const formik = useFormik<FormValues>({
     initialValues: {
@@ -67,7 +68,7 @@ const RegisterPage: React.FC = () => {
     onSubmit: async (values, { setSubmitting }) => {
       try {
         const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        await authService.register(
+        await register(
           values.username,
           values.displayname,
           values.email,

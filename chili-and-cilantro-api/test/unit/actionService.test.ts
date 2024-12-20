@@ -68,8 +68,8 @@ describe('ActionService', () => {
   let application: IApplication;
   let gameId: DefaultIdType;
   let mockGame: IGameDocument;
-  let hostChef: IChefDocument;
-  let hostUser: IUserDocument;
+  let masterChef: IChefDocument;
+  let masterChefUser: IUserDocument;
 
   beforeEach(async () => {
     application = new MockApplication();
@@ -77,8 +77,8 @@ describe('ActionService', () => {
     const generated = generateChefGameUser(true);
     gameId = generated.game._id;
     mockGame = generated.game;
-    hostChef = generated.chef;
-    hostUser = generated.user;
+    masterChef = generated.chef;
+    masterChefUser = generated.user;
   });
 
   describe('getGameHistoryAsync', () => {
@@ -89,7 +89,7 @@ describe('ActionService', () => {
         ModelName.Action,
       );
       const mockActions: IActionDocument[] = [
-        generateCreateGameAction(gameId, hostChef._id, hostUser._id),
+        generateCreateGameAction(gameId, masterChef._id, masterChefUser._id),
       ];
       const mockQuery = {
         sort: jest.fn().mockReturnValue(Promise.resolve(mockActions)),
@@ -112,7 +112,7 @@ describe('ActionService', () => {
       const createGame = jest
         .fn()
         .mockResolvedValue([
-          generateCreateGameAction(gameId, hostChef._id, hostUser._id),
+          generateCreateGameAction(gameId, masterChef._id, masterChefUser._id),
         ]);
 
       const actionService = new ActionService(
@@ -121,23 +121,23 @@ describe('ActionService', () => {
 
       const result = await actionService.createGameAsync(
         mockGame,
-        hostChef,
-        hostUser,
+        masterChef,
+        masterChefUser,
       );
 
       expect(createGame).toHaveBeenCalledWith([
         {
           gameId: gameId,
-          chefId: hostChef._id,
-          userId: hostUser._id,
+          chefId: masterChef._id,
+          userId: masterChefUser._id,
           type: ActionType.CREATE_GAME,
           details: {},
           round: constants.NONE,
         },
       ]);
       expect(result.gameId).toEqual(gameId);
-      expect(result.chefId).toEqual(hostChef._id);
-      expect(result.userId).toEqual(hostUser._id);
+      expect(result.chefId).toEqual(masterChef._id);
+      expect(result.userId).toEqual(masterChefUser._id);
       expect(result.type).toEqual(ActionType.CREATE_GAME);
     });
   });
@@ -147,7 +147,7 @@ describe('ActionService', () => {
       const joinGame = jest
         .fn()
         .mockResolvedValue([
-          generateJoinGameAction(gameId, hostChef._id, hostUser._id),
+          generateJoinGameAction(gameId, masterChef._id, masterChefUser._id),
         ]);
       const actionService = new ActionService(
         makeMockApplicationForDiscriminator(ActionType.JOIN_GAME, joinGame),
@@ -156,24 +156,24 @@ describe('ActionService', () => {
       // Act
       const result = await actionService.joinGameAsync(
         mockGame,
-        hostChef,
-        hostUser,
+        masterChef,
+        masterChefUser,
       );
 
       // Assert
       expect(joinGame).toHaveBeenCalledWith([
         {
           gameId: gameId,
-          chefId: hostChef._id,
-          userId: hostUser._id,
+          chefId: masterChef._id,
+          userId: masterChefUser._id,
           type: ActionType.JOIN_GAME,
           details: {},
           round: constants.NONE,
         },
       ]);
       expect(result.gameId).toEqual(gameId);
-      expect(result.chefId).toEqual(hostChef._id);
-      expect(result.userId).toEqual(hostUser._id);
+      expect(result.chefId).toEqual(masterChef._id);
+      expect(result.userId).toEqual(masterChefUser._id);
       expect(result.type).toEqual(ActionType.JOIN_GAME);
     });
   });
@@ -183,7 +183,7 @@ describe('ActionService', () => {
       const startGame = jest
         .fn()
         .mockResolvedValue([
-          generateStartGameAction(gameId, hostChef._id, hostUser._id),
+          generateStartGameAction(gameId, masterChef._id, masterChefUser._id),
         ]);
       const actionService = new ActionService(
         makeMockApplicationForDiscriminator(ActionType.START_GAME, startGame),
@@ -196,16 +196,16 @@ describe('ActionService', () => {
       expect(startGame).toHaveBeenCalledWith([
         {
           gameId: gameId,
-          chefId: hostChef._id,
-          userId: hostUser._id,
+          chefId: masterChef._id,
+          userId: masterChefUser._id,
           type: ActionType.START_GAME,
           details: {},
           round: constants.NONE,
         },
       ]);
       expect(result.gameId).toEqual(gameId);
-      expect(result.chefId).toEqual(hostChef._id);
-      expect(result.userId).toEqual(hostUser._id);
+      expect(result.chefId).toEqual(masterChef._id);
+      expect(result.userId).toEqual(masterChefUser._id);
       expect(result.type).toEqual(ActionType.START_GAME);
     });
   });
@@ -215,7 +215,7 @@ describe('ActionService', () => {
       const expireGame = jest
         .fn()
         .mockResolvedValue([
-          generateExpireGameAction(gameId, hostChef._id, hostUser._id),
+          generateExpireGameAction(gameId, masterChef._id, masterChefUser._id),
         ]);
       const actionService = new ActionService(
         makeMockApplicationForDiscriminator(ActionType.EXPIRE_GAME, expireGame),
@@ -228,16 +228,16 @@ describe('ActionService', () => {
       expect(expireGame).toHaveBeenCalledWith([
         {
           gameId: gameId,
-          chefId: hostChef._id,
-          userId: hostUser._id,
+          chefId: masterChef._id,
+          userId: masterChefUser._id,
           type: ActionType.EXPIRE_GAME,
           details: {},
           round: constants.NONE,
         },
       ]);
       expect(result.gameId).toEqual(gameId);
-      expect(result.chefId).toEqual(hostChef._id);
-      expect(result.userId).toEqual(hostUser._id);
+      expect(result.chefId).toEqual(masterChef._id);
+      expect(result.userId).toEqual(masterChefUser._id);
       expect(result.type).toEqual(ActionType.EXPIRE_GAME);
     });
   });
@@ -250,8 +250,8 @@ describe('ActionService', () => {
         .mockResolvedValue([
           generateSendMessageAction(
             gameId,
-            hostChef._id,
-            hostUser._id,
+            masterChef._id,
+            masterChefUser._id,
             message,
           ),
         ]);
@@ -262,7 +262,7 @@ describe('ActionService', () => {
       // Act
       const result = await actionService.sendMessageAsync(
         mockGame,
-        hostChef,
+        masterChef,
         message,
       );
 
@@ -270,8 +270,8 @@ describe('ActionService', () => {
       expect(messageAction).toHaveBeenCalledWith([
         {
           gameId: gameId,
-          chefId: hostChef._id,
-          userId: hostUser._id,
+          chefId: masterChef._id,
+          userId: masterChefUser._id,
           type: ActionType.MESSAGE,
           details: {
             message: message,
@@ -280,8 +280,8 @@ describe('ActionService', () => {
         },
       ]);
       expect(result.gameId).toEqual(gameId);
-      expect(result.chefId).toEqual(hostChef._id);
-      expect(result.userId).toEqual(hostUser._id);
+      expect(result.chefId).toEqual(masterChef._id);
+      expect(result.userId).toEqual(masterChefUser._id);
       expect(result.type).toEqual(ActionType.MESSAGE);
       expect(result.details.message).toEqual(message);
     });
@@ -296,8 +296,8 @@ describe('ActionService', () => {
         .mockResolvedValue([
           generateStartBiddingAction(
             gameId,
-            hostChef._id,
-            hostUser._id,
+            masterChef._id,
+            masterChefUser._id,
             round,
             bid,
           ),
@@ -312,7 +312,7 @@ describe('ActionService', () => {
       // Act
       const result = await actionService.startBiddingAsync(
         mockGame,
-        hostChef,
+        masterChef,
         bid,
       );
 
@@ -320,8 +320,8 @@ describe('ActionService', () => {
       expect(startBidding).toHaveBeenCalledWith([
         {
           gameId: gameId,
-          chefId: hostChef._id,
-          userId: hostUser._id,
+          chefId: masterChef._id,
+          userId: masterChefUser._id,
           type: ActionType.START_BIDDING,
           details: {
             bid: bid,
@@ -330,8 +330,8 @@ describe('ActionService', () => {
         },
       ]);
       expect(result.gameId).toEqual(gameId);
-      expect(result.chefId).toEqual(hostChef._id);
-      expect(result.userId).toEqual(hostUser._id);
+      expect(result.chefId).toEqual(masterChef._id);
+      expect(result.userId).toEqual(masterChefUser._id);
       expect(result.type).toEqual(ActionType.START_BIDDING);
       expect(result.details.bid).toEqual(bid);
       expect(result.round).toEqual(expect.any(Number));
@@ -344,29 +344,29 @@ describe('ActionService', () => {
       const passAction = jest
         .fn()
         .mockResolvedValue([
-          generatePassAction(gameId, hostChef._id, hostUser._id, round),
+          generatePassAction(gameId, masterChef._id, masterChefUser._id, round),
         ]);
       const actionService = new ActionService(
         makeMockApplicationForDiscriminator(ActionType.PASS, passAction),
       );
 
       // Act
-      const result = await actionService.passAsync(mockGame, hostChef);
+      const result = await actionService.passAsync(mockGame, masterChef);
 
       // Assert
       expect(passAction).toHaveBeenCalledWith([
         {
           gameId: gameId,
-          chefId: hostChef._id,
-          userId: hostUser._id,
+          chefId: masterChef._id,
+          userId: masterChefUser._id,
           type: ActionType.PASS,
           details: {},
           round: expect.any(Number),
         },
       ]);
       expect(result.gameId).toEqual(gameId);
-      expect(result.chefId).toEqual(hostChef._id);
-      expect(result.userId).toEqual(hostUser._id);
+      expect(result.chefId).toEqual(masterChef._id);
+      expect(result.userId).toEqual(masterChefUser._id);
       expect(result.type).toEqual(ActionType.PASS);
       expect(result.round).toEqual(expect.any(Number));
     });
@@ -382,8 +382,8 @@ describe('ActionService', () => {
         .mockResolvedValue([
           generatePlaceCardAction(
             gameId,
-            hostChef._id,
-            hostUser._id,
+            masterChef._id,
+            masterChefUser._id,
             round,
             cardType,
             position,
@@ -396,7 +396,7 @@ describe('ActionService', () => {
       // Act
       const result = await actionService.placeCardAsync(
         mockGame,
-        hostChef,
+        masterChef,
         cardType,
         position,
       );
@@ -405,8 +405,8 @@ describe('ActionService', () => {
       expect(placeCard).toHaveBeenCalledWith([
         {
           gameId: gameId,
-          chefId: hostChef._id,
-          userId: hostUser._id,
+          chefId: masterChef._id,
+          userId: masterChefUser._id,
           type: ActionType.PLACE_CARD,
           details: {
             cardType: cardType,
@@ -416,8 +416,8 @@ describe('ActionService', () => {
         },
       ]);
       expect(result.gameId).toEqual(gameId);
-      expect(result.chefId).toEqual(hostChef._id);
-      expect(result.userId).toEqual(hostUser._id);
+      expect(result.chefId).toEqual(masterChef._id);
+      expect(result.userId).toEqual(masterChefUser._id);
       expect(result.type).toEqual(ActionType.PLACE_CARD);
       expect(result.round).toEqual(expect.any(Number));
       expect(result.details.cardType).toEqual(cardType);

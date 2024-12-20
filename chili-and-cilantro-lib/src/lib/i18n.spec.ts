@@ -259,6 +259,21 @@ describe('translate', () => {
     expect(replaceVariablesSpy).not.toHaveBeenCalled();
     expect(result).toBe(Strings[language][StringNames.Common_Site]);
   });
+
+  it('should use otherVars in a template string', () => {
+    const otherVars = {
+      VARIABLE1: faker.lorem.word(),
+      VARIABLE2: faker.lorem.word(),
+    };
+    const result = translate(
+      StringNames.TEST_TESTTEMPLATE,
+      StringLanguages.EnglishUS,
+      otherVars,
+    );
+    expect(result).toBe(
+      `Testing ${otherVars.VARIABLE1} ${otherVars.VARIABLE2}`,
+    );
+  });
 });
 
 describe('translateEnum', () => {
@@ -422,18 +437,24 @@ describe('getLanguageCode', () => {
 });
 
 describe('replaceVariables', () => {
-  it('should replace a single variable with its constant value', () => {
-    const input =
-      'Password must be at least {MIN_PASSWORD_LENGTH} characters long';
-    const expected = `Password must be at least ${constants.MIN_PASSWORD_LENGTH} characters long`;
+  it('should replace variables with values from constants', () => {
+    const input = 'Min: {MIN_PASSWORD_LENGTH}, Max: {MAX_PASSWORD_LENGTH}';
+    const expected = `Min: ${constants.MIN_PASSWORD_LENGTH}, Max: ${constants.MAX_PASSWORD_LENGTH}`;
     expect(replaceVariables(input)).toBe(expected);
   });
 
-  it('should replace multiple variables with their constant values', () => {
-    const input =
-      'Username must be between {MIN_USERNAME_LENGTH} and {MAX_USERNAME_LENGTH} characters';
-    const expected = `Username must be between ${constants.MIN_USERNAME_LENGTH} and ${constants.MAX_USERNAME_LENGTH} characters`;
-    expect(replaceVariables(input)).toBe(expected);
+  it('should replace variables with values from otherVars', () => {
+    const input = 'Hello {NAME}, welcome to {SITE}';
+    const otherVars = { NAME: 'John', SITE: 'Our Website' };
+    const expected = 'Hello John, welcome to Our Website';
+    expect(replaceVariables(input, otherVars)).toBe(expected);
+  });
+
+  it('should prioritize otherVars over constants', () => {
+    const input = 'Min: {MIN_PASSWORD_LENGTH}, Name: {NAME}';
+    const otherVars = { MIN_PASSWORD_LENGTH: '10', NAME: 'John' };
+    const expected = 'Min: 10, Name: John';
+    expect(replaceVariables(input, otherVars)).toBe(expected);
   });
 
   it('should return the original string if no variables are found', () => {

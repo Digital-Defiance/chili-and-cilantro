@@ -8,6 +8,7 @@ exports[`buildNestedI18n should handle English (UK) language 1`] = `
   },
   "changePassword": {
     "changePasswordButton": "Change Password",
+    "success": "Password changed successfully",
   },
   "common": {
     "changePassword": "Change Password",
@@ -18,19 +19,46 @@ exports[`buildNestedI18n should handle English (UK) language 1`] = `
     "goToSplash": "Return to Welcome Screen",
     "loading": "Loading...",
     "logo": "logo",
+    "masterChef": "Master Chef",
     "newPassword": "New Password",
+    "password": "Password",
     "returnToKitchen": "Return to Kitchen",
     "site": "Chili and Cilantro",
     "startCooking": "Start Cooking",
     "tagline": "A Spicy Bluffing Game",
+    "tokenValid": "Token is valid",
     "unauthorized": "Unauthorized",
     "unexpectedError": "Unexpected Error",
+    "username": "Username",
   },
   "dashboard": {
     "gamesCreated": "Games You've Created",
     "gamesParticipating": "Games You're Participating in",
     "noGames": "No games available.",
     "title": "Your Dashboard",
+  },
+  "emailToken": {
+    "clickLinkEmailConfirm": "Please click the link below to confirm your email.",
+    "clickLinkResetPassword": "Please click the link below to reset your password.",
+    "expiresInTemplate": "Link expires in {EMAIL_TOKEN_EXPIRATION_MIN} minutes.",
+    "titleEmailConfirm": "Email Confirmation",
+    "titleResetPassword": "Password Reset",
+  },
+  "error": {
+    "accountStatusIsDeleted": "Account deleted",
+    "accountStatusIsLocked": "Account locked",
+    "accountStatusIsPendingEmailVerification": "Account pending email verification",
+    "allCardsPlaced": "All cards have been placed.",
+    "chefAlreadyInGame": "Chef is already in an active game.",
+    "emailAlreadyVerified": "Email has already been verified",
+    "emailInUse": "Email is already in use",
+    "emailTokenAlreadySent": "Email verification link has already been used or is invalid",
+    "emailTokenExpired": "Verification link has expired. Please request a new one.",
+    "emailTokenSentTooRecentlyTemplate": "Email token sent too recently. Please try again in {TIME_REMAINING} seconds.",
+    "failedToCreateEmailToken": "Failed to create email token",
+    "sendTokenFailure": "Failed to send email token",
+    "tooManyChefs": "Too many chefs in the kitchen.",
+    "youAlreadyJoined": "You have already joined this game.",
   },
   "forgotPassword": {
     "forgotPassword": "Forgot Password",
@@ -63,24 +91,44 @@ exports[`buildNestedI18n should handle English (UK) language 1`] = `
   },
   "login": {
     "loginButton": "Login",
+    "progress": "Logging in...",
+    "resentPasswordFailure": "Failed to resend verification email",
+    "resentPasswordSuccess": "Verification email sent successfully",
+    "title": "Login",
+    "usernameOrEmailRequired": "Either username or email is required",
   },
   "logoutButton": "Logout",
   "registerButton": "Register",
+  "resetPassword": {
+    "changeEmailFirst": "Please verify your email address before resetting your password.",
+    "sent": "If an account with that email exists, a password reset link has been sent.",
+    "success": "Password reset successfully",
+  },
   "splash": {
     "description": "In Chili and Cilantro, aspiring chefs compete to create the perfect dish. Your goal is to add just the right amount of cilantro without ruining it with a scorching chili. Be the first to successfully season two dishes or be the last chef standing to win!",
     "howToPlay": "How to Play",
   },
+  "testTestTemplate": "Testing {VARIABLE1} {VARIABLE2}",
   "validation": {
     "confirmNewPassword": "Confirm new password is required",
     "currentPasswordRequired": "Current password is required",
     "invalidEmail": "Invalid Email",
     "invalidLanguage": "Invalid Language",
+    "invalidTimezone": "Invalid Timezone",
     "invalidToken": "Invalid Token",
     "newPasswordRequired": "New password is required",
     "passwordMatch": "Password and confirm must match",
-    "passwordRegexErrorTemplate": "Password must be at least {MIN_PASSWORD_LENGTH} characters long and include at least one letter, one number, and one special character (!@#$%^&*()_+-=[]{};':"|,.<>/?)",
+    "passwordRegexErrorTemplate": "Password must be between {MIN_PASSWORD_LENGTH} and {MAX_PASSWORD_LENGTH} characters, and contain at least:
+  • One lowercase character (any script)
+  • One uppercase character (any script)
+  • One number (any numeral system)
+  • One special character (punctuation or symbol)",
     "passwordsDifferent": "New password must be different than the current password",
     "required": "Required",
+    "usernameRegexErrorTemplate": "Username must be between {MIN_USERNAME_LENGTH} and {MAX_USERNAME_LENGTH} characters, and:
+  • Start with a letter, number, or Unicode character
+  • Can contain letters, numbers, underscores, hyphens, and Unicode characters
+  • Cannot contain spaces or special characters other than underscores and hyphens",
   },
   "validationError": "Validation Error",
 }
@@ -94,6 +142,7 @@ exports[`buildNestedI18n should handle English (US) language 1`] = `
   },
   "changePassword": {
     "changePasswordButton": "Change Password",
+    "success": "Password changed successfully",
   },
   "common": {
     "changePassword": "Change Password",
@@ -104,19 +153,46 @@ exports[`buildNestedI18n should handle English (US) language 1`] = `
     "goToSplash": "Return to Welcome Screen",
     "loading": "Loading...",
     "logo": "logo",
+    "masterChef": "Master Chef",
     "newPassword": "New Password",
+    "password": "Password",
     "returnToKitchen": "Return to Kitchen",
     "site": "Chili and Cilantro",
     "startCooking": "Start Cooking",
     "tagline": "A Spicy Bluffing Game",
+    "tokenValid": "Token is valid",
     "unauthorized": "Unauthorized",
     "unexpectedError": "Unexpected Error",
+    "username": "Username",
   },
   "dashboard": {
     "gamesCreated": "Games You've Created",
     "gamesParticipating": "Games You're Participating in",
     "noGames": "No games available.",
     "title": "Your Dashboard",
+  },
+  "emailToken": {
+    "clickLinkEmailConfirm": "Please click the link below to confirm your email.",
+    "clickLinkResetPassword": "Please click the link below to reset your password.",
+    "expiresInTemplate": "Link expires in {EMAIL_TOKEN_EXPIRATION_MIN} minutes.",
+    "titleEmailConfirm": "Email Confirmation",
+    "titleResetPassword": "Password Reset",
+  },
+  "error": {
+    "accountStatusIsDeleted": "Account deleted",
+    "accountStatusIsLocked": "Account locked",
+    "accountStatusIsPendingEmailVerification": "Account pending email verification",
+    "allCardsPlaced": "All cards placed",
+    "chefAlreadyInGame": "Chef is already in an active game",
+    "emailAlreadyVerified": "Email has already been verified",
+    "emailInUse": "Email is already in use",
+    "emailTokenAlreadySent": "Email verification link has already been used or is invalid",
+    "emailTokenExpired": "Verification link has expired. Please request a new one.",
+    "emailTokenSentTooRecentlyTemplate": "Email token sent too recently. Please try again in {TIME_REMAINING} seconds.",
+    "failedToCreateEmailToken": "Failed to create email token",
+    "sendTokenFailure": "Failed to send email token",
+    "tooManyChefs": "Too many chefs in the kitchen",
+    "youAlreadyJoined": "You have already joined this game",
   },
   "forgotPassword": {
     "forgotPassword": "Forgot Password",
@@ -149,24 +225,44 @@ exports[`buildNestedI18n should handle English (US) language 1`] = `
   },
   "login": {
     "loginButton": "Login",
+    "progress": "Logging in...",
+    "resentPasswordFailure": "Failed to resend verification email",
+    "resentPasswordSuccess": "Verification email sent successfully",
+    "title": "Login",
+    "usernameOrEmailRequired": "Either username or email is required",
   },
   "logoutButton": "Logout",
   "registerButton": "Register",
+  "resetPassword": {
+    "changeEmailFirst": "Please verify your email address before resetting your password.",
+    "sent": "If an account with that email exists, a password reset link has been sent.",
+    "success": "Password reset successfully",
+  },
   "splash": {
     "description": "In Chili and Cilantro, aspiring chefs compete to create the perfect dish. Your goal is to add just the right amount of cilantro without ruining it with a scorching chili. Be the first to successfully season two dishes or be the last chef standing to win!",
     "howToPlay": "How to Play",
   },
+  "testTestTemplate": "Testing {VARIABLE1} {VARIABLE2}",
   "validation": {
     "confirmNewPassword": "Confirm new password is required",
     "currentPasswordRequired": "Current password is required",
     "invalidEmail": "Invalid Email",
     "invalidLanguage": "Invalid Language",
+    "invalidTimezone": "Invalid Timezone",
     "invalidToken": "Invalid Token",
     "newPasswordRequired": "New password is required",
     "passwordMatch": "Password and confirm must match",
-    "passwordRegexErrorTemplate": "Password must be at least 8 characters long and include at least one letter, one number, and one special character (!@#$%^&*()_+-=[]{};':"|,.<>/?)",
+    "passwordRegexErrorTemplate": "Password must be between {MIN_PASSWORD_LENGTH} and {MAX_PASSWORD_LENGTH} characters, and contain at least:
+  • One lowercase character (any script)
+  • One uppercase character (any script)
+  • One number (any numeral system)
+  • One special character (punctuation or symbol)",
     "passwordsDifferent": "New password must be different than the current password",
     "required": "Required",
+    "usernameRegexErrorTemplate": "Username must be between {MIN_USERNAME_LENGTH} and {MAX_USERNAME_LENGTH} characters, and:
+  • Start with a letter, number, or Unicode character
+  • Can contain letters, numbers, underscores, hyphens, and Unicode characters
+  • Cannot contain spaces or special characters other than underscores and hyphens",
   },
   "validationError": "Validation Error",
 }
@@ -180,6 +276,7 @@ exports[`buildNestedI18n should handle Español language 1`] = `
   },
   "changePassword": {
     "changePasswordButton": "Cambiar contraseña",
+    "success": "Contraseña cambiada con éxito",
   },
   "common": {
     "changePassword": "Cambiar contraseña",
@@ -190,19 +287,46 @@ exports[`buildNestedI18n should handle Español language 1`] = `
     "goToSplash": "Volver a la pantalla de bienvenida",
     "loading": "Cargando...",
     "logo": "logo",
+    "masterChef": "Chef Maestro",
     "newPassword": "Nueva contraseña",
+    "password": "Contraseña",
     "returnToKitchen": "Volver a la Cocina",
     "site": "Chili y Cilantro",
     "startCooking": "Comenzar a cocinar",
     "tagline": "Un Juego de Bluff Picante",
+    "tokenValid": "Token válido",
     "unauthorized": "No autorizado",
     "unexpectedError": "Error inesperado",
+    "username": "Nombre de usuario",
   },
   "dashboard": {
     "gamesCreated": "Juegos que has creado",
     "gamesParticipating": "Juegos en los que participas",
     "noGames": "No hay juegos disponibles.",
     "title": "Tu Tablero",
+  },
+  "emailToken": {
+    "clickLinkEmailConfirm": "Por favor, haz clic en el enlace de abajo para confirmar tu correo electrónica.",
+    "clickLinkResetPassword": "Por favor, haz clic en el enlace de abajo para restablecer tu contraseña.",
+    "expiresInTemplate": "El enlace caducará en {EMAIL_TOKEN_EXPIRATION_MIN} minutos.",
+    "titleEmailConfirm": "Confirmación de correo electrónico",
+    "titleResetPassword": "Restablecimiento de contraseña",
+  },
+  "error": {
+    "accountStatusIsDeleted": "Cuenta eliminada",
+    "accountStatusIsLocked": "Cuenta bloqueada",
+    "accountStatusIsPendingEmailVerification": "Cuenta en espera de verificación de correo electrónico",
+    "allCardsPlaced": "Todas las cartas han sido colocadas.",
+    "chefAlreadyInGame": "El chef ya está en un juego activo.",
+    "emailAlreadyVerified": "El correo electrónico ya ha sido verificado",
+    "emailInUse": "El correo electrónica ya esta en uso.",
+    "emailTokenAlreadySent": "El enlace de verificación de correo electrónica ya ha sido usado o es inválido.",
+    "emailTokenExpired": "El enlace de verificación ha caducado. Por favor, solicita uno nuevo.",
+    "emailTokenSentTooRecentlyTemplate": "El token de correo electrónico se envió hace muy poco. Inténtalo de nuevo en {TIME_REMAINING} segundos.",
+    "failedToCreateEmailToken": "Fallo al crear el token de correo",
+    "sendTokenFailure": "Fallo al enviar el token de correo",
+    "tooManyChefs": "Demasiados chefs en la cocina",
+    "youAlreadyJoined": "Ya te has unido a este juego",
   },
   "forgotPassword": {
     "forgotPassword": "Olvidé mi contraseña",
@@ -235,24 +359,44 @@ exports[`buildNestedI18n should handle Español language 1`] = `
   },
   "login": {
     "loginButton": "Iniciar sesión",
+    "progress": "Iniciando sesión...",
+    "resentPasswordFailure": "Reenviar contraseña fallido",
+    "resentPasswordSuccess": "Reenviar contraseña con éxito",
+    "title": "Iniciar sesión",
+    "usernameOrEmailRequired": "Se requiere un nombre de usuario o correo electrónica",
   },
   "logoutButton": "Cerrar sesión",
   "registerButton": "Registrarse",
+  "resetPassword": {
+    "changeEmailFirst": "Antes de restablecer la contraseña, verifica tu dirección de correo electrónico.",
+    "sent": "Si existe una cuenta con ese correo electrónico, se ha enviado un enlace para restablecer la contraseña.",
+    "success": "Contraseña restablecida con éxito",
+  },
   "splash": {
     "description": "En Chili and Cilantro, los aspirantes a chef compiten para crear el plato perfecto. Tu objetivo es agregar la cantidad justa de cilantro sin arruinarlo con un chile abrasador. ¡Sé el primero en condimentar con éxito dos platos o sé el último chef en pie para ganar!",
     "howToPlay": "Como Jugar",
   },
+  "testTestTemplate": "Probando {VARIABLE1} {VARIABLE2}",
   "validation": {
     "confirmNewPassword": "Se requiere la confirmación de la nueva contraseña",
     "currentPasswordRequired": "Se requiere la contraseña actual",
     "invalidEmail": "Correo electrónica inválido",
     "invalidLanguage": "Idioma inválido",
+    "invalidTimezone": "Fuseau horaire invático",
     "invalidToken": "Token inválido",
     "newPasswordRequired": "Se requiere la nueva contraseña",
     "passwordMatch": "La contraseña y la confirmación deben coincidir",
-    "passwordRegexErrorTemplate": "La contraseña debe tener al menos 8 caracteres y incluir al menos una letra, un número y un carácter especial (!@#$%^&*()_+-=[]{};':"|,.<>/?)",
+    "passwordRegexErrorTemplate": "La contraseña debe estar entre {MIN_PASSWORD_LENGTH} y {MAX_PASSWORD_LENGTH} caracteres, y contener al menos:
+  • Una letra minuscula (cualquier script)
+  • Una letra mayúscula (cualquier script)
+  • Un número (cualquier sistema numérico)
+  • Un caracter especial (puntuación o símbolo)",
     "passwordsDifferent": "La nueva contraseña debe ser diferente a la contraseña actual",
     "required": "Requerido",
+    "usernameRegexErrorTemplate": "El nombre de usuario debe tener entre {MIN_USERNAME_LENGTH} y {MAX_USERNAME_LENGTH} caracteres, y:
+  • Comenzar con una letra, un número, o un carácter Unicode
+  • Puede contener letras, números, guiones bajos, guiones, y carácteres Unicode
+  • No puede contener espacios o carácteres especiales excepto guiones bajos y guiones",
   },
   "validationError": "Error de validación",
 }
@@ -266,6 +410,7 @@ exports[`buildNestedI18n should handle Français language 1`] = `
   },
   "changePassword": {
     "changePasswordButton": "Changer le mot de passe",
+    "success": "Mot de passe changé avec succès",
   },
   "common": {
     "changePassword": "Changer le mot de passe",
@@ -276,19 +421,46 @@ exports[`buildNestedI18n should handle Français language 1`] = `
     "goToSplash": "Retourner aucran d'accueil",
     "loading": "Chargement...",
     "logo": "logo",
+    "masterChef": "Chef de cuisine",
     "newPassword": "Nouveau mot de passe",
+    "password": "Mot de passe",
     "returnToKitchen": "Retour à la Cuisine",
     "site": "Piment et Coriandre",
     "startCooking": "Commencer la Cuisine",
     "tagline": "Un Jeu de Bluff Épicé",
+    "tokenValid": "Jeton valide",
     "unauthorized": "Non autorisé",
     "unexpectedError": "Erreur inattendue",
+    "username": "Nom d’utilisateur",
   },
   "dashboard": {
     "gamesCreated": "Jeux que vous avez créé",
     "gamesParticipating": "Jeux que vous participez",
     "noGames": "Aucun jeu disponible.",
     "title": "Votre Tableau de Bord",
+  },
+  "emailToken": {
+    "clickLinkEmailConfirm": "Veuillez cliquer sur le lien ci-dessous pour confirmer votre courriel.",
+    "clickLinkResetPassword": "Veuillez cliquer sur le lien ci-dessous pour réinitialiser votre mot de passe.",
+    "expiresInTemplate": "Le lien expire dans {EMAIL_TOKEN_EXPIRATION_MIN} minutes.",
+    "titleEmailConfirm": "Confirmation de courriel",
+    "titleResetPassword": "Réinitialisation du mot de passe",
+  },
+  "error": {
+    "accountStatusIsDeleted": "Compte supprimé",
+    "accountStatusIsLocked": "Compte verrouillé",
+    "accountStatusIsPendingEmailVerification": "Compte en attente de confirmation de courriel",
+    "allCardsPlaced": "Toutes les cartes ont été placées",
+    "chefAlreadyInGame": "Chef deja dans le jeu",
+    "emailAlreadyVerified": "Courriel déjà vérifié",
+    "emailInUse": "Courriel déjà utilisé",
+    "emailTokenAlreadySent": "Le lien de vérification par courriel a déjà été utilisé ou est invalide",
+    "emailTokenExpired": "Le lien de vérification a expiré. Veuillez en demander un nouveau.",
+    "emailTokenSentTooRecentlyTemplate": "Le jeton de courrier électronique a été envoyé trop récemment. Veuillez réessayer dans {TIME_REMAINING} secondes.",
+    "failedToCreateEmailToken": "Échec de la création du jeton par courriel",
+    "sendTokenFailure": "Échec de l’envoi du jeton par courriel",
+    "tooManyChefs": "Trop de chefs dans la cuisine",
+    "youAlreadyJoined": "Vous avez déjà rejoint ce jeu",
   },
   "forgotPassword": {
     "forgotPassword": "Mot de passe oublié",
@@ -321,24 +493,44 @@ exports[`buildNestedI18n should handle Français language 1`] = `
   },
   "login": {
     "loginButton": "Connexion",
+    "progress": "Connexion en cours...",
+    "resentPasswordFailure": "Échec de l’envoi du courriel de verification",
+    "resentPasswordSuccess": "Courriel de verification envoyé avec успех",
+    "title": "Connexion",
+    "usernameOrEmailRequired": "Nom d’utilisateur ou courriel requis",
   },
   "logoutButton": "Déconnexion",
   "registerButton": "S'inscrire",
+  "resetPassword": {
+    "changeEmailFirst": "Vous devez changer votre courriel avant de pouvoir changer votre mot de passe.",
+    "sent": "Si un compte avec cet courriel existe, un lien de réinitialisation du mot de passe a été envoyé.",
+    "success": "Réinitialisation du mot de passe réussie",
+  },
   "splash": {
     "description": "Dans Chili and Cilantro, les chefs en herbe rivalisent pour créer le plat parfait. Votre objectif est d'ajouter juste la bonne quantité de coriandre sans gâcher le tout avec un piment brûlant. Soyez le premier à réussir à assaisonner deux plats ou soyez le dernier chef debout pour gagner !",
     "howToPlay": "Comment Jouer",
   },
+  "testTestTemplate": "Essai {VARIABLE1} {VARIABLE2}",
   "validation": {
     "confirmNewPassword": "La confirmation du nouveau mot de passe est requise",
     "currentPasswordRequired": "Le mot de passe actuel est requis",
     "invalidEmail": "Courriel invalide",
     "invalidLanguage": "Langue invalide",
+    "invalidTimezone": "Fuseau horaire invalide",
     "invalidToken": "Jeton invalide",
     "newPasswordRequired": "Le nouveau mot de passe est requis",
     "passwordMatch": "Le mot de passe et la confirmation doivent correspondre",
-    "passwordRegexErrorTemplate": "Le mot de passe doit comporter au moins 8 caractères et inclure au moins une lettre, un chiffre et un caractère spécial (!@#$%^&*()_+-=[]{};':"|,.<>/?)",
+    "passwordRegexErrorTemplate": "Le mot de passe doit contenir entre {MIN_PASSWORD_LENGTH} et {MAX_PASSWORD_LENGTH} caractères, et contenir au moins :
+  • Une lettre minuscule (tout script)
+  • Une lettre majuscule (tout script)
+  • Un chiffre (tout système numérique)
+  • Un caractère spécial (ponctuation ou symbole)",
     "passwordsDifferent": "Le nouveau mot de passe doit être différent du mot de passe actuel",
     "required": "Champ obligatoire",
+    "usernameRegexErrorTemplate": "Le nom d'utilisateur doit contenir entre {MIN_USERNAME_LENGTH} et {MAX_USERNAME_LENGTH} caractères, et :
+  • Commencer par une lettre, un chiffre, ou un caractère Unicode
+  • Peut contenir des lettres, des chiffres, des underscores, des tirets, et des caractères Unicode
+  • Ne peut contenir des espaces ou des caractères spéciaux autre que des underscores et des tirets",
   },
   "validationError": "Erreur de validation",
 }
@@ -352,6 +544,7 @@ exports[`buildNestedI18n should handle Український language 1`] = `
   },
   "changePassword": {
     "changePasswordButton": "Змінити пароль",
+    "success": "Пароль успішно змінено",
   },
   "common": {
     "changePassword": "Змінити пароль",
@@ -362,19 +555,46 @@ exports[`buildNestedI18n should handle Український language 1`] = `
     "goToSplash": "Повернутися до екрану привітання",
     "loading": "Завантаження...",
     "logo": "лого",
+    "masterChef": "Майстер-кухар",
     "newPassword": "Новий пароль",
+    "password": "Пароль",
     "returnToKitchen": "Повернутися на Кухню",
     "site": "Чілі та Коріандр",
     "startCooking": "Почати приготування",
     "tagline": "Пікантний Блеф",
+    "tokenValid": "Токен діїдженний",
     "unauthorized": "Немає авторизації",
     "unexpectedError": "Неочікувана помилка",
+    "username": "Ім’я користувача",
   },
   "dashboard": {
     "gamesCreated": "Гри, які ти створив",
     "gamesParticipating": "Гри, в яких ти береш участь",
     "noGames": "Немає доступних ігор.",
     "title": "Ваша Панель",
+  },
+  "emailToken": {
+    "clickLinkEmailConfirm": "Натисніть на посилання для підтвердження електронної пошти",
+    "clickLinkResetPassword": "Натисніть на посилання для скидання пароля",
+    "expiresInTemplate": "Посилання дійсне протягом {EMAIL_TOKEN_EXPIRATION_MIN} хвилин.",
+    "titleEmailConfirm": "Підтвердження електронної пошти",
+    "titleResetPassword": "Скидання пароля",
+  },
+  "error": {
+    "accountStatusIsDeleted": "Обліковий запис видалено",
+    "accountStatusIsLocked": "Обліковий запис заблоковано",
+    "accountStatusIsPendingEmailVerification": "Обліковий запис очікує підтвердження електронної пошти",
+    "allCardsPlaced": "Всі картки розміщені",
+    "chefAlreadyInGame": "Шеф-кухар вже в грі",
+    "emailAlreadyVerified": "Електронна пошта вже підтверджена",
+    "emailInUse": "Електронна пошта вже використовується",
+    "emailTokenAlreadySent": "Посилання для підтвердження електронної пошти вже використано або недійсне",
+    "emailTokenExpired": "Термін дії посилання закінчився. Будь ласка, запросіть новий.",
+    "emailTokenSentTooRecentlyTemplate": "Маркер електронної пошти надіслано занадто недавно. Повторіть спробу через {TIME_REMAINING} с.",
+    "failedToCreateEmailToken": "Неможливо створити електронний токен",
+    "sendTokenFailure": "Неможливо відправити електронний токен",
+    "tooManyChefs": "Забагато шеф-кухарів на кухні",
+    "youAlreadyJoined": "Ви вже приєдналися до цієї гри",
   },
   "forgotPassword": {
     "forgotPassword": "Забули пароль?",
@@ -407,24 +627,44 @@ exports[`buildNestedI18n should handle Український language 1`] = `
   },
   "login": {
     "loginButton": "Увійти",
+    "progress": "Вхід...",
+    "resentPasswordFailure": "Невдалося відправити новий пароль",
+    "resentPasswordSuccess": "Новиий пароль успішно відправлено",
+    "title": "Увійти",
+    "usernameOrEmailRequired": "Необхідно вказати ім’я користувача або електронну пошту",
   },
   "logoutButton": "Вийти",
   "registerButton": "Зареєструватися",
+  "resetPassword": {
+    "changeEmailFirst": "Будь ласка, підтвердіть вашу електронну адресу перед скиданням пароля.",
+    "sent": "Якщо обліковий запис із такою електронною адресою існує, було надіслано посилання для зміни пароля.",
+    "success": "Пароль успішно скинуто",
+  },
   "splash": {
     "description": "У Chili and Cilantro починаючі кухарі змагаються, щоб створити ідеальну страву. Ваша мета — додати потрібну кількість кінзи, не зіпсувавши її пекучим чилі. Будьте першим, хто успішно приправить дві страви, або будьте останнім шеф-кухарем, який виграє!",
     "howToPlay": "Як Грати",
   },
+  "testTestTemplate": "Тестування {VARIABLE1} {VARIABLE2}",
   "validation": {
     "confirmNewPassword": "Підтвердження нового пароля є обов’язковим",
     "currentPasswordRequired": "Поточний пароль є обов’язковим",
     "invalidEmail": "Недійсний електронній адрес",
     "invalidLanguage": "Недійсна мова",
+    "invalidTimezone": "Недійсна часова зона",
     "invalidToken": "Недійсний токен",
     "newPasswordRequired": "Новий пароль є обов’язковим",
     "passwordMatch": "Пароль та підтвердження повинні співпадати",
-    "passwordRegexErrorTemplate": "Пароль повинен містити принаймні 8 символів, включаючи принаймні одну літеру, одну цифру та один спеціальний символ (!@#$%^&*()_+-=[]{};':"|,.<>/?)",
+    "passwordRegexErrorTemplate": "Пароль повинен бути від {MIN_PASSWORD_LENGTH} до {MAX_PASSWORD_LENGTH} символів, та містити як мінімум:
+  • Одну нижню літеру (всіх скриптів)
+  • Одну верхню літеру (всіх скриптів)
+  • Одну цифру (будь-яку систему числення)
+  • Один спеціальний символ (пунктуацію або символ)",
     "passwordsDifferent": "Новий пароль повинен відрізнятися від поточного",
     "required": "Обов’язково",
+    "usernameRegexErrorTemplate": "Ім’я користувача повинно бути від {MIN_USERNAME_LENGTH} до {MAX_USERNAME_LENGTH} символів, та:
+  • Починатися з літери, числа, або Unicode-символу
+  • Містити літери, числа, підкреслення, тире, та Unicode-символи
+  • Не містити пробілів або спеціальних символів, крім підкреслення і тире",
   },
   "validationError": "Помилка валідації",
 }
@@ -438,6 +678,7 @@ exports[`buildNestedI18n should handle 中文 language 1`] = `
   },
   "changePassword": {
     "changePasswordButton": "更改密码",
+    "success": "密码更改成功",
   },
   "common": {
     "changePassword": "更改密码",
@@ -448,19 +689,46 @@ exports[`buildNestedI18n should handle 中文 language 1`] = `
     "goToSplash": "返回欢迎屏幕",
     "loading": "加载中...",
     "logo": "标志",
+    "masterChef": "大厨",
     "newPassword": "新密码",
+    "password": "密码",
     "returnToKitchen": "返回厨房",
     "site": "辣椒和香菜",
     "startCooking": "开始烹饪",
     "tagline": "一款辛辣的虚张声势游戏",
+    "tokenValid": "令牌有效",
     "unauthorized": "未经授权",
     "unexpectedError": "意外错误",
+    "username": "用户名",
   },
   "dashboard": {
     "gamesCreated": "您创建的游戏",
     "gamesParticipating": "您参与的游戏",
     "noGames": "没有可用的游戏。",
     "title": "您的仪表板",
+  },
+  "emailToken": {
+    "clickLinkEmailConfirm": "请单击下面的链接确认您的电子邮件。",
+    "clickLinkResetPassword": "请单击下面的链接重置密码。",
+    "expiresInTemplate": "链接在{EMAIL_TOKEN_EXPIRATION_MIN}分钟后过期。",
+    "titleEmailConfirm": "电子邮件确认",
+    "titleResetPassword": "密码重置",
+  },
+  "error": {
+    "accountStatusIsDeleted": "帐户已删除",
+    "accountStatusIsLocked": "帐户已锁定",
+    "accountStatusIsPendingEmailVerification": "帐户待电子邮件验证",
+    "allCardsPlaced": "所有卡片已放置",
+    "chefAlreadyInGame": "厨师已经在游戏中",
+    "emailAlreadyVerified": "电子邮件已验证",
+    "emailInUse": "电子邮件已在使用中",
+    "emailTokenAlreadySent": "电子邮件验证链接已被使用或无效",
+    "emailTokenExpired": "验证链接已过期。请请求一个新的。",
+    "emailTokenSentTooRecentlyTemplate": "电子邮件令牌发送太频繁。请在{TIME_REMAINING}秒后重试。",
+    "failedToCreateEmailToken": "无法创建电子邮件令牌",
+    "sendTokenFailure": "无法发送电子邮件令牌",
+    "tooManyChefs": "厨房里有太多厨师",
+    "youAlreadyJoined": "您已经加入该游戏",
   },
   "forgotPassword": {
     "forgotPassword": "忘记密码",
@@ -493,24 +761,44 @@ exports[`buildNestedI18n should handle 中文 language 1`] = `
   },
   "login": {
     "loginButton": "登录",
+    "progress": "登录中...",
+    "resentPasswordFailure": "重新发送密码失败",
+    "resentPasswordSuccess": "重发密码成功",
+    "title": "登录",
+    "usernameOrEmailRequired": "需要用户名或电子邮件",
   },
   "logoutButton": "注销",
   "registerButton": "注册",
+  "resetPassword": {
+    "changeEmailFirst": "在重置密码之前，请验证您的电子邮件地址。",
+    "sent": "如果有帐户与此电子邮件相关,密码重置链接已发送。",
+    "success": "密码重置成功",
+  },
   "splash": {
     "description": "在《辣椒和香菜》中，有抱负的厨师们竞相制作完美的菜肴。你的目标是添加适量的香菜，而不会让辣椒烧焦。成为第一个成功调味两道菜的人，或者成为最后一个获胜的厨师",
     "howToPlay": "如何玩",
   },
+  "testTestTemplate": "测试 {VARIABLE1} {VARIABLE2}",
   "validation": {
     "confirmNewPassword": "确认新密码是必需的",
     "currentPasswordRequired": "当前密码是必需的",
     "invalidEmail": "无效电子邮件",
     "invalidLanguage": "无效语言",
+    "invalidTimezone": "无效时区",
     "invalidToken": "无效令牌",
     "newPasswordRequired": "新密码是必需的",
     "passwordMatch": "密码和确认必须匹配",
-    "passwordRegexErrorTemplate": "密码必须至少8个字符长且包含至少一个字母、一个数字和一个特殊字符(!@#$%^&*()_+-=[]{};:"|,.<>/?)",
+    "passwordRegexErrorTemplate": "密码必须在{MIN_PASSWORD_LENGTH}和{MAX_PASSWORD_LENGTH}个字符之间，并且至少包含：
+  • 一个小写字母（任何脚本）
+  • 一个大写字母（任何脚本）
+  • 一个数字（任何数字系统）
+  • 一个特殊字符（标点符号或符号）",
     "passwordsDifferent": "新密码必须不同于当前密码",
     "required": "必填",
+    "usernameRegexErrorTemplate": "用户名必须在{MIN_USERNAME_LENGTH}和{MAX_USERNAME_LENGTH}个字符之间，并且：
+  • 以字母，数字，或Unicode字符开头
+  • 可以包含字母，数字，下划线，短横线，或Unicode字符
+  • 不能包含空格或特殊字符，除下划线和短横线外",
   },
   "validationError": "验证错误",
 }
@@ -524,6 +812,7 @@ exports[`buildNestedI18nForLanguage should call buildNestedI18n with the correct
   },
   "changePassword": {
     "changePasswordButton": "Change Password",
+    "success": "Password changed successfully",
   },
   "common": {
     "changePassword": "Change Password",
@@ -534,19 +823,46 @@ exports[`buildNestedI18nForLanguage should call buildNestedI18n with the correct
     "goToSplash": "Return to Welcome Screen",
     "loading": "Loading...",
     "logo": "logo",
+    "masterChef": "Master Chef",
     "newPassword": "New Password",
+    "password": "Password",
     "returnToKitchen": "Return to Kitchen",
     "site": "Chili and Cilantro",
     "startCooking": "Start Cooking",
     "tagline": "A Spicy Bluffing Game",
+    "tokenValid": "Token is valid",
     "unauthorized": "Unauthorized",
     "unexpectedError": "Unexpected Error",
+    "username": "Username",
   },
   "dashboard": {
     "gamesCreated": "Games You've Created",
     "gamesParticipating": "Games You're Participating in",
     "noGames": "No games available.",
     "title": "Your Dashboard",
+  },
+  "emailToken": {
+    "clickLinkEmailConfirm": "Please click the link below to confirm your email.",
+    "clickLinkResetPassword": "Please click the link below to reset your password.",
+    "expiresInTemplate": "Link expires in {EMAIL_TOKEN_EXPIRATION_MIN} minutes.",
+    "titleEmailConfirm": "Email Confirmation",
+    "titleResetPassword": "Password Reset",
+  },
+  "error": {
+    "accountStatusIsDeleted": "Account deleted",
+    "accountStatusIsLocked": "Account locked",
+    "accountStatusIsPendingEmailVerification": "Account pending email verification",
+    "allCardsPlaced": "All cards placed",
+    "chefAlreadyInGame": "Chef is already in an active game",
+    "emailAlreadyVerified": "Email has already been verified",
+    "emailInUse": "Email is already in use",
+    "emailTokenAlreadySent": "Email verification link has already been used or is invalid",
+    "emailTokenExpired": "Verification link has expired. Please request a new one.",
+    "emailTokenSentTooRecentlyTemplate": "Email token sent too recently. Please try again in {TIME_REMAINING} seconds.",
+    "failedToCreateEmailToken": "Failed to create email token",
+    "sendTokenFailure": "Failed to send email token",
+    "tooManyChefs": "Too many chefs in the kitchen",
+    "youAlreadyJoined": "You have already joined this game",
   },
   "forgotPassword": {
     "forgotPassword": "Forgot Password",
@@ -579,24 +895,44 @@ exports[`buildNestedI18nForLanguage should call buildNestedI18n with the correct
   },
   "login": {
     "loginButton": "Login",
+    "progress": "Logging in...",
+    "resentPasswordFailure": "Failed to resend verification email",
+    "resentPasswordSuccess": "Verification email sent successfully",
+    "title": "Login",
+    "usernameOrEmailRequired": "Either username or email is required",
   },
   "logoutButton": "Logout",
   "registerButton": "Register",
+  "resetPassword": {
+    "changeEmailFirst": "Please verify your email address before resetting your password.",
+    "sent": "If an account with that email exists, a password reset link has been sent.",
+    "success": "Password reset successfully",
+  },
   "splash": {
     "description": "In Chili and Cilantro, aspiring chefs compete to create the perfect dish. Your goal is to add just the right amount of cilantro without ruining it with a scorching chili. Be the first to successfully season two dishes or be the last chef standing to win!",
     "howToPlay": "How to Play",
   },
+  "testTestTemplate": "Testing {VARIABLE1} {VARIABLE2}",
   "validation": {
     "confirmNewPassword": "Confirm new password is required",
     "currentPasswordRequired": "Current password is required",
     "invalidEmail": "Invalid Email",
     "invalidLanguage": "Invalid Language",
+    "invalidTimezone": "Invalid Timezone",
     "invalidToken": "Invalid Token",
     "newPasswordRequired": "New password is required",
     "passwordMatch": "Password and confirm must match",
-    "passwordRegexErrorTemplate": "Password must be at least 8 characters long and include at least one letter, one number, and one special character (!@#$%^&*()_+-=[]{};':"|,.<>/?)",
+    "passwordRegexErrorTemplate": "Password must be between {MIN_PASSWORD_LENGTH} and {MAX_PASSWORD_LENGTH} characters, and contain at least:
+  • One lowercase character (any script)
+  • One uppercase character (any script)
+  • One number (any numeral system)
+  • One special character (punctuation or symbol)",
     "passwordsDifferent": "New password must be different than the current password",
     "required": "Required",
+    "usernameRegexErrorTemplate": "Username must be between {MIN_USERNAME_LENGTH} and {MAX_USERNAME_LENGTH} characters, and:
+  • Start with a letter, number, or Unicode character
+  • Can contain letters, numbers, underscores, hyphens, and Unicode characters
+  • Cannot contain spaces or special characters other than underscores and hyphens",
   },
   "validationError": "Validation Error",
 }
@@ -610,6 +946,7 @@ exports[`buildNestedI18nForLanguage should call buildNestedI18n with the correct
   },
   "changePassword": {
     "changePasswordButton": "Change Password",
+    "success": "Password changed successfully",
   },
   "common": {
     "changePassword": "Change Password",
@@ -620,19 +957,46 @@ exports[`buildNestedI18nForLanguage should call buildNestedI18n with the correct
     "goToSplash": "Return to Welcome Screen",
     "loading": "Loading...",
     "logo": "logo",
+    "masterChef": "Master Chef",
     "newPassword": "New Password",
+    "password": "Password",
     "returnToKitchen": "Return to Kitchen",
     "site": "Chili and Cilantro",
     "startCooking": "Start Cooking",
     "tagline": "A Spicy Bluffing Game",
+    "tokenValid": "Token is valid",
     "unauthorized": "Unauthorized",
     "unexpectedError": "Unexpected Error",
+    "username": "Username",
   },
   "dashboard": {
     "gamesCreated": "Games You've Created",
     "gamesParticipating": "Games You're Participating in",
     "noGames": "No games available.",
     "title": "Your Dashboard",
+  },
+  "emailToken": {
+    "clickLinkEmailConfirm": "Please click the link below to confirm your email.",
+    "clickLinkResetPassword": "Please click the link below to reset your password.",
+    "expiresInTemplate": "Link expires in {EMAIL_TOKEN_EXPIRATION_MIN} minutes.",
+    "titleEmailConfirm": "Email Confirmation",
+    "titleResetPassword": "Password Reset",
+  },
+  "error": {
+    "accountStatusIsDeleted": "Account deleted",
+    "accountStatusIsLocked": "Account locked",
+    "accountStatusIsPendingEmailVerification": "Account pending email verification",
+    "allCardsPlaced": "All cards have been placed.",
+    "chefAlreadyInGame": "Chef is already in an active game.",
+    "emailAlreadyVerified": "Email has already been verified",
+    "emailInUse": "Email is already in use",
+    "emailTokenAlreadySent": "Email verification link has already been used or is invalid",
+    "emailTokenExpired": "Verification link has expired. Please request a new one.",
+    "emailTokenSentTooRecentlyTemplate": "Email token sent too recently. Please try again in {TIME_REMAINING} seconds.",
+    "failedToCreateEmailToken": "Failed to create email token",
+    "sendTokenFailure": "Failed to send email token",
+    "tooManyChefs": "Too many chefs in the kitchen.",
+    "youAlreadyJoined": "You have already joined this game.",
   },
   "forgotPassword": {
     "forgotPassword": "Forgot Password",
@@ -665,24 +1029,44 @@ exports[`buildNestedI18nForLanguage should call buildNestedI18n with the correct
   },
   "login": {
     "loginButton": "Login",
+    "progress": "Logging in...",
+    "resentPasswordFailure": "Failed to resend verification email",
+    "resentPasswordSuccess": "Verification email sent successfully",
+    "title": "Login",
+    "usernameOrEmailRequired": "Either username or email is required",
   },
   "logoutButton": "Logout",
   "registerButton": "Register",
+  "resetPassword": {
+    "changeEmailFirst": "Please verify your email address before resetting your password.",
+    "sent": "If an account with that email exists, a password reset link has been sent.",
+    "success": "Password reset successfully",
+  },
   "splash": {
     "description": "In Chili and Cilantro, aspiring chefs compete to create the perfect dish. Your goal is to add just the right amount of cilantro without ruining it with a scorching chili. Be the first to successfully season two dishes or be the last chef standing to win!",
     "howToPlay": "How to Play",
   },
+  "testTestTemplate": "Testing {VARIABLE1} {VARIABLE2}",
   "validation": {
     "confirmNewPassword": "Confirm new password is required",
     "currentPasswordRequired": "Current password is required",
     "invalidEmail": "Invalid Email",
     "invalidLanguage": "Invalid Language",
+    "invalidTimezone": "Invalid Timezone",
     "invalidToken": "Invalid Token",
     "newPasswordRequired": "New password is required",
     "passwordMatch": "Password and confirm must match",
-    "passwordRegexErrorTemplate": "Password must be at least {MIN_PASSWORD_LENGTH} characters long and include at least one letter, one number, and one special character (!@#$%^&*()_+-=[]{};':"|,.<>/?)",
+    "passwordRegexErrorTemplate": "Password must be between {MIN_PASSWORD_LENGTH} and {MAX_PASSWORD_LENGTH} characters, and contain at least:
+  • One lowercase character (any script)
+  • One uppercase character (any script)
+  • One number (any numeral system)
+  • One special character (punctuation or symbol)",
     "passwordsDifferent": "New password must be different than the current password",
     "required": "Required",
+    "usernameRegexErrorTemplate": "Username must be between {MIN_USERNAME_LENGTH} and {MAX_USERNAME_LENGTH} characters, and:
+  • Start with a letter, number, or Unicode character
+  • Can contain letters, numbers, underscores, hyphens, and Unicode characters
+  • Cannot contain spaces or special characters other than underscores and hyphens",
   },
   "validationError": "Validation Error",
 }
@@ -696,6 +1080,7 @@ exports[`buildNestedI18nForLanguage should call buildNestedI18n with the correct
   },
   "changePassword": {
     "changePasswordButton": "Changer le mot de passe",
+    "success": "Mot de passe changé avec succès",
   },
   "common": {
     "changePassword": "Changer le mot de passe",
@@ -706,19 +1091,46 @@ exports[`buildNestedI18nForLanguage should call buildNestedI18n with the correct
     "goToSplash": "Retourner aucran d'accueil",
     "loading": "Chargement...",
     "logo": "logo",
+    "masterChef": "Chef de cuisine",
     "newPassword": "Nouveau mot de passe",
+    "password": "Mot de passe",
     "returnToKitchen": "Retour à la Cuisine",
     "site": "Piment et Coriandre",
     "startCooking": "Commencer la Cuisine",
     "tagline": "Un Jeu de Bluff Épicé",
+    "tokenValid": "Jeton valide",
     "unauthorized": "Non autorisé",
     "unexpectedError": "Erreur inattendue",
+    "username": "Nom d’utilisateur",
   },
   "dashboard": {
     "gamesCreated": "Jeux que vous avez créé",
     "gamesParticipating": "Jeux que vous participez",
     "noGames": "Aucun jeu disponible.",
     "title": "Votre Tableau de Bord",
+  },
+  "emailToken": {
+    "clickLinkEmailConfirm": "Veuillez cliquer sur le lien ci-dessous pour confirmer votre courriel.",
+    "clickLinkResetPassword": "Veuillez cliquer sur le lien ci-dessous pour réinitialiser votre mot de passe.",
+    "expiresInTemplate": "Le lien expire dans {EMAIL_TOKEN_EXPIRATION_MIN} minutes.",
+    "titleEmailConfirm": "Confirmation de courriel",
+    "titleResetPassword": "Réinitialisation du mot de passe",
+  },
+  "error": {
+    "accountStatusIsDeleted": "Compte supprimé",
+    "accountStatusIsLocked": "Compte verrouillé",
+    "accountStatusIsPendingEmailVerification": "Compte en attente de confirmation de courriel",
+    "allCardsPlaced": "Toutes les cartes ont été placées",
+    "chefAlreadyInGame": "Chef deja dans le jeu",
+    "emailAlreadyVerified": "Courriel déjà vérifié",
+    "emailInUse": "Courriel déjà utilisé",
+    "emailTokenAlreadySent": "Le lien de vérification par courriel a déjà été utilisé ou est invalide",
+    "emailTokenExpired": "Le lien de vérification a expiré. Veuillez en demander un nouveau.",
+    "emailTokenSentTooRecentlyTemplate": "Le jeton de courrier électronique a été envoyé trop récemment. Veuillez réessayer dans {TIME_REMAINING} secondes.",
+    "failedToCreateEmailToken": "Échec de la création du jeton par courriel",
+    "sendTokenFailure": "Échec de l’envoi du jeton par courriel",
+    "tooManyChefs": "Trop de chefs dans la cuisine",
+    "youAlreadyJoined": "Vous avez déjà rejoint ce jeu",
   },
   "forgotPassword": {
     "forgotPassword": "Mot de passe oublié",
@@ -751,24 +1163,44 @@ exports[`buildNestedI18nForLanguage should call buildNestedI18n with the correct
   },
   "login": {
     "loginButton": "Connexion",
+    "progress": "Connexion en cours...",
+    "resentPasswordFailure": "Échec de l’envoi du courriel de verification",
+    "resentPasswordSuccess": "Courriel de verification envoyé avec успех",
+    "title": "Connexion",
+    "usernameOrEmailRequired": "Nom d’utilisateur ou courriel requis",
   },
   "logoutButton": "Déconnexion",
   "registerButton": "S'inscrire",
+  "resetPassword": {
+    "changeEmailFirst": "Vous devez changer votre courriel avant de pouvoir changer votre mot de passe.",
+    "sent": "Si un compte avec cet courriel existe, un lien de réinitialisation du mot de passe a été envoyé.",
+    "success": "Réinitialisation du mot de passe réussie",
+  },
   "splash": {
     "description": "Dans Chili and Cilantro, les chefs en herbe rivalisent pour créer le plat parfait. Votre objectif est d'ajouter juste la bonne quantité de coriandre sans gâcher le tout avec un piment brûlant. Soyez le premier à réussir à assaisonner deux plats ou soyez le dernier chef debout pour gagner !",
     "howToPlay": "Comment Jouer",
   },
+  "testTestTemplate": "Essai {VARIABLE1} {VARIABLE2}",
   "validation": {
     "confirmNewPassword": "La confirmation du nouveau mot de passe est requise",
     "currentPasswordRequired": "Le mot de passe actuel est requis",
     "invalidEmail": "Courriel invalide",
     "invalidLanguage": "Langue invalide",
+    "invalidTimezone": "Fuseau horaire invalide",
     "invalidToken": "Jeton invalide",
     "newPasswordRequired": "Le nouveau mot de passe est requis",
     "passwordMatch": "Le mot de passe et la confirmation doivent correspondre",
-    "passwordRegexErrorTemplate": "Le mot de passe doit comporter au moins 8 caractères et inclure au moins une lettre, un chiffre et un caractère spécial (!@#$%^&*()_+-=[]{};':"|,.<>/?)",
+    "passwordRegexErrorTemplate": "Le mot de passe doit contenir entre {MIN_PASSWORD_LENGTH} et {MAX_PASSWORD_LENGTH} caractères, et contenir au moins :
+  • Une lettre minuscule (tout script)
+  • Une lettre majuscule (tout script)
+  • Un chiffre (tout système numérique)
+  • Un caractère spécial (ponctuation ou symbole)",
     "passwordsDifferent": "Le nouveau mot de passe doit être différent du mot de passe actuel",
     "required": "Champ obligatoire",
+    "usernameRegexErrorTemplate": "Le nom d'utilisateur doit contenir entre {MIN_USERNAME_LENGTH} et {MAX_USERNAME_LENGTH} caractères, et :
+  • Commencer par une lettre, un chiffre, ou un caractère Unicode
+  • Peut contenir des lettres, des chiffres, des underscores, des tirets, et des caractères Unicode
+  • Ne peut contenir des espaces ou des caractères spéciaux autre que des underscores et des tirets",
   },
   "validationError": "Erreur de validation",
 }
@@ -782,6 +1214,7 @@ exports[`buildNestedI18nForLanguage should call buildNestedI18n with the correct
   },
   "changePassword": {
     "changePasswordButton": "更改密码",
+    "success": "密码更改成功",
   },
   "common": {
     "changePassword": "更改密码",
@@ -792,19 +1225,46 @@ exports[`buildNestedI18nForLanguage should call buildNestedI18n with the correct
     "goToSplash": "返回欢迎屏幕",
     "loading": "加载中...",
     "logo": "标志",
+    "masterChef": "大厨",
     "newPassword": "新密码",
+    "password": "密码",
     "returnToKitchen": "返回厨房",
     "site": "辣椒和香菜",
     "startCooking": "开始烹饪",
     "tagline": "一款辛辣的虚张声势游戏",
+    "tokenValid": "令牌有效",
     "unauthorized": "未经授权",
     "unexpectedError": "意外错误",
+    "username": "用户名",
   },
   "dashboard": {
     "gamesCreated": "您创建的游戏",
     "gamesParticipating": "您参与的游戏",
     "noGames": "没有可用的游戏。",
     "title": "您的仪表板",
+  },
+  "emailToken": {
+    "clickLinkEmailConfirm": "请单击下面的链接确认您的电子邮件。",
+    "clickLinkResetPassword": "请单击下面的链接重置密码。",
+    "expiresInTemplate": "链接在{EMAIL_TOKEN_EXPIRATION_MIN}分钟后过期。",
+    "titleEmailConfirm": "电子邮件确认",
+    "titleResetPassword": "密码重置",
+  },
+  "error": {
+    "accountStatusIsDeleted": "帐户已删除",
+    "accountStatusIsLocked": "帐户已锁定",
+    "accountStatusIsPendingEmailVerification": "帐户待电子邮件验证",
+    "allCardsPlaced": "所有卡片已放置",
+    "chefAlreadyInGame": "厨师已经在游戏中",
+    "emailAlreadyVerified": "电子邮件已验证",
+    "emailInUse": "电子邮件已在使用中",
+    "emailTokenAlreadySent": "电子邮件验证链接已被使用或无效",
+    "emailTokenExpired": "验证链接已过期。请请求一个新的。",
+    "emailTokenSentTooRecentlyTemplate": "电子邮件令牌发送太频繁。请在{TIME_REMAINING}秒后重试。",
+    "failedToCreateEmailToken": "无法创建电子邮件令牌",
+    "sendTokenFailure": "无法发送电子邮件令牌",
+    "tooManyChefs": "厨房里有太多厨师",
+    "youAlreadyJoined": "您已经加入该游戏",
   },
   "forgotPassword": {
     "forgotPassword": "忘记密码",
@@ -837,24 +1297,44 @@ exports[`buildNestedI18nForLanguage should call buildNestedI18n with the correct
   },
   "login": {
     "loginButton": "登录",
+    "progress": "登录中...",
+    "resentPasswordFailure": "重新发送密码失败",
+    "resentPasswordSuccess": "重发密码成功",
+    "title": "登录",
+    "usernameOrEmailRequired": "需要用户名或电子邮件",
   },
   "logoutButton": "注销",
   "registerButton": "注册",
+  "resetPassword": {
+    "changeEmailFirst": "在重置密码之前，请验证您的电子邮件地址。",
+    "sent": "如果有帐户与此电子邮件相关,密码重置链接已发送。",
+    "success": "密码重置成功",
+  },
   "splash": {
     "description": "在《辣椒和香菜》中，有抱负的厨师们竞相制作完美的菜肴。你的目标是添加适量的香菜，而不会让辣椒烧焦。成为第一个成功调味两道菜的人，或者成为最后一个获胜的厨师",
     "howToPlay": "如何玩",
   },
+  "testTestTemplate": "测试 {VARIABLE1} {VARIABLE2}",
   "validation": {
     "confirmNewPassword": "确认新密码是必需的",
     "currentPasswordRequired": "当前密码是必需的",
     "invalidEmail": "无效电子邮件",
     "invalidLanguage": "无效语言",
+    "invalidTimezone": "无效时区",
     "invalidToken": "无效令牌",
     "newPasswordRequired": "新密码是必需的",
     "passwordMatch": "密码和确认必须匹配",
-    "passwordRegexErrorTemplate": "密码必须至少8个字符长且包含至少一个字母、一个数字和一个特殊字符(!@#$%^&*()_+-=[]{};:"|,.<>/?)",
+    "passwordRegexErrorTemplate": "密码必须在{MIN_PASSWORD_LENGTH}和{MAX_PASSWORD_LENGTH}个字符之间，并且至少包含：
+  • 一个小写字母（任何脚本）
+  • 一个大写字母（任何脚本）
+  • 一个数字（任何数字系统）
+  • 一个特殊字符（标点符号或符号）",
     "passwordsDifferent": "新密码必须不同于当前密码",
     "required": "必填",
+    "usernameRegexErrorTemplate": "用户名必须在{MIN_USERNAME_LENGTH}和{MAX_USERNAME_LENGTH}个字符之间，并且：
+  • 以字母，数字，或Unicode字符开头
+  • 可以包含字母，数字，下划线，短横线，或Unicode字符
+  • 不能包含空格或特殊字符，除下划线和短横线外",
   },
   "validationError": "验证错误",
 }
@@ -868,6 +1348,7 @@ exports[`buildNestedI18nForLanguage should call buildNestedI18n with the correct
   },
   "changePassword": {
     "changePasswordButton": "Cambiar contraseña",
+    "success": "Contraseña cambiada con éxito",
   },
   "common": {
     "changePassword": "Cambiar contraseña",
@@ -878,19 +1359,46 @@ exports[`buildNestedI18nForLanguage should call buildNestedI18n with the correct
     "goToSplash": "Volver a la pantalla de bienvenida",
     "loading": "Cargando...",
     "logo": "logo",
+    "masterChef": "Chef Maestro",
     "newPassword": "Nueva contraseña",
+    "password": "Contraseña",
     "returnToKitchen": "Volver a la Cocina",
     "site": "Chili y Cilantro",
     "startCooking": "Comenzar a cocinar",
     "tagline": "Un Juego de Bluff Picante",
+    "tokenValid": "Token válido",
     "unauthorized": "No autorizado",
     "unexpectedError": "Error inesperado",
+    "username": "Nombre de usuario",
   },
   "dashboard": {
     "gamesCreated": "Juegos que has creado",
     "gamesParticipating": "Juegos en los que participas",
     "noGames": "No hay juegos disponibles.",
     "title": "Tu Tablero",
+  },
+  "emailToken": {
+    "clickLinkEmailConfirm": "Por favor, haz clic en el enlace de abajo para confirmar tu correo electrónica.",
+    "clickLinkResetPassword": "Por favor, haz clic en el enlace de abajo para restablecer tu contraseña.",
+    "expiresInTemplate": "El enlace caducará en {EMAIL_TOKEN_EXPIRATION_MIN} minutos.",
+    "titleEmailConfirm": "Confirmación de correo electrónico",
+    "titleResetPassword": "Restablecimiento de contraseña",
+  },
+  "error": {
+    "accountStatusIsDeleted": "Cuenta eliminada",
+    "accountStatusIsLocked": "Cuenta bloqueada",
+    "accountStatusIsPendingEmailVerification": "Cuenta en espera de verificación de correo electrónico",
+    "allCardsPlaced": "Todas las cartas han sido colocadas.",
+    "chefAlreadyInGame": "El chef ya está en un juego activo.",
+    "emailAlreadyVerified": "El correo electrónico ya ha sido verificado",
+    "emailInUse": "El correo electrónica ya esta en uso.",
+    "emailTokenAlreadySent": "El enlace de verificación de correo electrónica ya ha sido usado o es inválido.",
+    "emailTokenExpired": "El enlace de verificación ha caducado. Por favor, solicita uno nuevo.",
+    "emailTokenSentTooRecentlyTemplate": "El token de correo electrónico se envió hace muy poco. Inténtalo de nuevo en {TIME_REMAINING} segundos.",
+    "failedToCreateEmailToken": "Fallo al crear el token de correo",
+    "sendTokenFailure": "Fallo al enviar el token de correo",
+    "tooManyChefs": "Demasiados chefs en la cocina",
+    "youAlreadyJoined": "Ya te has unido a este juego",
   },
   "forgotPassword": {
     "forgotPassword": "Olvidé mi contraseña",
@@ -923,24 +1431,44 @@ exports[`buildNestedI18nForLanguage should call buildNestedI18n with the correct
   },
   "login": {
     "loginButton": "Iniciar sesión",
+    "progress": "Iniciando sesión...",
+    "resentPasswordFailure": "Reenviar contraseña fallido",
+    "resentPasswordSuccess": "Reenviar contraseña con éxito",
+    "title": "Iniciar sesión",
+    "usernameOrEmailRequired": "Se requiere un nombre de usuario o correo electrónica",
   },
   "logoutButton": "Cerrar sesión",
   "registerButton": "Registrarse",
+  "resetPassword": {
+    "changeEmailFirst": "Antes de restablecer la contraseña, verifica tu dirección de correo electrónico.",
+    "sent": "Si existe una cuenta con ese correo electrónico, se ha enviado un enlace para restablecer la contraseña.",
+    "success": "Contraseña restablecida con éxito",
+  },
   "splash": {
     "description": "En Chili and Cilantro, los aspirantes a chef compiten para crear el plato perfecto. Tu objetivo es agregar la cantidad justa de cilantro sin arruinarlo con un chile abrasador. ¡Sé el primero en condimentar con éxito dos platos o sé el último chef en pie para ganar!",
     "howToPlay": "Como Jugar",
   },
+  "testTestTemplate": "Probando {VARIABLE1} {VARIABLE2}",
   "validation": {
     "confirmNewPassword": "Se requiere la confirmación de la nueva contraseña",
     "currentPasswordRequired": "Se requiere la contraseña actual",
     "invalidEmail": "Correo electrónica inválido",
     "invalidLanguage": "Idioma inválido",
+    "invalidTimezone": "Fuseau horaire invático",
     "invalidToken": "Token inválido",
     "newPasswordRequired": "Se requiere la nueva contraseña",
     "passwordMatch": "La contraseña y la confirmación deben coincidir",
-    "passwordRegexErrorTemplate": "La contraseña debe tener al menos 8 caracteres y incluir al menos una letra, un número y un carácter especial (!@#$%^&*()_+-=[]{};':"|,.<>/?)",
+    "passwordRegexErrorTemplate": "La contraseña debe estar entre {MIN_PASSWORD_LENGTH} y {MAX_PASSWORD_LENGTH} caracteres, y contener al menos:
+  • Una letra minuscula (cualquier script)
+  • Una letra mayúscula (cualquier script)
+  • Un número (cualquier sistema numérico)
+  • Un caracter especial (puntuación o símbolo)",
     "passwordsDifferent": "La nueva contraseña debe ser diferente a la contraseña actual",
     "required": "Requerido",
+    "usernameRegexErrorTemplate": "El nombre de usuario debe tener entre {MIN_USERNAME_LENGTH} y {MAX_USERNAME_LENGTH} caracteres, y:
+  • Comenzar con una letra, un número, o un carácter Unicode
+  • Puede contener letras, números, guiones bajos, guiones, y carácteres Unicode
+  • No puede contener espacios o carácteres especiales excepto guiones bajos y guiones",
   },
   "validationError": "Error de validación",
 }
@@ -954,6 +1482,7 @@ exports[`buildNestedI18nForLanguage should call buildNestedI18n with the correct
   },
   "changePassword": {
     "changePasswordButton": "Змінити пароль",
+    "success": "Пароль успішно змінено",
   },
   "common": {
     "changePassword": "Змінити пароль",
@@ -964,19 +1493,46 @@ exports[`buildNestedI18nForLanguage should call buildNestedI18n with the correct
     "goToSplash": "Повернутися до екрану привітання",
     "loading": "Завантаження...",
     "logo": "лого",
+    "masterChef": "Майстер-кухар",
     "newPassword": "Новий пароль",
+    "password": "Пароль",
     "returnToKitchen": "Повернутися на Кухню",
     "site": "Чілі та Коріандр",
     "startCooking": "Почати приготування",
     "tagline": "Пікантний Блеф",
+    "tokenValid": "Токен діїдженний",
     "unauthorized": "Немає авторизації",
     "unexpectedError": "Неочікувана помилка",
+    "username": "Ім’я користувача",
   },
   "dashboard": {
     "gamesCreated": "Гри, які ти створив",
     "gamesParticipating": "Гри, в яких ти береш участь",
     "noGames": "Немає доступних ігор.",
     "title": "Ваша Панель",
+  },
+  "emailToken": {
+    "clickLinkEmailConfirm": "Натисніть на посилання для підтвердження електронної пошти",
+    "clickLinkResetPassword": "Натисніть на посилання для скидання пароля",
+    "expiresInTemplate": "Посилання дійсне протягом {EMAIL_TOKEN_EXPIRATION_MIN} хвилин.",
+    "titleEmailConfirm": "Підтвердження електронної пошти",
+    "titleResetPassword": "Скидання пароля",
+  },
+  "error": {
+    "accountStatusIsDeleted": "Обліковий запис видалено",
+    "accountStatusIsLocked": "Обліковий запис заблоковано",
+    "accountStatusIsPendingEmailVerification": "Обліковий запис очікує підтвердження електронної пошти",
+    "allCardsPlaced": "Всі картки розміщені",
+    "chefAlreadyInGame": "Шеф-кухар вже в грі",
+    "emailAlreadyVerified": "Електронна пошта вже підтверджена",
+    "emailInUse": "Електронна пошта вже використовується",
+    "emailTokenAlreadySent": "Посилання для підтвердження електронної пошти вже використано або недійсне",
+    "emailTokenExpired": "Термін дії посилання закінчився. Будь ласка, запросіть новий.",
+    "emailTokenSentTooRecentlyTemplate": "Маркер електронної пошти надіслано занадто недавно. Повторіть спробу через {TIME_REMAINING} с.",
+    "failedToCreateEmailToken": "Неможливо створити електронний токен",
+    "sendTokenFailure": "Неможливо відправити електронний токен",
+    "tooManyChefs": "Забагато шеф-кухарів на кухні",
+    "youAlreadyJoined": "Ви вже приєдналися до цієї гри",
   },
   "forgotPassword": {
     "forgotPassword": "Забули пароль?",
@@ -1009,24 +1565,44 @@ exports[`buildNestedI18nForLanguage should call buildNestedI18n with the correct
   },
   "login": {
     "loginButton": "Увійти",
+    "progress": "Вхід...",
+    "resentPasswordFailure": "Невдалося відправити новий пароль",
+    "resentPasswordSuccess": "Новиий пароль успішно відправлено",
+    "title": "Увійти",
+    "usernameOrEmailRequired": "Необхідно вказати ім’я користувача або електронну пошту",
   },
   "logoutButton": "Вийти",
   "registerButton": "Зареєструватися",
+  "resetPassword": {
+    "changeEmailFirst": "Будь ласка, підтвердіть вашу електронну адресу перед скиданням пароля.",
+    "sent": "Якщо обліковий запис із такою електронною адресою існує, було надіслано посилання для зміни пароля.",
+    "success": "Пароль успішно скинуто",
+  },
   "splash": {
     "description": "У Chili and Cilantro починаючі кухарі змагаються, щоб створити ідеальну страву. Ваша мета — додати потрібну кількість кінзи, не зіпсувавши її пекучим чилі. Будьте першим, хто успішно приправить дві страви, або будьте останнім шеф-кухарем, який виграє!",
     "howToPlay": "Як Грати",
   },
+  "testTestTemplate": "Тестування {VARIABLE1} {VARIABLE2}",
   "validation": {
     "confirmNewPassword": "Підтвердження нового пароля є обов’язковим",
     "currentPasswordRequired": "Поточний пароль є обов’язковим",
     "invalidEmail": "Недійсний електронній адрес",
     "invalidLanguage": "Недійсна мова",
+    "invalidTimezone": "Недійсна часова зона",
     "invalidToken": "Недійсний токен",
     "newPasswordRequired": "Новий пароль є обов’язковим",
     "passwordMatch": "Пароль та підтвердження повинні співпадати",
-    "passwordRegexErrorTemplate": "Пароль повинен містити принаймні 8 символів, включаючи принаймні одну літеру, одну цифру та один спеціальний символ (!@#$%^&*()_+-=[]{};':"|,.<>/?)",
+    "passwordRegexErrorTemplate": "Пароль повинен бути від {MIN_PASSWORD_LENGTH} до {MAX_PASSWORD_LENGTH} символів, та містити як мінімум:
+  • Одну нижню літеру (всіх скриптів)
+  • Одну верхню літеру (всіх скриптів)
+  • Одну цифру (будь-яку систему числення)
+  • Один спеціальний символ (пунктуацію або символ)",
     "passwordsDifferent": "Новий пароль повинен відрізнятися від поточного",
     "required": "Обов’язково",
+    "usernameRegexErrorTemplate": "Ім’я користувача повинно бути від {MIN_USERNAME_LENGTH} до {MAX_USERNAME_LENGTH} символів, та:
+  • Починатися з літери, числа, або Unicode-символу
+  • Містити літери, числа, підкреслення, тире, та Unicode-символи
+  • Не містити пробілів або спеціальних символів, крім підкреслення і тире",
   },
   "validationError": "Помилка валідації",
 }

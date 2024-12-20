@@ -1,11 +1,9 @@
 import {
   AllCardsPlacedError,
-  AlreadyJoinedOtherError,
   CardType,
+  ChefAlreadyJoinedError,
   ChefState,
-  constants,
   DefaultIdType,
-  GameFullError,
   GameInProgressError,
   GamePasswordMismatchError,
   GamePhase,
@@ -15,6 +13,7 @@ import {
   IGameDocument,
   IGameListResponse,
   IMessageActionDocument,
+  IUserDocument,
   IncorrectGamePhaseError,
   InvalidActionError,
   InvalidGameError,
@@ -23,16 +22,17 @@ import {
   InvalidGamePasswordError,
   InvalidMessageError,
   InvalidUserDisplayNameError,
-  IUserDocument,
   ModelName,
   NotEnoughChefsError,
-  NotHostError,
+  NotMasterChefError,
   OutOfIngredientError,
   OutOfOrderError,
   StringNames,
-  translate,
+  TooManyChefsInGameError,
   TurnAction,
   UsernameInUseError,
+  constants,
+  translate,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { IApplication } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { ClientSession, Types } from 'mongoose';
@@ -74,7 +74,7 @@ export class GameService extends BaseService {
   ): Promise<IGameListResponse> {
     const GameModel = this.application.getModel<IGameDocument>(ModelName.Game);
     const createdGames = await GameModel.find({
-      hostUserId: userDoc._id,
+      masterChefUserId: userDoc._id,
     })
       .session(session)
       .lean();
@@ -138,7 +138,7 @@ export class GameService extends BaseService {
     maxChefs: number,
   ): Promise<void> {
     if (await this.playerService.userIsInAnyActiveGameAsync(user)) {
-      throw new AlreadyJoinedOtherError();
+      throw new ChefAlreadyJoinedError();
     }
     if (
       !validator.matches(displayName, constants.MULTILINGUAL_STRING_REGEX) ||
@@ -202,8 +202,8 @@ export class GameService extends BaseService {
         currentChef: constants.NONE,
         currentPhase: GamePhase.LOBBY,
         currentRound: constants.NONE,
-        hostChefId: chefId,
-        hostUserId: user._id,
+        masterChefId: chefId,
+        masterChefUserId: user._id,
         maxChefs: maxChefs,
         name: gameName,
         ...(password ? { password: password } : {}),
@@ -295,7 +295,7 @@ export class GameService extends BaseService {
     password: string,
   ): Promise<void> {
     if (await this.playerService.userIsInAnyActiveGameAsync(user)) {
-      throw new AlreadyJoinedOtherError();
+      throw new ChefAlreadyJoinedError();
     }
     const chefNames = await this.getGameChefNamesByGameIdAsync(
       game._id.toString(),
@@ -313,7 +313,7 @@ export class GameService extends BaseService {
       throw new GameInProgressError();
     }
     if (game.chefIds.length > game.maxChefs) {
-      throw new GameFullError();
+      throw new TooManyChefsInGameError();
     }
     if (
       !validator.matches(
@@ -367,10 +367,10 @@ export class GameService extends BaseService {
       const newChefIds = existingGame.chefIds.map(() => new Types.ObjectId());
 
       // find the existing chef id's index
-      const hostChefIndex = existingGame.chefIds.findIndex(
-        (chefId) => existingGame.hostChefId.toString() == chefId.toString(),
+      const masterChefIndex = existingGame.chefIds.findIndex(
+        (chefId) => existingGame.masterChefId.toString() == chefId.toString(),
       );
-      const newHostChefId = newChefIds[hostChefIndex];
+      const newMasterChefId = newChefIds[masterChefIndex];
 
       // we need to look up the user id for all chefs in the current game
       const existingChefs =
@@ -388,8 +388,8 @@ export class GameService extends BaseService {
           currentChef: constants.NONE,
           currentRound: constants.NONE,
           currentPhase: GamePhase.LOBBY,
-          hostChefId: newChefIds[hostChefIndex],
-          hostUserId: existingGame.hostUserId,
+          masterChefId: newChefIds[masterChefIndex],
+          masterChefUserId: existingGame.masterChefUserId,
           lastGame: existingGame._id,
           maxChefs: existingGame.maxChefs,
           name: existingGame.name,
@@ -421,11 +421,11 @@ export class GameService extends BaseService {
       const chefs = await Promise.all(chefCreations);
 
       // Create action for game creation - this could be moved to an event or a method to encapsulate the logic
-      const hostChef = chefs.find(
-        (chef) => chef._id.toString() == newHostChefId.toString(),
+      const masterChef = chefs.find(
+        (chef) => chef._id.toString() == newMasterChefId.toString(),
       );
-      await this.actionService.createGameAsync(newGame, hostChef, user);
-      return { game: newGame, chef: chefs[hostChefIndex] };
+      await this.actionService.createGameAsync(newGame, masterChef, user);
+      return { game: newGame, chef: chefs[masterChefIndex] };
     }, session);
   }
 
@@ -501,8 +501,8 @@ export class GameService extends BaseService {
     game: IGameDocument,
     userId: DefaultIdType,
   ): Promise<void> {
-    if (!(await this.playerService.isGameHostAsync(userId, game._id))) {
-      throw new NotHostError();
+    if (!(await this.playerService.isMasterChefAsync(userId, game._id))) {
+      throw new NotMasterChefError();
     }
     if (game.currentPhase !== GamePhase.LOBBY) {
       throw new GameInProgressError();

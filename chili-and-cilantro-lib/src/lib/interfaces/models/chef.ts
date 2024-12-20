@@ -12,5 +12,5 @@ export interface IChef<I = DefaultIdType> extends IHasTimestamps {
   lostCards: CardType[];
   userId: I;
   state: ChefState;
-  host: boolean;
+  masterChef: boolean;
 }
