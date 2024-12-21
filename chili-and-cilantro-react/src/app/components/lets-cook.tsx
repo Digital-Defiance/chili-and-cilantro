@@ -9,18 +9,21 @@ import {
   FormControlLabel,
   Switch,
   TextField,
+  Tooltip,
   Typography,
   styled,
 } from '@mui/material';
 import { AxiosResponse } from 'axios';
 import { useFormik } from 'formik';
-import React from 'react';
+import PropTypes from 'prop-types';
+import { ChangeEvent, FC } from 'react';
+import { useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
 import { useAuth } from '../auth-provider';
 import { useAppTranslation } from '../i18n-provider';
 import api from '../services/authenticated-api';
 
-type GameMode = 'CREATE' | 'JOIN';
+export type GameMode = 'CREATE' | 'JOIN';
 
 interface IFormValues {
   gameName?: string;
@@ -31,9 +34,14 @@ interface IFormValues {
   maxChefs: number;
 }
 
-const GameSetup: React.FC = () => {
+interface LetsCookProps {
+  create: boolean;
+}
+
+const LetsCook: FC<LetsCookProps> = ({ create }) => {
   const { t } = useAppTranslation();
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const validationSchema = Yup.object().shape({
     gameName: Yup.string().test(
@@ -121,7 +129,7 @@ const GameSetup: React.FC = () => {
       displayname: user?.displayName ?? '',
       gamePassword: '',
       maxChefs: constants.MAX_CHEFS,
-      gameMode: 'CREATE',
+      gameMode: create ? 'CREATE' : 'JOIN',
     },
     validationSchema,
     onSubmit: (values) => {
@@ -163,7 +171,7 @@ const GameSetup: React.FC = () => {
     await handleGameResponse(response);
   };
 
-  const handleGameModeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleGameModeChange = (event: ChangeEvent<HTMLInputElement>) => {
     const newMode = event.target.checked ? 'CREATE' : 'JOIN';
     formik.setFieldValue('gameMode', newMode);
     formik.setFieldValue('gameName', '');
@@ -172,6 +180,7 @@ const GameSetup: React.FC = () => {
       newMode === 'CREATE' ? 'gameName' : 'gameCode',
       false,
     );
+    navigate(newMode === 'CREATE' ? '/cook/create' : '/cook/join');
   };
 
   const handleChefIncrement = () => {
@@ -214,7 +223,7 @@ const GameSetup: React.FC = () => {
       sx={{ mt: 1 }}
     >
       <Typography variant="h4" gutterBottom>
-        Game Setup
+        {t(StringNames.LetsCook_Title)}
       </Typography>
       <FormControlLabel
         control={
@@ -235,7 +244,7 @@ const GameSetup: React.FC = () => {
           fullWidth
           id="gameName"
           name="gameName"
-          label="Game Name"
+          label={t(StringNames.Common_GameName)}
           value={formik.values.gameName}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
@@ -248,7 +257,7 @@ const GameSetup: React.FC = () => {
           fullWidth
           id="gameCode"
           name="gameCode"
-          label="Game Code"
+          label={t(StringNames.Common_GameCode)}
           value={formik.values.gameCode}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
@@ -261,7 +270,7 @@ const GameSetup: React.FC = () => {
         fullWidth
         id="displayname"
         name="displayname"
-        label="Display Name"
+        label={t(StringNames.Common_DisplayName)}
         value={formik.values.displayname}
         onChange={formik.handleChange}
         onBlur={formik.handleBlur}
@@ -273,7 +282,7 @@ const GameSetup: React.FC = () => {
         fullWidth
         id="gamePassword"
         name="gamePassword"
-        label="Game Password (optional)"
+        label={`${t(StringNames.Common_GamePassword)} (${t(StringNames.Common_Optional)})`}
         type="password"
         value={formik.values.gamePassword}
         onChange={formik.handleChange}
@@ -287,17 +296,24 @@ const GameSetup: React.FC = () => {
       {formik.values.gameMode === 'CREATE' && (
         <Box display="flex" alignItems="center" mt={2} mb={2}>
           <Typography variant="body1" mr={2}>
-            Max Chefs:
+            {t(StringNames.Common_MaxChefs)}:
           </Typography>
-          <StyledButtonSecondary
-            size="small"
-            variant="outlined"
-            onClick={handleChefDecrement}
-            disabled={formik.values.maxChefs <= constants.MIN_CHEFS}
-            style={{ minWidth: '50px', minHeight: '50px' }}
+          <Tooltip
+            title={t(StringNames.LetsCook_RemoveChef)}
+            disableInteractive={false}
           >
-            <i className="fa-duotone fa-knife-kitchen" />
-          </StyledButtonSecondary>
+            <span>
+              <StyledButtonSecondary
+                size="small"
+                variant="outlined"
+                onClick={handleChefDecrement}
+                disabled={formik.values.maxChefs <= constants.MIN_CHEFS}
+                style={{ minWidth: '50px', minHeight: '50px' }}
+              >
+                <i className="fa-duotone fa-knife-kitchen" />
+              </StyledButtonSecondary>
+            </span>
+          </Tooltip>
           <TextField
             name="maxChefs"
             value={formik.values.maxChefs}
@@ -306,14 +322,21 @@ const GameSetup: React.FC = () => {
             }}
             sx={{ width: '60px', mx: 1, '& input': { textAlign: 'center' } }}
           />
-          <StyledButtonPrimary
-            size="small"
-            variant="outlined"
-            onClick={handleChefIncrement}
-            disabled={formik.values.maxChefs >= constants.MAX_CHEFS}
+          <Tooltip
+            title={t(StringNames.LetsCook_AddChef)}
+            disableInteractive={false}
           >
-            <i className="fa-duotone fa-user-chef" />
-          </StyledButtonPrimary>
+            <span>
+              <StyledButtonPrimary
+                size="small"
+                variant="outlined"
+                onClick={handleChefIncrement}
+                disabled={formik.values.maxChefs >= constants.MAX_CHEFS}
+              >
+                <i className="fa-duotone fa-user-chef" />
+              </StyledButtonPrimary>
+            </span>
+          </Tooltip>
         </Box>
       )}
       <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
@@ -325,4 +348,8 @@ const GameSetup: React.FC = () => {
   );
 };
 
-export default GameSetup;
+LetsCook.propTypes = {
+  create: PropTypes.bool.isRequired,
+};
+
+export default LetsCook;

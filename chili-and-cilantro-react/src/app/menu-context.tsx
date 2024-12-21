@@ -41,10 +41,18 @@ export const MenuProvider: React.FC<MenuProviderProps> = ({ children }) => {
     {
       id: 'create-game',
       label: t(StringNames.Game_CreateGame),
-      action: () => navigate('/create-game'),
+      action: () => navigate('/cook/create'),
       isGlobal: true,
-      link: '/create-game',
-      icon: <i className="fa-duotone fa-pepper-hot" />,
+      link: '/cook/create',
+      icon: <i className="fa-duotone fa-utensils" />,
+    },
+    {
+      id: 'join-game',
+      label: t(StringNames.Game_JoinGame),
+      action: () => navigate('/cook/join'),
+      isGlobal: true,
+      link: '/cook/join',
+      icon: <i className="fa-duotone fa-hat-chef" />,
     },
   ];
   const [globalOptions, setGlobalOptions] =

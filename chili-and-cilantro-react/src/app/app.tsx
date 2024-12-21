@@ -1,6 +1,6 @@
 import { Container, CssBaseline, ThemeProvider } from '@mui/material';
 import { FC } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Outlet, Route, Routes } from 'react-router-dom';
 import '../styles.scss';
 import theme from '../theme';
 import { AuthProvider } from './auth-provider';
@@ -9,7 +9,7 @@ import ApiAccess from './components/api-access';
 import ChangePasswordPage from './components/change-password-page';
 import DashboardPage from './components/dashboard-page';
 import ForgotPasswordPage from './components/forgot-password-page';
-import Game from './components/game';
+import LetsCook from './components/lets-cook';
 import LoginPage from './components/login-page';
 import PrivateRoute from './components/private-route';
 import RegisterPage from './components/register-page';
@@ -64,13 +64,22 @@ const InnerApp: FC = () => {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route
-            path="/game"
+            path="/cook"
             element={
               <PrivateRoute>
-                <Game />
+                <Outlet />
               </PrivateRoute>
             }
-          />
+          >
+            <Route
+              path="join"
+              element={<LetsCook key="join" create={false} />}
+            />
+            <Route
+              path="create"
+              element={<LetsCook key="create" create={true} />}
+            />
+          </Route>
           <Route
             path="/dashboard"
             element={
