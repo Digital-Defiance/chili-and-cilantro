@@ -38,24 +38,6 @@ $accent-hover: color.adjust($accent-color, $lightness: 10%);
 $font-family: 'Playfair Display', serif;
 $font-secondary: 'McFoodPoisoning', sans-serif;
 
-.btn-primary {
-  background-color: $new-gray;
-  color: $new-dark;
-
-  &:hover {
-    background-color: $new-red;
-  }
-}
-
-.btn-secondary {
-  background-color: $new-gray;
-  color: $new-dark;
-
-  &:hover {
-    background-color: $new-green;
-  }
-}
-
 // Reset and base styles
 * {
   box-sizing: border-box;
@@ -160,80 +142,4 @@ body {
 .roboto-text {
   font-family: $font-family;
   font-weight: 400;
-}
-
-// Common form styles
-.form-group {
-  margin-bottom: 1rem;
-
-  label {
-    @extend .roboto-text;
-    display: block;
-    margin-bottom: 0.5rem;
-  }
-
-  input,
-  select,
-  textarea {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    font-size: 1rem;
-  }
-
-  .help-text {
-    @extend .roboto-text;
-    font-size: 0.875rem;
-    color: $secondary-dark;
-    margin-top: 0.25rem;
-  }
-}
-
-// Button styles
-.btn {
-  display: inline-block;
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  text-align: center;
-  text-decoration: none;
-  border-radius: 4px;
-  transition: background-color 0.3s ease;
-  cursor: pointer;
-
-  &-primary {
-    background-color: $background-color;
-    color: white;
-    border: none;
-
-    &:hover {
-      background-color: color.adjust($background-color, $lightness: -10%);
-    }
-  }
-
-  &-secondary {
-    background-color: $secondary-dark;
-    color: white;
-    border: none;
-
-    &:hover {
-      background-color: color.adjust($secondary-dark, $lightness: -10%);
-    }
-  }
-}
-
-.success-message {
-  color: $success-color;
-  margin-top: 1rem;
-  font-weight: bold;
-}
-
-.error-message {
-  color: $danger-color;
-  margin-top: 1rem;
-  font-weight: bold;
-}
-
-.cursor-pointer {
-  cursor: pointer;
 }

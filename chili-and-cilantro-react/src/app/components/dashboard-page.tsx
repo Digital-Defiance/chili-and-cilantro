@@ -108,14 +108,22 @@ const DashboardPage: React.FC = () => {
           t(StringNames.Dashboard_GamesParticipating),
         )}
         {renderGameList(createdGames, t(StringNames.Dashboard_GamesCreated))}
-        <Box display="flex" justifyContent="center" mt={2}>
+        <Box display="flex" justifyContent="center" mt={2} gap={2}>
           <Button
             variant="contained"
             color="primary"
             component={RouterLink}
-            to="/create-game"
+            to="/cook/create"
           >
             {t(StringNames.Game_CreateGame)}
+          </Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            component={RouterLink}
+            to="/cook/join"
+          >
+            {t(StringNames.Game_JoinGame)}
           </Button>
         </Box>
       </Box>
