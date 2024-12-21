@@ -37,12 +37,6 @@ jobs:
       - name: Clear Yarn cache
         run: yarn cache clean
 
-      - name: Setup FontAwesome
-        run: |
-          ./fontawesome-npmrc.sh --ci
-        env:
-          FONTAWESOME_KEY: ${{ secrets.FONTAWESOME_KEY }}
-
       - name: Install dependencies
         run: |
           ./do-yarn.sh --immutable

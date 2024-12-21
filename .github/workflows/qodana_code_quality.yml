@@ -37,12 +37,6 @@ jobs:
           corepack enable
           yarn set version 4.5.3
 
-      - name: Setup FontAwesome
-        run: |
-          ./fontawesome-npmrc.sh --ci
-        env:
-          FONTAWESOME_KEY: ${{ secrets.FONTAWESOME_KEY }}
-
       - name: Install dependencies
         run: |
           ./do-yarn.sh --immutable

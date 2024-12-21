@@ -19,7 +19,7 @@
   "forwardPorts": [3000, 27017],
 
   // Use 'postCreateCommand' to run commands after the container is created.
-  "postCreateCommand": "./setup-nvm.sh && ./fontawesome-npmrc.sh && ./npm-install-globals.sh && ./do-yarn.sh && git config --global --add safe.directory /workspaces/chili-and-cilantro",
+  "postCreateCommand": "./setup-nvm.sh && ./npm-install-globals.sh && ./do-yarn.sh && git config --global --add safe.directory /workspaces/chili-and-cilantro",
 
   // Configure tool-specific properties.
   // "customizations": {},
