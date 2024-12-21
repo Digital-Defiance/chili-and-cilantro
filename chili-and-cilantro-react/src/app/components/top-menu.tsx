@@ -15,7 +15,6 @@ import { AuthContext } from '../auth-provider';
 import { useAppTranslation } from '../i18n-provider';
 import { GameMenu } from './game-menu';
 import SideMenu from './side-menu';
-import './top-menu.scss';
 import { UserLanguageSelector } from './user-language-selector';
 import { UserMenu } from './user-menu';
 

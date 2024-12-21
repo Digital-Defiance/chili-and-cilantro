@@ -112,7 +112,7 @@ const RegisterPage: React.FC = () => {
         }}
       >
         <Typography component="h1" variant="h5">
-          Register
+          {t(StringNames.Register_Title)}
         </Typography>
         <Box
           component="form"
@@ -125,7 +125,7 @@ const RegisterPage: React.FC = () => {
             required
             fullWidth
             id="username"
-            label="Username"
+            label={t(StringNames.Common_Username)}
             name="username"
             autoComplete="username"
             autoFocus
@@ -140,7 +140,7 @@ const RegisterPage: React.FC = () => {
             required
             fullWidth
             id="email"
-            label="Email Address"
+            label={t(StringNames.Common_Email)}
             name="email"
             autoComplete="email"
             value={formik.values.email}
@@ -154,7 +154,7 @@ const RegisterPage: React.FC = () => {
             required
             fullWidth
             id="displayname"
-            label="Display Name"
+            label={t(StringNames.Common_DisplayName)}
             name="displayname"
             autoComplete="displayname"
             autoFocus
@@ -171,7 +171,7 @@ const RegisterPage: React.FC = () => {
             required
             fullWidth
             name="password"
-            label="Password"
+            label={t(StringNames.Common_Password)}
             type="password"
             id="password"
             autoComplete="new-password"
@@ -192,7 +192,7 @@ const RegisterPage: React.FC = () => {
           )}
           {registrationSuccess && (
             <Typography color="success.main" variant="body2" sx={{ mt: 1 }}>
-              Registration successful! Redirecting to login page...
+              {t(StringNames.Register_Success)}
             </Typography>
           )}
           <Button
@@ -202,11 +202,13 @@ const RegisterPage: React.FC = () => {
             sx={{ mt: 3, mb: 2 }}
             disabled={formik.isSubmitting}
           >
-            {formik.isSubmitting ? 'Registering...' : 'Register'}
+            {formik.isSubmitting
+              ? t(StringNames.Register_Progress)
+              : t(StringNames.RegisterButton)}
           </Button>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <MuiLink component={Link} to="/login" variant="body2">
-              Already have an account? Sign in
+              {t(StringNames.Register_LoginLink)}
             </MuiLink>
           </Box>
         </Box>

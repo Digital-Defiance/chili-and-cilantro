@@ -10,6 +10,8 @@ export const FrenchStrings: StringsCollection = {
   [StringNames.ChangePassword_ChangePasswordButton]: 'Changer le mot de passe',
   [StringNames.ChangePassword_Success]: 'Mot de passe changé avec succès',
   [StringNames.Common_ChangePassword]: 'Changer le mot de passe',
+  [StringNames.Common_CheckingAuthentication]:
+    'Vérification de l’authentification',
   [StringNames.Common_ConfirmNewPassword]: 'Confirmer le nouveau mot de passe',
   [StringNames.Common_CurrentPassword]: 'Mot de passe actuel',
   [StringNames.Common_GoToSplash]: "Retourner aucran d'accueil",
@@ -120,16 +122,26 @@ export const FrenchStrings: StringsCollection = {
   [StringNames.LetsCook_Title]: 'Cuisinons',
   [StringNames.LanguageUpdate_Success]: 'Langue mise à jour avec succès',
   [StringNames.Login_LoginButton]: 'Connexion',
+  [StringNames.Login_NoAccountSignUp]: "Vous n'avez pas de compte? S'inscrire",
   [StringNames.Login_Progress]: 'Connexion en cours...',
+  [StringNames.Login_ResendPasswordLink]:
+    'Renvoyer le courriel de verification',
   [StringNames.Login_ResentPasswordFailure]:
     'Échec de l’envoi du courriel de verification',
   [StringNames.Login_ResentPasswordSuccess]:
     'Courriel de verification envoyé avec успех',
   [StringNames.Login_Title]: 'Connexion',
+  [StringNames.Login_UseEmail]: 'Utiliser Courriel',
+  [StringNames.Login_UseUsername]: 'Utiliser Nom d’utilisateur',
   [StringNames.Login_UsernameOrEmailRequired]:
     'Nom d’utilisateur ou courriel requis',
   [StringNames.LogoutButton]: 'Déconnexion',
   [StringNames.RegisterButton]: "S'inscrire",
+  [StringNames.Register_LoginLink]: 'Déjà un compte? Connexion',
+  [StringNames.Register_Progress]: 'Inscription en cours...',
+  [StringNames.Register_Success]:
+    'Inscription réussie! Redirection vers la page de connexion...',
+  [StringNames.Register_Title]: 'S’inscrire',
   [StringNames.ResetPassword_ChangeEmailFirst]:
     'Vous devez changer votre courriel avant de pouvoir changer votre mot de passe.',
   [StringNames.ResetPassword_Sent]:

@@ -10,6 +10,7 @@ export const UkrainianStrings: StringsCollection = {
   [StringNames.ChangePassword_ChangePasswordButton]: 'Змінити пароль',
   [StringNames.ChangePassword_Success]: 'Пароль успішно змінено',
   [StringNames.Common_ChangePassword]: 'Змінити пароль',
+  [StringNames.Common_CheckingAuthentication]: 'Перевіряємо автентифікацію...',
   [StringNames.Common_ConfirmNewPassword]: 'Підтвердити новий пароль',
   [StringNames.Common_CurrentPassword]: 'Поточний пароль',
   [StringNames.Common_Email]: 'Електронна пошта',
@@ -116,16 +117,25 @@ export const UkrainianStrings: StringsCollection = {
   [StringNames.LetsCook_Title]: 'Давайте Готувати',
   [StringNames.LanguageUpdate_Success]: 'Мова оновлена успішно',
   [StringNames.Login_LoginButton]: 'Увійти',
+  [StringNames.Login_NoAccountSignUp]: 'Ви не маєте аккаунту? Зареєструватися',
   [StringNames.Login_Progress]: 'Вхід...',
+  [StringNames.Login_ResendPasswordLink]: 'Надіслати лист з новим паролем',
   [StringNames.Login_ResentPasswordFailure]:
     'Невдалося відправити новий пароль',
   [StringNames.Login_ResentPasswordSuccess]:
     'Новиий пароль успішно відправлено',
   [StringNames.Login_Title]: 'Увійти',
+  [StringNames.Login_UseEmail]: 'Використовувати електронну пошту',
+  [StringNames.Login_UseUsername]: 'Використовувати ім’я користувача',
   [StringNames.Login_UsernameOrEmailRequired]:
     'Необхідно вказати ім’я користувача або електронну пошту',
   [StringNames.LogoutButton]: 'Вийти',
   [StringNames.RegisterButton]: 'Зареєструватися',
+  [StringNames.Register_LoginLink]: 'Вже є аккаунт? Увійти',
+  [StringNames.Register_Progress]: 'Реєстрація...',
+  [StringNames.Register_Success]:
+    'Реєстрація успішна! Перенаправлення на сторінку входу...',
+  [StringNames.Register_Title]: 'Зареєструватися',
   [StringNames.ResetPassword_ChangeEmailFirst]:
     'Будь ласка, підтвердіть вашу електронну адресу перед скиданням пароля.',
   [StringNames.ResetPassword_Sent]:

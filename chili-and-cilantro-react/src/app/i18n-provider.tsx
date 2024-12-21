@@ -3,7 +3,9 @@ import {
   replaceVariables,
   StringNames,
   stringNameToI18nKey,
+  translateEnum,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { TranslatableEnum } from 'chili-and-cilantro-lib/src/lib/i18n.types';
 import { createContext, FC, ReactNode, useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -12,7 +14,8 @@ interface TranslationProviderProps {
 }
 
 interface TranslationContextType {
-  t: (key: StringNames) => string;
+  t: (key: StringNames, variables?: Record<string, string>) => string;
+  tEnum: (translatableEnum: TranslatableEnum) => string;
 }
 
 const TranslationContext = createContext<TranslationContextType | undefined>(
@@ -27,9 +30,13 @@ export const TranslationProvider: FC<TranslationProviderProps> = ({
 
   const value = {
     t: useCallback(
-      (key: StringNames) => replaceVariables(typedT(stringNameToI18nKey(key))),
+      (key: StringNames, variables?: Record<string, string>) =>
+        replaceVariables(typedT(stringNameToI18nKey(key)), variables),
       [typedT],
     ),
+    tEnum: (translatableEnum: TranslatableEnum) => {
+      return translateEnum(translatableEnum);
+    },
   };
 
   return (

@@ -10,6 +10,7 @@ export const BritishEnglishStrings: StringsCollection = {
   [StringNames.ChangePassword_ChangePasswordButton]: 'Change Password',
   [StringNames.ChangePassword_Success]: 'Password changed successfully',
   [StringNames.Common_ChangePassword]: 'Change Password',
+  [StringNames.Common_CheckingAuthentication]: 'Checking authentication...',
   [StringNames.Common_ConfirmNewPassword]: 'Confirm New Password',
   [StringNames.Common_CurrentPassword]: 'Current Password',
   [StringNames.Common_Email]: 'Email',
@@ -112,16 +113,25 @@ export const BritishEnglishStrings: StringsCollection = {
   [StringNames.LetsCook_RemoveChef]: 'Remove Chef',
   [StringNames.LetsCook_Title]: 'Let’s Cook',
   [StringNames.Login_LoginButton]: 'Login',
+  [StringNames.Login_NoAccountSignUp]: "Don't have an account? Sign Up",
   [StringNames.Login_Progress]: 'Logging in...',
+  [StringNames.Login_ResendPasswordLink]: 'Resend Verification Email',
   [StringNames.Login_ResentPasswordFailure]:
     'Failed to resend verification email',
   [StringNames.Login_ResentPasswordSuccess]:
     'Verification email sent successfully',
   [StringNames.Login_Title]: 'Login',
+  [StringNames.Login_UseEmail]: 'Use Email',
+  [StringNames.Login_UseUsername]: 'Use Username',
   [StringNames.Login_UsernameOrEmailRequired]:
     'Either username or email is required',
   [StringNames.LogoutButton]: 'Logout',
   [StringNames.RegisterButton]: 'Register',
+  [StringNames.Register_LoginLink]: 'Already have an account? Sign in',
+  [StringNames.Register_Progress]: 'Registering...',
+  [StringNames.Register_Success]:
+    'Registration successful! Redirecting to login page...',
+  [StringNames.Register_Title]: 'Register',
   [StringNames.ResetPassword_ChangeEmailFirst]:
     'Please verify your email address before resetting your password.',
   [StringNames.ResetPassword_Sent]:

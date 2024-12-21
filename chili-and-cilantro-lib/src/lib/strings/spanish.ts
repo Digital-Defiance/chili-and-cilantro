@@ -10,6 +10,7 @@ export const SpanishStrings: StringsCollection = {
   [StringNames.ChangePassword_ChangePasswordButton]: 'Cambiar contraseña',
   [StringNames.ChangePassword_Success]: 'Contraseña cambiada con éxito',
   [StringNames.Common_ChangePassword]: 'Cambiar contraseña',
+  [StringNames.Common_CheckingAuthentication]: 'Verificando autenticación...',
   [StringNames.Common_ConfirmNewPassword]: 'Confirmar nueva contraseña',
   [StringNames.Common_CurrentPassword]: 'Contraseña actual',
   [StringNames.Common_Email]: 'Correo electrónica',
@@ -118,14 +119,23 @@ export const SpanishStrings: StringsCollection = {
   [StringNames.LetsCook_Title]: 'Cocinemos',
   [StringNames.LanguageUpdate_Success]: 'Idioma actualizado con éxito',
   [StringNames.Login_LoginButton]: 'Iniciar sesión',
+  [StringNames.Login_NoAccountSignUp]: 'No tienes una cuenta? Regístrate',
   [StringNames.Login_Progress]: 'Iniciando sesión...',
+  [StringNames.Login_ResendPasswordLink]: 'Reenviar correo de verificación',
   [StringNames.Login_ResentPasswordFailure]: 'Reenviar contraseña fallido',
   [StringNames.Login_ResentPasswordSuccess]: 'Reenviar contraseña con éxito',
   [StringNames.Login_Title]: 'Iniciar sesión',
+  [StringNames.Login_UseEmail]: 'Usar correo electrónico',
+  [StringNames.Login_UseUsername]: 'Usar nombre de usuario',
   [StringNames.Login_UsernameOrEmailRequired]:
     'Se requiere un nombre de usuario o correo electrónica',
   [StringNames.LogoutButton]: 'Cerrar sesión',
   [StringNames.RegisterButton]: 'Registrarse',
+  [StringNames.Register_LoginLink]: '¿Ya tienes una cuenta? Iniciar sesión',
+  [StringNames.Register_Progress]: 'Registrando...',
+  [StringNames.Register_Success]:
+    'Registro exitoso! Redirigiendo a la página de inicio de sesión...',
+  [StringNames.Register_Title]: 'Registrarse',
   [StringNames.ResetPassword_ChangeEmailFirst]:
     'Antes de restablecer la contraseña, verifica tu dirección de correo electrónico.',
   [StringNames.ResetPassword_Sent]:

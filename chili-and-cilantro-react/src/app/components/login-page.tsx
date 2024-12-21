@@ -197,7 +197,7 @@ const LoginPage = () => {
               disabled={formik.isSubmitting}
               sx={{ mb: 2 }}
             >
-              Resend Verification Email
+              {t(StringNames.Login_ResendPasswordLink)}
             </Button>
           )}
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -210,10 +210,12 @@ const LoginPage = () => {
                 setLoginType(loginType === 'email' ? 'username' : 'email');
               }}
             >
-              {`Use ${loginType === 'email' ? 'Username' : 'Email'}`}
+              {loginType === 'email'
+                ? t(StringNames.Login_UseUsername)
+                : t(StringNames.Login_UseEmail)}
             </MuiLink>
             <MuiLink component={Link} to="/register" variant="body2">
-              {"Don't have an account? Sign Up"}
+              {t(StringNames.Login_NoAccountSignUp)}
             </MuiLink>
           </Box>
         </Box>
