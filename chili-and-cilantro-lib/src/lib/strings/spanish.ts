@@ -54,8 +54,28 @@ export const SpanishStrings: StringsCollection = {
     'El token de correo electrónico se envió hace muy poco. Inténtalo de nuevo en {TIME_REMAINING} segundos.',
   [StringNames.Error_FailedToCreateEmailToken]:
     'Fallo al crear el token de correo',
+  [StringNames.Error_GameAlreadyInProgress]: 'El juego ya está en progreso.',
+  [StringNames.Error_GameDisplayNameAlreadyInUse]:
+    'El nombre ya está en uso en este juego.',
+  [StringNames.Error_GameInvalidPhase]:
+    'El juego no está en la fase correcta para esta acción.',
+  [StringNames.Error_GamePasswordMismatch]:
+    'La contraseña del juego no coincide.',
+  [StringNames.Error_InvalidAction]: 'Acción inválida.',
+  [StringNames.Error_InvalidCredentials]: 'Credenciales inválidas.',
+  [StringNames.Error_MustBeMasterChef]:
+    'Debes ser el chef maestro para realizar esta acción.',
+  [StringNames.Error_NotEnoughChefsTemplate]:
+    'No hay suficientes chefs para comenzar el juego. {CHEFS_PRESENT}/{MIN_CHEFS}',
+  [StringNames.Error_NotInGame]: 'No estás en este juego.',
+  [StringNames.Error_NotYourTurn]: 'No es tu turno.',
+  [StringNames.Error_OutOfIngredientTemplate]: 'Sin {INGREDIENT}.',
   [StringNames.Error_SendTokenFailure]: 'Fallo al enviar el token de correo',
   [StringNames.Error_TooManyChefs]: 'Demasiados chefs en la cocina',
+  [StringNames.Error_UnexpectedTurnActionTemplate]:
+    'Acción de turno inesperada: {TURN_ACTION}.',
+  [StringNames.Error_UsernameInUse]: 'Nombre de usuario en uso',
+  [StringNames.Error_UserNotFound]: 'Usuario no encontrado',
   [StringNames.Error_YouAlreadyJoined]: 'Ya te has unido a este juego',
   [StringNames.Dashboard_GamesCreated]: 'Juegos que has creado',
   [StringNames.Dashboard_GamesParticipating]: 'Juegos en los que participas',
@@ -106,10 +126,31 @@ export const SpanishStrings: StringsCollection = {
     'En Chili and Cilantro, los aspirantes a chef compiten para crear el plato perfecto. Tu objetivo es agregar la cantidad justa de cilantro sin arruinarlo con un chile abrasador. ¡Sé el primero en condimentar con éxito dos platos o sé el último chef en pie para ganar!',
   [StringNames.Splash_HowToPlay]: 'Como Jugar',
   [StringNames.ValidationError]: 'Error de validación',
+  [StringNames.Validation_DisplayNameRegexErrorTemplate]:
+    'El nombre de usuario debe tener entre {MIN_USER_DISPLAY_NAME_LENGTH} y {MAX_USER_DISPLAY_NAME_LENGTH} caracteres',
+  [StringNames.Validation_DisplayNameRequired]:
+    'Se requiere un nombre de usuario',
+  [StringNames.Validation_GameCodeRequired]: 'Se requiere un código de juego',
+  [StringNames.Validation_GameNameRequired]: 'Se requiere un nombre de juego',
+  [StringNames.Validation_GamePasswordRegexErrorTemplate]:
+    'La contraseña del juego debe tener entre {MIN_GAME_PASSWORD_LENGTH} y {MAX_GAME_PASSWORD_LENGTH} caracteres',
   [StringNames.Validation_InvalidEmail]: 'Correo electrónica inválido',
+  [StringNames.Validation_InvalidGame]:
+    'ID de juego inválido o juego no existe.',
+  [StringNames.Validation_InvalidGameCode]: 'Código de juego invático',
+  [StringNames.Validation_InvalidGameCodeTemplate]:
+    'El código del juego debe tener {GAME_CODE_LENGTH} caracteres',
+  [StringNames.Validation_InvalidGameName]: 'Nombre de juego invático',
+  [StringNames.Validation_InvalidGameNameTemplate]:
+    'El nombre del juego debe tener entre {MIN_GAME_NAME_LENGTH} y {MAX_GAME_NAME_LENGTH} caracteres.',
   [StringNames.Validation_InvalidLanguage]: 'Idioma inválido',
+  [StringNames.Validation_InvalidMessage]: 'Mensaje inválido',
+  [StringNames.Validation_InvalidMaxChefs]: 'Número inválido de chefs',
   [StringNames.Validation_InvalidTimezone]: 'Fuseau horaire invático',
   [StringNames.Validation_InvalidToken]: 'Token inválido',
+  [StringNames.Validation_MaxChefsRequired]: 'Se requiere un número de chefs',
+  [StringNames.Validation_MessageRegexErrorTemplate]:
+    'El mensaje debe tener entre {MIN_MESSAGE_LENGTH} y {MAX_MESSAGE_LENGTH} caracteres.',
   [StringNames.Validation_PasswordRegexErrorTemplate]: `La contraseña debe estar entre {MIN_PASSWORD_LENGTH} y {MAX_PASSWORD_LENGTH} caracteres, y contener al menos:
   • Una letra minuscula (cualquier script)
   • Una letra mayúscula (cualquier script)

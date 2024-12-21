@@ -47,8 +47,24 @@ export const MandarinStrings: StringsCollection = {
   [StringNames.Error_EmailTokenSentTooRecentlyTemplate]:
     '电子邮件令牌发送太频繁。请在{TIME_REMAINING}秒后重试。',
   [StringNames.Error_FailedToCreateEmailToken]: '无法创建电子邮件令牌',
+  [StringNames.Error_GameAlreadyInProgress]: '游戏已经开始。',
+  [StringNames.Error_GameDisplayNameAlreadyInUse]: '游戏名称已经在使用中',
+  [StringNames.Error_GameInvalidPhase]: '游戏不处于此操作的正确阶段。',
+  [StringNames.Error_GamePasswordMismatch]: '游戏密码不匹配',
+  [StringNames.Error_InvalidAction]: '无效操作',
+  [StringNames.Error_InvalidCredentials]: '无效凭证',
+  [StringNames.Error_MustBeMasterChef]: '您必须是大厨才能执行此操作。',
+  [StringNames.Error_NotEnoughChefsTemplate]:
+    '没有足够的厨师开始游戏。{CHEFS_PRESENT}/{MIN_CHEFS}',
+  [StringNames.Error_NotInGame]: '您不在这个游戏中',
+  [StringNames.Error_NotYourTurn]: '不是你的回合',
+  [StringNames.Error_OutOfIngredientTemplate]: '缺少{INGREDIENT}',
   [StringNames.Error_SendTokenFailure]: '无法发送电子邮件令牌',
   [StringNames.Error_TooManyChefs]: '厨房里有太多厨师',
+  [StringNames.Error_UnexpectedTurnActionTemplate]:
+    '意外的回合动作:{TURN_ACTION}',
+  [StringNames.Error_UsernameInUse]: '用户名已经在使用中',
+  [StringNames.Error_UserNotFound]: '用户未找到',
   [StringNames.Error_YouAlreadyJoined]: '您已经加入该游戏',
   [StringNames.Dashboard_GamesCreated]: '您创建的游戏',
   [StringNames.Dashboard_GamesParticipating]: '您参与的游戏',
@@ -94,10 +110,29 @@ export const MandarinStrings: StringsCollection = {
     '在《辣椒和香菜》中，有抱负的厨师们竞相制作完美的菜肴。你的目标是添加适量的香菜，而不会让辣椒烧焦。成为第一个成功调味两道菜的人，或者成为最后一个获胜的厨师',
   [StringNames.Splash_HowToPlay]: '如何玩',
   [StringNames.ValidationError]: '验证错误',
+  [StringNames.Validation_DisplayNameRegexErrorTemplate]:
+    '用户显示名称必须在{MIN_USER_DISPLAY_NAME_LENGTH}和{MAX_USER_DISPLAY_NAME_LENGTH}个字符之间',
+  [StringNames.Validation_DisplayNameRequired]: '昵称是必需的',
+  [StringNames.Validation_GameCodeRequired]: '游戏代码是必需的',
+  [StringNames.Validation_GameNameRequired]: '游戏名是必需的',
+  [StringNames.Validation_GamePasswordRegexErrorTemplate]:
+    '游戏密码必须在{MIN_GAME_PASSWORD_LENGTH}和{MAX_GAME_PASSWORD_LENGTH}个字符之间',
   [StringNames.Validation_InvalidEmail]: '无效电子邮件',
+  [StringNames.Validation_InvalidGame]: '无效游戏ID或游戏不存在。',
+  [StringNames.Validation_InvalidGameCode]: '无效游戏代码',
+  [StringNames.Validation_InvalidGameCodeTemplate]:
+    '游戏代码必须是{GAME_CODE_LENGTH}个字符长',
+  [StringNames.Validation_InvalidGameName]: '无效游戏名称',
+  [StringNames.Validation_InvalidGameNameTemplate]:
+    '游戏名称必须在{MIN_GAME_NAME_LENGTH}和{MAX_GAME_NAME_LENGTH}个字符之间。',
   [StringNames.Validation_InvalidLanguage]: '无效语言',
+  [StringNames.Validation_InvalidMessage]: '无效消息',
+  [StringNames.Validation_InvalidMaxChefs]: '无效厨师数量',
   [StringNames.Validation_InvalidTimezone]: '无效时区',
   [StringNames.Validation_InvalidToken]: '无效令牌',
+  [StringNames.Validation_MaxChefsRequired]: '最大厨师是必需的',
+  [StringNames.Validation_MessageRegexErrorTemplate]:
+    '消息必须在{MIN_MESSAGE_LENGTH}和{MAX_MESSAGE_LENGTH}个字符之间。',
   [StringNames.Validation_PasswordRegexErrorTemplate]: `密码必须在{MIN_PASSWORD_LENGTH}和{MAX_PASSWORD_LENGTH}个字符之间，并且至少包含：
   • 一个小写字母（任何脚本）
   • 一个大写字母（任何脚本）

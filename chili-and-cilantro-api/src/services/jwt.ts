@@ -33,7 +33,7 @@ export class JwtService extends BaseService {
     const token = sign(tokenUser, environment.jwtSecret, {
       algorithm: constants.JWT_ALGO,
       allowInsecureKeySizes: false,
-      expiresIn: constants.JWT_EXPIRATION,
+      expiresIn: constants.JWT_EXPIRATION_SEC,
     });
     return {
       token,
@@ -60,11 +60,10 @@ export class JwtService extends BaseService {
         return {
           userId: decoded.userId as string,
         };
-      } else {
-        throw new InvalidTokenError();
       }
     } catch (error) {
-      throw new InvalidTokenError();
+      // Do nothing
     }
+    throw new InvalidTokenError();
   }
 }

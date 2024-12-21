@@ -1,8 +1,7 @@
 import {
-  AlreadyJoinedOtherError,
+  ChefAlreadyJoinedError,
   constants,
   DefaultIdType,
-  GameFullError,
   GameInProgressError,
   GamePasswordMismatchError,
   GamePhase,
@@ -11,6 +10,7 @@ import {
   InvalidUserDisplayNameError,
   IUserDocument,
   ModelName,
+  TooManyChefsError,
   UsernameInUseError,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { IApplication } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
@@ -112,7 +112,7 @@ describe('GameService', () => {
           userDisplayName,
           game.password,
         ),
-      ).rejects.toThrow(AlreadyJoinedOtherError);
+      ).rejects.toThrow(ChefAlreadyJoinedError);
     });
     it('should throw an error when the chef name is already in the specified game', async () => {
       // arrange
@@ -256,7 +256,7 @@ describe('GameService', () => {
           userDisplayName,
           game.password,
         ),
-      ).rejects.toThrow(GameFullError);
+      ).rejects.toThrow(TooManyChefsError);
     });
     it('should allow a user to join a game with no password as long as none is provided', async () => {
       const game = generateGame(false); // Game with no password required

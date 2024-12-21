@@ -76,7 +76,9 @@ export class UserController extends BaseController {
             ),
           body('displayname')
             .matches(constants.USER_DISPLAY_NAME_REGEX)
-            .withMessage(constants.USER_DISPLAY_NAME_REGEX_ERROR),
+            .withMessage(
+              translate(StringNames.Validation_DisplayNameRegexErrorTemplate),
+            ),
           body('email')
             .isEmail()
             .withMessage(translate(StringNames.Validation_InvalidEmail)),

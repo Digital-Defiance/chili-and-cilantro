@@ -52,9 +52,28 @@ export const UkrainianStrings: StringsCollection = {
     'Маркер електронної пошти надіслано занадто недавно. Повторіть спробу через {TIME_REMAINING} с.',
   [StringNames.Error_FailedToCreateEmailToken]:
     'Неможливо створити електронний токен',
+  [StringNames.Error_GameAlreadyInProgress]: 'Гра вже розпочалася',
+  [StringNames.Error_GameDisplayNameAlreadyInUse]:
+    'Ім’я вже використовується в цій грі.',
+  [StringNames.Error_GameInvalidPhase]:
+    'Гра не знаходиться в правильній фазі для цієї дії.',
+  [StringNames.Error_GamePasswordMismatch]: 'Пароль гри не відповідає',
+  [StringNames.Error_InvalidAction]: 'Недійсна дія',
+  [StringNames.Error_InvalidCredentials]: 'Неправильні дані',
+  [StringNames.Error_MustBeMasterChef]:
+    'Ви повинні бути майстром-кухарем, щоб виконати цю дію.',
+  [StringNames.Error_NotEnoughChefsTemplate]:
+    'Недостатньо шеф-кухарів для початку гри. {CHEFS_PRESENT}/{MIN_CHEFS}',
+  [StringNames.Error_NotInGame]: 'Ви не в цій грі',
+  [StringNames.Error_NotYourTurn]: 'Це не ваш ход',
+  [StringNames.Error_OutOfIngredientTemplate]: 'Недостатньо {INGREDIENT}.',
   [StringNames.Error_SendTokenFailure]:
     'Неможливо відправити електронний токен',
   [StringNames.Error_TooManyChefs]: 'Забагато шеф-кухарів на кухні',
+  [StringNames.Error_UnexpectedTurnActionTemplate]:
+    'Неочікувана дія в ході: {TURN_ACTION}',
+  [StringNames.Error_UsernameInUse]: 'Ім’я користувача вже використовується',
+  [StringNames.Error_UserNotFound]: 'Користувача не знайдено',
   [StringNames.Error_YouAlreadyJoined]: 'Ви вже приєдналися до цієї гри',
   [StringNames.Dashboard_GamesCreated]: 'Гри, які ти створив',
   [StringNames.Dashboard_GamesParticipating]: 'Гри, в яких ти береш участь',
@@ -107,10 +126,32 @@ export const UkrainianStrings: StringsCollection = {
     'У Chili and Cilantro починаючі кухарі змагаються, щоб створити ідеальну страву. Ваша мета — додати потрібну кількість кінзи, не зіпсувавши її пекучим чилі. Будьте першим, хто успішно приправить дві страви, або будьте останнім шеф-кухарем, який виграє!',
   [StringNames.Splash_HowToPlay]: 'Як Грати',
   [StringNames.ValidationError]: 'Помилка валідації',
+  [StringNames.Validation_DisplayNameRegexErrorTemplate]:
+    'Ім’я користувача повинно бути від {MIN_USER_DISPLAY_NAME_LENGTH} до {MAX_USER_DISPLAY_NAME_LENGTH} символів',
+  [StringNames.Validation_DisplayNameRequired]:
+    'Ім’я користувача є обов’язковим',
+  [StringNames.Validation_GameCodeRequired]: 'Код гри є обов’язковим',
+  [StringNames.Validation_GameNameRequired]: 'Ім’я гри є обов’язковим',
+  [StringNames.Validation_GamePasswordRegexErrorTemplate]:
+    'Пароль гри повинен бути від {MIN_GAME_PASSWORD_LENGTH} до {MAX_GAME_PASSWORD_LENGTH} символів',
   [StringNames.Validation_InvalidEmail]: 'Недійсний електронній адрес',
+  [StringNames.Validation_InvalidGame]:
+    'Недійсний ідентифікатор гри або гра не існує.',
+  [StringNames.Validation_InvalidGameCode]: 'Недійсний код гри',
+  [StringNames.Validation_InvalidGameCodeTemplate]:
+    'Код гри повинен бути {GAME_CODE_LENGTH} символів',
+  [StringNames.Validation_InvalidGameName]: 'Недійсне ім’я гри',
+  [StringNames.Validation_InvalidGameNameTemplate]:
+    'Ім’я гри повинно бути від {MIN_GAME_NAME_LENGTH} до {MAX_GAME_NAME_LENGTH} символів.',
   [StringNames.Validation_InvalidLanguage]: 'Недійсна мова',
+  [StringNames.Validation_InvalidMaxChefs]: 'Недійсна кількість шеф-кухарів',
+  [StringNames.Validation_InvalidMessage]: 'Недійсне повідомлення',
   [StringNames.Validation_InvalidTimezone]: 'Недійсна часова зона',
   [StringNames.Validation_InvalidToken]: 'Недійсний токен',
+  [StringNames.Validation_MaxChefsRequired]:
+    'Максимальна кількість шеф-кухарів є обов’язковою',
+  [StringNames.Validation_MessageRegexErrorTemplate]:
+    'Повідомлення повинно бути від {MIN_MESSAGE_LENGTH} до {MAX_MESSAGE_LENGTH} символів.',
   [StringNames.Validation_PasswordRegexErrorTemplate]: `Пароль повинен бути від {MIN_PASSWORD_LENGTH} до {MAX_PASSWORD_LENGTH} символів, та містити як мінімум:
   • Одну нижню літеру (всіх скриптів)
   • Одну верхню літеру (всіх скриптів)

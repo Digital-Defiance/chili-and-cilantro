@@ -28,7 +28,7 @@ export function findAuthToken(headers: IncomingHttpHeaders): string | null {
 
 /**
  * Middleware to authenticate a token
- * @param getModel Function to get a model
+ * @param application The application
  * @param req The request
  * @param res The response
  * @param next The next function

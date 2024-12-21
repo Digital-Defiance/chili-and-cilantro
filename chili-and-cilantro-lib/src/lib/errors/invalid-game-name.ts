@@ -1,11 +1,11 @@
-import constants from '../constants';
+import { StringNames } from '../enumerations/string-names';
+import { translate } from '../i18n';
 import { ValidationError } from './validation-error';
 
 export class InvalidGameNameError extends ValidationError {
   constructor() {
-    super(
-      `Invalid game name. Must be alphanumeric and between ${constants.MIN_GAME_NAME_LENGTH} and ${constants.MAX_GAME_NAME_LENGTH}.`,
-    );
+    super(translate(StringNames.Validation_InvalidGameNameTemplate));
+    this.name = 'InvalidGameNameError';
     Object.setPrototypeOf(this, InvalidGameNameError.prototype);
   }
 }

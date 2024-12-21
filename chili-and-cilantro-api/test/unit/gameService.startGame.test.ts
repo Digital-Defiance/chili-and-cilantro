@@ -6,8 +6,8 @@ import {
   IGameDocument,
   IUserDocument,
   ModelName,
+  MustBeMasterChefError,
   NotEnoughChefsError,
-  NotMasterChefError,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { IApplication } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { Model } from 'mongoose';
@@ -159,7 +159,7 @@ describe('gameService startGame', () => {
 
       await expect(async () =>
         gameService.validateStartGameOrThrowAsync(game, userId),
-      ).rejects.toThrow(NotMasterChefError);
+      ).rejects.toThrow(MustBeMasterChefError);
     });
     it('should throw if the game phase is not LOBBY', async () => {
       isMasterChefAsync.mockResolvedValue(true);

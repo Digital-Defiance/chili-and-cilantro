@@ -9,11 +9,6 @@ export const GAME_CODE_LENGTH = 5;
 export const GAME_CODE_REGEX = new RegExp(`^[A-Z]{${GAME_CODE_LENGTH}}$`);
 
 /**
- * Error message for invalid game codes
- */
-export const GAME_CODE_REGEX_ERROR = `Game code must be ${GAME_CODE_LENGTH} characters long`;
-
-/**
  * Maximum number of chefs in a game
  */
 export const MAX_CHEFS = 8;
@@ -38,8 +33,6 @@ export const GAME_PASSWORD_REGEX = new RegExp(
   `^[\\p{L}\\p{M}\\p{Nd}\\p{Pc}\\p{Zs}]{${MIN_GAME_PASSWORD_LENGTH},${MAX_GAME_PASSWORD_LENGTH}}$`,
   'u',
 );
-
-export const GAME_PASSWORD_REGEX_ERROR = `Game password must be between ${MIN_GAME_PASSWORD_LENGTH} and ${MAX_GAME_PASSWORD_LENGTH} characters long`;
 
 /**
  * Maximum length of a game name
@@ -87,8 +80,6 @@ export const USER_DISPLAY_NAME_REGEX = createUserDisplayNameRegex(
   MAX_USER_DISPLAY_NAME_LENGTH,
 );
 
-export const USER_DISPLAY_NAME_REGEX_ERROR = `User display name must be between ${MIN_USER_DISPLAY_NAME_LENGTH} and ${MAX_USER_DISPLAY_NAME_LENGTH} characters long`;
-
 /**
  * Maximum age of a game without activity in minutes
  */
@@ -110,7 +101,12 @@ export const MAX_MESSAGE_LENGTH = 512;
 /**
  * Minimum length of a game message
  */
-export const MIN_MESSAGE_LENGTH = 2;
+export const MIN_MESSAGE_LENGTH = 1;
+
+export const MESSAGE_REGEX = new RegExp(
+  `^[\\p{L}\\p{M}\\p{Nd}\\p{Pc}\\p{Zs}]{${MIN_MESSAGE_LENGTH},${MAX_MESSAGE_LENGTH}}$`,
+  'u',
+);
 
 /**
  * Regular expression to look for multilingual strings
@@ -160,7 +156,7 @@ export const JWT_ALGO:
 /**
  * The expiration time for a JWT token in seconds
  */
-export const JWT_EXPIRATION = 86400;
+export const JWT_EXPIRATION_SEC = 86400;
 
 /**
  * The domain of the site
@@ -242,17 +238,16 @@ export default {
   BCRYPT_ROUNDS,
   CHILI_PER_HAND,
   EMAIL_FROM,
-  EMAIL_TOKEN_RESEND_INTERVAL: EMAIL_TOKEN_RESEND_INTERVAL_MS,
+  EMAIL_TOKEN_RESEND_INTERVAL_MS,
   GAME_CODE_LENGTH,
   GAME_CODE_REGEX,
   JWT_ALGO,
-  JWT_EXPIRATION,
+  JWT_EXPIRATION_SEC,
   MAX_CHEFS,
   MIN_CHEFS,
   MAX_GAME_PASSWORD_LENGTH,
   MIN_GAME_PASSWORD_LENGTH,
   GAME_PASSWORD_REGEX,
-  GAME_PASSWORD_REGEX_ERROR,
   MAX_GAME_NAME_LENGTH,
   MIN_GAME_NAME_LENGTH,
   GAME_NAME_REGEX,
@@ -260,12 +255,12 @@ export default {
   HAND_SIZE,
   MAX_MESSAGE_LENGTH,
   MIN_MESSAGE_LENGTH,
+  MESSAGE_REGEX,
   MAX_USERNAME_LENGTH,
   MIN_USERNAME_LENGTH,
   MAX_USER_DISPLAY_NAME_LENGTH,
   MIN_USER_DISPLAY_NAME_LENGTH,
   USER_DISPLAY_NAME_REGEX,
-  USER_DISPLAY_NAME_REGEX_ERROR,
   MAX_GAME_AGE_WITHOUT_ACTIVITY_IN_MINUTES,
   MAX_PASSWORD_LENGTH,
   MIN_PASSWORD_LENGTH,
@@ -274,5 +269,5 @@ export default {
   ROUNDS_TO_WIN,
   USERNAME_REGEX,
   SITE_DOMAIN,
-  NONE: NONE,
+  NONE,
 };

@@ -383,14 +383,12 @@ export abstract class BaseController {
         res,
         next,
       );
-      Promise.reject();
-      return;
+      return Promise.reject();
     }
     const user = await UserModel.findById(req.user.id);
     if (!user) {
       handleError(new UserNotFoundError(), res, next);
-      Promise.reject();
-      return;
+      return Promise.reject();
     }
     return user;
   }

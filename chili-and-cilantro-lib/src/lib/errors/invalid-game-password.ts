@@ -1,11 +1,11 @@
-import constants from '../constants';
+import { StringNames } from '../enumerations/string-names';
+import { translate } from '../i18n';
 import { ValidationError } from './validation-error';
 
 export class InvalidGamePasswordError extends ValidationError {
   constructor() {
-    super(
-      `Invalid game pssword. Must be alphanumeric and between ${constants.MIN_PASSWORD_LENGTH} and ${constants.MAX_PASSWORD_LENGTH}.`,
-    );
+    super(translate(StringNames.Validation_GamePasswordRegexErrorTemplate));
+    this.name = 'InvalidGamePasswordError';
     Object.setPrototypeOf(this, InvalidGamePasswordError.prototype);
   }
 }

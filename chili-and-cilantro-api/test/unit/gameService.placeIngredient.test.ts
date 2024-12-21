@@ -8,8 +8,8 @@ import {
   IncorrectGamePhaseError,
   InvalidActionError,
   ModelName,
+  NotYourTurnError,
   OutOfIngredientError,
-  OutOfOrderError,
   TurnAction,
   constants,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
@@ -68,7 +68,7 @@ describe('GameService', () => {
       game.currentChef = 0;
       expect(() =>
         gameService.validatePlaceIngredientOrThrow(game, chef, CardType.CHILI),
-      ).toThrow(OutOfOrderError);
+      ).toThrow(NotYourTurnError);
     });
 
     it('should throw an error if the chef has placed all cards or has no cards left', () => {

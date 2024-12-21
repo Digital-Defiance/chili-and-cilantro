@@ -1,11 +1,11 @@
-import constants from '../constants';
+import { StringNames } from '../enumerations/string-names';
+import { translate } from '../i18n';
 import { ValidationError } from './validation-error';
 
 export class InvalidMessageError extends ValidationError {
   constructor() {
-    super(
-      `Message must be between ${constants.MIN_MESSAGE_LENGTH} and ${constants.MAX_MESSAGE_LENGTH} characters long.`,
-    );
+    super(translate(StringNames.Validation_MessageRegexErrorTemplate));
+    this.name = 'InvalidMessageError';
     Object.setPrototypeOf(this, InvalidMessageError.prototype);
   }
 }

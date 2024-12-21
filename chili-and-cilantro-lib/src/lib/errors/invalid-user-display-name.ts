@@ -1,11 +1,13 @@
-import constants from '../constants';
+import { StringNames } from '../enumerations/string-names';
+import { translate } from '../i18n';
 import { ValidationError } from './validation-error';
 
 export class InvalidUserDisplayNameError extends ValidationError {
+  public readonly displayName: string;
   constructor(displayName: string) {
-    super(
-      `Invalid user display name "${displayName}": Must be alphanumeric and between ${constants.MIN_USER_DISPLAY_NAME_LENGTH} and ${constants.MAX_USER_DISPLAY_NAME_LENGTH} characters long.`,
-    );
+    super(translate(StringNames.Validation_DisplayNameRegexErrorTemplate));
+    this.displayName = displayName;
+    this.name = 'InvalidUserDisplayNameError';
     Object.setPrototypeOf(this, InvalidUserDisplayNameError.prototype);
   }
 }

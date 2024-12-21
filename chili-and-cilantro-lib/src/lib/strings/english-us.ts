@@ -51,8 +51,27 @@ export const AmericanEnglishStrings: StringsCollection = {
   [StringNames.Error_EmailTokenSentTooRecentlyTemplate]:
     'Email token sent too recently. Please try again in {TIME_REMAINING} seconds.',
   [StringNames.Error_FailedToCreateEmailToken]: 'Failed to create email token',
+  [StringNames.Error_GameAlreadyInProgress]: 'Game is already in progress.',
+  [StringNames.Error_GameDisplayNameAlreadyInUse]:
+    'Name is already in use within this game.',
+  [StringNames.Error_GameInvalidPhase]:
+    'Game is not in the correct phase for this action.',
+  [StringNames.Error_GamePasswordMismatch]: 'Game password does not match.',
+  [StringNames.Error_InvalidAction]: 'Invalid action.',
+  [StringNames.Error_InvalidCredentials]: 'Invalid credentials.',
+  [StringNames.Error_MustBeMasterChef]:
+    'You must be the master chef to perform this action.',
+  [StringNames.Error_NotEnoughChefsTemplate]:
+    'Not enough chefs to start game. {CHEFS_PRESENT}/{MIN_CHEFS}',
+  [StringNames.Error_NotInGame]: 'You are not in this game.',
+  [StringNames.Error_NotYourTurn]: 'Not your turn.',
+  [StringNames.Error_OutOfIngredientTemplate]: 'Out of {INGREDIENT}.',
   [StringNames.Error_SendTokenFailure]: 'Failed to send email token',
   [StringNames.Error_TooManyChefs]: 'Too many chefs in the kitchen',
+  [StringNames.Error_UnexpectedTurnActionTemplate]:
+    'Unexpected turn action: {TURN_ACTION}.',
+  [StringNames.Error_UsernameInUse]: 'Username is already in use.',
+  [StringNames.Error_UserNotFound]: 'User not found',
   [StringNames.Error_YouAlreadyJoined]: 'You have already joined this game',
   [StringNames.Dashboard_GamesCreated]: "Games You've Created",
   [StringNames.Dashboard_GamesParticipating]: "Games You're Participating in",
@@ -103,10 +122,30 @@ export const AmericanEnglishStrings: StringsCollection = {
     'In Chili and Cilantro, aspiring chefs compete to create the perfect dish. Your goal is to add just the right amount of cilantro without ruining it with a scorching chili. Be the first to successfully season two dishes or be the last chef standing to win!',
   [StringNames.Splash_HowToPlay]: 'How to Play',
   [StringNames.ValidationError]: 'Validation Error',
+  [StringNames.Validation_DisplayNameRegexErrorTemplate]:
+    'User display name must be between {MIN_USER_DISPLAY_NAME_LENGTH} and {MAX_USER_DISPLAY_NAME_LENGTH} characters long',
+  [StringNames.Validation_DisplayNameRequired]: 'Display name is required',
+  [StringNames.Validation_GameCodeRequired]: 'Game code is required',
+  [StringNames.Validation_GameNameRequired]: 'Game name is required',
+  [StringNames.Validation_GamePasswordRegexErrorTemplate]:
+    'Game password must be between {MIN_GAME_PASSWORD_LENGTH} and {MAX_GAME_PASSWORD_LENGTH} characters long',
   [StringNames.Validation_InvalidEmail]: 'Invalid Email',
+  [StringNames.Validation_InvalidGame]:
+    'Invalid game ID or game does not exist.',
+  [StringNames.Validation_InvalidGameCode]: 'Invalid Game Code',
+  [StringNames.Validation_InvalidGameCodeTemplate]:
+    'Game code must be {GAME_CODE_LENGTH} characters long',
+  [StringNames.Validation_InvalidGameName]: 'Invalid Game Name',
+  [StringNames.Validation_InvalidGameNameTemplate]:
+    'Game name must be between {MIN_GAME_NAME_LENGTH} and {MAX_GAME_NAME_LENGTH} characters long.',
   [StringNames.Validation_InvalidLanguage]: 'Invalid Language',
+  [StringNames.Validation_InvalidMessage]: 'Invalid Message',
   [StringNames.Validation_InvalidTimezone]: 'Invalid Timezone',
   [StringNames.Validation_InvalidToken]: 'Invalid Token',
+  [StringNames.Validation_InvalidMaxChefs]: 'Invalid number of chefs',
+  [StringNames.Validation_MaxChefsRequired]: 'Max chefs is required',
+  [StringNames.Validation_MessageRegexErrorTemplate]:
+    'Message must be between {MIN_MESSAGE_LENGTH} and {MAX_MESSAGE_LENGTH} characters long.',
   [StringNames.Validation_PasswordRegexErrorTemplate]: `Password must be between {MIN_PASSWORD_LENGTH} and {MAX_PASSWORD_LENGTH} characters, and contain at least:
   • One lowercase character (any script)
   • One uppercase character (any script)

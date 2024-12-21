@@ -1,7 +1,6 @@
 import {
   AccountDeletedError,
   AccountLockedError,
-  AccountStatusError,
   AccountStatusTypeEnum,
   EmailInUseError,
   EmailTokenExpiredError,
@@ -9,6 +8,7 @@ import {
   EmailTokenType,
   EmailTokenUsedOrInvalidError,
   EmailVerifiedError,
+  HandleableError,
   IEmailTokenDocument,
   IUser,
   IUserDocument,
@@ -179,7 +179,7 @@ describe('UserService', () => {
         },
         {
           status: 'InvalidStatus' as AccountStatusTypeEnum,
-          error: AccountStatusError,
+          error: HandleableError,
         },
       ];
 

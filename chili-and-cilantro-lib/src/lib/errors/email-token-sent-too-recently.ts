@@ -10,7 +10,7 @@ export class EmailTokenSentTooRecentlyError extends HandleableError {
   constructor(lastSent: Date) {
     const now = Date.now();
     const nextAvailableTime = new Date(
-      lastSent.getTime() + constants.EMAIL_TOKEN_RESEND_INTERVAL,
+      lastSent.getTime() + constants.EMAIL_TOKEN_RESEND_INTERVAL_MS,
     );
     const timeRemaining = Math.max(
       0,

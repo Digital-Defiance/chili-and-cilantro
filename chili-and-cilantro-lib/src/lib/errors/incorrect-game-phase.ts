@@ -1,8 +1,11 @@
+import { StringNames } from '../enumerations/string-names';
+import { translate } from '../i18n';
 import { ValidationError } from './validation-error';
 
 export class IncorrectGamePhaseError extends ValidationError {
   constructor() {
-    super('Game is not in the correct phase for this action.');
+    super(translate(StringNames.Error_GameInvalidPhase));
+    this.name = 'IncorrectGamePhaseError';
     Object.setPrototypeOf(this, IncorrectGamePhaseError.prototype);
   }
 }

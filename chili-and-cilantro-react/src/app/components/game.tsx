@@ -38,18 +38,22 @@ const GameSetup: React.FC = () => {
   const validationSchema = Yup.object().shape({
     gameName: Yup.string().test(
       'gameName',
-      'Invalid game name',
+      t(StringNames.Validation_InvalidGameName),
       function (value) {
         const { gameMode } = this.parent;
         if (gameMode === 'CREATE') {
           if (!value)
-            return this.createError({ message: 'Game name is required' });
+            return this.createError({
+              message: t(StringNames.Validation_GameNameRequired),
+            });
           if (
-            !constants.MULTILINGUAL_STRING_REGEX.test(value) ||
+            !constants.GAME_NAME_REGEX.test(value) ||
             value.length < constants.MIN_GAME_NAME_LENGTH ||
             value.length > constants.MAX_GAME_NAME_LENGTH
           ) {
-            return this.createError({ message: 'Invalid game name' });
+            return this.createError({
+              message: t(StringNames.Validation_InvalidGameNameTemplate),
+            });
           }
         }
         return true;
@@ -57,15 +61,17 @@ const GameSetup: React.FC = () => {
     ),
     gameCode: Yup.string().test(
       'gameCode',
-      'Invalid game code',
+      t(StringNames.Validation_InvalidGameCode),
       function (value) {
         const { gameMode } = this.parent;
         if (gameMode === 'JOIN') {
           if (!value)
-            return this.createError({ message: 'Game code is required' });
+            return this.createError({
+              message: t(StringNames.Validation_GameCodeRequired),
+            });
           if (!constants.GAME_CODE_REGEX.test(value)) {
             return this.createError({
-              message: constants.GAME_CODE_REGEX_ERROR,
+              message: t(StringNames.Validation_InvalidGameCodeTemplate),
             });
           }
         }
@@ -75,25 +81,29 @@ const GameSetup: React.FC = () => {
     displayname: Yup.string()
       .matches(
         constants.USER_DISPLAY_NAME_REGEX,
-        constants.USER_DISPLAY_NAME_REGEX_ERROR,
+        t(StringNames.Validation_DisplayNameRegexErrorTemplate),
       )
-      .required('Display name is required'),
+      .required(t(StringNames.Validation_DisplayNameRequired)),
     gamePassword: Yup.string()
       .matches(
         constants.GAME_PASSWORD_REGEX,
-        constants.GAME_PASSWORD_REGEX_ERROR,
+        t(StringNames.Validation_GamePasswordRegexErrorTemplate),
       )
       .optional(),
     maxChefs: Yup.number().test(
       'maxChefs',
-      'Invalid number of chefs',
+      t(StringNames.Validation_InvalidMaxChefs),
       function (value) {
         const { gameMode } = this.parent;
         if (gameMode === 'CREATE') {
           if (!value)
-            return this.createError({ message: 'Max chefs is required' });
+            return this.createError({
+              message: t(StringNames.Validation_MaxChefsRequired),
+            });
           if (value < constants.MIN_CHEFS || value > constants.MAX_CHEFS) {
-            return this.createError({ message: 'Invalid number of chefs' });
+            return this.createError({
+              message: t(StringNames.Validation_InvalidMaxChefs),
+            });
           }
         }
         return true;
@@ -101,7 +111,7 @@ const GameSetup: React.FC = () => {
     ),
     gameMode: Yup.string()
       .oneOf(['CREATE', 'JOIN'])
-      .required('Game mode is required'),
+      .required(t(StringNames.Validation_Required)),
   });
 
   const formik = useFormik<IFormValues>({

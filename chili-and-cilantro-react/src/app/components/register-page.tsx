@@ -52,7 +52,7 @@ const RegisterPage: React.FC = () => {
       displayname: Yup.string()
         .matches(
           constants.USER_DISPLAY_NAME_REGEX,
-          constants.USER_DISPLAY_NAME_REGEX_ERROR,
+          t(StringNames.Validation_DisplayNameRegexErrorTemplate),
         )
         .required(t(StringNames.Validation_Required)),
       email: Yup.string()
@@ -63,7 +63,7 @@ const RegisterPage: React.FC = () => {
           constants.PASSWORD_REGEX,
           t(StringNames.Validation_PasswordRegexErrorTemplate),
         )
-        .required('Required'),
+        .required(t(StringNames.Validation_Required)),
     }),
     onSubmit: async (values, { setSubmitting }) => {
       try {

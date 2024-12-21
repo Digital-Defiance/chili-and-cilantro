@@ -18,17 +18,16 @@ import {
   InvalidActionError,
   InvalidGameError,
   InvalidGameNameError,
-  InvalidGameParameterError,
   InvalidGamePasswordError,
   InvalidMessageError,
   InvalidUserDisplayNameError,
   ModelName,
+  MustBeMasterChefError,
   NotEnoughChefsError,
-  NotMasterChefError,
+  NotYourTurnError,
   OutOfIngredientError,
-  OutOfOrderError,
   StringNames,
-  TooManyChefsInGameError,
+  TooManyChefsError,
   TurnAction,
   UsernameInUseError,
   constants,
@@ -161,10 +160,11 @@ export class GameService extends BaseService {
     ) {
       throw new InvalidGamePasswordError();
     }
-    if (maxChefs < constants.MIN_CHEFS || maxChefs > constants.MAX_CHEFS) {
-      throw new InvalidGameParameterError(
-        `Must be between ${constants.MIN_CHEFS} and ${constants.MAX_CHEFS}.`,
-      );
+    if (maxChefs < constants.MIN_CHEFS) {
+      throw new NotEnoughChefsError(maxChefs);
+    }
+    if (maxChefs > constants.MAX_CHEFS) {
+      throw new TooManyChefsError();
     }
   }
 
@@ -175,6 +175,8 @@ export class GameService extends BaseService {
    * @param gameName The name of the game
    * @param password Optional password for the game. Empty string for no password.
    * @param maxChefs The maximum number of chefs in the game. Must be between MIN_CHEFS and MAX_CHEFS.
+   * @param gameId The id of the game
+   * @param masterChefId The id of the master chef
    * @returns
    */
   public async createGameAsync(
@@ -184,7 +186,7 @@ export class GameService extends BaseService {
     password: string,
     maxChefs: number,
     gameId: DefaultIdType = new Types.ObjectId(),
-    chefId: DefaultIdType = new Types.ObjectId(),
+    masterChefId: DefaultIdType = new Types.ObjectId(),
   ): Promise<{
     game: IGameDocument;
     chef: IChefDocument;
@@ -196,13 +198,13 @@ export class GameService extends BaseService {
       {
         _id: gameId,
         cardsPlaced: 0,
-        chefIds: [chefId],
+        chefIds: [masterChefId],
         code: gameCode,
         currentBid: constants.NONE,
         currentChef: constants.NONE,
         currentPhase: GamePhase.LOBBY,
         currentRound: constants.NONE,
-        masterChefId: chefId,
+        masterChefId: masterChefId,
         masterChefUserId: user._id,
         maxChefs: maxChefs,
         name: gameName,
@@ -221,7 +223,7 @@ export class GameService extends BaseService {
       user,
       displayName,
       true,
-      chefId,
+      masterChefId,
     );
     const action = await this.actionService.createGameAsync(game, chef, user);
     return { game, chef, action };
@@ -313,7 +315,7 @@ export class GameService extends BaseService {
       throw new GameInProgressError();
     }
     if (game.chefIds.length > game.maxChefs) {
-      throw new TooManyChefsInGameError();
+      throw new TooManyChefsError();
     }
     if (
       !validator.matches(
@@ -502,13 +504,13 @@ export class GameService extends BaseService {
     userId: DefaultIdType,
   ): Promise<void> {
     if (!(await this.playerService.isMasterChefAsync(userId, game._id))) {
-      throw new NotMasterChefError();
+      throw new MustBeMasterChefError();
     }
     if (game.currentPhase !== GamePhase.LOBBY) {
       throw new GameInProgressError();
     }
     if (game.chefIds.length < constants.MIN_CHEFS) {
-      throw new NotEnoughChefsError(game.chefIds.length, constants.MIN_CHEFS);
+      throw new NotEnoughChefsError(game.chefIds.length);
     }
   }
 
@@ -862,7 +864,7 @@ export class GameService extends BaseService {
     }
     const currentChefId = this.getGameCurrentChefId(game);
     if (currentChefId.toString() !== chef._id.toString()) {
-      throw new OutOfOrderError();
+      throw new NotYourTurnError();
     }
     if (
       chef.placedCards.length >= constants.HAND_SIZE ||
@@ -1140,7 +1142,7 @@ export class GameService extends BaseService {
     return this.withTransaction<IGameChef>(async () => {
       const game = await this.getGameByCodeOrThrowAsync(gameCode, true);
       if (game.chefIds[game.currentChef].toString() !== user._id.toString()) {
-        throw new OutOfOrderError();
+        throw new NotYourTurnError();
       }
       const chef = await this.chefService.getGameChefOrThrowAsync(game, user);
       // BID, INCREASE_BID, PASS, or PLACE_CARD

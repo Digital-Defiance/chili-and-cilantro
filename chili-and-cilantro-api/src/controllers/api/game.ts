@@ -87,7 +87,7 @@ export class GameController extends BaseController {
             .notEmpty()
             .matches(
               constants.USER_DISPLAY_NAME_REGEX,
-              constants.USER_DISPLAY_NAME_REGEX_ERROR,
+              translate(StringNames.Validation_DisplayNameRegexErrorTemplate),
             ),
           body('password')
             .optional()
@@ -128,7 +128,7 @@ export class GameController extends BaseController {
             .notEmpty()
             .matches(
               constants.USER_DISPLAY_NAME_REGEX,
-              constants.USER_DISPLAY_NAME_REGEX_ERROR,
+              translate(StringNames.Validation_DisplayNameRegexErrorTemplate),
             ),
         ],
       }),

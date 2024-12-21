@@ -53,9 +53,29 @@ export const FrenchStrings: StringsCollection = {
     'Le jeton de courrier électronique a été envoyé trop récemment. Veuillez réessayer dans {TIME_REMAINING} secondes.',
   [StringNames.Error_FailedToCreateEmailToken]:
     'Échec de la création du jeton par courriel',
+  [StringNames.Error_GameAlreadyInProgress]: 'Le jeu est déjà en cours.',
+  [StringNames.Error_GameDisplayNameAlreadyInUse]:
+    'Le nom est déjà utilisé dans ce jeu.',
+  [StringNames.Error_GameInvalidPhase]:
+    'Le jeu n’est pas dans la phase correcte pour cette action.',
+  [StringNames.Error_GamePasswordMismatch]:
+    'Le mot de passe du jeu ne correspond pas.',
+  [StringNames.Error_InvalidAction]: 'Action invalide',
+  [StringNames.Error_InvalidCredentials]: 'Identifiants invalides',
+  [StringNames.Error_MustBeMasterChef]:
+    'Vous devez être le chef de cuisine pour effectuer cette action.',
+  [StringNames.Error_NotEnoughChefsTemplate]:
+    'Pas assez de chefs pour commencer le jeu. {CHEFS_PRESENT}/{MIN_CHEFS}',
+  [StringNames.Error_NotInGame]: 'Vous n’êtes pas dans ce jeu.',
+  [StringNames.Error_NotYourTurn]: 'Ce n’est pas votre tour.',
+  [StringNames.Error_OutOfIngredientTemplate]: 'Plus de {INGREDIENT}.',
   [StringNames.Error_SendTokenFailure]:
     'Échec de l’envoi du jeton par courriel',
   [StringNames.Error_TooManyChefs]: 'Trop de chefs dans la cuisine',
+  [StringNames.Error_UnexpectedTurnActionTemplate]:
+    'Action de tour inattendue: {TURN_ACTION}.',
+  [StringNames.Error_UsernameInUse]: 'Nom d’utilisateur déjà utilisé',
+  [StringNames.Error_UserNotFound]: 'Utilisateur non trouvé',
   [StringNames.Error_YouAlreadyJoined]: 'Vous avez déjà rejoint ce jeu',
   [StringNames.Dashboard_GamesCreated]: 'Jeux que vous avez créé',
   [StringNames.Dashboard_GamesParticipating]: 'Jeux que vous participez',
@@ -111,16 +131,34 @@ export const FrenchStrings: StringsCollection = {
     "Dans Chili and Cilantro, les chefs en herbe rivalisent pour créer le plat parfait. Votre objectif est d'ajouter juste la bonne quantité de coriandre sans gâcher le tout avec un piment brûlant. Soyez le premier à réussir à assaisonner deux plats ou soyez le dernier chef debout pour gagner !",
   [StringNames.Splash_HowToPlay]: 'Comment Jouer',
   [StringNames.ValidationError]: 'Erreur de validation',
+  [StringNames.Validation_DisplayNameRegexErrorTemplate]:
+    'Le nom d’utilisateur doit contenir entre {MIN_USER_DISPLAY_NAME_LENGTH} et {MAX_USER_DISPLAY_NAME_LENGTH} caractères',
+  [StringNames.Validation_DisplayNameRequired]: 'Nom d’utilisateur requis',
   [StringNames.Validation_InvalidEmail]: 'Courriel invalide',
+  [StringNames.Validation_InvalidGameCode]: 'Code de jeu invalide',
+  [StringNames.Validation_InvalidGameCodeTemplate]:
+    'Le code de jeu doit contenir {GAME_CODE_LENGTH} caractères',
+  [StringNames.Validation_GameCodeRequired]: 'Code de jeu requis',
+  [StringNames.Validation_GameNameRequired]: 'Nom du jeu requis',
+  [StringNames.Validation_GamePasswordRegexErrorTemplate]:
+    'Le mot de passe du jeu doit contenir entre {MIN_GAME_PASSWORD_LENGTH} et {MAX_GAME_PASSWORD_LENGTH} caractères',
+  [StringNames.Validation_InvalidGame]: 'ID de jeu invalide ou jeu inexistant.',
+  [StringNames.Validation_InvalidGameName]: 'Nom de jeu invalide',
+  [StringNames.Validation_InvalidGameNameTemplate]:
+    'Le nom du jeu doit contenir entre {MIN_GAME_NAME_LENGTH} et {MAX_GAME_NAME_LENGTH} caractères.',
   [StringNames.Validation_InvalidLanguage]: 'Langue invalide',
+  [StringNames.Validation_InvalidMessage]: 'Message invalide',
   [StringNames.Validation_InvalidTimezone]: 'Fuseau horaire invalide',
   [StringNames.Validation_InvalidToken]: 'Jeton invalide',
+  [StringNames.Validation_InvalidMaxChefs]: 'Nombre de chefs invalide',
+  [StringNames.Validation_MaxChefsRequired]: 'Le nombre de chefs est requis',
+  [StringNames.Validation_MessageRegexErrorTemplate]:
+    'Le message doit contenir entre {MIN_MESSAGE_LENGTH} et {MAX_MESSAGE_LENGTH} caractères.',
   [StringNames.Validation_PasswordRegexErrorTemplate]: `Le mot de passe doit contenir entre {MIN_PASSWORD_LENGTH} et {MAX_PASSWORD_LENGTH} caractères, et contenir au moins :
   • Une lettre minuscule (tout script)
   • Une lettre majuscule (tout script)
   • Un chiffre (tout système numérique)
   • Un caractère spécial (ponctuation ou symbole)`,
-
   [StringNames.Validation_CurrentPasswordRequired]:
     'Le mot de passe actuel est requis',
   [StringNames.Validation_PasswordsDifferent]:

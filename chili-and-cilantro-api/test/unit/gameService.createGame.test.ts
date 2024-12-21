@@ -1,15 +1,16 @@
 import {
-  AlreadyJoinedOtherError,
+  ChefAlreadyJoinedError,
   constants,
   IChefDocument,
   ICreateGameActionDocument,
   IGameDocument,
   InvalidGameNameError,
-  InvalidGameParameterError,
   InvalidGamePasswordError,
   InvalidUserDisplayNameError,
   IUserDocument,
   ModelName,
+  NotEnoughChefsError,
+  TooManyChefsError,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { IApplication } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { Model } from 'mongoose';
@@ -108,7 +109,7 @@ describe('GameService', () => {
           password,
           maxChefs,
         ),
-      ).rejects.toThrow(AlreadyJoinedOtherError);
+      ).rejects.toThrow(ChefAlreadyJoinedError);
     });
 
     it('should throw an error for an invalid username with special characters', async () => {
@@ -299,7 +300,7 @@ describe('GameService', () => {
           password,
           maxChefs,
         ),
-      ).rejects.toThrow(InvalidGameParameterError);
+      ).rejects.toThrow(NotEnoughChefsError);
     });
 
     it('should throw an error to too many chefs', async () => {
@@ -320,7 +321,7 @@ describe('GameService', () => {
           password,
           maxChefs,
         ),
-      ).rejects.toThrow(InvalidGameParameterError);
+      ).rejects.toThrow(TooManyChefsError);
     });
   });
 
