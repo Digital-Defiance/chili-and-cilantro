@@ -1,15 +1,16 @@
 import { AccountStatusTypeEnum } from '../../enumerations/account-status-type';
 import { StringLanguages } from '../../enumerations/string-languages';
+import { DefaultIdType } from '../../shared-types';
 import { IHasSoftDelete } from '../has-soft-delete';
 import { IHasSoftDeleter } from '../has-soft-deleter';
 import { IHasTimestampOwners } from '../has-timestamp-owners';
 import { IHasTimestamps } from '../has-timestamps';
 
-export interface IUser
+export interface IUser<I = DefaultIdType>
   extends IHasTimestamps,
-    IHasTimestampOwners,
+    IHasTimestampOwners<I>,
     IHasSoftDelete,
-    IHasSoftDeleter {
+    IHasSoftDeleter<I> {
   /**
    * The username of the user.
    */

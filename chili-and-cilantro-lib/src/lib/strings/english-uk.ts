@@ -30,7 +30,9 @@ export const BritishEnglishStrings: StringsCollection = {
   [StringNames.Common_ReturnToKitchen]: 'Return to Kitchen',
   [StringNames.Common_Site]: site,
   [StringNames.Common_StartCooking]: 'Start Cooking',
+  [StringNames.Common_Success]: 'Success',
   [StringNames.Common_Tagline]: 'A Spicy Bluffing Game',
+  [StringNames.Common_TokenRefreshed]: 'Token refreshed',
   [StringNames.Common_TokenValid]: 'Token is valid',
   [StringNames.Common_Unauthorized]: 'Unauthorized',
   [StringNames.Common_UnexpectedError]: 'Unexpected Error',
@@ -61,6 +63,7 @@ export const BritishEnglishStrings: StringsCollection = {
   [StringNames.Error_GameAlreadyInProgress]: 'Game is already in progress.',
   [StringNames.Error_GameDisplayNameAlreadyInUse]:
     'Name is already in use within this game.',
+  [StringNames.Error_GameEnded]: 'Game has already ended.',
   [StringNames.Error_GameInvalidPhase]:
     'Game is not in the correct phase for this action.',
   [StringNames.Error_GamePasswordMismatch]: 'Game password does not match.',
@@ -70,6 +73,7 @@ export const BritishEnglishStrings: StringsCollection = {
     'You must be the master chef to perform this action.',
   [StringNames.Error_NotEnoughChefsTemplate]:
     'Not enough chefs to start game. {CHEFS_PRESENT}/{MIN_CHEFS}',
+  [StringNames.Error_NotFound]: 'Not found',
   [StringNames.Error_NotInGame]: 'You are not in this game.',
   [StringNames.Error_NotYourTurn]: 'Not your turn.',
   [StringNames.Error_OutOfIngredientTemplate]: 'Out of {INGREDIENT}.',
@@ -96,7 +100,6 @@ export const BritishEnglishStrings: StringsCollection = {
   [StringNames.Game_CreateGameSuccess]: 'Game created successfully',
   [StringNames.Game_JoinGame]: 'Join Game',
   [StringNames.Game_JoinGameSuccess]: 'Joined game successfully',
-  [StringNames.Game_ListSuccess]: 'Retrieved game list successfully',
   [StringNames.KeyFeatures_Title]: 'Key Features',
   [StringNames.KeyFeatures_1]:
     'Exciting bluffing gameplay with a culinary twist',
@@ -145,6 +148,8 @@ export const BritishEnglishStrings: StringsCollection = {
     'User display name must be between {MIN_USER_DISPLAY_NAME_LENGTH} and {MAX_USER_DISPLAY_NAME_LENGTH} characters long',
   [StringNames.Validation_DisplayNameRequired]: 'Display name is required',
   [StringNames.Validation_GameCodeRequired]: 'Game code is required',
+  [StringNames.Validation_GameNameRegexErrorTemplate]:
+    'Game name must be between {MIN_GAME_NAME_LENGTH} and {MAX_GAME_NAME_LENGTH} characters long',
   [StringNames.Validation_GameNameRequired]: 'Game name is required',
   [StringNames.Validation_GamePasswordRegexErrorTemplate]:
     'Game password must be between {MIN_GAME_PASSWORD_LENGTH} and {MAX_GAME_PASSWORD_LENGTH} characters long',
@@ -161,7 +166,10 @@ export const BritishEnglishStrings: StringsCollection = {
   [StringNames.Validation_InvalidMessage]: 'Invalid Message',
   [StringNames.Validation_InvalidTimezone]: 'Invalid Timezone',
   [StringNames.Validation_InvalidToken]: 'Invalid Token',
-  [StringNames.Validation_InvalidMaxChefs]: 'Invalid number of chefs',
+  [StringNames.Validation_InvalidMaxChefsTemplate]:
+    'Max chefs must be between {MIN_CHEFS} and {MAX_CHEFS}.',
+  [StringNames.Validation_InvalidMaxChefsValueTemplate]:
+    '{VALUE} is not a valid number of chefs! Max chefs must be between {MIN_CHEFS} and {MAX_CHEFS}.',
   [StringNames.Validation_MaxChefsRequired]: 'Max chefs is required',
   [StringNames.Validation_MessageRegexErrorTemplate]:
     'Message must be between {MIN_MESSAGE_LENGTH} and {MAX_MESSAGE_LENGTH} characters long.',
@@ -183,6 +191,7 @@ export const BritishEnglishStrings: StringsCollection = {
   • Start with a letter, number, or Unicode character
   • Can contain letters, numbers, underscores, hyphens, and Unicode characters
   • Cannot contain spaces or special characters other than underscores and hyphens`,
+  [StringNames.VerifyEmail_Success]: 'Email verified successfully',
   [StringNames.TEST_TESTTEMPLATE]: 'Testing {VARIABLE1} {VARIABLE2}',
 };
 

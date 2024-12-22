@@ -7,15 +7,17 @@ import {
   handleError,
   routeConfig,
   RouteConfig,
+  sendApiMessageResponse,
+  SendFunction,
 } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { NextFunction, Request, Response } from 'express';
 import { param } from 'express-validator';
 import { BaseController } from '../base';
 
 export class I18nController extends BaseController {
-  public getRoutes(): RouteConfig<any>[] {
+  public getRoutes(): RouteConfig<Record<string, any>, true, Array<unknown>>[] {
     return [
-      routeConfig<any>({
+      routeConfig<Record<string, any>, true, Array<unknown>>({
         method: 'get',
         path: '/:languageCode',
         handler: this.i18n,
@@ -28,6 +30,7 @@ export class I18nController extends BaseController {
             })
             .withMessage('Invalid language code'),
         ],
+        rawJsonHandler: true,
       }),
     ];
   }
@@ -35,6 +38,7 @@ export class I18nController extends BaseController {
   private async i18n(
     req: Request,
     res: Response,
+    send: SendFunction<Record<string, any>>,
     next: NextFunction,
   ): Promise<void> {
     const { languageCode } = req.params;
@@ -42,9 +46,9 @@ export class I18nController extends BaseController {
     try {
       const language = languageCodeToStringLanguages(languageCode);
       const i18nTable = buildNestedI18nForLanguage(language);
-      res.status(200).json(i18nTable);
+      send(200, i18nTable, res);
     } catch (error) {
-      handleError(error, res, next);
+      handleError(error, res, sendApiMessageResponse, next);
     }
   }
 }

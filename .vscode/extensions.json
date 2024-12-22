@@ -11,7 +11,6 @@
     "mongodb.mongodb-vscode",
     "ms-playwright.playwright",
     "mermaidchart.vscode-mermaid-chart",
-    "graphite.gti-vscode",
-    "codeium.codeium"
+    "graphite.gti-vscode"
   ]
 }

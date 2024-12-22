@@ -4,5 +4,5 @@ import { ICreateGameDetails } from './details/create-game';
 
 export type ICreateGameAction<I = DefaultIdType> = IAction<
   I,
-  ICreateGameDetails
+  ICreateGameDetails<I>
 >;

@@ -31,7 +31,9 @@ export const FrenchStrings: StringsCollection = {
   [StringNames.Common_ReturnToKitchen]: 'Retour à la Cuisine',
   [StringNames.Common_Site]: site,
   [StringNames.Common_StartCooking]: 'Commencer la Cuisine',
+  [StringNames.Common_Success]: 'Succès',
   [StringNames.Common_Tagline]: 'Un Jeu de Bluff Épicé',
+  [StringNames.Common_TokenRefreshed]: 'Jeton réglé',
   [StringNames.Common_TokenValid]: 'Jeton valide',
   [StringNames.Common_Unauthorized]: 'Non autorisé',
   [StringNames.Common_UnexpectedError]: 'Erreur inattendue',
@@ -64,6 +66,7 @@ export const FrenchStrings: StringsCollection = {
   [StringNames.Error_GameAlreadyInProgress]: 'Le jeu est déjà en cours.',
   [StringNames.Error_GameDisplayNameAlreadyInUse]:
     'Le nom est déjà utilisé dans ce jeu.',
+  [StringNames.Error_GameEnded]: 'Le jeu est terminé',
   [StringNames.Error_GameInvalidPhase]:
     'Le jeu n’est pas dans la phase correcte pour cette action.',
   [StringNames.Error_GamePasswordMismatch]:
@@ -74,6 +77,7 @@ export const FrenchStrings: StringsCollection = {
     'Vous devez être le chef de cuisine pour effectuer cette action.',
   [StringNames.Error_NotEnoughChefsTemplate]:
     'Pas assez de chefs pour commencer le jeu. {CHEFS_PRESENT}/{MIN_CHEFS}',
+  [StringNames.Error_NotFound]: 'Introuvable',
   [StringNames.Error_NotInGame]: 'Vous n’êtes pas dans ce jeu.',
   [StringNames.Error_NotYourTurn]: 'Ce n’est pas votre tour.',
   [StringNames.Error_OutOfIngredientTemplate]: 'Plus de {INGREDIENT}.',
@@ -102,7 +106,6 @@ export const FrenchStrings: StringsCollection = {
   [StringNames.Game_CreateGameSuccess]: 'Jeu créé avec succès',
   [StringNames.Game_JoinGame]: 'Rejoindre un Jeu',
   [StringNames.Game_JoinGameSuccess]: 'Jeu rejoint avec succès',
-  [StringNames.Game_ListSuccess]: 'Liste de jeux récupérée avec succès',
   [StringNames.KeyFeatures_Title]: 'Caractéristiques Principales',
   [StringNames.KeyFeatures_1]:
     'Un jeu de bluff passionnant avec une touche culinaire',
@@ -160,6 +163,8 @@ export const FrenchStrings: StringsCollection = {
   [StringNames.Validation_InvalidGameCodeTemplate]:
     'Le code de jeu doit contenir {GAME_CODE_LENGTH} caractères',
   [StringNames.Validation_GameCodeRequired]: 'Code de jeu requis',
+  [StringNames.Validation_GameNameRegexErrorTemplate]:
+    'Le nom du jeu doit contenir entre {MIN_GAME_NAME_LENGTH} et {MAX_GAME_NAME_LENGTH} caractères.',
   [StringNames.Validation_GameNameRequired]: 'Nom du jeu requis',
   [StringNames.Validation_GamePasswordRegexErrorTemplate]:
     'Le mot de passe du jeu doit contenir entre {MIN_GAME_PASSWORD_LENGTH} et {MAX_GAME_PASSWORD_LENGTH} caractères',
@@ -171,7 +176,10 @@ export const FrenchStrings: StringsCollection = {
   [StringNames.Validation_InvalidMessage]: 'Message invalide',
   [StringNames.Validation_InvalidTimezone]: 'Fuseau horaire invalide',
   [StringNames.Validation_InvalidToken]: 'Jeton invalide',
-  [StringNames.Validation_InvalidMaxChefs]: 'Nombre de chefs invalide',
+  [StringNames.Validation_InvalidMaxChefsTemplate]:
+    'Le nombre maximum de chefs doit être compris entre {MIN_CHEFS} et {MAX_CHEFS}.',
+  [StringNames.Validation_InvalidMaxChefsValueTemplate]:
+    '{VALUE} n’est pas un nombre de chefs valide ! Le nombre maximum de chefs doit être compris entre {MIN_CHEFS} et {MAX_CHEFS}.',
   [StringNames.Validation_MaxChefsRequired]: 'Le nombre de chefs est requis',
   [StringNames.Validation_MessageRegexErrorTemplate]:
     'Le message doit contenir entre {MIN_MESSAGE_LENGTH} et {MAX_MESSAGE_LENGTH} caractères.',
@@ -195,6 +203,7 @@ export const FrenchStrings: StringsCollection = {
   • Commencer par une lettre, un chiffre, ou un caractère Unicode
   • Peut contenir des lettres, des chiffres, des underscores, des tirets, et des caractères Unicode
   • Ne peut contenir des espaces ou des caractères spéciaux autre que des underscores et des tirets`,
+  [StringNames.VerifyEmail_Success]: 'Courriel vérifié avec succès',
   [StringNames.TEST_TESTTEMPLATE]: 'Essai {VARIABLE1} {VARIABLE2}',
 };
 

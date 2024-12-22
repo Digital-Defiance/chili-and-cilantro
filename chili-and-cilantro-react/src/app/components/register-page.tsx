@@ -33,7 +33,7 @@ const RegisterPage: React.FC = () => {
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const navigate = useNavigate();
   const { t } = useAppTranslation();
-  const { register } = useAuth();
+  const { register, user } = useAuth();
 
   const formik = useFormik<FormValues>({
     initialValues: {
@@ -100,6 +100,11 @@ const RegisterPage: React.FC = () => {
       }
     },
   });
+
+  if (user) {
+    navigate('/dashboard');
+    return null;
+  }
 
   return (
     <Container maxWidth="xs">

@@ -4,14 +4,19 @@ import {
   ChefAlreadyJoinedError,
   ChefState,
   DefaultIdType,
+  GameEndedError,
   GameInProgressError,
   GamePasswordMismatchError,
   GamePhase,
   IBid,
   IChefDocument,
   ICreateGameActionDocument,
+  IGameAction,
+  IGameChef,
+  IGameChefs,
   IGameDocument,
   IGameListResponse,
+  IGameObject,
   IMessageActionDocument,
   IUserDocument,
   IncorrectGamePhaseError,
@@ -37,8 +42,6 @@ import { IApplication } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { ClientSession, Types } from 'mongoose';
 import validator from 'validator';
 import { IBidIngredient } from '../interfaces/bid-ingredient';
-import { IGameAction } from '../interfaces/game-action';
-import { IGameChef } from '../interfaces/game-chef';
 import { ActionService } from './action';
 import { BaseService } from './base';
 import { ChefService } from './chef';
@@ -64,28 +67,79 @@ export class GameService extends BaseService {
   }
 
   /**
+   * Converts a game document to a game object
+   * @param game The game document to convert
+   * @returns The game object
+   */
+  public static gameToGameObject(game: IGameDocument): IGameObject {
+    const roundWinners: Record<number, string> = {};
+    for (const key in game.roundWinners) {
+      roundWinners[key] = game.roundWinners[key].toString();
+    }
+    const roundBids: Record<number, IBid<string>[]> = {};
+    for (const key in game.roundBids) {
+      if (key.startsWith('$__')) {
+        continue;
+      }
+      roundBids[key] = game.roundBids[key].map((bid) => {
+        return {
+          ...bid,
+          chefId: bid.chefId.toString(),
+        } as IBid<string>;
+      });
+    }
+
+    return {
+      ...game.toObject(),
+      _id: game._id.toString(),
+      chefIds: game.chefIds.map((id: DefaultIdType) => id.toString()),
+      eliminatedChefIds: game.eliminatedChefIds.map((id: DefaultIdType) =>
+        id.toString(),
+      ),
+      turnOrder: game.turnOrder.map((id: DefaultIdType) => id.toString()),
+      roundWinners: roundWinners,
+      roundBids: roundBids,
+      lastGame: game.lastGame?.toString(),
+      winner: game.winner?.toString(),
+      masterChefId: game.masterChefId.toString(),
+      masterChefUserId: game.masterChefUserId.toString(),
+      createdBy: game.createdBy.toString(),
+      updatedBy: game.updatedBy.toString(),
+    } as IGameObject;
+  }
+
+  /**
    * Gets games for the specified user
    * @returns created and participating games
    */
   public async getGamesAsync(
     userDoc: IUserDocument,
     session?: ClientSession,
+    active?: boolean,
   ): Promise<IGameListResponse> {
     const GameModel = this.application.getModel<IGameDocument>(ModelName.Game);
-    const createdGames = await GameModel.find({
-      masterChefUserId: userDoc._id,
-    })
-      .session(session)
-      .lean();
+    const createdGames: IGameObject[] = (
+      await GameModel.find(
+        {
+          masterChefUserId: userDoc._id,
+          ...(active ? { currentPhase: { $ne: GamePhase.GAME_OVER } } : {}),
+        },
+        { session },
+      )
+    ).map((game) => GameService.gameToGameObject(game));
     const chefIds = await this.chefService.getChefsByUserIdAsync(userDoc._id);
-    const participatingGames = await GameModel.find({
-      chefIds: { $in: chefIds },
-    })
-      .session(session)
-      .lean();
+    const participatingGames: IGameObject[] = (
+      await GameModel.find(
+        {
+          chefIds: { $in: chefIds },
+          ...(active ? { currentPhase: { $ne: GamePhase.GAME_OVER } } : {}),
+        },
+        { session },
+      )
+    ).map((game) => GameService.gameToGameObject(game));
 
     return {
-      message: translate(StringNames.Game_ListSuccess),
+      message: translate(StringNames.Common_Success),
       participatingGames,
       createdGames,
     };
@@ -133,30 +187,31 @@ export class GameService extends BaseService {
     user: IUserDocument,
     displayName: string,
     gameName: string,
-    password: string,
     maxChefs: number,
+    password?: string,
   ): Promise<void> {
     if (await this.playerService.userIsInAnyActiveGameAsync(user)) {
       throw new ChefAlreadyJoinedError();
     }
     if (
-      !validator.matches(displayName, constants.MULTILINGUAL_STRING_REGEX) ||
+      !validator.matches(displayName, constants.USER_DISPLAY_NAME_REGEX) ||
       displayName.length < constants.MIN_USER_DISPLAY_NAME_LENGTH ||
       displayName.length > constants.MAX_USER_DISPLAY_NAME_LENGTH
     ) {
       throw new InvalidUserDisplayNameError(displayName);
     }
     if (
-      !validator.matches(gameName, constants.MULTILINGUAL_STRING_REGEX) ||
+      !validator.matches(gameName, constants.GAME_NAME_REGEX) ||
       gameName.length < constants.MIN_GAME_NAME_LENGTH ||
       gameName.length > constants.MAX_GAME_NAME_LENGTH
     ) {
       throw new InvalidGameNameError();
     }
     if (
-      !validator.matches(password, constants.GAME_PASSWORD_REGEX) ||
-      password.length < constants.MIN_GAME_PASSWORD_LENGTH ||
-      password.length > constants.MAX_GAME_PASSWORD_LENGTH
+      password !== undefined &&
+      (!validator.matches(password, constants.GAME_PASSWORD_REGEX) ||
+        password.length < constants.MIN_GAME_PASSWORD_LENGTH ||
+        password.length > constants.MAX_GAME_PASSWORD_LENGTH)
     ) {
       throw new InvalidGamePasswordError();
     }
@@ -183,8 +238,8 @@ export class GameService extends BaseService {
     user: IUserDocument,
     displayName: string,
     gameName: string,
-    password: string,
     maxChefs: number,
+    password?: string,
     gameId: DefaultIdType = new Types.ObjectId(),
     masterChefId: DefaultIdType = new Types.ObjectId(),
   ): Promise<{
@@ -212,6 +267,8 @@ export class GameService extends BaseService {
         roundBids: [],
         roundWinners: {},
         turnOrder: [], // will be chosen when the game is started
+        createdBy: user._id,
+        updatedBy: user._id,
       },
     ]);
     if (games.length !== 1) {
@@ -243,8 +300,8 @@ export class GameService extends BaseService {
     user: IUserDocument,
     displayName: string,
     gameName: string,
-    password: string,
     maxChefs: number,
+    password?: string,
     session?: ClientSession,
   ): Promise<IGameChef> {
     return this.withTransaction<IGameChef>(async () => {
@@ -252,15 +309,15 @@ export class GameService extends BaseService {
         user,
         displayName,
         gameName,
-        password,
         maxChefs,
+        password,
       );
       return this.createGameAsync(
         user,
         displayName,
         gameName,
-        password,
         maxChefs,
+        password,
       );
     }, session);
   }
@@ -277,17 +334,32 @@ export class GameService extends BaseService {
     game: IGameDocument,
     user: IUserDocument,
     displayName: string,
-  ): Promise<IGameChef> {
+    session?: ClientSession,
+  ): Promise<IGameChefs> {
+    if (game.currentPhase === GamePhase.GAME_OVER) {
+      throw new GameEndedError();
+    } else if (game.currentPhase !== GamePhase.LOBBY) {
+      throw new GameInProgressError();
+    }
+    // if the user is already in the game, just return the game and chef
+    // get chefIds for this user and game
+    const chefs = await this.chefService.getGameChefsByGameOrIdAsync(game);
+    if (chefs.some((c) => c.userId.toString() === user._id.toString())) {
+      return { game, chefs };
+    }
     const chef = await this.chefService.newChefAsync(
       game,
       user,
       displayName,
       false,
+      undefined,
+      session,
     );
-    await this.actionService.joinGameAsync(game, chef, user);
+    await this.actionService.joinGameAsync(game, chef, user, session);
     game.chefIds.push(chef._id);
-    await game.save();
-    return { game, chef };
+    const savedGame = await game.save();
+    chefs.push(chef);
+    return { game: savedGame, chefs: chefs };
   }
 
   public async validateJoinGameOrThrowAsync(
@@ -296,6 +368,14 @@ export class GameService extends BaseService {
     userDisplayName: string,
     password: string,
   ): Promise<void> {
+    const isParticipant = await this.verifyUserIsParticipantAsync(
+      user._id.toString(),
+      game.code,
+    );
+    if (isParticipant) {
+      // if already joined, do nothing
+      return;
+    }
     if (await this.playerService.userIsInAnyActiveGameAsync(user)) {
       throw new ChefAlreadyJoinedError();
     }
@@ -318,10 +398,7 @@ export class GameService extends BaseService {
       throw new TooManyChefsError();
     }
     if (
-      !validator.matches(
-        userDisplayName,
-        constants.MULTILINGUAL_STRING_REGEX,
-      ) ||
+      !validator.matches(userDisplayName, constants.USER_DISPLAY_NAME_REGEX) ||
       userDisplayName.length < constants.MIN_USER_DISPLAY_NAME_LENGTH ||
       userDisplayName.length > constants.MAX_USER_DISPLAY_NAME_LENGTH
     ) {
@@ -344,16 +421,20 @@ export class GameService extends BaseService {
     user: IUserDocument,
     displayName: string,
     session?: ClientSession,
-  ): Promise<IGameChef> {
-    return this.withTransaction<IGameChef>(async () => {
-      const game = await this.getGameByCodeOrThrowAsync(gameCode, true);
+  ): Promise<IGameChefs> {
+    return this.withTransaction<IGameChefs>(async () => {
+      const game = await this.getGameByCodeOrThrowAsync(
+        gameCode,
+        true,
+        session,
+      );
       await this.validateJoinGameOrThrowAsync(
         game,
         user,
         displayName,
         password,
       );
-      return this.joinGameAsync(game, user, displayName);
+      return this.joinGameAsync(game, user, displayName, session);
     }, session);
   }
 
@@ -542,6 +623,7 @@ export class GameService extends BaseService {
   public async getGameByIdOrThrowAsync(
     gameId: DefaultIdType,
     active = false,
+    session?: ClientSession,
   ): Promise<IGameDocument> {
     const GameModel = this.application.getModel<IGameDocument>(ModelName.Game);
     const search = active
@@ -550,7 +632,7 @@ export class GameService extends BaseService {
           currentPhase: { $ne: GamePhase.GAME_OVER },
         }
       : { _id: gameId };
-    const game = await GameModel.findOne(search);
+    const game = await GameModel.findOne(search, { session });
     if (!game) {
       throw new InvalidGameError();
     }
@@ -566,6 +648,7 @@ export class GameService extends BaseService {
   public async getGameByCodeOrThrowAsync(
     gameCode: string,
     active = false,
+    session?: ClientSession,
   ): Promise<IGameDocument> {
     const GameModel = this.application.getModel<IGameDocument>(ModelName.Game);
     // Construct the search criteria
@@ -574,7 +657,9 @@ export class GameService extends BaseService {
       : { code: gameCode };
 
     // Create the query
-    const query = GameModel.find(search).sort({ updatedAt: -1 }).limit(1);
+    const query = GameModel.find(search, undefined, { session })
+      .sort({ updatedAt: -1 })
+      .limit(1);
 
     // Execute the query and get the results
     const games = await query.exec();
@@ -1178,5 +1263,42 @@ export class GameService extends BaseService {
       // TODO determine next state, transition current phase, etc
       return result;
     }, session);
+  }
+
+  public async verifyUserIsParticipantAsync(
+    userId: string,
+    gameCode: string,
+    active = false,
+  ): Promise<boolean> {
+    // look for chefs in the chefs collection with a game id that matches a record in the games collection with the specified game code- also check if the game is active if requested
+    // get a document count for a query with a lookup to the games collection
+    const ChefModel = this.application.getModel<IChefDocument>(ModelName.Chef);
+    const query = ChefModel.aggregate([
+      {
+        $lookup: {
+          from: 'games',
+          localField: 'gameId',
+          foreignField: '_id',
+          as: 'game',
+        },
+      },
+      {
+        $match: {
+          userId: new Types.ObjectId(userId),
+          'game.code': gameCode,
+          ...(active
+            ? { 'game.currentPhase': { $ne: GamePhase.GAME_OVER } }
+            : {}),
+        },
+      },
+    ]);
+    // get the document count from the query
+    const count = await query.count('game');
+    const result =
+      Array.isArray(count) &&
+      count.length > 0 &&
+      'game' in count[0] &&
+      (count[0].game as number) > 0;
+    return result;
   }
 }

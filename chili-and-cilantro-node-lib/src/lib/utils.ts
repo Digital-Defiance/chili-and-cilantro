@@ -2,17 +2,20 @@ import {
   HandleableError,
   IApiErrorResponse,
   IApiExpressValidationErrorResponse,
+  IApiMessageResponse,
   IApiMongoValidationErrorResponse,
+  IMongoErrors,
   StringNames,
   TransactionCallback,
   translate,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { NextFunction, Request, Response } from 'express';
-import { Result } from 'express-validator';
+import { Result, ValidationError } from 'express-validator';
 import { ClientSession, Connection, Types } from 'mongoose';
 import { ExpressValidationError } from './errors/express-validation-error';
 import { MissingValidatedDataError } from './errors/missing-validated-data';
 import { MongooseValidationError } from './errors/mongoose-validation-error';
+import { SendFunction } from './shared-types';
 
 /**
  * Checks if the given id is a valid string id
@@ -154,9 +157,96 @@ export async function withTransaction<T>(
   }
 }
 
+/**
+ * Sends an API response with the given status and response object.
+ * @param status
+ * @param response
+ * @param res
+ */
+export function sendApiMessageResponse<T extends IApiMessageResponse>(
+  status: number,
+  response: T,
+  res: Response<T>,
+): void {
+  res.status(status).json(response);
+}
+
+/**
+ * Sends an API response with the given status, message, and error.
+ * @param status
+ * @param message
+ * @param error
+ * @param res
+ */
+export function sendApiErrorResponse(
+  status: number,
+  message: string,
+  error: unknown,
+  res: Response,
+): void {
+  sendApiMessageResponse<IApiErrorResponse>(status, { message, error }, res);
+}
+
+/**
+ * Sends an API response with the given status and validation errors.
+ * @param status
+ * @param errors
+ * @param res
+ */
+export function sendApiExpressValidationErrorResponse(
+  status: number,
+  errors: ValidationError[],
+  res: Response,
+): void {
+  sendApiMessageResponse<IApiExpressValidationErrorResponse>(
+    status,
+    { message: translate(StringNames.ValidationError), errors },
+    res,
+  );
+}
+
+/**
+ * Sends an API response with the given status, message, and MongoDB validation errors.
+ * @param status
+ * @param message
+ * @param errors
+ * @param res
+ */
+export function sendApiMongoValidationErrorResponse(
+  status: number,
+  message: string,
+  errors: IMongoErrors,
+  res: Response,
+): void {
+  sendApiMessageResponse<IApiMongoValidationErrorResponse>(
+    status,
+    { message, errors },
+    res,
+  );
+}
+
+/**
+ * Sends a raw JSON response with the given status and response object.
+ * @param status The status code
+ * @param response The response data
+ * @param res The response object
+ */
+export function sendRawJsonResponse<T>(
+  status: number,
+  response: T,
+  res: Response<T>,
+) {
+  res.status(status).json(response);
+}
+
 export function handleError(
   error: unknown,
   res: Response,
+  send: SendFunction<
+    | IApiErrorResponse
+    | IApiExpressValidationErrorResponse
+    | IApiMongoValidationErrorResponse
+  >,
   next: NextFunction,
 ): void {
   let handleableError: HandleableError;
@@ -167,10 +257,14 @@ export function handleError(
     alreadyHandled = error.handled;
     errorType = error.name;
   } else if (error instanceof Error) {
-    handleableError = new HandleableError(error.message, {
-      cause: error,
-      handled: true,
-    });
+    console.log(error);
+    handleableError = new HandleableError(
+      error.message ?? translate(StringNames.Common_UnexpectedError),
+      {
+        cause: error,
+        handled: true,
+      },
+    );
     errorType = error.name;
   } else {
     handleableError = new HandleableError(
@@ -180,22 +274,38 @@ export function handleError(
   }
   if (!res.headersSent) {
     if (error instanceof ExpressValidationError) {
-      res.status(handleableError.statusCode).json({
-        message: translate(StringNames.ValidationError),
-        errors:
-          error.errors instanceof Result ? error.errors.array() : error.errors,
-      } as IApiExpressValidationErrorResponse);
+      send(
+        handleableError.statusCode,
+        {
+          message: translate(StringNames.ValidationError),
+          errors:
+            error.errors instanceof Result
+              ? error.errors.array()
+              : error.errors,
+          errorType: 'ExpressValidationError',
+        },
+        res,
+      );
     } else if (error instanceof MongooseValidationError) {
-      res.status(handleableError.statusCode).json({
-        message: translate(StringNames.ValidationError),
-        errors: error.errors,
-      } as IApiMongoValidationErrorResponse);
+      send(
+        handleableError.statusCode,
+        {
+          message: translate(StringNames.ValidationError),
+          errors: error.errors,
+          errorType: 'MongooseValidationError',
+        },
+        res,
+      );
     } else {
-      res.status(handleableError.statusCode).json({
-        message: handleableError.message,
-        error: handleableError,
-        errorType: errorType,
-      } as IApiErrorResponse);
+      send(
+        handleableError.statusCode,
+        {
+          message: handleableError.message,
+          error: handleableError,
+          errorType: errorType,
+        },
+        res,
+      );
     }
     handleableError.handled = true;
   }

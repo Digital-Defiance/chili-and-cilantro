@@ -29,7 +29,9 @@ export const MandarinStrings: StringsCollection = {
   [StringNames.Common_ReturnToKitchen]: '返回厨房',
   [StringNames.Common_Site]: site,
   [StringNames.Common_StartCooking]: '开始烹饪',
+  [StringNames.Common_Success]: '成功',
   [StringNames.Common_Tagline]: '一款辛辣的虚张声势游戏',
+  [StringNames.Common_TokenRefreshed]: '令牌已刷新',
   [StringNames.Common_TokenValid]: '令牌有效',
   [StringNames.Common_Unauthorized]: '未经授权',
   [StringNames.Common_UnexpectedError]: '意外错误',
@@ -56,7 +58,9 @@ export const MandarinStrings: StringsCollection = {
   [StringNames.Error_FailedToCreateEmailToken]: '无法创建电子邮件令牌',
   [StringNames.Error_GameAlreadyInProgress]: '游戏已经开始。',
   [StringNames.Error_GameDisplayNameAlreadyInUse]: '游戏名称已经在使用中',
+  [StringNames.Error_GameEnded]: '游戏已结束',
   [StringNames.Error_GameInvalidPhase]: '游戏不处于此操作的正确阶段。',
+  [StringNames.Error_NotFound]: '未找到',
   [StringNames.Error_GamePasswordMismatch]: '游戏密码不匹配',
   [StringNames.Error_InvalidAction]: '无效操作',
   [StringNames.Error_InvalidCredentials]: '无效凭证',
@@ -89,7 +93,6 @@ export const MandarinStrings: StringsCollection = {
   [StringNames.Game_CreateGameSuccess]: '成功创建游戏',
   [StringNames.Game_JoinGame]: '加入游戏',
   [StringNames.Game_JoinGameSuccess]: '成功加入游戏',
-  [StringNames.Game_ListSuccess]: '成功检索游戏列表',
   [StringNames.KeyFeatures_Title]: '主要特点',
   [StringNames.KeyFeatures_1]: '令人兴奋的虚张声势游戏，带有烹饪的扭曲',
   [StringNames.KeyFeatures_2]: '战略性出价和卡片放置',
@@ -132,6 +135,8 @@ export const MandarinStrings: StringsCollection = {
     '用户显示名称必须在{MIN_USER_DISPLAY_NAME_LENGTH}和{MAX_USER_DISPLAY_NAME_LENGTH}个字符之间',
   [StringNames.Validation_DisplayNameRequired]: '昵称是必需的',
   [StringNames.Validation_GameCodeRequired]: '游戏代码是必需的',
+  [StringNames.Validation_GameNameRegexErrorTemplate]:
+    '游戏名必须在{MIN_GAME_NAME_LENGTH}和{MAX_GAME_NAME_LENGTH}个字符之间。',
   [StringNames.Validation_GameNameRequired]: '游戏名是必需的',
   [StringNames.Validation_GamePasswordRegexErrorTemplate]:
     '游戏密码必须在{MIN_GAME_PASSWORD_LENGTH}和{MAX_GAME_PASSWORD_LENGTH}个字符之间',
@@ -145,7 +150,10 @@ export const MandarinStrings: StringsCollection = {
     '游戏名称必须在{MIN_GAME_NAME_LENGTH}和{MAX_GAME_NAME_LENGTH}个字符之间。',
   [StringNames.Validation_InvalidLanguage]: '无效语言',
   [StringNames.Validation_InvalidMessage]: '无效消息',
-  [StringNames.Validation_InvalidMaxChefs]: '无效厨师数量',
+  [StringNames.Validation_InvalidMaxChefsTemplate]:
+    '最大厨师必须在{MIN_CHEFS}和{MAX_CHEFS}之间。',
+  [StringNames.Validation_InvalidMaxChefsValueTemplate]:
+    '{VALUE}不是有效的厨师数量！最大厨师必须在{MIN_CHEFS}和{MAX_CHEFS}之间。',
   [StringNames.Validation_InvalidTimezone]: '无效时区',
   [StringNames.Validation_InvalidToken]: '无效令牌',
   [StringNames.Validation_MaxChefsRequired]: '最大厨师是必需的',
@@ -166,6 +174,7 @@ export const MandarinStrings: StringsCollection = {
   • 以字母，数字，或Unicode字符开头
   • 可以包含字母，数字，下划线，短横线，或Unicode字符
   • 不能包含空格或特殊字符，除下划线和短横线外`,
+  [StringNames.VerifyEmail_Success]: '验证成功',
   [StringNames.TEST_TESTTEMPLATE]: '测试 {VARIABLE1} {VARIABLE2}',
 };
 

@@ -1,5 +1,8 @@
 import { debugLog } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { handleError } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import {
+  handleError,
+  sendApiMessageResponse,
+} from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { Application, static as expressStatic } from 'express';
 import { existsSync } from 'fs';
 import { join } from 'path';
@@ -67,7 +70,7 @@ export class AppRouter {
             'Error serving static file:',
             err,
           );
-          handleError(err, res, next);
+          handleError(err, res, sendApiMessageResponse, next);
           return;
         }
         next();

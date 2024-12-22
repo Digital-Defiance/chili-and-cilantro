@@ -42,6 +42,7 @@ export function generateChef(
     exec: jest.fn().mockResolvedValue(chefData),
     save: jest.fn().mockImplementation(() => Promise.resolve(chef)),
     sort: jest.fn().mockReturnThis(),
+    session: jest.fn().mockReturnThis(),
     ...chefData,
   } as IChefDocument & MockedModel;
   return chef;

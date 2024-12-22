@@ -1,25 +1,26 @@
 import {
   AccountStatusTypeEnum,
-  constants,
   HandleableError,
+  IApiErrorResponse,
   IApiMessageResponse,
   ICreateUserBasics,
-  IRequestUser,
+  IRequestUserResponse,
   ITokenResponse,
   IUserDocument,
-  IUserResponse,
   ModelName,
   StringLanguages,
   StringNames,
-  translate,
   UserNotFoundError,
   ValidationError,
+  constants,
+  translate,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import {
-  handleError,
   IApplication,
-  routeConfig,
   RouteConfig,
+  SendFunction,
+  handleError,
+  routeConfig,
 } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { MailService } from '@sendgrid/mail';
 import { NextFunction, Request, Response } from 'express';
@@ -46,9 +47,17 @@ export class UserController extends BaseController {
     this.userService = new UserService(application, this.mailService);
   }
 
-  protected getRoutes(): RouteConfig<unknown[]>[] {
+  protected getRoutes(): RouteConfig<
+    IApiMessageResponse,
+    false,
+    Array<unknown>
+  >[] {
     return [
-      routeConfig<unknown[]>({
+      routeConfig<
+        IApiMessageResponse | IApiErrorResponse,
+        false,
+        Array<unknown>
+      >({
         method: 'post',
         path: '/change-password',
         handler: this.changePassword,
@@ -64,7 +73,11 @@ export class UserController extends BaseController {
             ),
         ],
       }),
-      routeConfig<unknown[]>({
+      routeConfig<
+        IApiMessageResponse | IApiErrorResponse,
+        false,
+        Array<unknown>
+      >({
         method: 'post',
         path: '/register',
         handler: this.register,
@@ -94,7 +107,7 @@ export class UserController extends BaseController {
         ],
         useAuthentication: false,
       }),
-      routeConfig<unknown[]>({
+      routeConfig<ITokenResponse | IApiErrorResponse, false, Array<unknown>>({
         method: 'post',
         path: '/login',
         handler: this.login,
@@ -125,13 +138,21 @@ export class UserController extends BaseController {
         ],
         useAuthentication: false,
       }),
-      routeConfig<unknown[]>({
+      routeConfig<
+        IRequestUserResponse | IApiErrorResponse,
+        false,
+        Array<unknown>
+      >({
         method: 'get',
         path: '/refresh-token',
         handler: this.refreshToken,
         useAuthentication: true,
       }),
-      routeConfig<unknown[]>({
+      routeConfig<
+        IApiMessageResponse | IApiErrorResponse,
+        false,
+        Array<unknown>
+      >({
         method: 'get',
         path: '/verify-email',
         handler: this.verifyEmailToken,
@@ -149,13 +170,17 @@ export class UserController extends BaseController {
         ],
         useAuthentication: false,
       }),
-      routeConfig<unknown[]>({
+      routeConfig<IRequestUserResponse, false, Array<unknown>>({
         method: 'get',
         path: '/verify',
         handler: this.tokenVerifiedResponse,
         useAuthentication: true,
       }),
-      routeConfig<unknown[]>({
+      routeConfig<
+        IApiMessageResponse | IApiErrorResponse,
+        false,
+        Array<unknown>
+      >({
         method: 'post',
         path: '/resend-verification',
         handler: this.resendVerification,
@@ -173,7 +198,11 @@ export class UserController extends BaseController {
         ],
         useAuthentication: false,
       }),
-      routeConfig<unknown[]>({
+      routeConfig<
+        IApiMessageResponse | IApiErrorResponse,
+        false,
+        Array<unknown>
+      >({
         method: 'post',
         path: '/forgot-password',
         handler: this.forgotPassword,
@@ -185,7 +214,11 @@ export class UserController extends BaseController {
         ],
         useAuthentication: false,
       }),
-      routeConfig<unknown[]>({
+      routeConfig<
+        IApiMessageResponse | IApiErrorResponse,
+        false,
+        Array<unknown>
+      >({
         method: 'get',
         path: '/verify-reset-token',
         handler: this.verifyResetToken,
@@ -203,7 +236,11 @@ export class UserController extends BaseController {
         ],
         useAuthentication: false,
       }),
-      routeConfig<unknown[]>({
+      routeConfig<
+        IRequestUserResponse | IApiErrorResponse,
+        false,
+        Array<unknown>
+      >({
         method: 'post',
         path: '/reset-password',
         handler: this.resetPassword,
@@ -217,7 +254,11 @@ export class UserController extends BaseController {
         ],
         useAuthentication: false,
       }),
-      routeConfig<any>({
+      routeConfig<
+        IRequestUserResponse | IApiErrorResponse,
+        false,
+        Array<unknown>
+      >({
         method: 'post',
         path: '/language',
         handler: this.setLanguage,
@@ -247,12 +288,14 @@ export class UserController extends BaseController {
    * Change the user's password
    * @param req The request object
    * @param res The response object
+   * @param send The send function
    * @param next The next function
    * @returns
    */
   public async changePassword(
     req: Request,
     res: Response,
+    send: SendFunction<IApiMessageResponse | IApiErrorResponse>,
     next: NextFunction,
   ): Promise<void> {
     try {
@@ -264,6 +307,7 @@ export class UserController extends BaseController {
             statusCode: 401,
           }),
           res,
+          send as SendFunction<IApiErrorResponse>,
           next,
         );
         return;
@@ -274,43 +318,56 @@ export class UserController extends BaseController {
         currentPassword,
         newPassword,
       );
-      this.sendApiMessageResponse(
+      send(
         200,
         {
           message: translate(StringNames.ChangePassword_Success),
-        } as IApiMessageResponse,
+        },
         res,
       );
     } catch (error) {
-      handleError(error, res, next);
+      handleError(error, res, send as SendFunction<IApiErrorResponse>, next);
     }
   }
 
   /**
    * Send the verify token response after authenticateToken middleware
-   * @param req
-   * @param res
+   * @param req The request object
+   * @param res The response object
+   * @param send The send function
+   * @param next The next function
    */
   public async tokenVerifiedResponse(
     req: Request,
     res: Response,
+    send: SendFunction<IRequestUserResponse>,
+    next: NextFunction,
   ): Promise<void> {
     // If we've reached this point, the token is valid
-    this.sendApiMessageResponse(
+    send(
       200,
-      { message: 'Token is valid', user: req.user } as IUserResponse,
+      {
+        message: translate(StringNames.Common_TokenValid),
+        user: req.user,
+      },
       res,
     );
   }
 
   /**
    * Refresh the JWT token
-   * @param req
-   * @param res
-   * @param next
+   * @param req The request
+   * @param res The response
+   * @param send The send function
+   * @param next The next function
    * @returns
    */
-  private async refreshToken(req: Request, res: Response, next: NextFunction) {
+  private async refreshToken(
+    req: Request,
+    res: Response,
+    send: SendFunction<IRequestUserResponse | IApiErrorResponse>,
+    next: NextFunction,
+  ) {
     const UserModel = this.application.getModel<IUserDocument>(ModelName.User);
     try {
       const token = findAuthToken(req.headers);
@@ -320,6 +377,7 @@ export class UserController extends BaseController {
             statusCode: 422,
           }),
           res,
+          send as SendFunction<IApiErrorResponse>,
           next,
         );
         return;
@@ -334,18 +392,27 @@ export class UserController extends BaseController {
         !userDoc ||
         userDoc.accountStatusType !== AccountStatusTypeEnum.Active
       ) {
-        handleError(new UserNotFoundError(), res, next);
+        handleError(
+          new UserNotFoundError(),
+          res,
+          send as SendFunction<IApiErrorResponse>,
+          next,
+        );
         return;
       }
       const { token: newToken } = await this.jwtService.signToken(userDoc);
 
       res.header('Authorization', `Bearer ${newToken}`);
-      res.status(200).json({
-        message: 'Token refreshed',
-        user: RequestUserService.makeRequestUser(userDoc),
-      } as IUserResponse);
+      send(
+        200,
+        {
+          message: translate(StringNames.Common_TokenRefreshed),
+          user: RequestUserService.makeRequestUser(userDoc),
+        },
+        res,
+      );
     } catch (error) {
-      handleError(error, res, next);
+      handleError(error, res, send as SendFunction<IApiErrorResponse>, next);
     }
   }
 
@@ -353,12 +420,14 @@ export class UserController extends BaseController {
    * Register a new user
    * @param req The request object
    * @param res The response object
+   * @param send The send function
    * @param next The next function
    * @returns
    */
   public async register(
     req: Request,
     res: Response,
+    send: SendFunction<IApiMessageResponse | IApiErrorResponse>,
     next: NextFunction,
   ): Promise<void> {
     try {
@@ -375,13 +444,15 @@ export class UserController extends BaseController {
         } as ICreateUserBasics,
         password,
       );
-      this.sendApiMessageResponse(
+      send(
         201,
-        { message: 'User registered successfully' } as IApiMessageResponse,
+        {
+          message: translate(StringNames.Register_Success),
+        },
         res,
       );
     } catch (error) {
-      handleError(error, res, next);
+      handleError(error, res, send as SendFunction<IApiErrorResponse>, next);
     }
   }
 
@@ -389,16 +460,18 @@ export class UserController extends BaseController {
    * Log in a user
    * @param req The request object
    * @param res The response object
+   * @param send The send function
    * @param next The next function
    * @returns
    */
   public async login(
     req: Request,
     res: Response,
+    send: SendFunction<ITokenResponse | IApiErrorResponse>,
     next: NextFunction,
   ): Promise<void> {
     try {
-      const { username, email, password } = req.body;
+      const { username, email, password } = req.validatedBody;
 
       const userDoc = await this.userService.findUser(
         password,
@@ -411,11 +484,16 @@ export class UserController extends BaseController {
       userDoc.lastLogin = new Date();
       await userDoc.save();
 
-      res
-        .status(200)
-        .json({ token, message: 'Logged in successfully' } as ITokenResponse);
+      send(
+        200,
+        {
+          message: translate(StringNames.Common_Success),
+          token,
+        },
+        res,
+      );
     } catch (error) {
-      handleError(error, res, next);
+      handleError(error, res, send as SendFunction<IApiErrorResponse>, next);
     }
   }
 
@@ -423,12 +501,14 @@ export class UserController extends BaseController {
    * Verify an email token
    * @param req The request object
    * @param res The response object
+   * @param send The send function
    * @param next The next function
    * @returns
    */
   public async verifyEmailToken(
     req: Request,
     res: Response,
+    send: SendFunction<IApiMessageResponse | IApiErrorResponse>,
     next: NextFunction,
   ): Promise<void> {
     const emailToken = Array.isArray(req.query.token)
@@ -442,6 +522,7 @@ export class UserController extends BaseController {
       handleError(
         new ValidationError(translate(StringNames.Validation_InvalidToken)),
         res,
+        send as SendFunction<IApiErrorResponse>,
         next,
       );
       return;
@@ -450,13 +531,15 @@ export class UserController extends BaseController {
     try {
       await this.userService.verifyEmailTokenAndFinalize(emailToken);
 
-      this.sendApiMessageResponse(
+      send(
         200,
-        { message: 'Email verified successfully' } as IApiMessageResponse,
+        {
+          message: translate(StringNames.Common_Success),
+        },
         res,
       );
     } catch (error) {
-      handleError(error, res, next);
+      handleError(error, res, send as SendFunction<IApiErrorResponse>, next);
     }
   }
 
@@ -464,11 +547,13 @@ export class UserController extends BaseController {
    * Resend the verification email
    * @param req The request object
    * @param res The response object
+   * @param send The send function
    * @param next The next function
    */
   public async resendVerification(
     req: Request,
     res: Response,
+    send: SendFunction<IApiMessageResponse | IApiErrorResponse>,
     next: NextFunction,
   ): Promise<void> {
     const UserModel = this.application.getModel<IUserDocument>(ModelName.User);
@@ -478,22 +563,27 @@ export class UserController extends BaseController {
       // Find the user
       const user = await UserModel.findOne(username ? { username } : { email });
       if (!user) {
-        handleError(new UserNotFoundError(), res, next);
+        handleError(
+          new UserNotFoundError(),
+          res,
+          send as SendFunction<IApiErrorResponse>,
+          next,
+        );
         return;
       }
 
       // Resend the email token
       await this.userService.resendEmailToken(user._id.toString());
 
-      this.sendApiMessageResponse(
+      send(
         200,
         {
-          message: 'Verification email resent successfully',
-        } as IApiMessageResponse,
+          message: translate(StringNames.VerifyEmail_Success),
+        },
         res,
       );
     } catch (error) {
-      handleError(error, res, next);
+      handleError(error, res, send as SendFunction<IApiErrorResponse>, next);
     }
   }
 
@@ -501,25 +591,23 @@ export class UserController extends BaseController {
    * Send a password reset email
    * @param req The request object
    * @param res The response object
+   * @param send The send function
    * @param next The next function
    * @returns
    */
   public async forgotPassword(
     req: Request,
     res: Response,
+    send: SendFunction<IApiMessageResponse | IApiErrorResponse>,
     next: NextFunction,
   ): Promise<void> {
     try {
       const { email } = req.validatedBody;
       const result = await this.userService.initiatePasswordReset(email);
 
-      this.sendApiMessageResponse(
-        result.success ? 200 : 400,
-        { message: result.message } as IApiMessageResponse,
-        res,
-      );
+      send(result.success ? 200 : 400, { message: result.message }, res);
     } catch (error) {
-      handleError(error, res, next);
+      handleError(error, res, send as SendFunction<IApiErrorResponse>, next);
     }
   }
 
@@ -527,25 +615,27 @@ export class UserController extends BaseController {
    * Verify the password reset token
    * @param req The request object
    * @param res The response object
+   * @param send The send function
    * @param next The next function
    */
   public async verifyResetToken(
     req: Request,
     res: Response,
+    send: SendFunction<IApiMessageResponse | IApiErrorResponse>,
     next: NextFunction,
   ): Promise<void> {
     try {
       const { token } = req.query;
       await this.userService.verifyEmailToken(token as string);
-      this.sendApiMessageResponse(
+      send(
         200,
         {
           message: translate(StringNames.Common_TokenValid),
-        } as IApiMessageResponse,
+        },
         res,
       );
     } catch (error) {
-      handleError(error, res, next);
+      handleError(error, res, send as SendFunction<IApiErrorResponse>, next);
     }
   }
 
@@ -553,11 +643,13 @@ export class UserController extends BaseController {
    * Reset the user's password
    * @param req The request object
    * @param res The response object
+   * @param send The send function
    * @param next The next function
    */
   public async resetPassword(
     req: Request,
     res: Response,
+    send: SendFunction<IRequestUserResponse | IApiErrorResponse>,
     next: NextFunction,
   ): Promise<void> {
     try {
@@ -566,15 +658,17 @@ export class UserController extends BaseController {
 
       // Generate a new JWT token for the user
       const { token: newToken } = await this.jwtService.signToken(user);
-      const requestUser: IRequestUser =
-        RequestUserService.makeRequestUser(user);
       res.header('Authorization', `Bearer ${newToken}`);
-      res.status(200).json({
-        message: translate(StringNames.ResetPassword_Success),
-        user: requestUser,
-      } as IUserResponse);
+      send(
+        200,
+        {
+          message: translate(StringNames.ResetPassword_Success),
+          user: RequestUserService.makeRequestUser(user),
+        },
+        res,
+      );
     } catch (error) {
-      handleError(error, res, next);
+      handleError(error, res, send as SendFunction<IApiErrorResponse>, next);
     }
   }
 
@@ -582,12 +676,14 @@ export class UserController extends BaseController {
    * Set the user's language
    * @param req The request
    * @param res The response
+   * @param send The send function
    * @param next The next function
    * @returns void
    */
   public async setLanguage(
     req: Request,
     res: Response,
+    send: SendFunction<IRequestUserResponse | IApiErrorResponse>,
     next: NextFunction,
   ): Promise<void> {
     return await this.withTransaction<void>(async (sess) => {
@@ -600,25 +696,26 @@ export class UserController extends BaseController {
               translate(StringNames.Validation_InvalidLanguage),
             ),
             res,
+            send as SendFunction<IApiErrorResponse>,
             next,
           );
           return;
         }
-        const user = await this.userService.updateSiteLanguage(
+        const requestUser = await this.userService.updateSiteLanguage(
           userId,
           language as StringLanguages,
           sess,
         );
-        this.sendApiMessageResponse(
+        send(
           200,
           {
             message: translate(StringNames.LanguageUpdate_Success),
-            user,
-          } as IUserResponse,
+            user: requestUser,
+          },
           res,
         );
       } catch (error) {
-        handleError(error, res, next);
+        handleError(error, res, send as SendFunction<IApiErrorResponse>, next);
       }
     });
   }

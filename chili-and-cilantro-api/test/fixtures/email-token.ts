@@ -41,6 +41,7 @@ export function generateEmailToken(
     exec: jest.fn().mockResolvedValue(emailTokenData),
     save: jest.fn().mockImplementation(() => Promise.resolve(emailToken)),
     sort: jest.fn().mockReturnThis(),
+    session: jest.fn().mockReturnThis(),
     ...emailTokenData,
   } as IEmailTokenDocument & MockedModel;
   return emailToken;

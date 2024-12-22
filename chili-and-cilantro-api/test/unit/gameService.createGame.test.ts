@@ -87,8 +87,8 @@ describe('GameService', () => {
           user,
           displayName,
           gameName,
-          password,
           maxChefs,
+          password,
         ),
       ).resolves.not.toThrow();
     });
@@ -106,8 +106,8 @@ describe('GameService', () => {
           user,
           displayName,
           gameName,
-          password,
           maxChefs,
+          password,
         ),
       ).rejects.toThrow(ChefAlreadyJoinedError);
     });
@@ -127,8 +127,8 @@ describe('GameService', () => {
           user,
           displayName,
           gameName,
-          password,
           maxChefs,
+          password,
         ),
       ).rejects.toThrow(InvalidUserDisplayNameError);
     });
@@ -148,8 +148,8 @@ describe('GameService', () => {
           user,
           displayName,
           gameName,
-          password,
           maxChefs,
+          password,
         ),
       ).rejects.toThrow(InvalidUserDisplayNameError);
     });
@@ -169,8 +169,8 @@ describe('GameService', () => {
           user,
           displayName,
           gameName,
-          password,
           maxChefs,
+          password,
         ),
       ).rejects.toThrow(InvalidUserDisplayNameError);
     });
@@ -190,8 +190,8 @@ describe('GameService', () => {
           user,
           displayName,
           gameName,
-          password,
           maxChefs,
+          password,
         ),
       ).rejects.toThrow(InvalidGameNameError);
     });
@@ -211,8 +211,8 @@ describe('GameService', () => {
           user,
           displayName,
           gameName,
-          password,
           maxChefs,
+          password,
         ),
       ).rejects.toThrow(InvalidGameNameError);
     });
@@ -232,8 +232,8 @@ describe('GameService', () => {
           user,
           displayName,
           gameName,
-          password,
           maxChefs,
+          password,
         ),
       ).rejects.toThrow(InvalidGameNameError);
     });
@@ -254,8 +254,8 @@ describe('GameService', () => {
           user,
           displayName,
           gameName,
-          password,
           maxChefs,
+          password,
         ),
       ).rejects.toThrow(InvalidGamePasswordError);
     });
@@ -276,8 +276,8 @@ describe('GameService', () => {
           user,
           displayName,
           gameName,
-          password,
           maxChefs,
+          password,
         ),
       ).rejects.toThrow(InvalidGamePasswordError);
     });
@@ -297,8 +297,8 @@ describe('GameService', () => {
           user,
           displayName,
           gameName,
-          password,
           maxChefs,
+          password,
         ),
       ).rejects.toThrow(NotEnoughChefsError);
     });
@@ -318,8 +318,8 @@ describe('GameService', () => {
           user,
           displayName,
           gameName,
-          password,
           maxChefs,
+          password,
         ),
       ).rejects.toThrow(TooManyChefsError);
     });
@@ -389,8 +389,8 @@ describe('GameService', () => {
         mockUser,
         gameUserName,
         gameName,
-        password,
         maxChefs,
+        password,
         mockGame._id,
         mockChef._id,
       );
@@ -494,8 +494,8 @@ describe('GameService', () => {
           mockUser,
           displayName,
           gameName,
-          password,
           maxChefs,
+          password,
         ),
       ).rejects.toThrow('Validation failed');
     });

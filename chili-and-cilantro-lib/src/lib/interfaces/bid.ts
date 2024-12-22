@@ -1,10 +1,10 @@
 import { DefaultIdType } from '../shared-types';
 
-export interface IBid {
+export interface IBid<I = DefaultIdType> {
   /**
    * The chef who made the bid or pass
    */
-  chefId: DefaultIdType;
+  chefId: I;
   /**
    * The new bid amount. If the chef is passing, the bid remains the same.
    */

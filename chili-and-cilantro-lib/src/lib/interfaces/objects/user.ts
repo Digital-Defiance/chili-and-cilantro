@@ -1,4 +1,4 @@
 import { IHasID } from '../has-id';
 import { IUser } from '../models/user';
 
-export interface IUserObject extends IUser, IHasID {}
+export interface IUserObject extends IUser<string>, IHasID<string> {}

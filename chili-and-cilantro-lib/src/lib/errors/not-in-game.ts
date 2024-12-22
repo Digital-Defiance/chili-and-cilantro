@@ -3,8 +3,8 @@ import { translate } from '../i18n';
 import { ValidationError } from './validation-error';
 
 export class NotInGameError extends ValidationError {
-  constructor() {
-    super(translate(StringNames.Error_NotInGame));
+  constructor(statusCode = 422) {
+    super(translate(StringNames.Error_NotInGame), statusCode);
     this.name = 'NotInGameError';
     Object.setPrototypeOf(this, NotInGameError.prototype);
   }

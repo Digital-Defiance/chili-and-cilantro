@@ -4,5 +4,5 @@ import { IEndGameAction } from '../../models/actions/end-game';
 import { IActionDocument } from '../action';
 
 export interface IEndGameActionDocument<I = DefaultIdType>
-  extends IActionDocument<I, IEndGameDetails>,
+  extends IActionDocument<I, IEndGameDetails<I>>,
     IEndGameAction<I> {}

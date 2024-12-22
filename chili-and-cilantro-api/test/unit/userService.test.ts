@@ -17,8 +17,10 @@ import {
   InvalidUsernameError,
   ModelName,
   PendingEmailVerificationError,
+  StringNames,
   UserNotFoundError,
   UsernameInUseError,
+  translate,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import {
   IApplication,
@@ -33,6 +35,7 @@ import { Document, Model, Query, Types } from 'mongoose';
 import { UserService } from '../../src/services/user';
 import { MockApplication } from '../fixtures/application';
 import { generateEmailToken } from '../fixtures/email-token';
+import { generateBcryptHash } from '../fixtures/password';
 import { generateUser } from '../fixtures/user';
 
 jest.mock('@sendgrid/mail');
@@ -133,9 +136,13 @@ describe('UserService', () => {
 
       const result = await userService.findUser(password, email);
 
-      expect(mockUserModel.findOne).toHaveBeenCalledWith({
-        email: email.toLowerCase(),
-      });
+      expect(mockUserModel.findOne).toHaveBeenCalledWith(
+        {
+          email: email.toLowerCase(),
+        },
+        undefined,
+        { session: undefined },
+      );
       expect(result).toEqual(mockUser);
     });
 
@@ -227,7 +234,7 @@ describe('UserService', () => {
       } as unknown as IUser;
       const password = 'Password123!';
 
-      const fakedHash = randomBytes(16).toString('hex');
+      const fakedHash = generateBcryptHash();
       (bcrypt.hashSync as jest.Mock).mockReturnValueOnce(fakedHash);
 
       const result = userService.makeUserDoc(newUser, password);
@@ -398,7 +405,11 @@ describe('UserService', () => {
       const result = await userService.verifyEmailToken(token);
 
       expect(result).toBe(true);
-      expect(mockEmailTokenModel.findOne).toHaveBeenCalledWith({ token });
+      expect(mockEmailTokenModel.findOne).toHaveBeenCalledWith(
+        { token },
+        undefined,
+        { session: undefined },
+      );
     });
 
     it('should throw EmailTokenUsedOrInvalidError for invalid token', async () => {
@@ -461,9 +472,12 @@ describe('UserService', () => {
       expect(mockUser.emailVerified).toBe(true);
       expect(mockUser.accountStatusType).toBe(AccountStatusTypeEnum.Active);
       expect(mockUser.save).toHaveBeenCalled();
-      expect(mockEmailTokenModel.deleteOne).toHaveBeenCalledWith({
-        _id: mockEmailToken._id,
-      });
+      expect(mockEmailTokenModel.deleteOne).toHaveBeenCalledWith(
+        {
+          _id: mockEmailToken._id,
+        },
+        { session: undefined },
+      );
     });
 
     it('should throw UserNotFoundError if user not found', async () => {
@@ -586,9 +600,12 @@ describe('UserService', () => {
 
       expect(mockUser.password).toBe(fakedHash);
       expect(mockUser.save).toHaveBeenCalled();
-      expect(mockEmailTokenModel.deleteOne).toHaveBeenCalledWith({
-        _id: mockEmailToken._id,
-      });
+      expect(mockEmailTokenModel.deleteOne).toHaveBeenCalledWith(
+        {
+          _id: mockEmailToken._id,
+        },
+        { session: undefined },
+      );
     });
 
     it('should throw EmailTokenUsedOrInvalidError if token not found', async () => {
@@ -680,7 +697,7 @@ describe('UserService', () => {
 
       expect(result).toEqual({
         success: true,
-        message: 'Password reset link has been sent to your email.',
+        message: translate(StringNames.ResetPassword_Sent),
       });
       expect(mailService.send).not.toHaveBeenCalled(); // Email should not be sent because we mocked sendEmailToken
       expect(userService.createEmailToken).toHaveBeenCalledWith(
@@ -693,14 +710,16 @@ describe('UserService', () => {
     it('should handle errors and return appropriate message', async () => {
       jest
         .spyOn(mockUserModel, 'findOne')
-        .mockRejectedValueOnce(new Error('Unexpected error'));
+        .mockRejectedValueOnce(
+          new Error(translate(StringNames.Common_UnexpectedError)),
+        );
 
       const result =
         await userService.initiatePasswordReset('test@example.com');
 
       expect(result).toEqual({
         success: false,
-        message: 'An unexpected error occurred. Please try again later.',
+        message: translate(StringNames.Common_UnexpectedError),
       });
     });
   });

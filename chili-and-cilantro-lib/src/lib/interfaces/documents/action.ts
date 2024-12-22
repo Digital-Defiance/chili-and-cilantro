@@ -5,6 +5,6 @@ import { IBaseDocument } from './base';
 
 export interface IActionDocument<
   I = DefaultIdType,
-  D extends IActionDetailsBase = IActionDetailsBase,
+  D extends IActionDetailsBase<I> = IActionDetailsBase<I>,
 > extends IBaseDocument<IAction<I, D>, I>,
     IAction<I, D> {}

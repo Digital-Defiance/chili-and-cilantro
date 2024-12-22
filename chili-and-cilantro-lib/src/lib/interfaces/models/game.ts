@@ -6,7 +6,7 @@ import { IHasTimestamps } from '../has-timestamps';
 
 export interface IGame<I = DefaultIdType>
   extends IHasTimestamps,
-    IHasTimestampOwners {
+    IHasTimestampOwners<I> {
   /**
    * The game code.
    */
@@ -54,7 +54,7 @@ export interface IGame<I = DefaultIdType>
   /**
    * The bid history for each round
    */
-  roundBids: Record<number, IBid[]>;
+  roundBids: Record<number, IBid<I>[]>;
   /**
    * The winning ChefIDs for each round.
    */
@@ -79,4 +79,12 @@ export interface IGame<I = DefaultIdType>
    * The winner of the game.
    */
   winner?: I;
+  /**
+   * The date the game started.
+   */
+  dateStarted?: Date;
+  /**
+   * The date the game ended.
+   */
+  dateEnded?: Date;
 }

@@ -83,6 +83,7 @@ export function generateUser(
     exec: jest.fn().mockResolvedValue(userData),
     save: jest.fn().mockImplementation(() => Promise.resolve(user)),
     sort: jest.fn().mockReturnThis(),
+    session: jest.fn().mockReturnThis(),
     ...userData,
   } as IUserDocument & MockedModel;
   return user;

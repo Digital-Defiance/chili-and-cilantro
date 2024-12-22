@@ -30,7 +30,9 @@ export const SpanishStrings: StringsCollection = {
   [StringNames.Common_ReturnToKitchen]: 'Volver a la Cocina',
   [StringNames.Common_Site]: site,
   [StringNames.Common_StartCooking]: 'Comenzar a cocinar',
+  [StringNames.Common_Success]: 'Éxito',
   [StringNames.Common_Tagline]: 'Un Juego de Bluff Picante',
+  [StringNames.Common_TokenRefreshed]: 'Token refrescado',
   [StringNames.Common_TokenValid]: 'Token válido',
   [StringNames.Common_Unauthorized]: 'No autorizado',
   [StringNames.Common_UnexpectedError]: 'Error inesperado',
@@ -64,6 +66,7 @@ export const SpanishStrings: StringsCollection = {
   [StringNames.Error_GameAlreadyInProgress]: 'El juego ya está en progreso.',
   [StringNames.Error_GameDisplayNameAlreadyInUse]:
     'El nombre ya está en uso en este juego.',
+  [StringNames.Error_GameEnded]: 'El juego ha terminado.',
   [StringNames.Error_GameInvalidPhase]:
     'El juego no está en la fase correcta para esta acción.',
   [StringNames.Error_GamePasswordMismatch]:
@@ -74,6 +77,7 @@ export const SpanishStrings: StringsCollection = {
     'Debes ser el chef maestro para realizar esta acción.',
   [StringNames.Error_NotEnoughChefsTemplate]:
     'No hay suficientes chefs para comenzar el juego. {CHEFS_PRESENT}/{MIN_CHEFS}',
+  [StringNames.Error_NotFound]: 'No encontrado',
   [StringNames.Error_NotInGame]: 'No estás en este juego.',
   [StringNames.Error_NotYourTurn]: 'No es tu turno.',
   [StringNames.Error_OutOfIngredientTemplate]: 'Sin {INGREDIENT}.',
@@ -101,7 +105,6 @@ export const SpanishStrings: StringsCollection = {
   [StringNames.Game_CreateGameSuccess]: 'Juego creado con éxito',
   [StringNames.Game_JoinGame]: 'Unirse al juego',
   [StringNames.Game_JoinGameSuccess]: 'Juego unido con éxito',
-  [StringNames.Game_ListSuccess]: 'Lista de juegos recuperada con éxito',
   [StringNames.KeyFeatures_Title]: 'Características Clave',
   [StringNames.KeyFeatures_1]:
     'Emocionante juego de faroleo con un toque culinario',
@@ -150,6 +153,8 @@ export const SpanishStrings: StringsCollection = {
   [StringNames.Validation_DisplayNameRequired]:
     'Se requiere un nombre de usuario',
   [StringNames.Validation_GameCodeRequired]: 'Se requiere un código de juego',
+  [StringNames.Validation_GameNameRegexErrorTemplate]:
+    'El nombre del juego debe tener entre {MIN_GAME_NAME_LENGTH} y {MAX_GAME_NAME_LENGTH} caracteres.',
   [StringNames.Validation_GameNameRequired]: 'Se requiere un nombre de juego',
   [StringNames.Validation_GamePasswordRegexErrorTemplate]:
     'La contraseña del juego debe tener entre {MIN_GAME_PASSWORD_LENGTH} y {MAX_GAME_PASSWORD_LENGTH} caracteres',
@@ -164,7 +169,10 @@ export const SpanishStrings: StringsCollection = {
     'El nombre del juego debe tener entre {MIN_GAME_NAME_LENGTH} y {MAX_GAME_NAME_LENGTH} caracteres.',
   [StringNames.Validation_InvalidLanguage]: 'Idioma inválido',
   [StringNames.Validation_InvalidMessage]: 'Mensaje inválido',
-  [StringNames.Validation_InvalidMaxChefs]: 'Número inválido de chefs',
+  [StringNames.Validation_InvalidMaxChefsTemplate]:
+    'El máximo de chefs debe estar entre {MIN_CHEFS} y {MAX_CHEFS}.',
+  [StringNames.Validation_InvalidMaxChefsValueTemplate]:
+    '{VALUE} no es un número válido de chefs! El máximo de chefs debe estar entre {MIN_CHEFS} y {MAX_CHEFS}.',
   [StringNames.Validation_InvalidTimezone]: 'Fuseau horaire invático',
   [StringNames.Validation_InvalidToken]: 'Token inválido',
   [StringNames.Validation_MaxChefsRequired]: 'Se requiere un número de chefs',
@@ -190,6 +198,7 @@ export const SpanishStrings: StringsCollection = {
   • Comenzar con una letra, un número, o un carácter Unicode
   • Puede contener letras, números, guiones bajos, guiones, y carácteres Unicode
   • No puede contener espacios o carácteres especiales excepto guiones bajos y guiones`,
+  [StringNames.VerifyEmail_Success]: 'Correo electrónica verificado con éxito',
   [StringNames.TEST_TESTTEMPLATE]: 'Probando {VARIABLE1} {VARIABLE2}',
 };
 

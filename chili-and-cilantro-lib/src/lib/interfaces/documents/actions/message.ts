@@ -4,5 +4,5 @@ import { IMessageAction } from '../../models/actions/message';
 import { IActionDocument } from '../action';
 
 export interface IMessageActionDocument<I = DefaultIdType>
-  extends IActionDocument<I, IMessageDetails>,
+  extends IActionDocument<I, IMessageDetails<I>>,
     IMessageAction<I> {}

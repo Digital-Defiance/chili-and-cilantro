@@ -1,3 +1,4 @@
+import { DefaultIdType } from '../../../../shared-types';
 import { IActionDetailsBase } from './base';
 
-export type IStartNewRoundDetails = IActionDetailsBase;
+export type IStartNewRoundDetails<I = DefaultIdType> = IActionDetailsBase<I>;

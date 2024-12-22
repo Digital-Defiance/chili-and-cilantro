@@ -4,5 +4,5 @@ import { IJoinGameAction } from '../../models/actions/join-game';
 import { IActionDocument } from '../action';
 
 export interface IJoinGameActionDocument<I = DefaultIdType>
-  extends IActionDocument<I, IJoinGameDetails>,
+  extends IActionDocument<I, IJoinGameDetails<I>>,
     IJoinGameAction<I> {}

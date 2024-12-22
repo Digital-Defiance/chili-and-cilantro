@@ -4,5 +4,5 @@ import { IMakeBidAction } from '../../models/actions/make-bid';
 import { IActionDocument } from '../action';
 
 export interface IMakeBidActionDocument<I = DefaultIdType>
-  extends IActionDocument<I, IMakeBidDetails>,
+  extends IActionDocument<I, IMakeBidDetails<I>>,
     IMakeBidAction<I> {}

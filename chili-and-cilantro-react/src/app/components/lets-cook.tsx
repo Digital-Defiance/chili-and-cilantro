@@ -1,5 +1,6 @@
 import {
   IGameChefResponse,
+  IGameChefsResponse,
   StringNames,
   constants,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
@@ -60,7 +61,7 @@ const LetsCook: FC<LetsCookProps> = ({ create }) => {
             value.length > constants.MAX_GAME_NAME_LENGTH
           ) {
             return this.createError({
-              message: t(StringNames.Validation_InvalidGameNameTemplate),
+              message: t(StringNames.Validation_GameNameRegexErrorTemplate),
             });
           }
         }
@@ -100,7 +101,7 @@ const LetsCook: FC<LetsCookProps> = ({ create }) => {
       .optional(),
     maxChefs: Yup.number().test(
       'maxChefs',
-      t(StringNames.Validation_InvalidMaxChefs),
+      t(StringNames.Validation_InvalidMaxChefsTemplate),
       function (value) {
         const { gameMode } = this.parent;
         if (gameMode === 'CREATE') {
@@ -110,7 +111,7 @@ const LetsCook: FC<LetsCookProps> = ({ create }) => {
             });
           if (value < constants.MIN_CHEFS || value > constants.MAX_CHEFS) {
             return this.createError({
-              message: t(StringNames.Validation_InvalidMaxChefs),
+              message: t(StringNames.Validation_InvalidMaxChefsTemplate),
             });
           }
         }
@@ -146,27 +147,37 @@ const LetsCook: FC<LetsCookProps> = ({ create }) => {
   });
 
   const handleGameResponse = async (response: AxiosResponse) => {
-    const data = response.data as IGameChefResponse;
     if (response.status === 201) {
-      console.log('create', data);
+      const data = response.data as IGameChefResponse;
+      navigate(`/kitchen/${data.game.code}`, {
+        state: { game: data.game, chefs: [data.chef] },
+      });
     } else if (response.status === 200) {
-      console.log('join', data);
+      const data = response.data as IGameChefsResponse;
+      navigate(`/kitchen/${data.game.code}`, {
+        state: { game: data.game, chefs: data.chefs },
+      });
     }
   };
 
   const createGame = async () => {
     const response = await api.post('/game/create', {
       name: formik.values.gameName,
-      password: formik.values.gamePassword,
+      ...(formik.values.gamePassword && formik.values.gamePassword.length > 0
+        ? { password: formik.values.gamePassword }
+        : {}),
       displayname: formik.values.displayname,
+      maxChefs: formik.values.maxChefs,
     });
     await handleGameResponse(response);
   };
 
   const joinGame = async () => {
     const response = await api.post(`/game/${formik.values.gameCode}/join`, {
-      password: formik.values.gamePassword,
       displayname: formik.values.displayname,
+      ...(formik.values.gamePassword && formik.values.gamePassword.length > 0
+        ? { password: formik.values.gamePassword }
+        : {}),
     });
     await handleGameResponse(response);
   };

@@ -50,19 +50,22 @@ describe('ChefService', () => {
       );
 
       // Assert
-      expect((ChefModel as any).create).toHaveBeenCalledWith([
-        {
-          _id: mockChef._id,
-          gameId: mockGame._id,
-          name: username,
-          userId: mockUser._id,
-          hand: expectedHand,
-          placedCards: [],
-          lostCards: [],
-          state: ChefState.LOBBY,
-          masterChef: masterChef,
-        },
-      ]);
+      expect((ChefModel as any).create).toHaveBeenCalledWith(
+        [
+          {
+            _id: mockChef._id,
+            gameId: mockGame._id,
+            name: username,
+            userId: mockUser._id,
+            hand: expectedHand,
+            placedCards: [],
+            lostCards: [],
+            state: ChefState.LOBBY,
+            masterChef: masterChef,
+          },
+        ],
+        { session: undefined },
+      );
       expect(result).toBeDefined();
       // Add more assertions as needed
     });
@@ -88,18 +91,21 @@ describe('ChefService', () => {
       );
 
       // Assert
-      expect((ChefModel as any).create).toHaveBeenCalledWith([
-        expect.objectContaining({
-          gameId: mockGame._id,
-          name: username,
-          userId: mockUser._id,
-          hand: expectedHand,
-          placedCards: [],
-          lostCards: [],
-          state: ChefState.LOBBY,
-          masterChef: masterChef,
-        }),
-      ]);
+      expect((ChefModel as any).create).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            gameId: mockGame._id,
+            name: username,
+            userId: mockUser._id,
+            hand: expectedHand,
+            placedCards: [],
+            lostCards: [],
+            state: ChefState.LOBBY,
+            masterChef: masterChef,
+          }),
+        ],
+        { session: undefined },
+      );
       expect(result).toBeDefined();
       expect(result._id).toBeDefined();
       expect(result._id).toBeInstanceOf(Types.ObjectId);
@@ -132,19 +138,22 @@ describe('ChefService', () => {
       );
 
       // Assert
-      expect((ChefModel as any).create).toHaveBeenCalledWith([
-        {
-          _id: newChef._id,
-          gameId: newGame._id,
-          name: existingChef.name,
-          userId: existingChef.userId,
-          hand: expectedHand,
-          placedCards: [],
-          lostCards: [],
-          state: ChefState.LOBBY,
-          masterChef: existingChef.masterChef,
-        },
-      ]);
+      expect((ChefModel as any).create).toHaveBeenCalledWith(
+        [
+          {
+            _id: newChef._id,
+            gameId: newGame._id,
+            name: existingChef.name,
+            userId: existingChef.userId,
+            hand: expectedHand,
+            placedCards: [],
+            lostCards: [],
+            state: ChefState.LOBBY,
+            masterChef: existingChef.masterChef,
+          },
+        ],
+        { session: undefined },
+      );
       expect(result).toBeDefined();
       expect(result._id).toEqual(newChef._id);
       expect(result.gameId).toEqual(newGame._id);
@@ -177,18 +186,21 @@ describe('ChefService', () => {
       );
 
       // Assert
-      expect((ChefModel as any).create).toHaveBeenCalledWith([
-        expect.objectContaining({
-          gameId: newGame._id,
-          name: existingChef.name,
-          userId: existingChef.userId,
-          hand: expectedHand,
-          placedCards: [],
-          lostCards: [],
-          state: ChefState.LOBBY,
-          masterChef: existingChef.masterChef,
-        }),
-      ]);
+      expect((ChefModel as any).create).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            gameId: newGame._id,
+            name: existingChef.name,
+            userId: existingChef.userId,
+            hand: expectedHand,
+            placedCards: [],
+            lostCards: [],
+            state: ChefState.LOBBY,
+            masterChef: existingChef.masterChef,
+          }),
+        ],
+        { session: undefined },
+      );
       expect(result).toBeDefined();
       expect(result._id).toEqual(newChef._id);
       expect(result._id).toBeInstanceOf(Types.ObjectId);
@@ -217,10 +229,14 @@ describe('ChefService', () => {
       );
 
       // Assert
-      expect((ChefModel as any).findOne).toHaveBeenCalledWith({
-        gameId: mockGame._id,
-        userId: mockUser._id,
-      });
+      expect((ChefModel as any).findOne).toHaveBeenCalledWith(
+        {
+          gameId: mockGame._id,
+          userId: mockUser._id,
+        },
+        undefined,
+        { session: undefined },
+      );
       expect(result).toBeDefined();
       expect(result).toEqual(
         expect.objectContaining({
@@ -274,9 +290,13 @@ describe('ChefService', () => {
         await chefService.getGameChefsByGameOrIdAsync(gameIdString);
 
       // Assert
-      expect((ChefModel as any).find).toHaveBeenCalledWith({
-        gameId: mockGame._id,
-      });
+      expect((ChefModel as any).find).toHaveBeenCalledWith(
+        {
+          gameId: mockGame._id,
+        },
+        undefined,
+        { session: undefined },
+      );
       expect(result).toBeDefined();
       expect(result).toEqual(mockChefs);
     });
@@ -297,9 +317,13 @@ describe('ChefService', () => {
         await chefService.getGameChefsByGameOrIdAsync(gameIdString);
 
       // Assert
-      expect((ChefModel as any).find).toHaveBeenCalledWith({
-        gameId: mockGame._id,
-      });
+      expect((ChefModel as any).find).toHaveBeenCalledWith(
+        {
+          gameId: mockGame._id,
+        },
+        undefined,
+        { session: undefined },
+      );
       expect(result).toBeDefined();
       expect(result).toEqual(mockChefs);
     });

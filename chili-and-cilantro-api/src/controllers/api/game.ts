@@ -1,15 +1,28 @@
 import {
   CardType,
+  GamePhase,
+  IActionResponse,
+  IActionsResponse,
+  IApiErrorResponse,
+  IApiMessageResponse,
+  IChefDocument,
+  IGameActionResponse,
   IGameChefResponse,
+  IGameChefsResponse,
+  IGameListResponse,
+  IMessageActionDocument,
+  ITurnActionsResponse,
+  NotFoundError,
+  NotInGameError,
   StringNames,
   TurnAction,
-  ValidationError,
   constants,
   translate,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import {
   IApplication,
   RouteConfig,
+  SendFunction,
   handleError,
   routeConfig,
 } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
@@ -23,10 +36,10 @@ import { PlayerService } from '../../services/player';
 import { BaseController } from '../base';
 
 export class GameController extends BaseController {
-  private readonly actionService;
-  private readonly chefService;
-  private readonly playerService;
-  private readonly gameService;
+  private readonly actionService: ActionService;
+  private readonly chefService: ChefService;
+  private readonly playerService: PlayerService;
+  private readonly gameService: GameService;
 
   constructor(application: IApplication) {
     super(application);
@@ -51,122 +64,148 @@ export class GameController extends BaseController {
     );
   }
 
-  protected getRoutes(): RouteConfig<unknown[]>[] {
+  protected getRoutes(): RouteConfig<
+    IApiMessageResponse,
+    false,
+    Array<unknown>
+  >[] {
     return [
-      routeConfig<unknown[]>({
-        method: 'get',
-        path: '/list',
-        handler: this.getGames,
-        useAuthentication: true,
-      }),
-      routeConfig<unknown[]>({
-        method: 'post',
-        path: '/create',
-        handler: this.createGame,
-        useAuthentication: true,
-        validation: [
-          body('name')
-            .isString()
-            .trim()
-            .notEmpty()
-            .matches(
-              constants.GAME_NAME_REGEX,
-              constants.GAME_NAME_REGEX_ERROR,
-            ),
-          body('username')
-            .isString()
-            .trim()
-            .notEmpty()
-            .matches(
-              constants.USERNAME_REGEX,
-              translate(StringNames.Validation_UsernameRegexErrorTemplate),
-            ),
-          body('displayname')
-            .isString()
-            .trim()
-            .notEmpty()
-            .matches(
-              constants.USER_DISPLAY_NAME_REGEX,
-              translate(StringNames.Validation_DisplayNameRegexErrorTemplate),
-            ),
-          body('password')
-            .optional()
-            .isString()
-            .trim()
-            .matches(
-              constants.PASSWORD_REGEX,
-              translate(StringNames.Validation_PasswordRegexErrorTemplate),
-            ),
-          body('maxChefs').isInt({ min: 2, max: 8 }),
-        ],
-      }),
-      routeConfig<unknown[]>({
+      routeConfig<IGameListResponse | IApiErrorResponse, false, Array<unknown>>(
+        {
+          method: 'get',
+          path: '/list',
+          handler: this.getGames,
+          useAuthentication: true,
+        },
+      ),
+      routeConfig<IGameChefResponse | IApiErrorResponse, false, Array<unknown>>(
+        {
+          method: 'post',
+          path: '/create',
+          handler: this.createGame,
+          useAuthentication: true,
+          validation: [
+            body('name')
+              .isString()
+              .trim()
+              .notEmpty()
+              .matches(constants.GAME_NAME_REGEX)
+              .withMessage(
+                translate(StringNames.Validation_GameNameRegexErrorTemplate),
+              ),
+            body('displayname')
+              .isString()
+              .trim()
+              .notEmpty()
+              .matches(constants.USER_DISPLAY_NAME_REGEX)
+              .withMessage(
+                translate(StringNames.Validation_DisplayNameRegexErrorTemplate),
+              ),
+            body('password')
+              .optional()
+              .isString()
+              .trim()
+              .matches(constants.PASSWORD_REGEX)
+              .withMessage(
+                translate(StringNames.Validation_PasswordRegexErrorTemplate),
+              ),
+            body('maxChefs').isInt({
+              min: constants.MIN_CHEFS,
+              max: constants.MAX_CHEFS,
+            }),
+          ],
+        },
+      ),
+      routeConfig<
+        IGameChefsResponse | IApiErrorResponse,
+        false,
+        Array<unknown>
+      >({
         method: 'post',
         path: '/:code/join',
         handler: this.joinGame,
         useAuthentication: true,
         validation: [
-          body('username')
-            .isString()
-            .trim()
-            .notEmpty()
-            .matches(
-              constants.USERNAME_REGEX,
-              translate(StringNames.Validation_UsernameRegexErrorTemplate),
-            ),
           body('password')
             .optional()
             .isString()
             .trim()
-            .matches(
-              constants.PASSWORD_REGEX,
+            .matches(constants.PASSWORD_REGEX)
+            .withMessage(
               translate(StringNames.Validation_PasswordRegexErrorTemplate),
             ),
           body('displayname')
             .isString()
             .trim()
             .notEmpty()
-            .matches(
-              constants.USER_DISPLAY_NAME_REGEX,
+            .matches(constants.USER_DISPLAY_NAME_REGEX)
+            .withMessage(
               translate(StringNames.Validation_DisplayNameRegexErrorTemplate),
             ),
         ],
       }),
-      routeConfig<unknown[]>({
+      routeConfig<
+        IActionResponse<IMessageActionDocument> | IApiErrorResponse,
+        false,
+        Array<unknown>
+      >({
         method: 'post',
         path: '/:code/message',
         handler: this.sendMessage,
         useAuthentication: true,
         validation: [body('message').isString().trim().notEmpty()],
       }),
-      routeConfig<unknown[]>({
+      routeConfig<IActionsResponse | IApiErrorResponse, false, Array<unknown>>({
         method: 'get',
         path: '/:code/history',
         handler: this.getGameHistory,
         useAuthentication: true,
       }),
-      routeConfig<unknown[]>({
+      routeConfig<
+        IGameActionResponse | IApiErrorResponse,
+        false,
+        Array<unknown>
+      >({
         method: 'post',
         path: '/:code/start',
         handler: this.startGame,
         useAuthentication: true,
       }),
-      routeConfig<unknown[]>({
+      routeConfig<
+        ITurnActionsResponse | IApiErrorResponse,
+        false,
+        Array<unknown>
+      >({
         method: 'get',
         path: '/:code/action',
         handler: this.getAvailableActions,
         useAuthentication: true,
       }),
-      routeConfig<unknown[]>({
-        method: 'post',
-        path: '/:code/action',
-        handler: this.performTurnAction,
+      routeConfig<
+        IGameChefsResponse | IApiErrorResponse,
+        false,
+        Array<unknown>
+      >({
+        method: 'get',
+        path: '/:code',
+        handler: this.getGame,
         useAuthentication: true,
-        validation: [
-          body('action').isString().isIn(Object.values(TurnAction)),
-          body('cardType').optional().isString().isIn(Object.values(CardType)),
-        ],
       }),
+      routeConfig<IGameChefResponse | IApiErrorResponse, false, Array<unknown>>(
+        {
+          method: 'post',
+          path: '/:code/action',
+          handler: this.performTurnAction,
+          useAuthentication: true,
+          validation: [
+            body('action').isString().isIn(Object.values(TurnAction)),
+            body('cardType')
+              .optional()
+              .isString()
+              .isIn(Object.values(CardType)),
+          ],
+        },
+      ),
     ];
   }
 
@@ -174,36 +213,44 @@ export class GameController extends BaseController {
    * Creates a new game.
    * @param req The request
    * @param res The response
+   * @param send The send function
    * @param next The next function
    * @returns
    */
-  private async createGame(req: Request, res: Response, next: NextFunction) {
+  private async createGame(
+    req: Request,
+    res: Response<IGameChefResponse>,
+    send: SendFunction<IGameChefResponse | IApiErrorResponse>,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       const user = await this.validateAndFetchRequestUser(req, res, next);
-      const { name, username, password, maxChefs } = req.body;
+      const { name, displayname, password, maxChefs } = req.validatedBody;
       const sanitizedName = (name as string)?.trim();
-      const sanitizedUserName = (username as string)?.trim();
+      const sanitizedDisplayName = (displayname as string)
+        ?.trim()
+        .toLowerCase();
       const sanitizedPassword = (password as string)?.trim();
       const sanitizedMaxChefs = parseInt(maxChefs, 10);
 
       const { game, chef } = await this.gameService.performCreateGameAsync(
         user,
-        sanitizedUserName,
+        sanitizedDisplayName,
         sanitizedName,
-        sanitizedPassword,
         sanitizedMaxChefs,
+        sanitizedPassword,
       );
-      this.sendApiMessageResponse(
+      send(
         201,
         {
           message: translate(StringNames.Game_CreateGameSuccess),
-          game,
-          chef,
-        } as IGameChefResponse,
+          game: GameService.gameToGameObject(game),
+          chef: ChefService.chefToChefObject(chef),
+        },
         res,
       );
     } catch (error) {
-      handleError(error, res, next);
+      handleError(error, res, send as SendFunction<IApiErrorResponse>, next);
     }
   }
 
@@ -211,34 +258,40 @@ export class GameController extends BaseController {
    * Joins a game
    * @param req The request
    * @param res The response
+   * @param send The send function
    * @param next The next function
    * @returns
    */
-  private async joinGame(req: Request, res: Response, next: NextFunction) {
+  private async joinGame(
+    req: Request,
+    res: Response,
+    send: SendFunction<IGameChefsResponse | IApiErrorResponse>,
+    next: NextFunction,
+  ) {
     try {
       const user = await this.validateAndFetchRequestUser(req, res, next);
-      const { username, password } = req.validatedBody;
+      const { displayname, password } = req.validatedBody;
       const gameCode = req.params.code;
-      const sanitizedUserName = (username as string)?.trim();
+      const sanitizedDisplayName = (displayname as string)?.trim();
       const sanitizedPassword = (password as string)?.trim();
 
-      const { game, chef } = await this.gameService.performJoinGameAsync(
+      const { game, chefs } = await this.gameService.performJoinGameAsync(
         gameCode,
         sanitizedPassword,
         user,
-        sanitizedUserName,
+        sanitizedDisplayName,
       );
-      this.sendApiMessageResponse(
+      send(
         200,
         {
           message: translate(StringNames.Game_JoinGameSuccess),
-          game,
-          chef,
-        } as IGameChefResponse,
+          game: GameService.gameToGameObject(game),
+          chefs: chefs.map((c) => ChefService.chefToChefObject(c)),
+        },
         res,
       );
     } catch (error) {
-      handleError(error, res, next);
+      handleError(error, res, send as SendFunction<IApiErrorResponse>, next);
     }
   }
 
@@ -246,13 +299,21 @@ export class GameController extends BaseController {
    * Send a message to game chat
    * @param req The request
    * @param res The response
+   * @param send The send function
    * @param next The next function
    * @returns
    */
-  private async sendMessage(req: Request, res: Response, next: NextFunction) {
+  private async sendMessage(
+    req: Request,
+    res: Response,
+    send: SendFunction<
+      IActionResponse<IMessageActionDocument> | IApiErrorResponse
+    >,
+    next: NextFunction,
+  ) {
     try {
       const user = await this.validateAndFetchRequestUser(req, res, next);
-      const { message } = req.body;
+      const { message } = req.validatedBody;
       const gameCode = req.params.code;
       const sanitizedMessage = (message as string)?.trim();
       const messageAction = await this.gameService.performSendMessageAsync(
@@ -260,9 +321,16 @@ export class GameController extends BaseController {
         user,
         sanitizedMessage,
       );
-      res.status(200).json(messageAction);
+      send(
+        200,
+        {
+          message: translate(StringNames.Common_Success),
+          action: messageAction,
+        },
+        res,
+      );
     } catch (e) {
-      handleError(e, res, next);
+      handleError(e, res, send as SendFunction<IApiErrorResponse>, next);
     }
   }
 
@@ -270,29 +338,65 @@ export class GameController extends BaseController {
    * Gets the history of the game
    * @param req The request
    * @param res The response
+   * @param send The send function
    * @param next The next function
    * @returns
    */
   private async getGameHistory(
     req: Request,
     res: Response,
+    send: SendFunction<IActionsResponse | IApiErrorResponse>,
     next: NextFunction,
   ) {
     try {
       await this.validateAndFetchRequestUser(req, res, next);
       const gameCode = req.params.code;
+      const isParticipant = await this.gameService.verifyUserIsParticipantAsync(
+        req.user.id,
+        gameCode,
+      );
+      if (!isParticipant) {
+        send(
+          403,
+          {
+            message: translate(StringNames.Error_NotInGame),
+            error: new NotInGameError(403),
+          },
+          res,
+        );
+        return;
+      }
       const game = await this.gameService.getGameByCodeOrThrowAsync(
         gameCode,
         true,
       );
-      const actions = await this.actionService.getGameHistoryAsync(game);
-      res.status(200).json(actions);
-    } catch (e) {
-      if (e instanceof ValidationError) {
-        res.status(400).json(e);
-      } else {
-        this.sendApiErrorResponse(500, 'An error occurred', e, res);
+      if (
+        game.currentPhase === GamePhase.GAME_OVER &&
+        new Date().getTime() >
+          game.dateEnded.getTime() +
+            constants.MAX_GAME_HISTORY_AGE_IN_HOURS * 60 * 60 * 1000
+      ) {
+        send(
+          404,
+          {
+            message: translate(StringNames.Error_NotFound),
+            error: new NotFoundError(),
+          },
+          res,
+        );
+        return;
       }
+      const actions = await this.actionService.getGameHistoryAsync(game);
+      send(
+        200,
+        {
+          message: translate(StringNames.Common_Success),
+          actions: actions.map((a) => ActionService.actionToActionObject(a)),
+        },
+        res,
+      );
+    } catch (e) {
+      handleError(e, res, send as SendFunction<IApiErrorResponse>, next);
     }
   }
 
@@ -300,10 +404,16 @@ export class GameController extends BaseController {
    * Starts a game
    * @param req The request
    * @param res The response
+   * @param send The send function
    * @param next The next function
    * @returns
    */
-  private async startGame(req: Request, res: Response, next: NextFunction) {
+  private async startGame(
+    req: Request,
+    res: Response,
+    send: SendFunction<IGameActionResponse | IApiErrorResponse>,
+    next: NextFunction,
+  ) {
     try {
       const user = await this.validateAndFetchRequestUser(req, res, next);
       const gameCode = req.params.code;
@@ -311,9 +421,17 @@ export class GameController extends BaseController {
         gameCode,
         user._id,
       );
-      res.status(200).json({ game, action });
+      send(
+        200,
+        {
+          message: translate(StringNames.Common_Success),
+          game: GameService.gameToGameObject(game),
+          action: ActionService.actionToActionObject(action),
+        },
+        res,
+      );
     } catch (e) {
-      handleError(e, res, next);
+      handleError(e, res, send as SendFunction<IApiErrorResponse>, next);
     }
   }
 
@@ -321,12 +439,14 @@ export class GameController extends BaseController {
    * Gets the available actions for the current turn
    * @param req The request
    * @param res The response
+   * @param send The send function
    * @param next The next function
    * @returns
    */
   private async getAvailableActions(
     req: Request,
     res: Response,
+    send: SendFunction<ITurnActionsResponse | IApiErrorResponse>,
     next: NextFunction,
   ) {
     try {
@@ -338,9 +458,16 @@ export class GameController extends BaseController {
       );
       const chef = await this.chefService.getGameChefOrThrowAsync(game, user);
       const actions = this.gameService.availableTurnActions(game, chef);
-      res.status(200).json(actions);
+      send(
+        200,
+        {
+          message: translate(StringNames.Common_Success),
+          actions,
+        },
+        res,
+      );
     } catch (e) {
-      handleError(e, res, next);
+      handleError(e, res, send as SendFunction<IApiErrorResponse>, next);
     }
   }
 
@@ -348,18 +475,20 @@ export class GameController extends BaseController {
    * Performs a turn action for the specified game
    * @param req The request
    * @param res The response
+   * @param send The send function
    * @param next The next function
    * @returns
    */
   private async performTurnAction(
     req: Request,
     res: Response,
+    send: SendFunction<IGameChefResponse | IApiErrorResponse>,
     next: NextFunction,
   ) {
     try {
       const user = await this.validateAndFetchRequestUser(req, res, next);
       const gameCode = req.params.code;
-      const { action, ingredient, bid } = req.body;
+      const { action, ingredient, bid } = req.validatedBody;
       const actionArgs = {
         ...(ingredient ? { ingredient: ingredient as CardType } : {}),
         ...(bid ? { bid: bid as number } : {}),
@@ -370,9 +499,17 @@ export class GameController extends BaseController {
         action as TurnAction,
         actionArgs,
       );
-      res.status(200).json({ game, chef });
+      send(
+        200,
+        {
+          message: translate(StringNames.Common_Success),
+          game: GameService.gameToGameObject(game),
+          chef: ChefService.chefToChefObject(chef),
+        },
+        res,
+      );
     } catch (e) {
-      handleError(e, res, next);
+      handleError(e, res, send as SendFunction<IApiErrorResponse>, next);
     }
   }
 
@@ -380,14 +517,75 @@ export class GameController extends BaseController {
    * Gets all games created and participating for the current user
    * @param req The request
    * @param res The response
+   * @param send The send function
    * @param next The next function
    * @returns The response
    */
-  private async getGames(req: Request, res: Response, next: NextFunction) {
+  private async getGames(
+    req: Request,
+    res: Response,
+    send: SendFunction<IGameListResponse | IApiErrorResponse>,
+    next: NextFunction,
+  ) {
+    try {
+      return this.withTransaction<void>(async (session) => {
+        const user = await this.validateAndFetchRequestUser(req, res, next);
+        const gameResponse: IGameListResponse =
+          await this.gameService.getGamesAsync(user, session, true);
+        send(200, gameResponse, res);
+      });
+    } catch (e) {
+      handleError(e, res, send as SendFunction<IApiErrorResponse>, next);
+    }
+  }
+
+  /**
+   * Gets a game by code, user must be a participant
+   * @param req The request
+   * @param res The response
+   * @param send The send function
+   * @param next The next function
+   * @returns The response
+   */
+  private async getGame(
+    req: Request,
+    res: Response,
+    send: SendFunction<IGameChefsResponse | IApiErrorResponse>,
+    next: NextFunction,
+  ) {
     return this.withTransaction<void>(async (session) => {
-      const user = await this.validateAndFetchRequestUser(req, res, next);
-      const gameResponse = await this.gameService.getGamesAsync(user, session);
-      res.status(200).json(gameResponse);
+      const gameCode = req.params.code;
+      const isParticipant = await this.gameService.verifyUserIsParticipantAsync(
+        req.user.id,
+        gameCode,
+      );
+      if (!isParticipant) {
+        send(
+          403,
+          {
+            message: translate(StringNames.Error_NotInGame),
+            error: new NotInGameError(403),
+          },
+          res,
+        );
+        return;
+      }
+      const game = await this.gameService.getGameByCodeOrThrowAsync(
+        gameCode,
+        true,
+        session,
+      );
+      const chefs: IChefDocument[] =
+        await this.chefService.getGameChefsByGameOrIdAsync(game);
+      send(
+        200,
+        {
+          message: translate(StringNames.Common_Success),
+          game: GameService.gameToGameObject(game),
+          chefs: chefs.map((c) => ChefService.chefToChefObject(c)),
+        },
+        res,
+      );
     });
   }
 }
