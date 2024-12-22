@@ -34,6 +34,9 @@ const PlayerDisc: React.FC<PlayerDiscProps> = ({
   discSize = 160, // Default disc size
 }) => {
   const [isRevealed, setIsRevealed] = useState(reveal);
+  const iconSize = discSize / 3;
+  const iconCircleRadius = iconSize * 0.85;
+  const innerBorderRadius = iconCircleRadius * 0.85;
 
   // Define theme colors
   const playerThemes: ThemeColors[] = [
@@ -282,9 +285,6 @@ const PlayerDisc: React.FC<PlayerDiscProps> = ({
 
   // Function to render the front face
   const renderFront = () => {
-    const iconSize = discSize / 3;
-    const iconCircleRadius = iconSize * 0.7;
-
     return (
       <svg
         key={'front'}
@@ -307,6 +307,15 @@ const PlayerDisc: React.FC<PlayerDiscProps> = ({
           r={iconCircleRadius}
           fill={theme.secondary}
         />
+        {/* Inner border circle */}
+        <circle
+          cx={discSize / 2}
+          cy={discSize / 2}
+          r={innerBorderRadius}
+          fill="none"
+          stroke={theme.border}
+          strokeWidth={(discSize / 100) * 2}
+        />
         <Hat
           style={player}
           dropShadowColor={theme.accent}
@@ -322,9 +331,6 @@ const PlayerDisc: React.FC<PlayerDiscProps> = ({
 
   // Function to render the back face
   const renderBack = () => {
-    const iconSize = discSize / 3;
-    const iconCircleRadius = iconSize * 0.7;
-
     return (
       <svg
         key={'back'}
@@ -346,6 +352,15 @@ const PlayerDisc: React.FC<PlayerDiscProps> = ({
           cy={discSize / 2}
           r={iconCircleRadius}
           fill={theme.primary}
+        />
+        {/* Inner border circle */}
+        <circle
+          cx={discSize / 2}
+          cy={discSize / 2}
+          r={innerBorderRadius}
+          fill="none"
+          stroke={theme.accent}
+          strokeWidth={(discSize / 100) * 2}
         />
         <image
           href={iconSrc}
