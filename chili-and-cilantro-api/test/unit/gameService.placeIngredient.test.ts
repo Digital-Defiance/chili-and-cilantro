@@ -59,7 +59,7 @@ describe('GameService', () => {
     it('should throw an error if the game phase is incorrect', () => {
       game.currentPhase = GamePhase.BIDDING;
       expect(() =>
-        gameService.validatePlaceIngredientOrThrow(game, chef, CardType.CHILI),
+        gameService.validatePlaceIngredientOrThrow(game, chef, CardType.Chili),
       ).toThrow(IncorrectGamePhaseError);
     });
 
@@ -67,18 +67,18 @@ describe('GameService', () => {
       game.turnOrder = [generateObjectId(), chef._id]; // Chef is not the current chef
       game.currentChef = 0;
       expect(() =>
-        gameService.validatePlaceIngredientOrThrow(game, chef, CardType.CHILI),
+        gameService.validatePlaceIngredientOrThrow(game, chef, CardType.Chili),
       ).toThrow(NotYourTurnError);
     });
 
     it('should throw an error if the chef has placed all cards or has no cards left', () => {
       chef.placedCards = new Array(constants.HAND_SIZE).fill({
-        type: CardType.CHILI,
+        type: CardType.Chili,
         faceUp: false,
       });
       chef.hand = [];
       expect(() =>
-        gameService.validatePlaceIngredientOrThrow(game, chef, CardType.CHILI),
+        gameService.validatePlaceIngredientOrThrow(game, chef, CardType.Chili),
       ).toThrow(AllCardsPlacedError);
     });
 
@@ -86,14 +86,14 @@ describe('GameService', () => {
       // Mock canPlaceCard to return false
       jest.spyOn(gameService, 'canPlaceCard').mockReturnValue(false);
       expect(() =>
-        gameService.validatePlaceIngredientOrThrow(game, chef, CardType.CHILI),
+        gameService.validatePlaceIngredientOrThrow(game, chef, CardType.Chili),
       ).toThrow(InvalidActionError);
     });
 
     it('should throw an error if the chef does not have the specified ingredient', () => {
-      chef.hand = [{ type: CardType.CILANTRO, faceUp: false }]; // Chef does not have 'Chili'
+      chef.hand = [{ type: CardType.Cilantro, faceUp: false }]; // Chef does not have 'Chili'
       expect(() =>
-        gameService.validatePlaceIngredientOrThrow(game, chef, CardType.CHILI),
+        gameService.validatePlaceIngredientOrThrow(game, chef, CardType.Chili),
       ).toThrow(OutOfIngredientError);
     });
   });
@@ -128,7 +128,7 @@ describe('GameService', () => {
     });
     it('should successfully place a card', async () => {
       game.currentChef = 0; // Chef is the current chef
-      const ingredient = CardType.CHILI;
+      const ingredient = CardType.Chili;
 
       const result = await gameService.placeIngredientAsync(
         game,
@@ -150,7 +150,7 @@ describe('GameService', () => {
 
     it('should handle the last chef in the turn order', async () => {
       game.currentChef = game.chefIds.length - 1; // Chef is the last in the turn order
-      const ingredient = CardType.CHILI;
+      const ingredient = CardType.Chili;
 
       const result = await gameService.placeIngredientAsync(
         game,
@@ -163,8 +163,8 @@ describe('GameService', () => {
     });
 
     it('should throw an error if the chef does not have the specified ingredient', async () => {
-      chef.hand = [{ type: CardType.CILANTRO, faceUp: false }]; // Chef does not have 'Chili'
-      const ingredient = CardType.CHILI;
+      chef.hand = [{ type: CardType.Cilantro, faceUp: false }]; // Chef does not have 'Chili'
+      const ingredient = CardType.Chili;
 
       await expect(async () =>
         gameService.placeIngredientAsync(game, chef, ingredient),
@@ -195,10 +195,10 @@ describe('GameService', () => {
         playerService,
       );
       game = generateGame(true, { currentPhase: GamePhase.SETUP });
-      chef = generateChef({ hand: [{ type: CardType.CHILI, faceUp: false }] });
+      chef = generateChef({ hand: [{ type: CardType.Chili, faceUp: false }] });
     });
     it('should successfully perform card placement', async () => {
-      const ingredient = CardType.CHILI;
+      const ingredient = CardType.Chili;
       jest
         .spyOn(gameService, 'validatePlaceIngredientOrThrow')
         .mockImplementation(() => {});
@@ -229,7 +229,7 @@ describe('GameService', () => {
     });
 
     it('should throw an error if validation fails', async () => {
-      const ingredient = CardType.CHILI;
+      const ingredient = CardType.Chili;
       jest
         .spyOn(gameService, 'validatePlaceIngredientOrThrow')
         .mockImplementation(() => {
@@ -242,7 +242,7 @@ describe('GameService', () => {
     });
 
     it('should throw an error if placement fails', async () => {
-      const ingredient = CardType.CHILI;
+      const ingredient = CardType.Chili;
       jest
         .spyOn(gameService, 'withTransaction')
         .mockImplementation(mockedWithTransactionAsync);

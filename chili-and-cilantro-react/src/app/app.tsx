@@ -8,6 +8,7 @@ import AccountError from './components/account-error';
 import ApiAccess from './components/api-access';
 import ChangePasswordPage from './components/change-password-page';
 import DashboardPage from './components/dashboard-page';
+import DiscTest from './components/disc-test';
 import ForgotPasswordPage from './components/forgot-password-page';
 import LetsCook from './components/lets-cook';
 import LoginPage from './components/login-page';
@@ -90,6 +91,7 @@ const InnerApp: FC = () => {
           />
           <Route path="/verify-email" element={<VerifyEmailPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/disc-test" element={<DiscTest />} />
         </Routes>
       </Container>
     </MenuProvider>

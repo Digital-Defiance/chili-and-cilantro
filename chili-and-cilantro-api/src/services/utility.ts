@@ -58,10 +58,10 @@ export abstract class UtilityService {
     const numCilantro = handSize - numChili;
     const hand: ICard[] = [];
     for (let i = 0; i < numChili; i++) {
-      hand.push({ type: CardType.CHILI, faceUp: false });
+      hand.push({ type: CardType.Chili, faceUp: false });
     }
     for (let i = 0; i < numCilantro; i++) {
-      hand.push({ type: CardType.CILANTRO, faceUp: false });
+      hand.push({ type: CardType.Cilantro, faceUp: false });
     }
     return hand;
   }

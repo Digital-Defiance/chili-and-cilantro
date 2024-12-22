@@ -102,10 +102,10 @@ describe('UtilityService', () => {
     it('should make a hand with the correct number of each type of card', () => {
       const hand = UtilityService.makeHand();
       const chiliCount = hand.filter(
-        (card) => card.type === CardType.CHILI,
+        (card) => card.type === CardType.Chili,
       ).length;
       const cilantroCount = hand.filter(
-        (card) => card.type === CardType.CILANTRO,
+        (card) => card.type === CardType.Cilantro,
       ).length;
       expect(hand.length).toEqual(constants.HAND_SIZE);
       expect(chiliCount).toEqual(constants.CHILI_PER_HAND);

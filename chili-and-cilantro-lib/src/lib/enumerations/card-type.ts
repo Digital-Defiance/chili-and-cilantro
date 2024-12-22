@@ -1,6 +1,6 @@
 export enum CardType {
-  CHILI = 'chili',
-  CILANTRO = 'cilantro',
+  Chili = 'chili',
+  Cilantro = 'cilantro',
 }
 
 export default CardType;

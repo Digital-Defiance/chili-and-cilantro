@@ -10,27 +10,27 @@ export type CardTypeLanguageTranslation = {
 
 export const CardTypeTranslations: CardTypeLanguageTranslation = {
   [StringLanguages.EnglishUS]: {
-    [CardType.CHILI]: 'Chili',
-    [CardType.CILANTRO]: 'Cilantro',
+    [CardType.Chili]: 'Chili',
+    [CardType.Cilantro]: 'Cilantro',
   },
   [StringLanguages.EnglishUK]: {
-    [CardType.CHILI]: 'Chili',
-    [CardType.CILANTRO]: 'Cilantro',
+    [CardType.Chili]: 'Chili',
+    [CardType.Cilantro]: 'Cilantro',
   },
   [StringLanguages.French]: {
-    [CardType.CHILI]: 'Piment',
-    [CardType.CILANTRO]: 'Coriandre',
+    [CardType.Chili]: 'Piment',
+    [CardType.Cilantro]: 'Coriandre',
   },
   [StringLanguages.MandarinChinese]: {
-    [CardType.CHILI]: '辣椒',
-    [CardType.CILANTRO]: '芫荽',
+    [CardType.Chili]: '辣椒',
+    [CardType.Cilantro]: '芫荽',
   },
   [StringLanguages.Spanish]: {
-    [CardType.CHILI]: 'Chile',
-    [CardType.CILANTRO]: 'Cilantro',
+    [CardType.Chili]: 'Chile',
+    [CardType.Cilantro]: 'Cilantro',
   },
   [StringLanguages.Ukrainian]: {
-    [CardType.CHILI]: 'Чилі',
-    [CardType.CILANTRO]: 'Коріандр',
+    [CardType.Chili]: 'Чилі',
+    [CardType.Cilantro]: 'Коріандр',
   },
 };

@@ -557,11 +557,11 @@ describe('GameService', () => {
     it('should return true if the chef has the ingredient in hand', () => {
       const chef = generateChef({
         hand: [
-          { type: CardType.CHILI, faceUp: false },
-          { type: CardType.CILANTRO, faceUp: false },
+          { type: CardType.Chili, faceUp: false },
+          { type: CardType.Cilantro, faceUp: false },
         ],
       });
-      const ingredient = CardType.CHILI;
+      const ingredient = CardType.Chili;
 
       const result = gameService.hasIngredientInHand(chef, ingredient);
       expect(result).toBe(true);
@@ -569,9 +569,9 @@ describe('GameService', () => {
 
     it('should return false if the chef does not have the ingredient in hand', () => {
       const chef = generateChef({
-        hand: [{ type: CardType.CILANTRO, faceUp: false }],
+        hand: [{ type: CardType.Cilantro, faceUp: false }],
       });
-      const ingredient = CardType.CHILI;
+      const ingredient = CardType.Chili;
 
       const result = gameService.hasIngredientInHand(chef, ingredient);
       expect(result).toBe(false);
@@ -579,7 +579,7 @@ describe('GameService', () => {
 
     it("should return false if the chef's hand is empty", () => {
       const chef = generateChef({ hand: [] });
-      const ingredient = CardType.CHILI;
+      const ingredient = CardType.Chili;
 
       const result = gameService.hasIngredientInHand(chef, ingredient);
       expect(result).toBe(false);
