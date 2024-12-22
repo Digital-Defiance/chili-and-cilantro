@@ -200,6 +200,7 @@ const PlayerDisc: React.FC<PlayerDiscProps> = ({
     const lineThickness = (discSize / 100) * 1.5;
     const lineElements = [];
     const swirlElements = [];
+    const adjustedSwirlRadius = swirlRadius * 0.85;
 
     switch (patternType) {
       case 'dots':
@@ -227,12 +228,12 @@ const PlayerDisc: React.FC<PlayerDiscProps> = ({
       case 'swirl':
         for (let i = 0; i < swirlCount; i++) {
           const angle = (i / swirlCount) * 2 * Math.PI;
-          const x = discSize / 2 + discSize * 0.3 * Math.cos(angle);
-          const y = discSize / 2 + discSize * 0.3 * Math.sin(angle);
+          const x = discSize / 2 + discSize * 0.28 * Math.cos(angle);
+          const y = discSize / 2 + discSize * 0.28 * Math.sin(angle);
           const swirlPath = `M ${x} ${y} 
-                             C ${x + swirlRadius * Math.cos(angle + Math.PI / 2)} ${y + swirlRadius * Math.sin(angle + Math.PI / 2)}, 
-                               ${x + swirlRadius * 2 * Math.cos(angle)} ${y + swirlRadius * 2 * Math.sin(angle)},
-                               ${x + swirlRadius * 3 * Math.cos(angle + Math.PI / 4)} ${y + swirlRadius * 3 * Math.sin(angle + Math.PI / 4)}`;
+                             C ${x + adjustedSwirlRadius * Math.cos(angle + Math.PI / 2)} ${y + adjustedSwirlRadius * Math.sin(angle + Math.PI / 2)}, 
+                               ${x + adjustedSwirlRadius * 2 * Math.cos(angle)} ${y + adjustedSwirlRadius * 2 * Math.sin(angle)},
+                               ${x + adjustedSwirlRadius * 2.5 * Math.cos(angle + Math.PI / 4)} ${y + adjustedSwirlRadius * 2.5 * Math.sin(angle + Math.PI / 4)}`;
           swirlElements.push(
             <path
               key={`swirl-pattern-${i}`}
