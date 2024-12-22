@@ -31,7 +31,7 @@ export const ChefSchema = new Schema<IChefDocument>(
         validator: function (v: string) {
           return (
             v !== undefined &&
-            validator.matches(v, constants.MULTILINGUAL_STRING_REGEX) &&
+            validator.matches(v, constants.USER_DISPLAY_NAME_REGEX) &&
             v.length >= constants.MIN_USER_DISPLAY_NAME_LENGTH &&
             v.length <= constants.MAX_USER_DISPLAY_NAME_LENGTH
           );

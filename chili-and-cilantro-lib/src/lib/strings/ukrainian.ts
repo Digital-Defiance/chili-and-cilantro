@@ -30,7 +30,9 @@ export const UkrainianStrings: StringsCollection = {
   [StringNames.Common_ReturnToKitchen]: 'Повернутися до кухні',
   [StringNames.Common_Site]: site,
   [StringNames.Common_StartCooking]: 'Почати приготування',
+  [StringNames.Common_Success]: 'Успіх',
   [StringNames.Common_Tagline]: 'Гострий блеф',
+  [StringNames.Common_TokenRefreshed]: 'Токен оновлено',
   [StringNames.Common_TokenValid]: 'Токен дійсний',
   [StringNames.Common_Unauthorized]: 'Неавторизовано',
   [StringNames.Common_UnexpectedError]: 'Неочікувана помилка',
@@ -62,6 +64,7 @@ export const UkrainianStrings: StringsCollection = {
   [StringNames.Error_GameAlreadyInProgress]: 'Гра вже розпочалася',
   [StringNames.Error_GameDisplayNameAlreadyInUse]:
     'Ім’я вже використовується в цій грі.',
+  [StringNames.Error_GameEnded]: 'Гра завершилася',
   [StringNames.Error_GameInvalidPhase]:
     'Гра не знаходиться в правильній фазі для цієї дії.',
   [StringNames.Error_GamePasswordMismatch]: 'Пароль гри не відповідає',
@@ -71,6 +74,7 @@ export const UkrainianStrings: StringsCollection = {
     'Ви повинні бути майстром-кухарем, щоб виконати цю дію.',
   [StringNames.Error_NotEnoughChefsTemplate]:
     'Недостатньо шеф-кухарів для початку гри. {CHEFS_PRESENT}/{MIN_CHEFS}',
+  [StringNames.Error_NotFound]: 'Не знайдено',
   [StringNames.Error_NotInGame]: 'Ви не в цій грі',
   [StringNames.Error_NotYourTurn]: 'Це не ваш ход',
   [StringNames.Error_OutOfIngredientTemplate]: 'Недостатньо {INGREDIENT}.',
@@ -99,7 +103,6 @@ export const UkrainianStrings: StringsCollection = {
   [StringNames.Game_CreateGameSuccess]: 'Гру успішно створено',
   [StringNames.Game_JoinGame]: 'Приєднатися до гри',
   [StringNames.Game_JoinGameSuccess]: 'Успішно приєднано до гри',
-  [StringNames.Game_ListSuccess]: 'Список ігор успішно отримано',
   [StringNames.KeyFeatures_Title]: 'Ключові Жарактеристики',
   [StringNames.KeyFeatures_1]:
     'Захоплюючий геймплей блефу з кулінарним родзинкою',
@@ -150,6 +153,8 @@ export const UkrainianStrings: StringsCollection = {
   [StringNames.Validation_DisplayNameRequired]:
     'Ім’я користувача є обов’язковим',
   [StringNames.Validation_GameCodeRequired]: 'Код гри є обов’язковим',
+  [StringNames.Validation_GameNameRegexErrorTemplate]:
+    'Ім’я гри повинно бути від {MIN_GAME_NAME_LENGTH} до {MAX_GAME_NAME_LENGTH} символів.',
   [StringNames.Validation_GameNameRequired]: 'Ім’я гри є обов’язковим',
   [StringNames.Validation_GamePasswordRegexErrorTemplate]:
     'Пароль гри повинен бути від {MIN_GAME_PASSWORD_LENGTH} до {MAX_GAME_PASSWORD_LENGTH} символів',
@@ -163,7 +168,10 @@ export const UkrainianStrings: StringsCollection = {
   [StringNames.Validation_InvalidGameNameTemplate]:
     'Ім’я гри повинно бути від {MIN_GAME_NAME_LENGTH} до {MAX_GAME_NAME_LENGTH} символів.',
   [StringNames.Validation_InvalidLanguage]: 'Недійсна мова',
-  [StringNames.Validation_InvalidMaxChefs]: 'Недійсна кількість шеф-кухарів',
+  [StringNames.Validation_InvalidMaxChefsTemplate]:
+    'Максимальна кількість шеф-кухарів повинна бути від {MIN_CHEFS} до {MAX_CHEFS}.',
+  [StringNames.Validation_InvalidMaxChefsValueTemplate]:
+    '{VALUE} не є допустимою кількістю шеф-кухарів! Максимальна кількість шеф-кухарів повинна бути від {MIN_CHEFS} до {MAX_CHEFS}.',
   [StringNames.Validation_InvalidMessage]: 'Недійсне повідомлення',
   [StringNames.Validation_InvalidTimezone]: 'Недійсна часова зона',
   [StringNames.Validation_InvalidToken]: 'Недійсний токен',
@@ -190,6 +198,7 @@ export const UkrainianStrings: StringsCollection = {
   • Починатися з літери, числа, або Unicode-символу
   • Містити літери, числа, підкреслення, тире, та Unicode-символи
   • Не містити пробілів або спеціальних символів, крім підкреслення і тире`,
+  [StringNames.VerifyEmail_Success]: 'Електронна пошта підтверджена',
   [StringNames.TEST_TESTTEMPLATE]: 'Тестування {VARIABLE1} {VARIABLE2}',
 };
 

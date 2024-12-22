@@ -140,6 +140,7 @@ describe('GameService', () => {
       // Assertions
       expect(mockChefService.getGameChefsByGameOrIdAsync).toHaveBeenCalledWith(
         existingGame,
+        {}, // mock session
       );
       expect(mockChefService.newChefFromExisting).toHaveBeenCalledTimes(
         existingGame.chefIds.length,

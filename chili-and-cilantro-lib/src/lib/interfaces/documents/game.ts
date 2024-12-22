@@ -3,5 +3,5 @@ import { IGame } from '../models/game';
 import { IBaseDocument } from './base';
 
 export interface IGameDocument<I = DefaultIdType>
-  extends IBaseDocument<IGame, I>,
-    IGame {}
+  extends IBaseDocument<IGame<I>, I>,
+    IGame<I> {}

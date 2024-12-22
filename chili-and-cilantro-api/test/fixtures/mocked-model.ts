@@ -12,4 +12,5 @@ export interface MockedModel {
   exec: jest.Mock;
   save: jest.Mock;
   sort: jest.Mock;
+  session: jest.Mock;
 }

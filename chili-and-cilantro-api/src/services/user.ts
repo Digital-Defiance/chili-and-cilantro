@@ -55,6 +55,21 @@ export class UserService extends BaseService {
   }
 
   /**
+   * Convert a user document to a user object
+   * @param user The user document
+   * @returns The user object
+   */
+  public static userToUserObject(user: IUserDocument): IUserObject {
+    return {
+      ...user.toObject(),
+      _id: user._id.toString(),
+      createdBy: user.createdBy.toString(),
+      deletedBy: user.deletedBy?.toString(),
+      updatedBy: user.updatedBy.toString(),
+    } as IUserObject;
+  }
+
+  /**
    * Create a new email token to send to the user for email verification
    * @param userDoc The user to create the token for
    * @param type The type of email token
@@ -63,27 +78,34 @@ export class UserService extends BaseService {
   public async createEmailToken(
     userDoc: IUserDocument,
     type: EmailTokenType,
+    session?: ClientSession,
   ): Promise<IEmailTokenDocument> {
     const EmailTokenModel = this.application.getModel<IEmailTokenDocument>(
       ModelName.EmailToken,
     );
     // delete any expired tokens for the same user and email to prevent index constraint conflicts
-    await EmailTokenModel.deleteMany({
-      userId: userDoc.id,
-      email: userDoc.email,
-      expiresAt: { $lt: new Date() },
-    });
-    const emailTokens = await EmailTokenModel.create([
+    await EmailTokenModel.deleteMany(
       {
         userId: userDoc.id,
-        type: type,
         email: userDoc.email,
-        token: randomBytes(constants.EMAIL_TOKEN_LENGTH).toString('hex'),
-        lastSent: null,
-        createdAt: Date.now(),
-        expiresAt: new Date(Date.now() + constants.EMAIL_TOKEN_EXPIRATION_MS),
+        expiresAt: { $lt: new Date() },
       },
-    ]);
+      { session },
+    );
+    const emailTokens = await EmailTokenModel.create(
+      [
+        {
+          userId: userDoc.id,
+          type: type,
+          email: userDoc.email,
+          token: randomBytes(constants.EMAIL_TOKEN_LENGTH).toString('hex'),
+          lastSent: null,
+          createdAt: Date.now(),
+          expiresAt: new Date(Date.now() + constants.EMAIL_TOKEN_EXPIRATION_MS),
+        },
+      ],
+      { session },
+    );
     if (emailTokens.length !== 1) {
       throw new Error(translate(StringNames.Error_FailedToCreateEmailToken));
     }
@@ -153,6 +175,7 @@ export class UserService extends BaseService {
     password: string,
     email?: string,
     username?: string,
+    session?: ClientSession,
   ): Promise<IUserDocument> {
     const UserModel = this.application.getModel<IUserDocument>(ModelName.User);
     let userDoc: IUserDocument | null;
@@ -160,9 +183,11 @@ export class UserService extends BaseService {
     if (username) {
       userDoc = await UserModel.findOne({
         username: { $regex: new RegExp(`^${username}$`, 'i') },
-      });
+      }).session(session);
     } else if (email) {
-      userDoc = await UserModel.findOne({ email: email.toLowerCase() });
+      userDoc = await UserModel.findOne({ email: email.toLowerCase() }).session(
+        session,
+      );
     } else {
       // This should never happen due to our validation, but it's good to have as a fallback
       throw new UsernameOrEmailRequiredError();
@@ -206,7 +231,7 @@ export class UserService extends BaseService {
   public fillUserDefaults(
     newUser: ICreateUserBasics,
     createdBy?: DefaultIdType,
-  ): IUserObject {
+  ): IUserDocument {
     const now = new Date();
     const userId = new Types.ObjectId();
     const createdById = createdBy || userId;
@@ -222,7 +247,7 @@ export class UserService extends BaseService {
       createdBy: createdById,
       updatedAt: now,
       updatedBy: createdById,
-    } as IUserObject;
+    } as IUserDocument;
   }
 
   /**
@@ -256,6 +281,7 @@ export class UserService extends BaseService {
   public async newUser(
     userData: ICreateUserBasics,
     password: string,
+    session?: ClientSession,
   ): Promise<IUserDocument> {
     const UserModel = this.application.getModel<IUserDocument>(ModelName.User);
     if (!constants.USERNAME_REGEX.test(userData.username)) {
@@ -266,16 +292,22 @@ export class UserService extends BaseService {
       throw new InvalidPasswordError();
     }
 
-    const existingEmailCount = await UserModel.countDocuments({
-      email: userData.email.toLowerCase(),
-    });
+    const existingEmailCount = await UserModel.countDocuments(
+      {
+        email: userData.email.toLowerCase(),
+      },
+      { session },
+    );
     if (existingEmailCount > 0) {
       throw new EmailInUseError();
     }
 
-    const existingUsernameCount = await UserModel.countDocuments({
-      username: { $regex: new RegExp(`^${userData.username}$`, 'i') },
-    });
+    const existingUsernameCount = await UserModel.countDocuments(
+      {
+        username: { $regex: new RegExp(`^${userData.username}$`, 'i') },
+      },
+      { session },
+    );
     if (existingUsernameCount > 0) {
       throw new UsernameInUseError();
     }
@@ -284,11 +316,12 @@ export class UserService extends BaseService {
       this.fillUserDefaults(userData),
       password,
     );
-    await newUser.save();
+    await newUser.save({ session });
 
     const emailToken = await this.createEmailToken(
       newUser,
       EmailTokenType.AccountVerification,
+      session,
     );
     try {
       await this.sendEmailToken(emailToken);
@@ -302,7 +335,10 @@ export class UserService extends BaseService {
    * Re-send a previously sent email token
    * @param userId
    */
-  public async resendEmailToken(userId: string): Promise<void> {
+  public async resendEmailToken(
+    userId: string,
+    session?: ClientSession,
+  ): Promise<void> {
     const EmailTokenModel = this.application.getModel<IEmailTokenDocument>(
       ModelName.EmailToken,
     );
@@ -319,7 +355,8 @@ export class UserService extends BaseService {
         $or: [{ lastSent: null }, { lastSent: { $lte: minLastSentTime } }],
       })
         .sort({ createdAt: -1 })
-        .limit(1);
+        .limit(1)
+        .session(session);
 
     if (!emailToken) {
       throw new EmailTokenUsedOrInvalidError();
@@ -333,20 +370,23 @@ export class UserService extends BaseService {
    * @param emailToken
    * @returns
    */
-  public async verifyEmailToken(emailToken: string): Promise<boolean> {
+  public async verifyEmailToken(
+    emailToken: string,
+    session?: ClientSession,
+  ): Promise<boolean> {
     const EmailTokenModel = this.application.getModel<IEmailTokenDocument>(
       ModelName.EmailToken,
     );
     const token: IEmailTokenDocument | null = await EmailTokenModel.findOne({
       token: emailToken,
-    });
+    }).session(session);
 
     if (!token) {
       throw new EmailTokenUsedOrInvalidError();
     }
 
     if (token.expiresAt < new Date()) {
-      await EmailTokenModel.deleteOne({ _id: token._id });
+      await EmailTokenModel.deleteOne({ _id: token._id }, { session });
       throw new EmailTokenExpiredError();
     }
 
@@ -357,25 +397,30 @@ export class UserService extends BaseService {
    * Verify the email token and update the user's account status
    * @param emailToken
    */
-  public async verifyEmailTokenAndFinalize(emailToken: string): Promise<void> {
+  public async verifyEmailTokenAndFinalize(
+    emailToken: string,
+    session?: ClientSession,
+  ): Promise<void> {
     const EmailTokenModel = this.application.getModel<IEmailTokenDocument>(
       ModelName.EmailToken,
     );
     const UserModel = this.application.getModel<IUserDocument>(ModelName.User);
     const token: IEmailTokenDocument | null = await EmailTokenModel.findOne({
       token: emailToken,
-    });
+    }).session(session);
 
     if (!token) {
       throw new EmailTokenUsedOrInvalidError();
     }
 
     if (token.expiresAt < new Date()) {
-      await EmailTokenModel.deleteOne({ _id: token._id });
+      await EmailTokenModel.deleteOne({ _id: token._id }, { session });
       throw new EmailTokenExpiredError();
     }
 
-    const user: IUserDocument | null = await UserModel.findById(token.userId);
+    const user: IUserDocument | null = await UserModel.findById(
+      token.userId,
+    ).session(session);
 
     if (!user) {
       throw new UserNotFoundError();
@@ -390,7 +435,7 @@ export class UserService extends BaseService {
     await user.save();
 
     // Delete the token after successful verification
-    await EmailTokenModel.deleteOne({ _id: token._id });
+    await EmailTokenModel.deleteOne({ _id: token._id }, { session });
   }
 
   /**
@@ -403,9 +448,11 @@ export class UserService extends BaseService {
     userId: string,
     currentPassword: string,
     newPassword: string,
+    session?: ClientSession,
   ): Promise<void> {
     const UserModel = this.application.getModel<IUserDocument>(ModelName.User);
-    const user: IUserDocument | null = await UserModel.findById(userId);
+    const user: IUserDocument | null =
+      await UserModel.findById(userId).session(session);
     if (!user) {
       throw new UserNotFoundError();
     }
@@ -430,10 +477,13 @@ export class UserService extends BaseService {
    */
   public async initiatePasswordReset(
     email: string,
+    session?: ClientSession,
   ): Promise<{ success: boolean; message: string }> {
     const UserModel = this.application.getModel<IUserDocument>(ModelName.User);
     try {
-      const user = await UserModel.findOne({ email: email.toLowerCase() });
+      const user = await UserModel.findOne({
+        email: email.toLowerCase(),
+      }).session(session);
       if (!user) {
         // We don't want to reveal whether an email exists in our system
         return {
@@ -454,18 +504,36 @@ export class UserService extends BaseService {
       const emailToken = await this.createEmailToken(
         user,
         EmailTokenType.PasswordReset,
+        session,
       );
-      await this.sendEmailToken(emailToken);
+      if (!emailToken) {
+        return {
+          success: false,
+          message: translate(StringNames.Error_FailedToCreateEmailToken),
+        };
+      }
 
-      return {
-        success: true,
-        message: 'Password reset link has been sent to your email.',
-      };
-    } catch (error) {
+      try {
+        await this.sendEmailToken(emailToken);
+
+        return {
+          success: true,
+          message: translate(StringNames.ResetPassword_Sent),
+        };
+      } catch (sendEmailError: any) {
+        console.error('Error sending email:', sendEmailError);
+        return {
+          success: false,
+          message:
+            sendEmailError.message ||
+            translate(StringNames.Error_SendTokenFailure),
+        };
+      }
+    } catch (error: any) {
       console.error('Error in initiatePasswordReset:', error);
       return {
         success: false,
-        message: 'An unexpected error occurred. Please try again later.',
+        message: error.message || translate(StringNames.Common_UnexpectedError),
       };
     }
   }
@@ -477,6 +545,7 @@ export class UserService extends BaseService {
    */
   public async validatePasswordResetToken(
     token: string,
+    session?: ClientSession,
   ): Promise<IEmailTokenDocument> {
     const EmailTokenModel = this.application.getModel<IEmailTokenDocument>(
       ModelName.EmailToken,
@@ -484,12 +553,12 @@ export class UserService extends BaseService {
     const emailToken = await EmailTokenModel.findOne({
       token,
       type: EmailTokenType.PasswordReset,
-    });
+    }).session(session);
     if (!emailToken) {
       throw new Error('Invalid or expired password reset token');
     }
     if (emailToken.expiresAt < new Date()) {
-      await EmailTokenModel.deleteOne({ _id: emailToken._id });
+      await EmailTokenModel.deleteOne({ _id: emailToken._id }, { session });
       throw new Error('Password reset token has expired');
     }
     return emailToken;
@@ -504,6 +573,7 @@ export class UserService extends BaseService {
   public async resetPassword(
     token: string,
     password: string,
+    session?: ClientSession,
   ): Promise<IUserDocument> {
     const EmailTokenModel = this.application.getModel<IEmailTokenDocument>(
       ModelName.EmailToken,
@@ -513,13 +583,13 @@ export class UserService extends BaseService {
       token,
       type: EmailTokenType.PasswordReset,
       expiresAt: { $gt: new Date() },
-    });
+    }).session(session);
 
     if (!emailToken) {
       throw new EmailTokenUsedOrInvalidError();
     }
 
-    const user = await UserModel.findById(emailToken.userId);
+    const user = await UserModel.findById(emailToken.userId).session(session);
 
     if (!user) {
       throw new UserNotFoundError();
@@ -531,7 +601,7 @@ export class UserService extends BaseService {
     await user.save();
 
     // Delete the used token
-    await EmailTokenModel.deleteOne({ _id: emailToken._id });
+    await EmailTokenModel.deleteOne({ _id: emailToken._id }, { session });
 
     return user;
   }
@@ -558,7 +628,7 @@ export class UserService extends BaseService {
           siteLanguage: newLanguage,
         },
         { new: true },
-      ).session(sess ?? null);
+      ).session(sess);
       if (!userDoc) {
         throw new UserNotFoundError();
       }

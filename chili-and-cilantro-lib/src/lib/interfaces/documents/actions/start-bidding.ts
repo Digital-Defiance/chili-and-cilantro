@@ -4,5 +4,5 @@ import { IStartBiddingAction } from '../../models/actions/start-bidding';
 import { IActionDocument } from '../action';
 
 export interface IStartBiddingActionDocument<I = DefaultIdType>
-  extends IActionDocument<I, IStartBiddingDetails>,
+  extends IActionDocument<I, IStartBiddingDetails<I>>,
     IStartBiddingAction<I> {}

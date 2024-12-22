@@ -50,19 +50,22 @@ describe('ChefService', () => {
       );
 
       // Assert
-      expect((ChefModel as any).create).toHaveBeenCalledWith([
-        {
-          _id: mockChef._id,
-          gameId: mockGame._id,
-          name: username,
-          userId: mockUser._id,
-          hand: expectedHand,
-          placedCards: [],
-          lostCards: [],
-          state: ChefState.LOBBY,
-          masterChef: masterChef,
-        },
-      ]);
+      expect((ChefModel as any).create).toHaveBeenCalledWith(
+        [
+          {
+            _id: mockChef._id,
+            gameId: mockGame._id,
+            name: username,
+            userId: mockUser._id,
+            hand: expectedHand,
+            placedCards: [],
+            lostCards: [],
+            state: ChefState.LOBBY,
+            masterChef: masterChef,
+          },
+        ],
+        { session: undefined },
+      );
       expect(result).toBeDefined();
       // Add more assertions as needed
     });
@@ -88,18 +91,21 @@ describe('ChefService', () => {
       );
 
       // Assert
-      expect((ChefModel as any).create).toHaveBeenCalledWith([
-        expect.objectContaining({
-          gameId: mockGame._id,
-          name: username,
-          userId: mockUser._id,
-          hand: expectedHand,
-          placedCards: [],
-          lostCards: [],
-          state: ChefState.LOBBY,
-          masterChef: masterChef,
-        }),
-      ]);
+      expect((ChefModel as any).create).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            gameId: mockGame._id,
+            name: username,
+            userId: mockUser._id,
+            hand: expectedHand,
+            placedCards: [],
+            lostCards: [],
+            state: ChefState.LOBBY,
+            masterChef: masterChef,
+          }),
+        ],
+        { session: undefined },
+      );
       expect(result).toBeDefined();
       expect(result._id).toBeDefined();
       expect(result._id).toBeInstanceOf(Types.ObjectId);
@@ -132,19 +138,22 @@ describe('ChefService', () => {
       );
 
       // Assert
-      expect((ChefModel as any).create).toHaveBeenCalledWith([
-        {
-          _id: newChef._id,
-          gameId: newGame._id,
-          name: existingChef.name,
-          userId: existingChef.userId,
-          hand: expectedHand,
-          placedCards: [],
-          lostCards: [],
-          state: ChefState.LOBBY,
-          masterChef: existingChef.masterChef,
-        },
-      ]);
+      expect((ChefModel as any).create).toHaveBeenCalledWith(
+        [
+          {
+            _id: newChef._id,
+            gameId: newGame._id,
+            name: existingChef.name,
+            userId: existingChef.userId,
+            hand: expectedHand,
+            placedCards: [],
+            lostCards: [],
+            state: ChefState.LOBBY,
+            masterChef: existingChef.masterChef,
+          },
+        ],
+        { session: undefined },
+      );
       expect(result).toBeDefined();
       expect(result._id).toEqual(newChef._id);
       expect(result.gameId).toEqual(newGame._id);
@@ -177,18 +186,21 @@ describe('ChefService', () => {
       );
 
       // Assert
-      expect((ChefModel as any).create).toHaveBeenCalledWith([
-        expect.objectContaining({
-          gameId: newGame._id,
-          name: existingChef.name,
-          userId: existingChef.userId,
-          hand: expectedHand,
-          placedCards: [],
-          lostCards: [],
-          state: ChefState.LOBBY,
-          masterChef: existingChef.masterChef,
-        }),
-      ]);
+      expect((ChefModel as any).create).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            gameId: newGame._id,
+            name: existingChef.name,
+            userId: existingChef.userId,
+            hand: expectedHand,
+            placedCards: [],
+            lostCards: [],
+            state: ChefState.LOBBY,
+            masterChef: existingChef.masterChef,
+          }),
+        ],
+        { session: undefined },
+      );
       expect(result).toBeDefined();
       expect(result._id).toEqual(newChef._id);
       expect(result._id).toBeInstanceOf(Types.ObjectId);
@@ -207,8 +219,12 @@ describe('ChefService', () => {
         user: mockUser,
       } = generateChefGameUser(true);
 
+      const mockQuery = {
+        session: jest.fn().mockResolvedValueOnce(mockChef), // Mock the session method
+      };
+
       // mock findOne to have an exec() which returns a chef
-      (ChefModel as any).findOne = jest.fn().mockResolvedValueOnce(mockChef);
+      (ChefModel as any).findOne = jest.fn().mockReturnValueOnce(mockQuery);
 
       // Act
       const result = await chefService.getGameChefOrThrowAsync(
@@ -235,6 +251,7 @@ describe('ChefService', () => {
           userId: mockUser._id,
         }),
       );
+      expect(mockQuery.session).toHaveBeenCalled();
     });
 
     it('should throw NotInGameError if no chef is found', async () => {
@@ -244,7 +261,11 @@ describe('ChefService', () => {
       const mockGame = { _id: gameId } as IGameDocument;
       const mockUser = { _id: userId } as IUserDocument;
 
-      (ChefModel as any).findOne = jest.fn().mockResolvedValueOnce(null);
+      const mockQuery = {
+        session: jest.fn().mockResolvedValueOnce(null), // Mock the session method
+      };
+
+      (ChefModel as any).findOne = jest.fn().mockReturnValueOnce(mockQuery);
 
       // Act & Assert
       await expect(async () =>
@@ -267,7 +288,11 @@ describe('ChefService', () => {
         ...additionalChefs,
       ];
 
-      (ChefModel as any).find = jest.fn().mockResolvedValueOnce(mockChefs);
+      const mockQuery = {
+        session: jest.fn().mockResolvedValueOnce(mockChefs), // Mock the session method
+      };
+
+      (ChefModel as any).find = jest.fn().mockReturnValueOnce(mockQuery);
 
       // Act
       const result =
@@ -291,7 +316,11 @@ describe('ChefService', () => {
       const mockChefs: IChefDocument[] = [mockChef, ...additionalChefs];
       const gameIdString = mockGame._id.toString();
 
-      (ChefModel as any).find = jest.fn().mockResolvedValueOnce(mockChefs);
+      const mockQuery = {
+        session: jest.fn().mockResolvedValueOnce(mockChefs), // Mock the session method
+      };
+
+      (ChefModel as any).find = jest.fn().mockReturnValue(mockQuery);
       // Act
       const result =
         await chefService.getGameChefsByGameOrIdAsync(gameIdString);
@@ -300,6 +329,7 @@ describe('ChefService', () => {
       expect((ChefModel as any).find).toHaveBeenCalledWith({
         gameId: mockGame._id,
       });
+      expect(mockQuery.session).toHaveBeenCalled();
       expect(result).toBeDefined();
       expect(result).toEqual(mockChefs);
     });

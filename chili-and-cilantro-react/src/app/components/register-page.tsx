@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import { AxiosError } from 'axios';
 import { useFormik } from 'formik';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
 import { useAuth } from '../auth-provider';
@@ -33,7 +33,7 @@ const RegisterPage: React.FC = () => {
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const navigate = useNavigate();
   const { t } = useAppTranslation();
-  const { register } = useAuth();
+  const { register, user } = useAuth();
 
   const formik = useFormik<FormValues>({
     initialValues: {
@@ -100,6 +100,12 @@ const RegisterPage: React.FC = () => {
       }
     },
   });
+
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
 
   return (
     <Container maxWidth="xs">

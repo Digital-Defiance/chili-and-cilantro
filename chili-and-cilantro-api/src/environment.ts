@@ -41,6 +41,7 @@ function getSiteUrl() {
 export const environment: IEnvironment = {
   production: production,
   siteUrl: process.env.SITE_URL ?? getSiteUrl(),
+  basePath: process.env.BASE_PATH ?? '/',
   jwtSecret: process.env.JWT_SECRET ?? 'Ch1l!&C1l@ntr0',
   sendgridKey: process.env.SENDGRID_API_KEY ?? '',
   emailSender: process.env.EMAIL_SENDER ?? constants.EMAIL_FROM,
@@ -52,6 +53,8 @@ export const environment: IEnvironment = {
     port: port,
     sslEnabled: sslEnabled,
     corsOrigin: process.env.CORS_ORIGIN ?? getSiteUrl(),
+    pusherVersion: process.env.PUSHER_VERSION ?? '8.2.0',
+    fontawesomeKitId: process.env.FONTAWESOME_KIT_ID ?? '',
   },
   mongo: {
     uri: process.env.MONGO_URI ?? 'mongodb://localhost:27017/chilicilantro',
@@ -62,5 +65,11 @@ export const environment: IEnvironment = {
      * arbitrarily generated string, arbitrarily 100 characters long
      */
     secret: process.env.EXPRESS_SESSION_SECRET ?? '',
+  },
+  pusher: {
+    appId: process.env.PUSHER_APP_ID ?? '',
+    key: process.env.PUSHER_KEY ?? '',
+    secret: process.env.PUSHER_SECRET ?? '',
+    cluster: process.env.PUSHER_CLUSTER ?? '',
   },
 };

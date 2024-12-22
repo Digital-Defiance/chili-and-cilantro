@@ -3,7 +3,9 @@ import {
   IUserDocument,
   ModelName,
   StringLanguages,
+  StringNames,
   constants,
+  translate,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { Schema } from 'mongoose';
 import validator from 'validator';
@@ -27,6 +29,9 @@ export const UserSchema = new Schema<IUserDocument>(
       validate: {
         validator: async function (value: any) {
           return validator.isEmail(value);
+        },
+        message: (props: any) => {
+          return translate(StringNames.Validation_InvalidEmail);
         },
       },
     },
@@ -74,6 +79,7 @@ export const UserSchema = new Schema<IUserDocument>(
       type: String,
       required: true,
       trim: true,
+      match: constants.PASSWORD_HASH_REGEX,
     },
     /**
      * User's last login date/time.

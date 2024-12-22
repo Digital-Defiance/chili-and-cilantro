@@ -1,4 +1,6 @@
 import { IHasID } from '../../has-id';
 import { IActionObject } from '../action';
 
-export interface IFlipCardActionObject extends IActionObject, IHasID {}
+export interface IFlipCardActionObject
+  extends IActionObject<string>,
+    IHasID<string> {}

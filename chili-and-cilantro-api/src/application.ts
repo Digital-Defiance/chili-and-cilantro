@@ -9,6 +9,7 @@ import {
   handleError,
   IApplication,
   SchemaMap,
+  sendApiMessageResponse,
 } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import express, { Application, NextFunction, Request, Response } from 'express';
 import { Server } from 'http';
@@ -153,7 +154,7 @@ export class App implements IApplication {
             err instanceof HandleableError
               ? err
               : new HandleableError(err.message, { cause: err });
-          handleError(handleableError, res, next);
+          handleError(handleableError, res, sendApiMessageResponse, next);
         },
       );
 

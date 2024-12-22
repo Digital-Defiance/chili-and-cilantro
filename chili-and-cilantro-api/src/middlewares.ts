@@ -1,6 +1,7 @@
 import { constants } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import cors from 'cors';
-import { Application, json, urlencoded } from 'express';
+import { randomBytes } from 'crypto';
+import { Application, json, Request, Response, urlencoded } from 'express';
 import helmet from 'helmet';
 
 export class Middlewares {
@@ -32,6 +33,11 @@ export class Middlewares {
     callback(null, corsOptions);
   };
   public static init(app: Application): void {
+    // CSP nonce
+    app.use((req, res, next) => {
+      res.locals.cspNonce = randomBytes(32).toString('hex');
+      next();
+    });
     // Helmet helps you secure your Express apps by setting various HTTP headers
     app.use(
       helmet({
@@ -46,8 +52,12 @@ export class Middlewares {
             connectSrc: ["'self'", 'https://ka-p.fontawesome.com'],
             scriptSrc: [
               "'self'",
-              "'unsafe-inline'",
+              //"'unsafe-inline'",
               'https://kit.fontawesome.com',
+              'https://js.pusher.com',
+              (req: Request, res: Response) => `'nonce-${res.locals.cspNonce}'`,
+              `'sha256-6PKsc2tce3h07DOGUTGAjjPqKvoXMqTLynuHAwpWTL4='`, // fontawesome
+              `'sha256-av6jwjxPe2WZrP9CzmEkq2F85ixfGLW5uOadNDWPeEw='`, // pusher
             ],
             styleSrc: [
               "'self'",

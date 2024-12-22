@@ -2,11 +2,6 @@ import {
   DefaultLanguage,
   GlobalLanguageContext,
   HandleableError,
-  IApiErrorResponse,
-  IApiExpressValidationErrorResponse,
-  IApiMessageResponse,
-  IApiMongoValidationErrorResponse,
-  IMongoErrors,
   IRequestUser,
   IUserDocument,
   ModelName,
@@ -17,11 +12,15 @@ import {
   UserNotFoundError,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import {
+  ApiResponse,
   ExpressValidationError,
   FlexibleValidationChain,
   handleError,
   IApplication,
   RouteConfig,
+  sendApiMessageResponse,
+  SendFunction,
+  sendRawJsonResponse,
   withTransaction as utilsWithTransaction,
 } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import {
@@ -34,7 +33,6 @@ import {
 import {
   matchedData,
   ValidationChain,
-  ValidationError,
   validationResult,
 } from 'express-validator';
 import { ClientSession } from 'mongoose';
@@ -56,21 +54,30 @@ export abstract class BaseController {
   /**
    * Returns the routes that the controller will handle.
    */
-  protected abstract getRoutes(): RouteConfig<unknown[]>[];
+  protected abstract getRoutes(): RouteConfig<
+    ApiResponse,
+    any,
+    Array<unknown>
+  >[];
 
   private getAuthenticationMiddleware(
-    useAuthentication: boolean,
+    route: RouteConfig<ApiResponse, any, Array<unknown>>,
   ): RequestHandler[] {
-    return useAuthentication ? [this.authenticateRequest.bind(this)] : [];
+    return route.useAuthentication
+      ? [this.authenticateRequest.bind(this, route)]
+      : [];
   }
 
   private getValidationMiddleware(
-    validation: FlexibleValidationChain,
+    route: RouteConfig<ApiResponse, any, Array<unknown>>,
   ): RequestHandler[] {
-    if (Array.isArray(validation) && validation.length > 0) {
-      return [...validation, this.createValidationHandler(validation)];
-    } else if (typeof validation === 'function') {
-      return [this.createDynamicValidationHandler(validation)];
+    if (Array.isArray(route.validation) && route.validation.length > 0) {
+      return [
+        ...route.validation,
+        this.createValidationHandler(route.validation),
+      ];
+    } else if (typeof route.validation === 'function') {
+      return [this.createDynamicValidationHandler(route.validation)];
     }
     return [];
   }
@@ -106,41 +113,46 @@ export abstract class BaseController {
     };
   }
 
-  private createRequestHandler(
-    handler: RequestHandler,
-    useAuthentication: boolean,
-    handlerArgs: any[],
-  ): RequestHandler {
+  private createRequestHandler<
+    T extends ApiResponse,
+    RawJsonResponse extends boolean = false,
+    HandlerArgs extends Array<unknown> = Array<unknown>,
+  >(route: RouteConfig<T, RawJsonResponse, HandlerArgs>): RequestHandler {
     return async (req: Request, res: Response, next: NextFunction) => {
       this.activeRequest = req;
       this.activeResponse = res;
       // if req.user wasn't added above, return an unauthorized response
-      if (useAuthentication && !req.user) {
+      if (route.useAuthentication && !req.user) {
         handleError(
           new HandleableError(translate(StringNames.Common_Unauthorized), {
             statusCode: 401,
           }),
           res,
+          sendApiMessageResponse,
           next,
         );
         return;
       }
 
       // Check if handler is defined before calling it
-      if (typeof handler !== 'function') {
+      if (typeof route.handler !== 'function') {
         throw new Error('Handler is not a function');
       }
 
       try {
-        await handler.call(
-          this,
+        const boundHandler = route.handler.bind(this);
+        const sendFunc: SendFunction<T> = route.rawJsonHandler
+          ? sendRawJsonResponse.bind(this)
+          : sendApiMessageResponse.bind(this);
+        await boundHandler(
           req,
           res,
+          sendFunc,
           next,
-          ...(handlerArgs ? handlerArgs : []),
+          ...(route.handlerArgs ?? []),
         );
       } catch (error) {
-        handleError(error, res, next);
+        handleError(error, res, sendApiMessageResponse, next);
       }
     };
   }
@@ -151,101 +163,28 @@ export abstract class BaseController {
   private initializeRoutes(): void {
     const routes = this.getRoutes();
     routes.forEach((route) => {
-      const {
-        method,
-        path,
-        handler,
-        useAuthentication,
-        middleware = [],
-        validation = [],
-      } = route;
-      this.router[method](
-        path,
+      this.router[route.method](
+        route.path,
         ...[
-          ...this.getAuthenticationMiddleware(useAuthentication),
+          ...this.getAuthenticationMiddleware(route),
           setGlobalContextLanguageFromRequest,
-          ...this.getValidationMiddleware(validation),
-          ...middleware,
-          this.createRequestHandler(
-            handler,
-            useAuthentication,
-            route.handlerArgs,
-          ),
+          ...this.getValidationMiddleware(route),
+          ...(route.middleware ?? []),
+          this.createRequestHandler(route),
         ],
       );
     });
   }
 
   /**
-   * Sends an API response with the given status and response object.
-   * @param status
-   * @param response
-   * @param res
-   */
-  protected sendApiMessageResponse(
-    status: number,
-    response: IApiMessageResponse,
-    res: Response,
-  ): void {
-    res.status(status).json(response);
-  }
-
-  /**
-   * Sends an API response with the given status, message, and error.
-   * @param status
-   * @param message
-   * @param error
-   * @param res
-   */
-  protected sendApiErrorResponse(
-    status: number,
-    message: string,
-    error: unknown,
-    res: Response,
-  ): void {
-    res.status(status).json({ message, error } as IApiErrorResponse);
-  }
-
-  /**
-   * Sends an API response with the given status and validation errors.
-   * @param status
-   * @param errors
-   * @param res
-   */
-  protected sendApiExpressValidationErrorResponse(
-    status: number,
-    errors: ValidationError[],
-    res: Response,
-  ): void {
-    res.status(status).json({ errors } as IApiExpressValidationErrorResponse);
-  }
-
-  /**
-   * Sends an API response with the given status, message, and MongoDB validation errors.
-   * @param status
-   * @param message
-   * @param errors
-   * @param res
-   */
-  protected sendApiMongoValidationErrorResponse(
-    status: number,
-    message: string,
-    errors: IMongoErrors,
-    res: Response,
-  ): void {
-    res
-      .status(status)
-      .json({ message, errors } as IApiMongoValidationErrorResponse);
-  }
-
-  /**
    * Authenticates the request by checking the token. Also populates the request with the user object.
-   * @param getModel Function to get models from the database
+   * @param route The route config
    * @param req The request object
    * @param res The response object
    * @param next The next function
    */
   protected authenticateRequest(
+    route: RouteConfig<ApiResponse, any, Array<unknown>>,
     req: Request,
     res: Response,
     next: NextFunction,
@@ -254,10 +193,11 @@ export abstract class BaseController {
       if (err || !req.user) {
         handleError(
           new HandleableError(translate(StringNames.Common_Unauthorized), {
-            statusCode: 401,
+            statusCode: route.authFailureStatusCode ?? 401,
             cause: err,
           }),
           res,
+          sendApiMessageResponse,
           next,
         );
         return;
@@ -311,7 +251,12 @@ export abstract class BaseController {
   ): void {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      handleError(new ExpressValidationError(errors), res, next);
+      handleError(
+        new ExpressValidationError(errors),
+        res,
+        sendApiMessageResponse,
+        next,
+      );
       return;
     }
     // Create an object with only the validated fields
@@ -381,13 +326,15 @@ export abstract class BaseController {
           statusCode: 401,
         }),
         res,
+        sendApiMessageResponse,
         next,
       );
       return Promise.reject();
     }
     const user = await UserModel.findById(req.user.id);
     if (!user) {
-      handleError(new UserNotFoundError(), res, next);
+      handleError(new UserNotFoundError(), res, sendApiMessageResponse, next);
+      handleError(new UserNotFoundError(), res, sendApiMessageResponse, next);
       return Promise.reject();
     }
     return user;

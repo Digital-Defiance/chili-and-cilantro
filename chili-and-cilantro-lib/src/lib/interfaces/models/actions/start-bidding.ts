@@ -4,5 +4,5 @@ import { IStartBiddingDetails } from './details/start-bidding';
 
 export type IStartBiddingAction<I = DefaultIdType> = IAction<
   I,
-  IStartBiddingDetails
+  IStartBiddingDetails<I>
 >;

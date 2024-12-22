@@ -81,6 +81,7 @@ export function generateGame(
     exec: jest.fn().mockResolvedValue(gameData),
     save: jest.fn().mockImplementation(() => Promise.resolve(game)),
     sort: jest.fn().mockReturnThis(),
+    session: jest.fn().mockReturnThis(),
     ...gameData,
   } as IGameDocument & MockedModel;
   return game;

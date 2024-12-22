@@ -1,3 +1,4 @@
+import { DefaultIdType } from '../../../../shared-types';
 import { IActionDetailsBase } from './base';
 
-export type IPassDetails = IActionDetailsBase;
+export type IPassDetails<I = DefaultIdType> = IActionDetailsBase<I>;

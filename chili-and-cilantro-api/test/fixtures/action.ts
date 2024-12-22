@@ -466,6 +466,7 @@ export function generateAction(
     exec: jest.fn().mockResolvedValue(actionData),
     save: jest.fn().mockImplementation(() => Promise.resolve(action)),
     sort: jest.fn().mockReturnThis(),
+    session: jest.fn().mockReturnThis(),
     ...actionData,
   } as ChiliCilantroActions & MockedModel;
   return action;

@@ -5,7 +5,7 @@ import { IActionDetailsBase } from './actions/details/base';
 
 export interface IAction<
   I = DefaultIdType,
-  D extends IActionDetailsBase = IActionDetailsBase,
+  D extends IActionDetailsBase<I> = IActionDetailsBase<I>,
 > extends IHasTimestamps {
   gameId: I;
   chefId: I;

@@ -21,7 +21,14 @@
         "bundle": false,
         "main": "chili-and-cilantro-api/src/main.ts",
         "tsConfig": "chili-and-cilantro-api/tsconfig.app.json",
-        "assets": ["chili-and-cilantro-api/src/assets"],
+        "assets": [
+          "assets",
+          {
+            "input": "./chili-and-cilantro-api/src/views",
+            "glob": "**/*.ejs",
+            "output": "./chili-and-cilantro-api/src/views"
+          }
+        ],
         "generatePackageJson": true,
         "esbuildOptions": {
           "sourcemap": true,

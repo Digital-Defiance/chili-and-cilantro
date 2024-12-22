@@ -4,5 +4,5 @@ import { IExpireGameDetails } from './details/expire-game';
 
 export type IExpireGameAction<I = DefaultIdType> = IAction<
   I,
-  IExpireGameDetails
+  IExpireGameDetails<I>
 >;

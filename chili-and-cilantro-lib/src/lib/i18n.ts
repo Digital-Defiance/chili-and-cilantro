@@ -66,7 +66,9 @@ export const buildNestedI18n = (
  * @param language The language to build the nested I18n object for
  * @returns The nested I18n object
  */
-export const buildNestedI18nForLanguage = (language: StringLanguages) => {
+export const buildNestedI18nForLanguage = (
+  language: StringLanguages,
+): Record<string, any> => {
   if (!Strings[language]) {
     throw new Error(`Strings not found for language: ${language}`);
   }
@@ -93,24 +95,25 @@ export function replaceVariables(
 ): string {
   const variables = str.match(/\{(.+?)\}/g);
   if (!variables) {
-    return str;
+    return str; // No placeholders, return original string
   }
-  return variables
-    .map((variable) => variable.replace('{', '').replace('}', ''))
-    .reduce((acc, variable) => {
-      if (otherVars && variable in otherVars) {
-        return acc.replace(`{${variable}}`, otherVars[variable]);
-      } else if (variable in constants) {
-        return acc.replace(
-          `{${variable}}`,
-          (constants as Record<string, any>)[variable],
-        );
-      } else {
-        // Variable not found in constants or otherVars, so return the original string
-        return acc;
-      }
-    }, str)
-    .replace(/\{(.+?)\}/g, '');
+
+  let result = str; // Start with the original string
+
+  for (const variable of variables) {
+    const varName = variable.slice(1, -1); // Extract variable name
+    let replacement = '';
+
+    if (otherVars && varName in otherVars) {
+      replacement = otherVars[varName];
+    } else if (varName in constants) {
+      replacement = (constants as any)[varName].toString(); // Handle non-string constants
+    }
+    //If the variable is not found in constants or otherVars, leave it unchanged
+    result = result.replace(variable, replacement);
+  }
+
+  return result;
 }
 
 /**
@@ -129,13 +132,14 @@ export const translate = (
     console.warn(`Language ${lang} not found in Strings`);
     return name; // Fallback to the string name itself
   }
-  if (!(name in Strings[lang])) {
+  const stringValue = Strings[lang][name];
+  if (stringValue === undefined) {
     console.warn(`String ${name} not found for language ${lang}`);
     return name; // Fallback to the string name itself
   }
   return (name as string).toLowerCase().endsWith('template')
-    ? replaceVariables(Strings[lang][name], otherVars)
-    : Strings[lang][name];
+    ? replaceVariables(stringValue, otherVars)
+    : stringValue;
 };
 
 /**

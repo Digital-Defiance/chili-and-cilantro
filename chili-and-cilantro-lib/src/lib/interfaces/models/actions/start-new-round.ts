@@ -4,5 +4,5 @@ import { IStartNewRoundDetails } from './details/start-new-round';
 
 export type IStartNewRoundAction<I = DefaultIdType> = IAction<
   I,
-  IStartNewRoundDetails
+  IStartNewRoundDetails<I>
 >;

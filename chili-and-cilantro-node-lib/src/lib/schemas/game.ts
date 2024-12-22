@@ -1,10 +1,12 @@
 import {
-  constants,
   GamePhase,
   IBid,
   IGameDocument,
   IRoundBids,
   ModelName,
+  StringNames,
+  constants,
+  translate,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import mongoose, { ValidatorProps } from 'mongoose';
 import validator from 'validator';
@@ -35,34 +37,34 @@ export const GameSchema = new Schema<IGameDocument>(
   {
     code: {
       type: String,
-      required: [true, 'Game code field is required'],
+      required: [true, translate(StringNames.Validation_Required)],
       validate: {
         validator: function (v: string) {
           return (
             v !== undefined &&
-            validator.matches(v, /[A-Z]+/i) &&
+            validator.matches(v, constants.GAME_CODE_REGEX) &&
             v.length == constants.GAME_CODE_LENGTH
           );
         },
         message: (props: ValidatorProps) =>
-          `${props.value} is not a valid game code!`,
+          translate(StringNames.Validation_InvalidGameCode),
       },
       set: (v: string) => (v || '').trim().toUpperCase(),
     },
     name: {
       type: String,
-      required: [true, 'Game name field is required'],
+      required: [true, translate(StringNames.Validation_Required)],
       validate: {
         validator: function (v: string) {
           return (
             v !== undefined &&
-            validator.matches(v, constants.MULTILINGUAL_STRING_REGEX) &&
+            validator.matches(v, constants.GAME_NAME_REGEX) &&
             v.length >= constants.MIN_GAME_NAME_LENGTH &&
             v.length <= constants.MAX_GAME_NAME_LENGTH
           );
         },
         message: (props: ValidatorProps) =>
-          `${props.value} is not a valid game name!`,
+          translate(StringNames.Validation_GameNameRegexErrorTemplate),
       },
       set: (v: string) => (v || '').trim(),
     },
@@ -73,13 +75,13 @@ export const GameSchema = new Schema<IGameDocument>(
         validator: function (v: string) {
           return (
             v !== undefined &&
-            validator.matches(v, constants.PASSWORD_REGEX) &&
+            validator.matches(v, constants.GAME_PASSWORD_REGEX) &&
             v.length >= constants.MIN_GAME_PASSWORD_LENGTH &&
             v.length <= constants.MAX_GAME_PASSWORD_LENGTH
           );
         },
         message: (props: ValidatorProps) =>
-          `${props.value} is not a valid password!`,
+          translate(StringNames.Validation_GamePasswordRegexErrorTemplate),
       },
       set: (v: string) => (v || '').trim(),
     },
@@ -105,7 +107,13 @@ export const GameSchema = new Schema<IGameDocument>(
           return v >= constants.MIN_CHEFS && v <= constants.MAX_CHEFS;
         },
         message: (props: ValidatorProps) =>
-          `${props.value} is not a valid number of chefs!`,
+          translate(
+            StringNames.Validation_InvalidMaxChefsValueTemplate,
+            undefined,
+            {
+              VALUE: props.value,
+            },
+          ),
       },
     },
     cardsPlaced: {
@@ -168,6 +176,24 @@ export const GameSchema = new Schema<IGameDocument>(
       type: Schema.Types.ObjectId,
       ref: ModelName.Chef,
       required: false,
+    },
+    dateStarted: {
+      type: Date,
+      required: false,
+    },
+    dateEnded: {
+      type: Date,
+      required: false,
+    },
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      ref: ModelName.User,
+      required: true,
+    },
+    updatedBy: {
+      type: Schema.Types.ObjectId,
+      ref: ModelName.User,
+      required: true,
     },
   },
   {

@@ -1,4 +1,7 @@
-import { StringNames } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import {
+  IGameObject,
+  StringNames,
+} from '@chili-and-cilantro/chili-and-cilantro-lib';
 import {
   Box,
   Button,
@@ -9,6 +12,7 @@ import {
   ListItemText,
   Paper,
   Typography,
+  useTheme,
 } from '@mui/material';
 import { isAxiosError } from 'axios';
 import React, { memo, useCallback, useEffect, useState } from 'react';
@@ -17,19 +21,16 @@ import { useAuth } from '../auth-provider';
 import { useAppTranslation } from '../i18n-provider';
 import api from '../services/authenticated-api';
 
-interface Game {
-  _id: string;
-  name: string;
-  balance: number;
-}
-
 const DashboardPage: React.FC = () => {
-  const [participatingGames, setParticipatingGames] = useState<Game[]>([]);
-  const [createdGames, setCreatedGames] = useState<Game[]>([]);
+  const [participatingGames, setParticipatingGames] = useState<IGameObject[]>(
+    [],
+  );
+  const [createdGames, setCreatedGames] = useState<IGameObject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const { t } = useAppTranslation();
+  const theme = useTheme();
 
   const fetchGames = useCallback(async () => {
     if (!isAuthenticated || !user) {
@@ -68,7 +69,7 @@ const DashboardPage: React.FC = () => {
     );
   }
 
-  const renderGameList = (games: Game[], title: string) => (
+  const renderGameList = (games: IGameObject[], title: string) => (
     <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
       <Typography variant="h6" gutterBottom>
         {title}
@@ -81,12 +82,26 @@ const DashboardPage: React.FC = () => {
             <ListItem
               key={game._id}
               component={RouterLink}
-              to={`/game/${game._id}`}
+              to={`/kitchen/${game.code}`}
               sx={{
-                '&:hover': { backgroundColor: 'action.hover' },
+                color: theme.palette.text.primary,
                 cursor: 'pointer',
-                borderRadius: 1,
+                borderRadius: theme.shape.borderRadius, // Use theme's borderRadius
                 mb: 1,
+                border: `1px solid ${theme.palette.divider}`, // Add a subtle border
+                transition: theme.transitions.create(
+                  ['background-color', 'transform'],
+                  {
+                    // Add smooth transitions
+                    duration: theme.transitions.duration.short,
+                  },
+                ),
+                '&:hover': {
+                  transform: 'scale(1.02)', // Slightly enlarge on hover for a playful feel
+                  boxShadow: theme.shadows[2], // Add a shadow on hover
+                  color: theme.palette.primary.main,
+                  backgroundColor: theme.palette.action.hover, // Change background on hover
+                },
               }}
             >
               <ListItemText primary={game.name} />

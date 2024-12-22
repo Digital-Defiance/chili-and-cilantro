@@ -4,5 +4,5 @@ import { IPlaceCardAction } from '../../models/actions/place-card';
 import { IActionDocument } from '../action';
 
 export interface IPlaceCardActionDocument<I = DefaultIdType>
-  extends IActionDocument<I, IPlaceCardDetails>,
+  extends IActionDocument<I, IPlaceCardDetails<I>>,
     IPlaceCardAction<I> {}

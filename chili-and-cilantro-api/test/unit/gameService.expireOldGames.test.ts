@@ -131,9 +131,12 @@ describe('GameService', () => {
       ];
 
       // Mock GameModel.find to return the old games
+      const mockQuery = {
+        session: jest.fn().mockResolvedValueOnce(mockOldGames),
+      } as unknown as Query<IGameDocument[], IGameDocument>;
       const findSpy = jest
         .spyOn(mockGameModel, 'find')
-        .mockResolvedValue(mockOldGames);
+        .mockReturnValueOnce(mockQuery);
 
       // Mock expireGamesOrThrowAsync
       const expireGamesOrThrowAsyncSpy: jest.SpyInstance = jest
@@ -160,13 +163,12 @@ describe('GameService', () => {
 
     it('should handle when there are no old games to expire due to error', async () => {
       // Mock GameModel.find to return an empty array
-      jest.spyOn(mockGameModel, 'find').mockImplementation(
-        () =>
-          ({
-            exec: jest.fn().mockResolvedValue(null),
-            sort: jest.fn().mockReturnThis(),
-          }) as unknown as Query<IGameDocument[], IGameDocument>,
-      );
+      const mockQuery = {
+        sort: jest.fn().mockReturnThis(),
+        session: jest.fn().mockResolvedValueOnce(null),
+      } as unknown as Query<IGameDocument[], IGameDocument>;
+
+      jest.spyOn(mockGameModel, 'find').mockImplementation(() => mockQuery);
 
       // Mock expireGamesOrThrowAsync
       jest
@@ -189,17 +191,16 @@ describe('GameService', () => {
 
       // Assert that expireGamesOrThrowAsync was not called
       expect(gameService.expireGamesOrThrowAsync).not.toHaveBeenCalled();
+      expect(mockQuery.session).toHaveBeenCalled();
     });
 
     it('should handle when there are no old games to expire', async () => {
       // Mock GameModel.find to return an empty array
-      jest.spyOn(mockGameModel, 'find').mockImplementation(
-        () =>
-          ({
-            exec: jest.fn().mockResolvedValue([]),
-            sort: jest.fn().mockReturnThis(),
-          }) as unknown as Query<IGameDocument[], IGameDocument>,
-      );
+      const mockQuery = {
+        sort: jest.fn().mockReturnThis(),
+        session: jest.fn().mockResolvedValueOnce([]),
+      } as unknown as Query<IGameDocument[], IGameDocument>;
+      jest.spyOn(mockGameModel, 'find').mockImplementation(() => mockQuery);
 
       // Mock expireGamesOrThrowAsync
       jest
@@ -222,6 +223,7 @@ describe('GameService', () => {
 
       // Assert that expireGamesOrThrowAsync was not called
       expect(gameService.expireGamesOrThrowAsync).not.toHaveBeenCalled();
+      expect(mockQuery.session).toHaveBeenCalled();
     });
 
     it('should handle errors during the expiring process', async () => {

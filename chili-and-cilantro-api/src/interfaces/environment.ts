@@ -1,6 +1,7 @@
 export interface IEnvironment {
   production: boolean;
   siteUrl: string;
+  basePath: string;
   emailSender: string;
   jwtSecret: string;
   sendgridKey: string;
@@ -12,6 +13,8 @@ export interface IEnvironment {
     port: number;
     sslEnabled: boolean;
     corsOrigin: string;
+    pusherVersion: string;
+    fontawesomeKitId: string;
   };
   mongo: {
     uri: string;
@@ -19,6 +22,12 @@ export interface IEnvironment {
   cookies: {
     enabled: boolean;
     secret: string;
+  };
+  pusher: {
+    appId: string;
+    key: string;
+    secret: string;
+    cluster: string;
   };
 }
 

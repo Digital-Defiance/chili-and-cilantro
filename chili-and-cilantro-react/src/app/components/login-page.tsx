@@ -31,7 +31,7 @@ const LoginPage = () => {
   const [loginError, setLoginError] = useState<string | null>(null);
   const [resendStatus, setResendStatus] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { login, errorType } = useAuth();
+  const { login, errorType, user } = useAuth();
   const { t } = useAppTranslation();
 
   const formik = useFormik({
@@ -103,6 +103,12 @@ const LoginPage = () => {
     currentFormik.setFieldValue(loginType, '');
     currentFormik.setFieldTouched(loginType, false);
   }, [loginType]);
+
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
 
   return (
     <Container maxWidth="xs">

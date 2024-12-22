@@ -31,7 +31,7 @@ export const MIN_GAME_PASSWORD_LENGTH = 1;
  */
 export const GAME_PASSWORD_REGEX = new RegExp(
   `^[\\p{L}\\p{M}\\p{Nd}\\p{Pc}\\p{Zs}]{${MIN_GAME_PASSWORD_LENGTH},${MAX_GAME_PASSWORD_LENGTH}}$`,
-  'u',
+  'ui',
 );
 
 /**
@@ -45,10 +45,8 @@ export const MIN_GAME_NAME_LENGTH = 2;
 
 export const GAME_NAME_REGEX = new RegExp(
   `^[\\p{L}\\p{M}\\p{Nd}\\p{Pc}\\p{Zs}]{${MIN_GAME_NAME_LENGTH},${MAX_GAME_NAME_LENGTH}}$`,
-  'u',
+  'ui',
 );
-
-export const GAME_NAME_REGEX_ERROR = `Game name must be between ${MIN_GAME_NAME_LENGTH} and ${MAX_GAME_NAME_LENGTH} characters long`;
 
 /**
  * Maximum length of a username
@@ -71,7 +69,7 @@ export const MIN_USER_DISPLAY_NAME_LENGTH = 1;
 const createUserDisplayNameRegex = (minLength: number, maxLength: number) => {
   return new RegExp(
     `^[\\p{L}\\p{M}\\p{Nd}\\p{Pc}\\p{Zs}]{${minLength},${maxLength}}$`,
-    'u',
+    'ui',
   );
 };
 
@@ -84,6 +82,11 @@ export const USER_DISPLAY_NAME_REGEX = createUserDisplayNameRegex(
  * Maximum age of a game without activity in minutes
  */
 export const MAX_GAME_AGE_WITHOUT_ACTIVITY_IN_MINUTES = 60;
+
+/**
+ * Maximum age users can see game history in hours after the game ends
+ */
+export const MAX_GAME_HISTORY_AGE_IN_HOURS = 24;
 
 /**
  * Maximum length of a password
@@ -104,14 +107,9 @@ export const MAX_MESSAGE_LENGTH = 512;
 export const MIN_MESSAGE_LENGTH = 1;
 
 export const MESSAGE_REGEX = new RegExp(
-  `^[\\p{L}\\p{M}\\p{Nd}\\p{Pc}\\p{Zs}]{${MIN_MESSAGE_LENGTH},${MAX_MESSAGE_LENGTH}}$`,
-  'u',
+  `^[\\p{L}\\p{M}\\p{Nd}\\p{Pc}\\p{Zs}\\p{Po}]{${MIN_MESSAGE_LENGTH},${MAX_MESSAGE_LENGTH}}$`,
+  'ui',
 );
-
-/**
- * Regular expression to look for multilingual strings
- */
-export const MULTILINGUAL_STRING_REGEX = /^[\s\p{N}\p{L}_-]+$/u;
 
 /**
  * Number of cards in a hand
@@ -169,11 +167,6 @@ export const SITE_DOMAIN = 'chilicilantro.com';
 export const EMAIL_FROM = `noreply@${SITE_DOMAIN}`;
 
 /**
- * The name of the application.
- */
-export const APPLICATION_NAME = 'Chili & Cilantro';
-
-/**
  * Duration in milliseconds for which an email token is valid, in minutes
  */
 export const EMAIL_TOKEN_EXPIRATION_MIN = 15;
@@ -208,8 +201,8 @@ export const EMAIL_TOKEN_RESEND_INTERVAL_MS =
 
 const createUsernameRegex = (minLength: number, maxLength: number) => {
   return new RegExp(
-    `^[\\p{L}\\p{M}\\p{Nd}][\\p{L}\\p{M}\\p{Nd}_-]{${minLength - 1},${maxLength - 1}}$`,
-    'u',
+    `^[\\p{L}\\p{M}\\p{Nd}._-]{${minLength},${maxLength}}$`,
+    'u', // Keep the 'u' flag for Unicode support
   );
 };
 /**
@@ -234,6 +227,13 @@ export const PASSWORD_REGEX = createPasswordRegex(
   MAX_PASSWORD_LENGTH,
 );
 
+/**
+ * The regular expression to validate bcrypt password hashes.
+ */
+export const PASSWORD_HASH_REGEX = new RegExp(
+  `^\\$2[abxy]?\\$\\d{2}\\$[./0-9A-Za-z]{53}$`,
+);
+
 export default {
   BCRYPT_ROUNDS,
   CHILI_PER_HAND,
@@ -251,7 +251,6 @@ export default {
   MAX_GAME_NAME_LENGTH,
   MIN_GAME_NAME_LENGTH,
   GAME_NAME_REGEX,
-  GAME_NAME_REGEX_ERROR,
   HAND_SIZE,
   MAX_MESSAGE_LENGTH,
   MIN_MESSAGE_LENGTH,
@@ -264,7 +263,6 @@ export default {
   MAX_GAME_AGE_WITHOUT_ACTIVITY_IN_MINUTES,
   MAX_PASSWORD_LENGTH,
   MIN_PASSWORD_LENGTH,
-  MULTILINGUAL_STRING_REGEX,
   PASSWORD_REGEX,
   ROUNDS_TO_WIN,
   USERNAME_REGEX,

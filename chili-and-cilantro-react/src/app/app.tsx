@@ -10,6 +10,7 @@ import ChangePasswordPage from './components/change-password-page';
 import DashboardPage from './components/dashboard-page';
 import DiscTest from './components/disc-test';
 import ForgotPasswordPage from './components/forgot-password-page';
+import Kitchen from './components/kitchen';
 import LetsCook from './components/lets-cook';
 import LoginPage from './components/login-page';
 import PrivateRoute from './components/private-route';
@@ -92,6 +93,14 @@ const InnerApp: FC = () => {
           <Route path="/verify-email" element={<VerifyEmailPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/disc-test" element={<DiscTest />} />
+          <Route
+            path="/kitchen/:gameCode"
+            element={
+              <PrivateRoute>
+                <Kitchen />
+              </PrivateRoute>
+            }
+          />
         </Routes>
       </Container>
     </MenuProvider>

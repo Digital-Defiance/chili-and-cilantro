@@ -46,9 +46,12 @@ describe('GameService', () => {
   describe('getGameByIdOrThrowAsync', () => {
     it('should return a game when found', async () => {
       const mockGame = generateGame();
+      const mockQuery = {
+        session: jest.fn().mockResolvedValueOnce(mockGame),
+      } as unknown as Query<IGameDocument[], IGameDocument>;
       const findOneSpy = jest
         .spyOn(mockGameModel, 'findOne')
-        .mockResolvedValue(mockGame);
+        .mockReturnValueOnce(mockQuery);
 
       const gameId = new Types.ObjectId();
       const result = await gameService.getGameByIdOrThrowAsync(gameId);
@@ -57,37 +60,41 @@ describe('GameService', () => {
       expect(findOneSpy).toHaveBeenCalledWith({
         _id: gameId,
       });
+      expect(mockQuery.session).toHaveBeenCalled();
     });
 
     it('should throw InvalidGameError when game is not found', async () => {
-      jest.spyOn(mockGameModel, 'findOne').mockResolvedValue(null);
+      const mockQuery = {
+        session: jest.fn().mockResolvedValueOnce(null),
+      } as unknown as Query<IGameDocument[], IGameDocument>;
+      jest.spyOn(mockGameModel, 'findOne').mockReturnValueOnce(mockQuery);
 
       const gameId = new mongoose.Types.ObjectId();
 
       await expect(async () =>
         gameService.getGameByIdOrThrowAsync(gameId),
       ).rejects.toThrow(InvalidGameError);
+      expect(mockQuery.session).toHaveBeenCalled();
     });
 
     it('should search for active games when active parameter is true', async () => {
       const mockGame = generateGame();
+      const mockQuery = {
+        session: jest.fn().mockResolvedValueOnce(mockGame),
+      } as unknown as Query<IGameDocument[], IGameDocument>;
       const findOneSpy = jest
         .spyOn(mockGameModel, 'findOne')
-        .mockImplementation(
-          () =>
-            ({
-              exec: jest.fn().mockResolvedValue(mockGame),
-              sort: jest.fn().mockReturnThis(),
-            }) as unknown as Query<IGameDocument[], IGameDocument>,
-        );
+        .mockImplementation(() => mockQuery);
 
       const gameId = new mongoose.Types.ObjectId();
-      await gameService.getGameByIdOrThrowAsync(gameId, true);
+      const result = await gameService.getGameByIdOrThrowAsync(gameId, true);
 
       expect(findOneSpy).toHaveBeenCalledWith({
         _id: new mongoose.Types.ObjectId(gameId),
         currentPhase: { $ne: GamePhase.GAME_OVER },
       });
+      expect(mockQuery.session).toHaveBeenCalled();
+      expect(result).toBe(mockGame);
     });
   });
   describe('getGameByCodeOrThrowAsync', () => {
@@ -97,6 +104,7 @@ describe('GameService', () => {
         sort: jest.fn().mockReturnThis(),
         limit: jest.fn().mockReturnThis(),
         exec: jest.fn().mockResolvedValue([mockGame]),
+        session: jest.fn().mockReturnThis(),
       } as unknown as Query<IGameDocument[], IGameDocument>;
       const findSpy = jest
         .spyOn(mockGameModel, 'find')
@@ -107,12 +115,17 @@ describe('GameService', () => {
 
       expect(result).toBe(mockGame);
       expect(findSpy).toHaveBeenCalledWith({ code: gameCode });
+      expect(mockQuery.sort).toHaveBeenCalledWith({ updatedAt: -1 });
+      expect(mockQuery.limit).toHaveBeenCalledWith(1);
+      expect(mockQuery.exec).toHaveBeenCalled();
+      expect(mockQuery.session).toHaveBeenCalled();
     });
     it('should throw InvalidGameError when no game is found, returning null', async () => {
       const mockQuery = {
         sort: jest.fn().mockReturnThis(),
         limit: jest.fn().mockReturnThis(),
         exec: jest.fn().mockResolvedValue(null),
+        session: jest.fn().mockReturnThis(),
       } as unknown as Query<IGameDocument[], IGameDocument>;
       jest.spyOn(mockGameModel, 'find').mockReturnValue(mockQuery);
 
@@ -127,6 +140,7 @@ describe('GameService', () => {
         sort: jest.fn().mockReturnThis(),
         limit: jest.fn().mockReturnThis(),
         exec: jest.fn().mockResolvedValue([]),
+        session: jest.fn().mockReturnThis(),
       } as unknown as Query<IGameDocument[], IGameDocument>;
       jest.spyOn(mockGameModel, 'find').mockReturnValue(mockQuery);
 
@@ -141,6 +155,7 @@ describe('GameService', () => {
       const mockQuery = {
         sort: jest.fn().mockReturnThis(),
         limit: jest.fn().mockReturnThis(),
+        session: jest.fn().mockReturnThis(),
         exec: jest.fn().mockResolvedValue([mockGame]),
       } as unknown as Query<IGameDocument[], IGameDocument>;
       jest.spyOn(mockGameModel, 'find').mockReturnValue(mockQuery);
@@ -152,6 +167,10 @@ describe('GameService', () => {
         code: gameCode,
         currentPhase: { $ne: GamePhase.GAME_OVER },
       });
+      expect(mockQuery.sort).toHaveBeenCalledWith({ updatedAt: -1 });
+      expect(mockQuery.limit).toHaveBeenCalledWith(1);
+      expect(mockQuery.exec).toHaveBeenCalled();
+      expect(mockQuery.session).toHaveBeenCalled();
     });
     it('should return the most recent game when multiple games are found', async () => {
       const gameOne = generateGame();
@@ -159,6 +178,7 @@ describe('GameService', () => {
         sort: jest.fn().mockReturnThis(),
         limit: jest.fn().mockReturnThis(),
         exec: jest.fn().mockResolvedValue([gameOne]),
+        session: jest.fn().mockReturnThis(),
       } as unknown as Query<IGameDocument[], IGameDocument>;
       jest.spyOn(mockGameModel, 'find').mockReturnValue(mockQuery);
 

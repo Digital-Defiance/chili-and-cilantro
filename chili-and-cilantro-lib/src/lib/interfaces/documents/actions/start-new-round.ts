@@ -4,5 +4,5 @@ import { IStartNewRoundAction } from '../../models/actions/start-new-round';
 import { IActionDocument } from '../action';
 
 export interface IStartNewRoundActionDocument<I = DefaultIdType>
-  extends IActionDocument<I, IStartNewRoundDetails>,
+  extends IActionDocument<I, IStartNewRoundDetails<I>>,
     IStartNewRoundAction<I> {}

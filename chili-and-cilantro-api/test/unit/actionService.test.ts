@@ -19,7 +19,7 @@ import {
   SchemaMap,
 } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { faker } from '@faker-js/faker';
-import { Model } from 'mongoose';
+import { Model, Query } from 'mongoose';
 import { ActionService } from '../../src/services/action';
 import {
   generateCreateGameAction,
@@ -92,10 +92,11 @@ describe('ActionService', () => {
         generateCreateGameAction(gameId, masterChef._id, masterChefUser._id),
       ];
       const mockQuery = {
-        sort: jest.fn().mockReturnValue(Promise.resolve(mockActions)),
-      };
+        sort: jest.fn().mockReturnThis(),
+        session: jest.fn().mockResolvedValueOnce(mockActions),
+      } as unknown as Query<IActionDocument[], IActionDocument>;
 
-      jest.spyOn(ActionModel, 'find').mockReturnValue(mockQuery as any);
+      jest.spyOn(ActionModel, 'find').mockReturnValue(mockQuery);
 
       // Act
       const result = await actionService.getGameHistoryAsync(mockGame);
@@ -104,6 +105,8 @@ describe('ActionService', () => {
       expect(ActionModel.find).toHaveBeenCalledWith({ gameId: gameId });
       expect(ActionModel.find().sort).toHaveBeenCalledWith({ createdAt: 1 });
       expect(result).toEqual(mockActions);
+      expect(mockQuery.session).toHaveBeenCalled();
+      expect(mockQuery.sort).toHaveBeenCalledWith({ createdAt: 1 });
     });
   });
 
@@ -125,16 +128,19 @@ describe('ActionService', () => {
         masterChefUser,
       );
 
-      expect(createGame).toHaveBeenCalledWith([
-        {
-          gameId: gameId,
-          chefId: masterChef._id,
-          userId: masterChefUser._id,
-          type: ActionType.CREATE_GAME,
-          details: {},
-          round: constants.NONE,
-        },
-      ]);
+      expect(createGame).toHaveBeenCalledWith(
+        [
+          {
+            gameId: gameId,
+            chefId: masterChef._id,
+            userId: masterChefUser._id,
+            type: ActionType.CREATE_GAME,
+            details: {},
+            round: constants.NONE,
+          },
+        ],
+        { session: undefined },
+      );
       expect(result.gameId).toEqual(gameId);
       expect(result.chefId).toEqual(masterChef._id);
       expect(result.userId).toEqual(masterChefUser._id);
@@ -161,16 +167,19 @@ describe('ActionService', () => {
       );
 
       // Assert
-      expect(joinGame).toHaveBeenCalledWith([
-        {
-          gameId: gameId,
-          chefId: masterChef._id,
-          userId: masterChefUser._id,
-          type: ActionType.JOIN_GAME,
-          details: {},
-          round: constants.NONE,
-        },
-      ]);
+      expect(joinGame).toHaveBeenCalledWith(
+        [
+          {
+            gameId: gameId,
+            chefId: masterChef._id,
+            userId: masterChefUser._id,
+            type: ActionType.JOIN_GAME,
+            details: {},
+            round: constants.NONE,
+          },
+        ],
+        { session: undefined },
+      );
       expect(result.gameId).toEqual(gameId);
       expect(result.chefId).toEqual(masterChef._id);
       expect(result.userId).toEqual(masterChefUser._id);
@@ -193,16 +202,19 @@ describe('ActionService', () => {
       const result = await actionService.startGameAsync(mockGame);
 
       // Assert
-      expect(startGame).toHaveBeenCalledWith([
-        {
-          gameId: gameId,
-          chefId: masterChef._id,
-          userId: masterChefUser._id,
-          type: ActionType.START_GAME,
-          details: {},
-          round: constants.NONE,
-        },
-      ]);
+      expect(startGame).toHaveBeenCalledWith(
+        [
+          {
+            gameId: gameId,
+            chefId: masterChef._id,
+            userId: masterChefUser._id,
+            type: ActionType.START_GAME,
+            details: {},
+            round: constants.NONE,
+          },
+        ],
+        { session: undefined },
+      );
       expect(result.gameId).toEqual(gameId);
       expect(result.chefId).toEqual(masterChef._id);
       expect(result.userId).toEqual(masterChefUser._id);
@@ -225,16 +237,19 @@ describe('ActionService', () => {
       const result = await actionService.expireGameAsync(mockGame);
 
       // Assert
-      expect(expireGame).toHaveBeenCalledWith([
-        {
-          gameId: gameId,
-          chefId: masterChef._id,
-          userId: masterChefUser._id,
-          type: ActionType.EXPIRE_GAME,
-          details: {},
-          round: constants.NONE,
-        },
-      ]);
+      expect(expireGame).toHaveBeenCalledWith(
+        [
+          {
+            gameId: gameId,
+            chefId: masterChef._id,
+            userId: masterChefUser._id,
+            type: ActionType.EXPIRE_GAME,
+            details: {},
+            round: constants.NONE,
+          },
+        ],
+        { session: undefined },
+      );
       expect(result.gameId).toEqual(gameId);
       expect(result.chefId).toEqual(masterChef._id);
       expect(result.userId).toEqual(masterChefUser._id);
@@ -267,18 +282,21 @@ describe('ActionService', () => {
       );
 
       // Assert
-      expect(messageAction).toHaveBeenCalledWith([
-        {
-          gameId: gameId,
-          chefId: masterChef._id,
-          userId: masterChefUser._id,
-          type: ActionType.MESSAGE,
-          details: {
-            message: message,
+      expect(messageAction).toHaveBeenCalledWith(
+        [
+          {
+            gameId: gameId,
+            chefId: masterChef._id,
+            userId: masterChefUser._id,
+            type: ActionType.MESSAGE,
+            details: {
+              message: message,
+            },
+            round: constants.NONE,
           },
-          round: constants.NONE,
-        },
-      ]);
+        ],
+        { session: undefined },
+      );
       expect(result.gameId).toEqual(gameId);
       expect(result.chefId).toEqual(masterChef._id);
       expect(result.userId).toEqual(masterChefUser._id);
@@ -317,18 +335,21 @@ describe('ActionService', () => {
       );
 
       // Assert
-      expect(startBidding).toHaveBeenCalledWith([
-        {
-          gameId: gameId,
-          chefId: masterChef._id,
-          userId: masterChefUser._id,
-          type: ActionType.START_BIDDING,
-          details: {
-            bid: bid,
+      expect(startBidding).toHaveBeenCalledWith(
+        [
+          {
+            gameId: gameId,
+            chefId: masterChef._id,
+            userId: masterChefUser._id,
+            type: ActionType.START_BIDDING,
+            details: {
+              bid: bid,
+            },
+            round: expect.any(Number),
           },
-          round: expect.any(Number),
-        },
-      ]);
+        ],
+        { session: undefined },
+      );
       expect(result.gameId).toEqual(gameId);
       expect(result.chefId).toEqual(masterChef._id);
       expect(result.userId).toEqual(masterChefUser._id);
@@ -354,16 +375,19 @@ describe('ActionService', () => {
       const result = await actionService.passAsync(mockGame, masterChef);
 
       // Assert
-      expect(passAction).toHaveBeenCalledWith([
-        {
-          gameId: gameId,
-          chefId: masterChef._id,
-          userId: masterChefUser._id,
-          type: ActionType.PASS,
-          details: {},
-          round: expect.any(Number),
-        },
-      ]);
+      expect(passAction).toHaveBeenCalledWith(
+        [
+          {
+            gameId: gameId,
+            chefId: masterChef._id,
+            userId: masterChefUser._id,
+            type: ActionType.PASS,
+            details: {},
+            round: expect.any(Number),
+          },
+        ],
+        { session: undefined },
+      );
       expect(result.gameId).toEqual(gameId);
       expect(result.chefId).toEqual(masterChef._id);
       expect(result.userId).toEqual(masterChefUser._id);
@@ -402,19 +426,22 @@ describe('ActionService', () => {
       );
 
       // Assert
-      expect(placeCard).toHaveBeenCalledWith([
-        {
-          gameId: gameId,
-          chefId: masterChef._id,
-          userId: masterChefUser._id,
-          type: ActionType.PLACE_CARD,
-          details: {
-            cardType: cardType,
-            position: position,
+      expect(placeCard).toHaveBeenCalledWith(
+        [
+          {
+            gameId: gameId,
+            chefId: masterChef._id,
+            userId: masterChefUser._id,
+            type: ActionType.PLACE_CARD,
+            details: {
+              cardType: cardType,
+              position: position,
+            },
+            round: expect.any(Number),
           },
-          round: expect.any(Number),
-        },
-      ]);
+        ],
+        { session: undefined },
+      );
       expect(result.gameId).toEqual(gameId);
       expect(result.chefId).toEqual(masterChef._id);
       expect(result.userId).toEqual(masterChefUser._id);

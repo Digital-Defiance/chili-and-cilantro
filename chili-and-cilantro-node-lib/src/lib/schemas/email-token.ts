@@ -2,13 +2,16 @@ import {
   EmailTokenType,
   IEmailTokenDocument,
   ModelName,
+  StringNames,
+  constants,
+  translate,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { randomBytes } from 'crypto';
 import { Schema, ValidatorProps } from 'mongoose';
-import { v4 as uuidv4 } from 'uuid';
 import validator from 'validator';
 
 const generateRandomToken = () => {
-  return uuidv4();
+  return randomBytes(constants.EMAIL_TOKEN_LENGTH).toString('hex');
 };
 
 /**
@@ -42,6 +45,8 @@ export const EmailTokenSchema = new Schema<IEmailTokenDocument>({
     required: true,
     null: false,
     immutable: true,
+    minLength: constants.EMAIL_TOKEN_LENGTH * 2,
+    maxLength: constants.EMAIL_TOKEN_LENGTH * 2,
   },
   /**
    * The email address associated with the token
@@ -54,7 +59,7 @@ export const EmailTokenSchema = new Schema<IEmailTokenDocument>({
     validate: {
       validator: (v: string) => validator.isEmail(v),
       message: (props: ValidatorProps) =>
-        `${props.value} is not a valid email address!`,
+        translate(StringNames.Validation_InvalidEmail),
     },
   },
   /**

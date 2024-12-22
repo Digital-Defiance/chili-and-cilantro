@@ -4,5 +4,5 @@ import { ICreateGameDetails } from '../../models/actions/details/create-game';
 import { IActionDocument } from '../action';
 
 export interface ICreateGameActionDocument<I = DefaultIdType>
-  extends IActionDocument<I, ICreateGameDetails>,
+  extends IActionDocument<I, ICreateGameDetails<I>>,
     ICreateGameAction<I> {}

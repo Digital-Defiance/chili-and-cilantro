@@ -4,6 +4,7 @@ import {
   constants,
   IAction,
   IActionDocument,
+  IActionObject,
   IChefDocument,
   ICreateGameAction,
   ICreateGameActionDocument,
@@ -37,7 +38,7 @@ import {
   ModelName,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { IApplication } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
-import { Model } from 'mongoose';
+import { ClientSession, Model } from 'mongoose';
 import { BaseService } from './base';
 
 export class ActionService extends BaseService {
@@ -54,13 +55,31 @@ export class ActionService extends BaseService {
   constructor(application: IApplication, useTransactions = true) {
     super(application, useTransactions);
   }
+
+  /**
+   * Converts an action document to an action object
+   * @param action The action document
+   * @returns The action object
+   */
+  public static actionToActionObject(action: IActionDocument): IActionObject {
+    return {
+      ...action.toObject(),
+      _id: action._id.toString(),
+      chefId: action.chefId.toString(),
+      gameId: action.gameId.toString(),
+      userId: action.userId.toString(),
+    } as IActionObject;
+  }
+
   private async createAction<T extends IActionDocument, U extends IAction>(
     action: ActionType,
     data: U,
+    session?: ClientSession,
   ): Promise<T> {
-    const results = (await this.actionDiscriminatorsByType[action].create([
-      data,
-    ])) as T[];
+    const results = (await this.actionDiscriminatorsByType[action].create(
+      [data],
+      { session },
+    )) as T[];
     if (results.length !== 1) {
       throw new Error('Failed to create action');
     }
@@ -69,18 +88,22 @@ export class ActionService extends BaseService {
 
   public async getGameHistoryAsync(
     game: IGameDocument,
+    session?: ClientSession,
   ): Promise<IActionDocument[]> {
     const ActionModel = this.application.getModel<IActionDocument>(
       ModelName.Action,
     );
-    return await ActionModel.find({ gameId: game._id }).sort({
-      createdAt: 1,
-    });
+    return await ActionModel.find({ gameId: game._id })
+      .sort({
+        createdAt: 1,
+      })
+      .session(session);
   }
   public async createGameAsync(
     game: IGameDocument,
     chef: IChefDocument,
     user: IUserDocument,
+    session?: ClientSession,
   ): Promise<ICreateGameActionDocument> {
     return this.createAction<ICreateGameActionDocument, ICreateGameAction>(
       ActionType.CREATE_GAME,
@@ -92,12 +115,14 @@ export class ActionService extends BaseService {
         details: {} as ICreateGameDetails,
         round: constants.NONE,
       } as ICreateGameAction,
+      session,
     );
   }
   public async joinGameAsync(
     game: IGameDocument,
     chef: IChefDocument,
     user: IUserDocument,
+    session?: ClientSession,
   ): Promise<IJoinGameActionDocument> {
     return this.createAction<IJoinGameActionDocument, IJoinGameAction>(
       ActionType.JOIN_GAME,
@@ -109,10 +134,12 @@ export class ActionService extends BaseService {
         details: {} as IJoinGameDetails,
         round: constants.NONE,
       } as IJoinGameAction,
+      session,
     );
   }
   public async startGameAsync(
     game: IGameDocument,
+    session?: ClientSession,
   ): Promise<IStartGameActionDocument> {
     return this.createAction<IStartGameActionDocument, IStartGameAction>(
       ActionType.START_GAME,
@@ -124,10 +151,12 @@ export class ActionService extends BaseService {
         details: {} as IStartGameDetails,
         round: game.currentRound,
       } as IStartGameAction,
+      session,
     );
   }
   public async expireGameAsync(
     game: IGameDocument,
+    session?: ClientSession,
   ): Promise<IExpireGameActionDocument> {
     return this.createAction<IExpireGameActionDocument, IExpireGameAction>(
       ActionType.EXPIRE_GAME,
@@ -139,12 +168,14 @@ export class ActionService extends BaseService {
         details: {} as IExpireGameDetails,
         round: game.currentRound,
       } as IExpireGameAction,
+      session,
     );
   }
   public async sendMessageAsync(
     game: IGameDocument,
     chef: IChefDocument,
     message: string,
+    session?: ClientSession,
   ): Promise<IMessageActionDocument> {
     return this.createAction<IMessageActionDocument, IMessageAction>(
       ActionType.MESSAGE,
@@ -158,12 +189,14 @@ export class ActionService extends BaseService {
         } as IMessageDetails,
         round: game.currentRound,
       } as IMessageAction,
+      session,
     );
   }
   public async startBiddingAsync(
     game: IGameDocument,
     chef: IChefDocument,
     bid: number,
+    session?: ClientSession,
   ): Promise<IStartBiddingActionDocument> {
     return this.createAction<IStartBiddingActionDocument, IStartBiddingAction>(
       ActionType.START_BIDDING,
@@ -177,11 +210,13 @@ export class ActionService extends BaseService {
         } as IStartBiddingDetails,
         round: game.currentRound,
       } as IStartBiddingAction,
+      session,
     );
   }
   public async passAsync(
     game: IGameDocument,
     chef: IChefDocument,
+    session?: ClientSession,
   ): Promise<IPassActionDocument> {
     return this.createAction<IPassActionDocument, IPassAction>(
       ActionType.PASS,
@@ -193,6 +228,7 @@ export class ActionService extends BaseService {
         details: {} as IPassDetails,
         round: game.currentRound,
       } as IPassAction,
+      session,
     );
   }
   public async placeCardAsync(
@@ -200,6 +236,7 @@ export class ActionService extends BaseService {
     chef: IChefDocument,
     cardType: CardType,
     position: number,
+    session?: ClientSession,
   ): Promise<IPlaceCardActionDocument> {
     return this.createAction<IPlaceCardActionDocument, IPlaceCardAction>(
       ActionType.PLACE_CARD,
@@ -214,12 +251,14 @@ export class ActionService extends BaseService {
         } as IPlaceCardDetails,
         round: game.currentRound,
       } as IPlaceCardAction,
+      session,
     );
   }
 
   public async quitGameAsync(
     game: IGameDocument,
     chef: IChefDocument,
+    session?: ClientSession,
   ): Promise<IQuitGameActionDocument> {
     return this.createAction<IQuitGameActionDocument, IQuitGameAction>(
       ActionType.QUIT_GAME,
@@ -231,6 +270,7 @@ export class ActionService extends BaseService {
         details: {} as IQuitGameDetails,
         round: game.currentRound,
       } as IQuitGameAction,
+      session,
     );
   }
 }

@@ -39,12 +39,12 @@
         "nrwl.angular-console",
         "GitHub.copilot",
         "GitHub.copilot-chat",
-        "Codeium.codeium",
         "bruno-api-client.bruno",
         "GitHub.vscode-pull-request-github",
         "MermaidChart.vscode-mermaid-chart",
         "Graphite.gti-vscode",
-        "Orta.vscode-jest"
+        "Orta.vscode-jest",
+        "Google.geminicodeassist"
       ],
       // Set *default* container specific settings.json values on container create.
       "settings": {

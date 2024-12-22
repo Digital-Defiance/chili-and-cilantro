@@ -1,5 +1,6 @@
 import {
   IGameChefResponse,
+  IGameChefsResponse,
   StringNames,
   constants,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
@@ -13,10 +14,10 @@ import {
   Typography,
   styled,
 } from '@mui/material';
-import { AxiosResponse } from 'axios';
+import { AxiosResponse, isAxiosError } from 'axios';
 import { useFormik } from 'formik';
 import PropTypes from 'prop-types';
-import { ChangeEvent, FC } from 'react';
+import { ChangeEvent, FC, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
 import { useAuth } from '../auth-provider';
@@ -42,6 +43,7 @@ const LetsCook: FC<LetsCookProps> = ({ create }) => {
   const { t } = useAppTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
 
   const validationSchema = Yup.object().shape({
     gameName: Yup.string().test(
@@ -60,7 +62,7 @@ const LetsCook: FC<LetsCookProps> = ({ create }) => {
             value.length > constants.MAX_GAME_NAME_LENGTH
           ) {
             return this.createError({
-              message: t(StringNames.Validation_InvalidGameNameTemplate),
+              message: t(StringNames.Validation_GameNameRegexErrorTemplate),
             });
           }
         }
@@ -100,7 +102,7 @@ const LetsCook: FC<LetsCookProps> = ({ create }) => {
       .optional(),
     maxChefs: Yup.number().test(
       'maxChefs',
-      t(StringNames.Validation_InvalidMaxChefs),
+      t(StringNames.Validation_InvalidMaxChefsTemplate),
       function (value) {
         const { gameMode } = this.parent;
         if (gameMode === 'CREATE') {
@@ -110,7 +112,7 @@ const LetsCook: FC<LetsCookProps> = ({ create }) => {
             });
           if (value < constants.MIN_CHEFS || value > constants.MAX_CHEFS) {
             return this.createError({
-              message: t(StringNames.Validation_InvalidMaxChefs),
+              message: t(StringNames.Validation_InvalidMaxChefsTemplate),
             });
           }
         }
@@ -133,7 +135,7 @@ const LetsCook: FC<LetsCookProps> = ({ create }) => {
     },
     validationSchema,
     onSubmit: (values) => {
-      console.log('Form submitted:', values);
+      setError(null);
       if (values.gameMode === 'CREATE') {
         createGame();
       } else {
@@ -146,29 +148,53 @@ const LetsCook: FC<LetsCookProps> = ({ create }) => {
   });
 
   const handleGameResponse = async (response: AxiosResponse) => {
-    const data = response.data as IGameChefResponse;
     if (response.status === 201) {
-      console.log('create', data);
+      const data = response.data as IGameChefResponse;
+      navigate(`/kitchen/${data.game.code}`, {
+        state: { game: data.game, chefs: [data.chef] },
+      });
     } else if (response.status === 200) {
-      console.log('join', data);
+      const data = response.data as IGameChefsResponse;
+      navigate(`/kitchen/${data.game.code}`, {
+        state: { game: data.game, chefs: data.chefs },
+      });
+    } else if (response.data.message) {
+      setError(response.data.message);
     }
   };
 
   const createGame = async () => {
-    const response = await api.post('/game/create', {
-      name: formik.values.gameName,
-      password: formik.values.gamePassword,
-      displayname: formik.values.displayname,
-    });
-    await handleGameResponse(response);
+    try {
+      const response = await api.post('/game/create', {
+        name: formik.values.gameName,
+        ...(formik.values.gamePassword && formik.values.gamePassword.length > 0
+          ? { password: formik.values.gamePassword }
+          : {}),
+        displayname: formik.values.displayname,
+        maxChefs: formik.values.maxChefs,
+      });
+      await handleGameResponse(response);
+    } catch (error) {
+      if (isAxiosError(error) && error.response?.data.message) {
+        setError(error.response?.data.message);
+      }
+    }
   };
 
   const joinGame = async () => {
-    const response = await api.post(`/game/${formik.values.gameCode}/join`, {
-      password: formik.values.gamePassword,
-      displayname: formik.values.displayname,
-    });
-    await handleGameResponse(response);
+    try {
+      const response = await api.post(`/game/${formik.values.gameCode}/join`, {
+        displayname: formik.values.displayname,
+        ...(formik.values.gamePassword && formik.values.gamePassword.length > 0
+          ? { password: formik.values.gamePassword }
+          : {}),
+      });
+      await handleGameResponse(response);
+    } catch (error) {
+      if (isAxiosError(error) && error.response?.data.message) {
+        setError(error.response?.data.message);
+      }
+    }
   };
 
   const handleGameModeChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -339,6 +365,7 @@ const LetsCook: FC<LetsCookProps> = ({ create }) => {
           </Tooltip>
         </Box>
       )}
+      {error && <Typography color="error">{error}</Typography>}
       <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
         {formik.values.gameMode === 'CREATE'
           ? t(StringNames.Game_CreateGame)

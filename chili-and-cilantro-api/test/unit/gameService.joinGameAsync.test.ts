@@ -15,7 +15,7 @@ import {
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import { IApplication } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { faker } from '@faker-js/faker';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import sinon from 'sinon';
 import { ActionService } from '../../src/services/action';
 import { ChefService } from '../../src/services/chef';
@@ -23,7 +23,6 @@ import { GameService } from '../../src/services/game';
 import { PlayerService } from '../../src/services/player';
 import { UtilityService } from '../../src/services/utility';
 import { MockApplication } from '../fixtures/application';
-import { generateChef } from '../fixtures/chef';
 import { generateChefGameUser, generateGame } from '../fixtures/game';
 import { generateObjectId } from '../fixtures/objectId';
 import { generateUser } from '../fixtures/user';
@@ -77,6 +76,23 @@ describe('GameService', () => {
       jest.restoreAllMocks();
     });
 
+    it('should not throw an error if the user is already a participant', async () => {
+      // Arrange
+      sinon.stub(playerService, 'userIsInAnyActiveGameAsync').resolves(false);
+      sinon.stub(gameService, 'getGameChefNamesByGameIdAsync').resolves([]);
+      sinon.stub(gameService, 'verifyUserIsParticipantAsync').resolves(true); // Simulate user already in game
+
+      // Act & Assert
+      await expect(
+        gameService.validateJoinGameOrThrowAsync(
+          game,
+          user,
+          userDisplayName,
+          game.password,
+        ),
+      ).resolves.not.toThrow();
+    });
+
     it('should not throw an error when all parameters are valid', async () => {
       // arrange
       // Mock the condition where user is not in an active game
@@ -84,6 +100,7 @@ describe('GameService', () => {
       sinon
         .stub(gameService, 'getGameChefNamesByGameIdAsync')
         .resolves([chef.name]);
+      sinon.stub(gameService, 'verifyUserIsParticipantAsync').resolves(false);
 
       // act/assert
       await expect(
@@ -103,6 +120,7 @@ describe('GameService', () => {
       sinon
         .stub(gameService, 'getGameChefNamesByGameIdAsync')
         .resolves([chef.name]);
+      sinon.stub(gameService, 'verifyUserIsParticipantAsync').resolves(false);
 
       // act/assert
       await expect(async () =>
@@ -121,6 +139,7 @@ describe('GameService', () => {
       sinon
         .stub(gameService, 'getGameChefNamesByGameIdAsync')
         .resolves([chef.name]);
+      sinon.stub(gameService, 'verifyUserIsParticipantAsync').resolves(false);
 
       // act/assert
       await expect(async () =>
@@ -138,6 +157,7 @@ describe('GameService', () => {
       sinon
         .stub(gameService, 'getGameChefNamesByGameIdAsync')
         .resolves([chef.name]);
+      sinon.stub(gameService, 'verifyUserIsParticipantAsync').resolves(false);
       game = generateGame(true, {
         _id: gameId,
         masterChefUserId: user._id,
@@ -162,6 +182,7 @@ describe('GameService', () => {
       sinon
         .stub(gameService, 'getGameChefNamesByGameIdAsync')
         .resolves([chef.name]);
+      sinon.stub(gameService, 'verifyUserIsParticipantAsync').resolves(false);
 
       userDisplayName = '!'.repeat(constants.MIN_USER_DISPLAY_NAME_LENGTH + 1); // Set an invalid username with special characters
 
@@ -183,6 +204,7 @@ describe('GameService', () => {
       sinon
         .stub(gameService, 'getGameChefNamesByGameIdAsync')
         .resolves([chef.name]);
+      sinon.stub(gameService, 'verifyUserIsParticipantAsync').resolves(false);
 
       userDisplayName = 'x'.repeat(constants.MIN_USER_DISPLAY_NAME_LENGTH - 1); // Set an invalid username that is too short
 
@@ -204,6 +226,7 @@ describe('GameService', () => {
       sinon
         .stub(gameService, 'getGameChefNamesByGameIdAsync')
         .resolves([chef.name]);
+      sinon.stub(gameService, 'verifyUserIsParticipantAsync').resolves(false);
 
       userDisplayName = 'x'.repeat(constants.MAX_USER_DISPLAY_NAME_LENGTH + 1); // Set an invalid username that is too long
 
@@ -225,6 +248,7 @@ describe('GameService', () => {
       sinon
         .stub(gameService, 'getGameChefNamesByGameIdAsync')
         .resolves([chef.name]);
+      sinon.stub(gameService, 'verifyUserIsParticipantAsync').resolves(false);
 
       // act/assert
       await expect(async () =>
@@ -244,6 +268,7 @@ describe('GameService', () => {
       sinon
         .stub(gameService, 'getGameChefNamesByGameIdAsync')
         .resolves([chef.name]);
+      sinon.stub(gameService, 'verifyUserIsParticipantAsync').resolves(false);
 
       for (let i = 1; i <= constants.MAX_CHEFS; i++) {
         game.chefIds.push(generateObjectId());
@@ -268,6 +293,7 @@ describe('GameService', () => {
 
       sinon.stub(playerService, 'userIsInAnyActiveGameAsync').resolves(false);
       sinon.stub(gameService, 'getGameChefNamesByGameIdAsync').resolves([]);
+      sinon.stub(gameService, 'verifyUserIsParticipantAsync').resolves(false);
 
       await expect(
         gameService.validateJoinGameOrThrowAsync(game, user, displayName, ''),
@@ -284,6 +310,7 @@ describe('GameService', () => {
 
       sinon.stub(playerService, 'userIsInAnyActiveGameAsync').resolves(false);
       sinon.stub(gameService, 'getGameChefNamesByGameIdAsync').resolves([]);
+      sinon.stub(gameService, 'verifyUserIsParticipantAsync').resolves(false);
 
       await expect(async () =>
         gameService.validateJoinGameOrThrowAsync(
@@ -304,6 +331,7 @@ describe('GameService', () => {
 
       sinon.stub(playerService, 'userIsInAnyActiveGameAsync').resolves(false);
       sinon.stub(gameService, 'getGameChefNamesByGameIdAsync').resolves([]);
+      sinon.stub(gameService, 'verifyUserIsParticipantAsync').resolves(false);
 
       await expect(async () =>
         gameService.validateJoinGameOrThrowAsync(game, user, displayName, ''),
@@ -326,7 +354,10 @@ describe('GameService', () => {
     beforeEach(() => {
       application = new MockApplication();
       gameModel = application.getModel<IGameDocument>(ModelName.Game);
-      mockChefService = { newChefAsync: jest.fn() } as unknown as ChefService;
+      mockChefService = {
+        newChefAsync: jest.fn(),
+        getGameChefsByGameOrIdAsync: jest.fn(),
+      } as unknown as ChefService;
       mockActionService = {
         joinGameAsync: jest.fn(),
       } as unknown as ActionService;
@@ -347,12 +378,10 @@ describe('GameService', () => {
 
     it('should successfully join a game', async () => {
       // Setup mocks
-      const mockChef = generateChef({
-        masterChef: false,
-        gameId,
-        userId: user._id,
-      });
-      (mockChefService.newChefAsync as jest.Mock).mockResolvedValue(mockChef);
+      (mockChefService.newChefAsync as jest.Mock).mockResolvedValue(chef);
+      (
+        mockChefService.getGameChefsByGameOrIdAsync as jest.Mock
+      ).mockResolvedValue([]);
       game.save = jest.fn().mockResolvedValue(game);
 
       // Call the method
@@ -364,19 +393,45 @@ describe('GameService', () => {
         user,
         displayName,
         false,
+        undefined,
+        undefined,
       );
       expect(mockActionService.joinGameAsync).toHaveBeenCalledWith(
         game,
-        mockChef,
+        chef,
         user,
+        undefined,
       );
-      expect(game.chefIds).toContain(mockChef._id);
+      expect(game.chefIds).toContain(chef._id);
       expect(game.save).toHaveBeenCalled();
-      expect(result).toEqual({ game, chef: mockChef });
+      expect(result).toEqual({ game, chefs: [chef] });
+    });
+
+    it('should successfully re-join a game if already a member', async () => {
+      // Setup mocks
+      (mockChefService.newChefAsync as jest.Mock).mockResolvedValue(chef);
+      (
+        mockChefService.getGameChefsByGameOrIdAsync as jest.Mock
+      ).mockResolvedValue([chef]);
+      game.save = jest.fn().mockResolvedValue(game);
+
+      // Call the method
+      const result = await gameService.joinGameAsync(game, user, displayName);
+
+      // Assertions
+      expect(mockChefService.newChefAsync).not.toHaveBeenCalled();
+      expect(mockActionService.joinGameAsync).not.toHaveBeenCalled();
+      expect(game.chefIds).toContain(chef._id);
+      expect(game.save).not.toHaveBeenCalled();
+      expect(result).toEqual({ game, chefs: [chef] });
     });
   });
   describe('performJoinGameAsync', () => {
-    let gameId, mockChef, mockGame, mockUser, displayName;
+    let gameId: Types.ObjectId;
+    let mockChef: IChefDocument;
+    let mockGame: IGameDocument;
+    let mockUser: IUserDocument;
+    let displayName: string;
     beforeEach(() => {
       gameId = generateObjectId();
       const generated = generateChefGameUser(true);
@@ -398,9 +453,10 @@ describe('GameService', () => {
       sinon
         .stub(gameService, 'generateNewGameCodeAsync')
         .resolves(UtilityService.generateGameCode());
-      sinon
-        .stub(gameService, 'joinGameAsync')
-        .resolves({ game: mockGame, chef: mockChef });
+      sinon.stub(gameService, 'joinGameAsync').resolves({
+        game: mockGame,
+        chefs: [mockChef],
+      });
 
       // act
       const result = await gameService.performJoinGameAsync(
@@ -412,7 +468,7 @@ describe('GameService', () => {
 
       // assert
       expect(result.game).toBe(mockGame);
-      expect(result.chef).toBe(mockChef);
+      expect(result.chefs).toEqual([mockChef]);
     });
 
     it('should throw an error if validation fails', async () => {

@@ -16,7 +16,7 @@ import {
   ListItemText,
 } from '@mui/material';
 import { FC, ReactNode } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth-provider';
 import { useAppTranslation } from '../i18n-provider';
 import { useMenu } from '../menu-context';
@@ -36,6 +36,7 @@ const SideMenu: FC<{ isOpen: boolean; onClose: () => void }> = ({
   const { t } = useAppTranslation();
   const { gameOptions } = useMenu();
   const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const menuItems: IMenuItem[] = isAuthenticated
     ? [
         {
@@ -98,7 +99,7 @@ const SideMenu: FC<{ isOpen: boolean; onClose: () => void }> = ({
               component={Link}
               to={item.link}
               onClick={() => {
-                if (item.action) {
+                if (item.action && !item.link) {
                   item.action();
                 }
                 onClose();

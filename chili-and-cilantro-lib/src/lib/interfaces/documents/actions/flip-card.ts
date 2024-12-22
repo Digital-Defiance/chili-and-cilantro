@@ -4,5 +4,5 @@ import { IFlipCardAction } from '../../models/actions/flip-card';
 import { IActionDocument } from '../action';
 
 export interface IFlipCardActionDocument<I = DefaultIdType>
-  extends IActionDocument<I, IFlipCardDetails>,
+  extends IActionDocument<I, IFlipCardDetails<I>>,
     IFlipCardAction<I> {}

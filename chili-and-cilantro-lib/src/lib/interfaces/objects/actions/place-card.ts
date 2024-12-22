@@ -1,4 +1,6 @@
 import { IHasID } from '../../has-id';
 import { IPlaceCardAction } from '../../models/actions/place-card';
 
-export interface IPlaceCardActionObject extends IPlaceCardAction, IHasID {}
+export interface IPlaceCardActionObject
+  extends IPlaceCardAction<string>,
+    IHasID<string> {}
