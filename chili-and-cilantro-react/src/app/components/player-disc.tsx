@@ -93,49 +93,118 @@ const PlayerDisc: React.FC<PlayerDiscProps> = ({
       : 'assets/images/cilantro.png';
   const theme = playerThemes[player - 1] || playerThemes[0];
 
-  const renderBorderDecoration = () => (
-    <g className="border-decoration">
+  // Function to render the border decoration
+  const renderBorderDecoration = () => {
+    const numSkulls = 6;
+    const skullRadius = discSize * 0.05;
+    const borderInset = discSize * 0.05; // Inset the border by 5% of the disc size
+
+    // Outer circle (slightly inset)
+    const outerCircle = (
       <circle
+        key="outer-circle"
         cx={discSize / 2}
         cy={discSize / 2}
-        r={discSize * 0.42}
+        r={discSize * 0.48 - borderInset} // Reduce the radius to inset the border
         fill="none"
         stroke={theme.border}
         strokeWidth={(discSize / 100) * 3}
       />
-      {[0, 60, 120, 180, 240, 300].map((angle) => (
-        <g
-          key={angle}
-          transform={`rotate(${angle}, ${discSize / 2}, ${discSize / 2})`}
-        >
-          <circle
-            cx={discSize / 2}
-            cy={(discSize / 100) * 8}
-            r={(discSize / 100) * 2}
-            fill={theme.accent}
-          />
-          <path
-            d={`M${discSize / 2 - 2},${(discSize / 100) * 8} Q${
-              discSize / 2
-            },${(discSize / 100) * 6} ${discSize / 2 + 2},${
-              (discSize / 100) * 8
-            }`}
-            fill={theme.accent}
-          />
-        </g>
-      ))}
-    </g>
-  );
+    );
 
+    const skullSvg = (
+      <g>
+        <circle cx="0" cy="0" r={skullRadius * 0.6} fill={theme.border} />
+        <circle
+          cx={-skullRadius * 0.4}
+          cy={-skullRadius * 0.2}
+          r={skullRadius * 0.15}
+          fill={theme.primary}
+        />
+        <circle
+          cx={skullRadius * 0.4}
+          cy={-skullRadius * 0.2}
+          r={skullRadius * 0.15}
+          fill={theme.primary}
+        />
+        <rect
+          x={-skullRadius * 0.6}
+          y={skullRadius * 0.2}
+          width={skullRadius * 1.2}
+          height={skullRadius * 0.3}
+          fill={theme.border}
+        />
+      </g>
+    );
+
+    const borderElements = [outerCircle];
+
+    for (let i = 0; i < numSkulls; i++) {
+      const angle = (i / numSkulls) * 2 * Math.PI;
+      const x =
+        discSize / 2 +
+        (discSize * 0.42 - borderInset) * Math.cos(angle) -
+        skullRadius / 2;
+      const y =
+        discSize / 2 +
+        (discSize * 0.42 - borderInset) * Math.sin(angle) -
+        skullRadius / 2;
+      borderElements.push(
+        <g
+          key={`skull-${i}`}
+          transform={`translate(${x}, ${y}) rotate(${(angle * 180) / Math.PI})`}
+        >
+          {skullSvg}
+        </g>,
+      );
+    }
+
+    const swirlRadius = discSize * 0.02;
+    const swirlPath = `M ${swirlRadius}, 0
+                       A ${swirlRadius}, ${swirlRadius} 0 0,1 0, -${swirlRadius}
+                       A ${swirlRadius}, ${swirlRadius} 0 0,1 -${swirlRadius}, 0
+                       A ${swirlRadius}, ${swirlRadius} 0 0,1 0, ${swirlRadius}
+                       A ${swirlRadius}, ${swirlRadius} 0 0,1 ${swirlRadius}, 0`;
+
+    for (let i = 0; i < numSkulls; i++) {
+      const angle = ((i + 0.5) / numSkulls) * 2 * Math.PI;
+      const x =
+        discSize / 2 + (discSize * 0.42 - borderInset) * Math.cos(angle);
+      const y =
+        discSize / 2 + (discSize * 0.42 - borderInset) * Math.sin(angle);
+      borderElements.push(
+        <path
+          key={`swirl-${i}`}
+          d={swirlPath}
+          fill="none"
+          stroke={theme.border}
+          strokeWidth={(discSize / 100) * 1}
+          transform={`translate(${x}, ${y}) rotate(${(angle * 180) / Math.PI + 90})`}
+        />,
+      );
+    }
+
+    return <g key="border-decoration">{borderElements}</g>;
+  };
+
+  // Function to render the pattern
   const renderPattern = () => {
     const dotCount = 50;
     const dotRadius = (discSize / 100) * 2;
     const maxOffset = discSize / 2 - dotRadius;
+    const swirlCount = 8;
+    const swirlRadius = discSize * 0.08;
+    const swirlThickness = (discSize / 100) * 1.5;
+    const lineCount = 16;
+    const lineLength = discSize * 0.3;
+    const lineThickness = (discSize / 100) * 1.5;
+    const lineElements = [];
+    const swirlElements = [];
 
     switch (patternType) {
       case 'dots':
         return (
-          <g className="pattern">
+          <g key={'dots'} className="pattern">
             {[...Array(dotCount)].map((_, i) => {
               const angle = Math.random() * 2 * Math.PI;
               const distance = Math.random() * maxOffset;
@@ -144,7 +213,7 @@ const PlayerDisc: React.FC<PlayerDiscProps> = ({
 
               return (
                 <circle
-                  key={i}
+                  key={`dot-${i}`}
                   cx={x}
                   cy={y}
                   r={dotRadius}
@@ -156,22 +225,68 @@ const PlayerDisc: React.FC<PlayerDiscProps> = ({
           </g>
         );
       case 'swirl':
+        for (let i = 0; i < swirlCount; i++) {
+          const angle = (i / swirlCount) * 2 * Math.PI;
+          const x = discSize / 2 + discSize * 0.3 * Math.cos(angle);
+          const y = discSize / 2 + discSize * 0.3 * Math.sin(angle);
+          const swirlPath = `M ${x} ${y} 
+                             C ${x + swirlRadius * Math.cos(angle + Math.PI / 2)} ${y + swirlRadius * Math.sin(angle + Math.PI / 2)}, 
+                               ${x + swirlRadius * 2 * Math.cos(angle)} ${y + swirlRadius * 2 * Math.sin(angle)},
+                               ${x + swirlRadius * 3 * Math.cos(angle + Math.PI / 4)} ${y + swirlRadius * 3 * Math.sin(angle + Math.PI / 4)}`;
+          swirlElements.push(
+            <path
+              key={`swirl-pattern-${i}`}
+              d={swirlPath}
+              fill="none"
+              stroke={theme.accent}
+              strokeWidth={swirlThickness}
+              strokeLinecap="round"
+            />,
+          );
+        }
         return (
-          <g className="pattern">{/* SVG elements for swirl pattern */}</g>
-        ); // Implement swirl pattern
+          <g key={'swirl'} className="pattern">
+            {swirlElements}
+          </g>
+        );
       case 'lines':
+        for (let i = 0; i < lineCount; i++) {
+          const angle = (i / lineCount) * 2 * Math.PI;
+          const startX = discSize / 2 + discSize * 0.1 * Math.cos(angle);
+          const startY = discSize / 2 + discSize * 0.1 * Math.sin(angle);
+          const endX = startX + lineLength * Math.cos(angle);
+          const endY = startY + lineLength * Math.sin(angle);
+          lineElements.push(
+            <line
+              key={`line-${i}`}
+              x1={startX}
+              y1={startY}
+              x2={endX}
+              y2={endY}
+              stroke={theme.accent}
+              strokeWidth={lineThickness}
+              strokeLinecap="round"
+            />,
+          );
+        }
         return (
-          <g className="pattern">{/* SVG elements for lines pattern */}</g>
-        ); // Implement lines pattern
+          <g key={'lines'} className="pattern">
+            {lineElements}
+          </g>
+        );
       default:
         return null;
     }
   };
 
+  // Function to render the front face
   const renderFront = () => {
     const iconSize = discSize / 3;
+    const iconCircleRadius = iconSize * 0.7;
+
     return (
       <svg
+        key={'front'}
         viewBox={`0 0 ${discSize} ${discSize}`}
         width={discSize}
         height={discSize}
@@ -184,10 +299,17 @@ const PlayerDisc: React.FC<PlayerDiscProps> = ({
         />
         {renderBorderDecoration()}
         {renderPattern()}
+        {/* Add the background circle for the hat */}
+        <circle
+          cx={discSize / 2}
+          cy={discSize / 2}
+          r={iconCircleRadius}
+          fill={theme.secondary}
+        />
         <Hat
-          player={player}
+          style={player}
           dropShadowColor={theme.accent}
-          fillColor={theme.secondary}
+          fillColor="#fff"
           otherColor={theme.primary}
           size={iconSize}
           x={discSize / 2 - iconSize / 2}
@@ -197,10 +319,14 @@ const PlayerDisc: React.FC<PlayerDiscProps> = ({
     );
   };
 
+  // Function to render the back face
   const renderBack = () => {
     const iconSize = discSize / 3;
+    const iconCircleRadius = iconSize * 0.7;
+
     return (
       <svg
+        key={'back'}
         viewBox={`0 0 ${discSize} ${discSize}`}
         width={discSize}
         height={discSize}
@@ -213,6 +339,13 @@ const PlayerDisc: React.FC<PlayerDiscProps> = ({
         />
         {renderBorderDecoration()}
         {renderPattern()}
+        {/* Add the background circle for the icon */}
+        <circle
+          cx={discSize / 2}
+          cy={discSize / 2}
+          r={iconCircleRadius}
+          fill={theme.primary}
+        />
         <image
           href={iconSrc}
           width={iconSize}

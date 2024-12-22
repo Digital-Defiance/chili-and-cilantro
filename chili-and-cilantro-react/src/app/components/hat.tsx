@@ -1,7 +1,7 @@
 import { FC } from 'react';
 
 interface HatProps {
-  player: number;
+  style: number;
   dropShadowColor: string;
   fillColor?: string;
   otherColor?: string;
@@ -11,13 +11,13 @@ interface HatProps {
 }
 
 const hats = (
-  player: number,
+  style: number,
   dropShadowColor: string,
   fillColorValue: string,
   otherColorValue: string,
   size: number,
 ): JSX.Element => {
-  switch (player) {
+  switch (style) {
     case 1:
       return (
         <svg
@@ -437,12 +437,12 @@ const hats = (
         </svg>
       );
     default:
-      throw new Error(`Unknown player number: ${player}`);
+      throw new Error(`Unknown player number: ${style}`);
   }
 };
 
 export const Hat: FC<HatProps> = ({
-  player,
+  style,
   dropShadowColor,
   fillColor,
   otherColor,
@@ -454,7 +454,7 @@ export const Hat: FC<HatProps> = ({
   const fillColorValue = fillColor ?? '#fff';
   return (
     <g transform={`translate(${x}, ${y})`}>
-      {hats(player, dropShadowColor, fillColorValue, otherColorValue, size)}
+      {hats(style, dropShadowColor, fillColorValue, otherColorValue, size)}
     </g>
   );
 };
