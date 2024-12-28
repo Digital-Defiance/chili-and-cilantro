@@ -44,7 +44,8 @@
         "MermaidChart.vscode-mermaid-chart",
         "Graphite.gti-vscode",
         "Orta.vscode-jest",
-        "Google.geminicodeassist"
+        "Google.geminicodeassist",
+        "GoogleCloudTools.cloudcode"
       ],
       // Set *default* container specific settings.json values on container create.
       "settings": {

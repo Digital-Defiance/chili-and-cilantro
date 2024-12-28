@@ -4,6 +4,7 @@ import {
   ChefAlreadyJoinedError,
   ChefState,
   DefaultIdType,
+  EndGameReason,
   GameEndedError,
   GameInProgressError,
   GamePasswordMismatchError,
@@ -21,6 +22,7 @@ import {
   IUserDocument,
   IncorrectGamePhaseError,
   InvalidActionError,
+  InvalidEndGameReasonError,
   InvalidGameError,
   InvalidGameNameError,
   InvalidGamePasswordError,
@@ -624,7 +626,75 @@ export class GameService extends BaseService {
     return this.withTransaction<IGameAction>(async () => {
       const game = await this.getGameByCodeOrThrowAsync(gameCode, true);
       await this.validateStartGameOrThrowAsync(game, userId);
-      return this.startGameAsync(game);
+      return await this.startGameAsync(game);
+    }, session);
+  }
+
+  /**
+   * Validates that the specified game can be ended or throws a validation error
+   * @param game The game to end
+   * @param userId The ID of the user ending the game
+   * @param reason The reason the game is ending
+   */
+  public async validateEndGameOrThrowAsync(
+    game: IGameDocument,
+    userId: DefaultIdType,
+    reason: EndGameReason,
+  ): Promise<void> {
+    if (!(await this.playerService.isMasterChefAsync(userId, game._id))) {
+      throw new MustBeMasterChefError();
+    }
+    if (game.currentPhase === GamePhase.GAME_OVER) {
+      throw new GameEndedError();
+    }
+    if (reason === EndGameReason.INACTIVE) {
+      throw new InvalidEndGameReasonError(reason);
+    }
+  }
+
+  /**
+   * Ends the specified game
+   * @param game The game to end
+   * @param reason The reason the game is ending
+   * @param session The session to use for the transaction
+   * @returns The ended game
+   */
+  public async endGameAsync(
+    game: IGameDocument,
+    reason: EndGameReason,
+    session?: ClientSession,
+  ): Promise<IGameAction> {
+    game.currentPhase = GamePhase.GAME_OVER;
+    const savedGame = await game.save({ session });
+    const action = await this.actionService.endGameAsync(
+      savedGame,
+      reason,
+      session,
+    );
+    return { game: savedGame, action };
+  }
+
+  /**
+   * Ends the specified game
+   * @param gameCode The code of the game to end
+   * @param userId The ID of the user ending the game
+   * @param session The session to use for the transaction
+   * @returns The ended game
+   */
+  public async performEndGameAsync(
+    gameCode: string,
+    reason: EndGameReason,
+    userId: DefaultIdType,
+    session?: ClientSession,
+  ): Promise<IGameAction> {
+    return this.withTransaction<IGameAction>(async (session) => {
+      const game = await this.getGameByCodeOrThrowAsync(
+        gameCode,
+        true,
+        session,
+      );
+      await this.validateEndGameOrThrowAsync(game, userId, reason);
+      return await this.endGameAsync(game, reason, session);
     }, session);
   }
 

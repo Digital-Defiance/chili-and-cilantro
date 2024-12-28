@@ -4,6 +4,7 @@ import CardType from './enumerations/card-type';
 import ChallengeResponse from './enumerations/challenge-response';
 import ChefState from './enumerations/chef-state';
 import { EmailTokenType } from './enumerations/email-token-type';
+import { EndGameReason } from './enumerations/end-game-reason';
 import GamePhase from './enumerations/game-phase';
 import QuitGameReason from './enumerations/quit-game-reason';
 import { StringLanguages } from './enumerations/string-languages';
@@ -25,6 +26,7 @@ export type TranslatableEnum =
     }
   | { type: TranslatableEnumType.ChefState; value: ChefState }
   | { type: TranslatableEnumType.EmailTokenType; value: EmailTokenType }
+  | { type: TranslatableEnumType.EndGameReason; value: EndGameReason }
   | { type: TranslatableEnumType.GamePhase; value: GamePhase }
   | { type: TranslatableEnumType.QuitGameReason; value: QuitGameReason }
   | { type: TranslatableEnumType.TurnAction; value: TurnAction }
@@ -59,6 +61,9 @@ export type TranslationsMap = {
   };
   [TranslatableEnumType.EmailTokenType]: {
     [key in StringLanguages]: { [key in EmailTokenType]: string };
+  };
+  [TranslatableEnumType.EndGameReason]: {
+    [key in StringLanguages]: { [key in EndGameReason]: string };
   };
   [TranslatableEnumType.GamePhase]: {
     [key in StringLanguages]: { [key in GamePhase]: string };

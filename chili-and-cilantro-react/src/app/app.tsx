@@ -13,6 +13,7 @@ import ForgotPasswordPage from './components/forgot-password-page';
 import Kitchen from './components/kitchen';
 import LetsCook from './components/lets-cook';
 import LoginPage from './components/login-page';
+import { Logout } from './components/logout';
 import PrivateRoute from './components/private-route';
 import RegisterPage from './components/register-page';
 import SplashPage from './components/splash-page';
@@ -98,6 +99,14 @@ const InnerApp: FC = () => {
             element={
               <PrivateRoute>
                 <Kitchen />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/logout"
+            element={
+              <PrivateRoute>
+                <Logout />
               </PrivateRoute>
             }
           />

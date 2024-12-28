@@ -12,6 +12,7 @@ export const FrenchStrings: StringsCollection = {
   [StringNames.Common_ChangePassword]: 'Changer le mot de passe',
   [StringNames.Common_CheckingAuthentication]:
     'Vérification de l’authentification',
+  [StringNames.Common_Chef]: 'Chef',
   [StringNames.Common_ConfirmNewPassword]: 'Confirmer le nouveau mot de passe',
   [StringNames.Common_CurrentPassword]: 'Mot de passe actuel',
   [StringNames.Common_GoToSplash]: "Retourner aucran d'accueil",
@@ -19,9 +20,11 @@ export const FrenchStrings: StringsCollection = {
   [StringNames.Common_Dashboard]: 'Tableau de bord',
   [StringNames.Common_DisplayName]: 'Nom d’utilisateur',
   [StringNames.Common_Email]: 'Courriel',
+  [StringNames.Common_Game]: 'Jeu',
   [StringNames.Common_GameCode]: 'Code de jeu',
   [StringNames.Common_GameName]: 'Nom du jeu',
   [StringNames.Common_GamePassword]: 'Mot de passe du jeu',
+  [StringNames.Common_Kitchen]: 'Cuisine',
   [StringNames.Common_Loading]: 'Chargement...',
   [StringNames.Common_Logo]: 'logo',
   [StringNames.Common_MasterChef]: 'Chef de cuisine',
@@ -73,12 +76,14 @@ export const FrenchStrings: StringsCollection = {
     'Le mot de passe du jeu ne correspond pas.',
   [StringNames.Error_InvalidAction]: 'Action invalide',
   [StringNames.Error_InvalidCredentials]: 'Identifiants invalides',
+  [StringNames.Error_InvalidEndGameReason]: 'Raison de fin de jeu invalide',
   [StringNames.Error_MustBeMasterChef]:
     'Vous devez être le chef de cuisine pour effectuer cette action.',
   [StringNames.Error_NotEnoughChefsTemplate]:
     'Pas assez de chefs pour commencer le jeu. {CHEFS_PRESENT}/{MIN_CHEFS}',
   [StringNames.Error_NotFound]: 'Introuvable',
   [StringNames.Error_NotInGame]: 'Vous n’êtes pas dans ce jeu.',
+  [StringNames.Error_NotLoggedIn]: 'Vous n’êtes pas connecté',
   [StringNames.Error_NotYourTurn]: 'Ce n’est pas votre tour.',
   [StringNames.Error_OutOfIngredientTemplate]: 'Plus de {INGREDIENT}.',
   [StringNames.Error_SendTokenFailure]:
@@ -104,6 +109,7 @@ export const FrenchStrings: StringsCollection = {
   [StringNames.ForgotPassword_Title]: 'Mot de passe oublié',
   [StringNames.Game_CreateGame]: 'Créer un Jeu',
   [StringNames.Game_CreateGameSuccess]: 'Jeu créé avec succès',
+  [StringNames.Game_EndGame]: 'Terminer le Jeu',
   [StringNames.Game_JoinGame]: 'Rejoindre un Jeu',
   [StringNames.Game_JoinGameSuccess]: 'Jeu rejoint avec succès',
   [StringNames.KeyFeatures_Title]: 'Caractéristiques Principales',

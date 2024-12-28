@@ -1,5 +1,6 @@
 import {
   CardType,
+  EndGameReason,
   GamePhase,
   IActionResponse,
   IActionsResponse,
@@ -170,6 +171,19 @@ export class GameController extends BaseController {
         path: '/:code/start',
         handler: this.startGame,
         useAuthentication: true,
+      }),
+      routeConfig<
+        IGameActionResponse | IApiErrorResponse,
+        false,
+        Array<unknown>
+      >({
+        method: 'post',
+        path: '/:code/end',
+        handler: this.endGame,
+        useAuthentication: true,
+        validation: [
+          body('reason').isString().isIn(Object.values(EndGameReason)),
+        ],
       }),
       routeConfig<
         ITurnActionsResponse | IApiErrorResponse,
@@ -587,5 +601,34 @@ export class GameController extends BaseController {
         res,
       );
     });
+  }
+
+  private async endGame(
+    req: Request,
+    res: Response,
+    send: SendFunction<IGameActionResponse | IApiErrorResponse>,
+    next: NextFunction,
+  ) {
+    try {
+      const user = await this.validateAndFetchRequestUser(req, res, next);
+      const gameCode = req.params.code;
+      const reason = req.validatedBody.reason as EndGameReason;
+      const { game, action } = await this.gameService.performEndGameAsync(
+        gameCode,
+        reason,
+        user._id,
+      );
+      send(
+        200,
+        {
+          message: translate(StringNames.Common_Success),
+          game: GameService.gameToGameObject(game),
+          action: ActionService.actionToActionObject(action),
+        },
+        res,
+      );
+    } catch (e) {
+      handleError(e, res, send as SendFunction<IApiErrorResponse>, next);
+    }
   }
 }

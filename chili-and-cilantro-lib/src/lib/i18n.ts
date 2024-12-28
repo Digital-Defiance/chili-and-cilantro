@@ -7,6 +7,7 @@ import { ChallengeResponseTranslations } from './enumeration-translations/challe
 import { ChallengeResponsePastTenseTranslations } from './enumeration-translations/challenge-response-past-tense';
 import { ChefStateTranslations } from './enumeration-translations/chef-state';
 import { EmailTokenTypeTranslations } from './enumeration-translations/email-token-type';
+import { EndGameReasonTranslations } from './enumeration-translations/end-game-reason';
 import { GamePhaseTranslations } from './enumeration-translations/game-phase';
 import { QuitGameReasonTranslations } from './enumeration-translations/quit-game-reason';
 import { TurnActionTranslations } from './enumeration-translations/turn-action';
@@ -155,6 +156,7 @@ export const translationsMap: TranslationsMap = {
     ChallengeResponsePastTenseTranslations,
   [TranslatableEnumType.ChefState]: ChefStateTranslations,
   [TranslatableEnumType.EmailTokenType]: EmailTokenTypeTranslations,
+  [TranslatableEnumType.EndGameReason]: EndGameReasonTranslations,
   [TranslatableEnumType.GamePhase]: GamePhaseTranslations,
   [TranslatableEnumType.QuitGameReason]: QuitGameReasonTranslations,
   [TranslatableEnumType.TurnAction]: TurnActionTranslations,

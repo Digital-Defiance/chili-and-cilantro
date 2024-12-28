@@ -7,6 +7,7 @@ export enum TranslatableEnumType {
   ChallengeResponsePastTense = 'ChallengeResponsePastTense',
   ChefState = 'ChefState',
   EmailTokenType = 'EmailTokenType',
+  EndGameReason = 'EndGameReason',
   GamePhase = 'GamePhase',
   QuitGameReason = 'QuitGameReason',
   TurnAction = 'TurnAction',
