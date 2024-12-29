@@ -1,28 +1,43 @@
 import {
+  EndGameReason,
   GamePhase,
+  IActionObject,
   IChefObject,
+  IGameChefsHistoryResponse,
   IGameObject,
-  IRequestUser,
   StringNames,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Typography,
+} from '@mui/material';
 import { isAxiosError } from 'axios';
-import { FC, useCallback, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth-provider';
 import { IncludeOnMenu } from '../enumerations/include-on-menu';
 import { useAppTranslation } from '../i18n-provider';
+import { IMenuOption } from '../interfaces/menu-option';
 import { PusherProvider, usePusher } from '../pusher-context';
 import api from '../services/authenticated-api';
 import { useRegisterMenuOption } from '../use-register-menu';
+import ShareGame from './share-game';
 
 export const Kitchen: FC = () => {
   const { user } = useAuth();
 
+  const [openEndGameDialog, setOpenEndGameDialog] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [gameCode, setGameCode] = useState<string | null>(null);
   const [game, setGame] = useState<IGameObject | null>(null);
   const [chefs, setChefs] = useState<IChefObject[] | null>(null);
+  const [history, setHistory] = useState<IActionObject[] | null>(null);
   const location = useLocation();
   const { t } = useAppTranslation();
   const { pusher, error: pusherError } = usePusher();
@@ -32,7 +47,7 @@ export const Kitchen: FC = () => {
     async (
       gameCode: string,
       currentPhase: GamePhase,
-      masterChefId: string,
+      masterChefUserId: string,
       t: (key: StringNames, variables?: Record<string, string>) => string,
     ) => {
       try {
@@ -42,11 +57,13 @@ export const Kitchen: FC = () => {
         if (currentPhase === GamePhase.GAME_OVER) {
           throw new Error(t(StringNames.Error_GameEnded));
         }
-        if (masterChefId !== user.id) {
+        if (masterChefUserId !== user.id) {
           throw new Error(t(StringNames.Error_MustBeMasterChef));
         }
 
-        const result = await api.post(`/game/${gameCode}/end`);
+        const result = await api.post(`/game/${gameCode}/end`, {
+          reason: EndGameReason.ENDED_BY_HOST,
+        });
         navigate('/dashboard');
       } catch (error) {
         if (isAxiosError(error) && error.response) {
@@ -61,37 +78,56 @@ export const Kitchen: FC = () => {
     [user, navigate],
   );
 
+  const handleOpenEndGameDialog = useCallback(() => {
+    setOpenEndGameDialog(true);
+  }, []);
+
+  const handleCloseEndGameDialog = useCallback(() => {
+    setOpenEndGameDialog(false);
+  }, []);
+
+  const handleConfirmEndGame = useCallback(() => {
+    // Perform end game action here, e.g., call endGame()
+    if (game?.code && game?.currentPhase && game?.masterChefUserId) {
+      endGame(game.code, game.currentPhase, game.masterChefUserId, t);
+    }
+
+    setOpenEndGameDialog(false);
+  }, [game, endGame, t]);
+
   useEffect(() => {
     if (pusherError) {
       setError(pusherError);
     }
   }, [pusherError]);
 
-  const handleEndGame = useCallback(() => {
-    if (game?.code && game?.currentPhase && game?.masterChefId) {
-      // Check if game exists before calling endGame
-      endGame(game.code, game.currentPhase, game.masterChefId, t);
-    }
-  }, [game?.code, game?.currentPhase, game?.masterChefId, endGame, t]);
-
-  const filterFunction = (
-    game: IGameObject | null,
-    user: IRequestUser | null,
-  ): boolean => true;
-  // !!game?.masterChefId && !!user?.id && game?.masterChefId === user?.id;
+  const filterFunction = useCallback(
+    (option: IMenuOption) => {
+      const result =
+        game !== null &&
+        user !== null &&
+        user.id !== null &&
+        game.masterChefUserId === user.id;
+      return result;
+    },
+    [game, user],
+  );
 
   useRegisterMenuOption(
-    {
-      id: 'end-game',
-      label: t(StringNames.Game_EndGame),
-      action: handleEndGame,
-      icon: <i className="fa-solid fa-door-closed" />,
-      requiresAuth: true,
-      routePattern: /^\/kitchen\/.*$/,
-      includeOnMenus: [IncludeOnMenu.GameMenu, IncludeOnMenu.SideMenu],
-      index: 10,
-      filter: () => filterFunction(game, user),
-    },
+    useMemo(
+      () => ({
+        id: 'end-game',
+        label: t(StringNames.Game_EndGame),
+        action: handleOpenEndGameDialog,
+        icon: <i className="fa-solid fa-door-closed" />,
+        requiresAuth: true,
+        routePattern: /^\/kitchen\/.*$/,
+        includeOnMenus: [IncludeOnMenu.GameMenu, IncludeOnMenu.SideMenu],
+        index: 10,
+        filter: filterFunction,
+      }),
+      [t, handleOpenEndGameDialog, filterFunction],
+    ),
     [game, user],
   );
 
@@ -127,20 +163,30 @@ export const Kitchen: FC = () => {
         if (
           response.status === 200 &&
           'game' in response.data &&
-          'chefs' in response.data
+          'chefs' in response.data &&
+          'history' in response.data
         ) {
-          console.log(response.data);
+          const data = response.data as IGameChefsHistoryResponse;
           setGameCode(gameCode);
-          setGame(response.data.game);
-          setChefs(response.data.chefs);
+          setGame(data.game);
+          setChefs(data.chefs);
+          setHistory(data.history);
         } else {
           setError(response.data.message);
         }
       } catch (error) {
-        if (isAxiosError(error) && error.response) {
+        setGameCode(null);
+        setGame(null);
+        setChefs(null);
+        setHistory(null);
+        if (
+          isAxiosError(error) &&
+          error.response &&
+          error.response.data.message
+        ) {
           setError(error.response.data.message);
         } else {
-          setError('An unexpected error occurred');
+          setError(t(StringNames.Common_UnexpectedError));
         }
       }
     };
@@ -160,21 +206,49 @@ export const Kitchen: FC = () => {
 
   return (
     <PusherProvider>
-      <div>
-        <h1>
-          {t(StringNames.Common_Kitchen)}: {gameCode}
-        </h1>
-        <h2>
-          {t(StringNames.Common_Game)}: {game.name}
-        </h2>
-        <h3>
-          {t(StringNames.Common_MasterChef)}: {getMasterChef()?.name}
-        </h3>
-        <h4>
-          {t(StringNames.Common_Chef)}: {getUserChef()?.name}
-        </h4>
+      <Box>
+        <Box display="flex" justifyContent="space-between">
+          <h1>
+            {t(StringNames.Common_Kitchen)}: {gameCode}
+          </h1>
+          <h2>
+            {t(StringNames.Common_Game)}: {game.name}
+          </h2>
+          <h3>
+            {t(StringNames.Common_MasterChef)}: {getMasterChef()?.name}
+          </h3>
+          <h4>
+            {t(StringNames.Common_Chef)}: {getUserChef()?.name}
+          </h4>
+        </Box>
+        <Box display="flex" justifyContent="space-between">
+          <ShareGame game={game} />
+        </Box>
         {error && <Typography color="error">{error}</Typography>}
-      </div>
+        <Dialog
+          open={openEndGameDialog}
+          onClose={handleCloseEndGameDialog}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">
+            {t(StringNames.Game_EndGame)}
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              {t(StringNames.Game_EndGameConfirmation)}
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseEndGameDialog} color="primary">
+              {t(StringNames.Common_Cancel)}
+            </Button>
+            <Button onClick={handleConfirmEndGame} color="primary" autoFocus>
+              {t(StringNames.Common_Confirm)}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Box>
     </PusherProvider>
   );
 };

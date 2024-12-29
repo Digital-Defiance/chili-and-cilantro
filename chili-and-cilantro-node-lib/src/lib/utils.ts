@@ -257,7 +257,6 @@ export function handleError(
     alreadyHandled = error.handled;
     errorType = error.name;
   } else if (error instanceof Error) {
-    console.log(error);
     handleableError = new HandleableError(
       error.message ?? translate(StringNames.Common_UnexpectedError),
       {

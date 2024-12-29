@@ -8,9 +8,13 @@ export const MandarinStrings: StringsCollection = {
   [StringNames.AccountError_Title]: '帐户错误',
   [StringNames.ChangePassword_ChangePasswordButton]: '更改密码',
   [StringNames.ChangePassword_Success]: '密码更改成功',
+  [StringNames.Common_Cancel]: '取消',
   [StringNames.Common_ChangePassword]: '更改密码',
   [StringNames.Common_CheckingAuthentication]: '检查身份验证...',
   [StringNames.Common_Chef]: '厨师',
+  [StringNames.Common_Close]: '关闭',
+  [StringNames.Common_CopyLink]: '复制链接',
+  [StringNames.Common_Confirm]: '确认',
   [StringNames.Common_ConfirmNewPassword]: '确认新密码',
   [StringNames.Common_CurrentPassword]: '当前密码',
   [StringNames.Common_Email]: '电子邮件',
@@ -22,6 +26,8 @@ export const MandarinStrings: StringsCollection = {
   [StringNames.Common_GameCode]: '游戏代码',
   [StringNames.Common_GameName]: '游戏名',
   [StringNames.Common_GamePassword]: '游戏密码',
+  [StringNames.Common_GenerateQRCode]: '生成QR码',
+  [StringNames.Common_IncludePassword]: '包括密码',
   [StringNames.Common_Kitchen]: '厨房',
   [StringNames.Common_Loading]: '加载中...',
   [StringNames.Common_Logo]: '标志',
@@ -30,6 +36,8 @@ export const MandarinStrings: StringsCollection = {
   [StringNames.Common_Optional]: '可选',
   [StringNames.Common_Password]: '密码',
   [StringNames.Common_ReturnToKitchen]: '返回厨房',
+  [StringNames.Common_ShareGame]: '分享游戏',
+  [StringNames.Common_ShareLink]: '分享链接',
   [StringNames.Common_Site]: site,
   [StringNames.Common_StartCooking]: '开始烹饪',
   [StringNames.Common_Success]: '成功',
@@ -68,6 +76,7 @@ export const MandarinStrings: StringsCollection = {
   [StringNames.Error_InvalidAction]: '无效操作',
   [StringNames.Error_InvalidCredentials]: '无效凭证',
   [StringNames.Error_InvalidEndGameReason]: '无效的结束游戏原因',
+  [StringNames.Error_InvalidLanguageCode]: '无效语言代码',
   [StringNames.Error_MustBeMasterChef]: '您必须是大厨才能执行此操作。',
   [StringNames.Error_NotEnoughChefsTemplate]:
     '没有足够的厨师开始游戏。{CHEFS_PRESENT}/{MIN_CHEFS}',
@@ -97,6 +106,8 @@ export const MandarinStrings: StringsCollection = {
   [StringNames.Game_CreateGame]: '创建游戏',
   [StringNames.Game_CreateGameSuccess]: '成功创建游戏',
   [StringNames.Game_EndGame]: '结束游戏',
+  [StringNames.Game_EndGameConfirmation]:
+    '您确定要结束游戏吗？所有厨师都将断开连接。',
   [StringNames.Game_JoinGame]: '加入游戏',
   [StringNames.Game_JoinGameSuccess]: '成功加入游戏',
   [StringNames.KeyFeatures_Title]: '主要特点',
@@ -176,6 +187,7 @@ export const MandarinStrings: StringsCollection = {
   [StringNames.Validation_PasswordMatch]: '密码和确认必须匹配',
   [StringNames.Validation_ConfirmNewPassword]: '确认新密码是必需的',
   [StringNames.Validation_Required]: '必填',
+  [StringNames.Validation_TokenExpired]: '令牌已过期',
   [StringNames.Validation_UsernameRegexErrorTemplate]: `用户名必须在{MIN_USERNAME_LENGTH}和{MAX_USERNAME_LENGTH}个字符之间，并且：
   • 以字母，数字，或Unicode字符开头
   • 可以包含字母，数字，下划线，短横线，或Unicode字符

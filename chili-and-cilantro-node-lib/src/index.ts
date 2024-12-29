@@ -3,6 +3,7 @@ export * from './lib/discriminators/action';
 export * from './lib/errors/express-validation-error';
 export * from './lib/errors/missing-validated-data';
 export * from './lib/errors/mongoose-validation-error';
+export * from './lib/errors/token-expired';
 export * from './lib/interfaces/application';
 export * from './lib/interfaces/discriminator-collections';
 export * from './lib/interfaces/route-config';

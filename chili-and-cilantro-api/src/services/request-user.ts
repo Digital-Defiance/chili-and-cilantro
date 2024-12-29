@@ -21,6 +21,7 @@ export class RequestUserService {
       timezone: userDoc.timezone,
       lastLogin: userDoc.lastLogin,
       emailVerified: userDoc.emailVerified,
-    } as IRequestUser;
+      siteLanguage: userDoc.siteLanguage,
+    };
   }
 }

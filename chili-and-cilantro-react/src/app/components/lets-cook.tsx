@@ -4,10 +4,13 @@ import {
   StringNames,
   constants,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import {
   Box,
   Button,
   FormControlLabel,
+  IconButton,
+  InputAdornment,
   Switch,
   TextField,
   Tooltip,
@@ -18,7 +21,7 @@ import { AxiosResponse, isAxiosError } from 'axios';
 import { useFormik } from 'formik';
 import PropTypes from 'prop-types';
 import { ChangeEvent, FC, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import * as Yup from 'yup';
 import { useAuth } from '../auth-provider';
 import { useAppTranslation } from '../i18n-provider';
@@ -44,6 +47,11 @@ const LetsCook: FC<LetsCookProps> = ({ create }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const params: { gameCode?: string } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const gameCode = params.gameCode ?? null;
+  const gamePassword = searchParams.get('gamePassword') ?? null;
 
   const validationSchema = Yup.object().shape({
     gameName: Yup.string().test(
@@ -127,9 +135,9 @@ const LetsCook: FC<LetsCookProps> = ({ create }) => {
   const formik = useFormik<IFormValues>({
     initialValues: {
       gameName: '',
-      gameCode: '',
+      gameCode: gameCode ?? '',
       displayname: user?.displayName ?? '',
-      gamePassword: '',
+      gamePassword: gamePassword ?? '',
       maxChefs: constants.MAX_CHEFS,
       gameMode: create ? 'CREATE' : 'JOIN',
     },
@@ -217,6 +225,10 @@ const LetsCook: FC<LetsCookProps> = ({ create }) => {
   const handleChefDecrement = () => {
     const newValue = Math.max(formik.values.maxChefs - 1, constants.MIN_CHEFS);
     formik.setFieldValue('maxChefs', newValue);
+  };
+
+  const handleClickShowPassword = () => {
+    setShowPassword((prev) => !prev);
   };
 
   const StyledButtonPrimary = styled(Button)(({ theme }) => ({
@@ -309,7 +321,7 @@ const LetsCook: FC<LetsCookProps> = ({ create }) => {
         id="gamePassword"
         name="gamePassword"
         label={`${t(StringNames.Common_GamePassword)} (${t(StringNames.Common_Optional)})`}
-        type="password"
+        type={showPassword ? 'text' : 'password'}
         value={formik.values.gamePassword}
         onChange={formik.handleChange}
         onBlur={formik.handleBlur}
@@ -318,6 +330,21 @@ const LetsCook: FC<LetsCookProps> = ({ create }) => {
         }
         helperText={formik.touched.gamePassword && formik.errors.gamePassword}
         margin="normal"
+        slotProps={{
+          input: {
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle password visibility"
+                  onClick={handleClickShowPassword}
+                  edge="end"
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          },
+        }}
       />
       {formik.values.gameMode === 'CREATE' && (
         <Box display="flex" alignItems="center" mt={2} mb={2}>

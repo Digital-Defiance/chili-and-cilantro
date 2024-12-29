@@ -74,10 +74,9 @@ const InnerApp: FC = () => {
               </PrivateRoute>
             }
           >
-            <Route
-              path="join"
-              element={<LetsCook key="join" create={false} />}
-            />
+            <Route path="join" element={<LetsCook key="join" create={false} />}>
+              <Route path=":gameCode" element={<LetsCook create={false} />} />
+            </Route>
             <Route
               path="create"
               element={<LetsCook key="create" create={true} />}

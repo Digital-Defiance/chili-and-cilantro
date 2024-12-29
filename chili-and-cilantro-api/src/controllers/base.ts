@@ -18,6 +18,7 @@ import {
   handleError,
   IApplication,
   RouteConfig,
+  RouteHandlers,
   sendApiMessageResponse,
   SendFunction,
   sendRawJsonResponse,
@@ -44,28 +45,34 @@ export abstract class BaseController {
   private activeRequest: Request | null = null;
   private activeResponse: Response | null = null;
   public readonly application: IApplication;
+  protected routeDefinitions: RouteConfig<any, any, any>[] = [];
+  protected handlers: RouteHandlers<any, any, any> = {};
 
   public constructor(application: IApplication) {
     this.application = application;
     this.router = Router();
+    this.initRouteDefinitions();
     this.initializeRoutes();
   }
 
-  /**
-   * Returns the routes that the controller will handle.
-   */
-  protected abstract getRoutes(): RouteConfig<
-    ApiResponse,
-    any,
-    Array<unknown>
-  >[];
+  protected abstract initRouteDefinitions(): void;
 
   private getAuthenticationMiddleware(
     route: RouteConfig<ApiResponse, any, Array<unknown>>,
   ): RequestHandler[] {
-    return route.useAuthentication
-      ? [this.authenticateRequest.bind(this, route)]
-      : [];
+    if (route.useAuthentication) {
+      return [
+        async (req, res, next) => {
+          try {
+            await this.authenticateRequest(route, req, res, next);
+          } catch (err) {
+            next(err);
+          }
+        },
+      ];
+    } else {
+      return [];
+    }
   }
 
   private getValidationMiddleware(
@@ -117,12 +124,12 @@ export abstract class BaseController {
     T extends ApiResponse,
     RawJsonResponse extends boolean = false,
     HandlerArgs extends Array<unknown> = Array<unknown>,
-  >(route: RouteConfig<T, RawJsonResponse, HandlerArgs>): RequestHandler {
+  >(config: RouteConfig<T, RawJsonResponse, HandlerArgs>): RequestHandler {
     return async (req: Request, res: Response, next: NextFunction) => {
       this.activeRequest = req;
       this.activeResponse = res;
-      // if req.user wasn't added above, return an unauthorized response
-      if (route.useAuthentication && !req.user) {
+
+      if (config.useAuthentication && !this.activeRequest?.user) {
         handleError(
           new HandleableError(translate(StringNames.Common_Unauthorized), {
             statusCode: 401,
@@ -134,23 +141,13 @@ export abstract class BaseController {
         return;
       }
 
-      // Check if handler is defined before calling it
-      if (typeof route.handler !== 'function') {
-        throw new Error('Handler is not a function');
-      }
-
       try {
-        const boundHandler = route.handler.bind(this);
-        const sendFunc: SendFunction<T> = route.rawJsonHandler
+        const handler = this.handlers[config.handlerKey];
+        const sendFunc: SendFunction<T> = config.rawJsonHandler
           ? sendRawJsonResponse.bind(this)
           : sendApiMessageResponse.bind(this);
-        await boundHandler(
-          req,
-          res,
-          sendFunc,
-          next,
-          ...(route.handlerArgs ?? []),
-        );
+
+        await handler(req, res, sendFunc, next, ...(config.handlerArgs ?? []));
       } catch (error) {
         handleError(error, res, sendApiMessageResponse, next);
       }
@@ -161,19 +158,20 @@ export abstract class BaseController {
    * Initializes the routes for the controller.
    */
   private initializeRoutes(): void {
-    const routes = this.getRoutes();
-    routes.forEach((route) => {
-      this.router[route.method](
-        route.path,
-        ...[
-          ...this.getAuthenticationMiddleware(route),
-          setGlobalContextLanguageFromRequest,
-          ...this.getValidationMiddleware(route),
-          ...(route.middleware ?? []),
-          this.createRequestHandler(route),
-        ],
-      );
-    });
+    Object.values(this.routeDefinitions).forEach(
+      (config: RouteConfig<any, any, any>) => {
+        this.router[config.method](
+          config.path,
+          ...[
+            ...this.getAuthenticationMiddleware(config),
+            setGlobalContextLanguageFromRequest,
+            ...this.getValidationMiddleware(config),
+            ...(config.middleware ?? []),
+            this.createRequestHandler(config),
+          ],
+        );
+      },
+    );
   }
 
   /**
@@ -183,13 +181,13 @@ export abstract class BaseController {
    * @param res The response object
    * @param next The next function
    */
-  protected authenticateRequest(
+  protected async authenticateRequest(
     route: RouteConfig<ApiResponse, any, Array<unknown>>,
     req: Request,
     res: Response,
     next: NextFunction,
-  ): void {
-    authenticateToken(this.application, req, res, (err) => {
+  ): Promise<void> {
+    await authenticateToken(this.application, req, res, (err) => {
       if (err || !req.user) {
         handleError(
           new HandleableError(translate(StringNames.Common_Unauthorized), {
@@ -202,8 +200,8 @@ export abstract class BaseController {
         );
         return;
       }
-      next();
     });
+    next();
   }
 
   private handleBooleanFields(

@@ -5,9 +5,9 @@ import {
   translate,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import {
+  ApiRequestHandler,
   ApiResponse,
   IApplication,
-  RouteConfig,
   SendFunction,
   routeConfig,
 } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
@@ -29,14 +29,16 @@ export class PusherController extends BaseController {
       cluster: environment.pusher.cluster,
       useTLS: true,
     });
+    this.handlers = {
+      authenticatePusher: this.authenticatePusher,
+      getAppInfo: this.getAppInfo,
+    };
   }
 
-  public getRoutes(): RouteConfig<ApiResponse, any, Array<unknown>>[] {
-    return [
-      routeConfig<ApiResponse, true, Array<unknown>>({
-        method: 'post',
-        path: '/auth',
-        handler: this.authenticatePusher.bind(this),
+  protected initRouteDefinitions(): void {
+    this.routeDefinitions = [
+      routeConfig<ApiResponse, true, Array<unknown>>('post', '/auth', {
+        handlerKey: 'authenticatePusher',
         useAuthentication: true,
         authFailureStatusCode: 403,
         validation: [
@@ -44,21 +46,21 @@ export class PusherController extends BaseController {
           body('channel_name').isString().notEmpty(),
         ],
       }),
-      routeConfig<ApiResponse, true, Array<unknown>>({
-        method: 'get',
-        path: '/appInfo',
-        handler: this.getAppInfo.bind(this),
+      routeConfig<ApiResponse, true, Array<unknown>>('get', '/appInfo', {
+        handlerKey: 'getAppInfo',
         useAuthentication: true,
       }),
     ];
   }
 
-  private async getAppInfo(
+  private getAppInfo: ApiRequestHandler<
+    IPusherAppInfoResponse | IApiErrorResponse
+  > = async (
     req: Request,
     res: Response,
     send: SendFunction<IPusherAppInfoResponse | IApiErrorResponse>,
     next: NextFunction,
-  ): Promise<void> {
+  ): Promise<void> => {
     if (!req.user) {
       const errorMessage = translate(StringNames.Common_Unauthorized);
       send(
@@ -80,30 +82,31 @@ export class PusherController extends BaseController {
       },
       res,
     );
-  }
+  };
 
-  private async authenticatePusher(
-    req: Request,
-    res: Response,
-    send: SendFunction<Pusher.UserAuthResponse>,
-    next: NextFunction,
-  ): Promise<void> {
-    const user = await this.validateAndFetchRequestUser(req, res, next);
-    const socketId = req.validatedBody.socket_id;
-    const channel = req.validatedBody.channel_name;
+  private authenticatePusher: ApiRequestHandler<Pusher.UserAuthResponse> =
+    async (
+      req: Request,
+      res: Response,
+      send: SendFunction<Pusher.UserAuthResponse>,
+      next: NextFunction,
+    ): Promise<void> => {
+      const user = await this.validateAndFetchRequestUser(req, res, next);
+      const socketId = req.validatedBody.socket_id;
+      const channel = req.validatedBody.channel_name;
 
-    const presenceData = channel.startsWith('presence-')
-      ? {
-          user_id: user._id.toString(),
-          user_info: { name: user.username },
-        }
-      : null;
+      const presenceData = channel.startsWith('presence-')
+        ? {
+            user_id: user._id.toString(),
+            user_info: { name: user.username },
+          }
+        : null;
 
-    const authResponse = this.pusher.authenticateUser(socketId, {
-      id: user._id.toString(),
-      user_info: UserService.userToUserObject(user),
-      watchlist: [],
-    });
-    send(200, authResponse, res);
-  }
+      const authResponse = this.pusher.authenticateUser(socketId, {
+        id: user._id.toString(),
+        user_info: UserService.userToUserObject(user),
+        watchlist: [],
+      });
+      send(200, authResponse, res);
+    };
 }

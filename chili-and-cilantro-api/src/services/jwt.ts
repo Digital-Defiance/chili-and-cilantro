@@ -4,7 +4,15 @@ import {
   ITokenUser,
   IUserDocument,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { JwtPayload, sign, verify, VerifyOptions } from 'jsonwebtoken';
+import { TokenExpiredError as CurseFundTokenExpiredError } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import {
+  JsonWebTokenError,
+  JwtPayload,
+  TokenExpiredError as JwtTokenExpiredError,
+  sign,
+  verify,
+  VerifyOptions,
+} from 'jsonwebtoken';
 import { promisify } from 'util';
 import { environment } from '../environment';
 import { ISignedToken } from '../interfaces/signed-token';
@@ -61,8 +69,12 @@ export class JwtService extends BaseService {
           userId: decoded.userId as string,
         };
       }
-    } catch (error) {
-      // Do nothing
+    } catch (err) {
+      if (err instanceof JwtTokenExpiredError) {
+        throw new CurseFundTokenExpiredError();
+      } else if (err instanceof JsonWebTokenError) {
+        throw err;
+      }
     }
     throw new InvalidTokenError();
   }

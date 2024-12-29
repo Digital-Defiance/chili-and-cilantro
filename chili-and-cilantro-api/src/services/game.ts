@@ -9,12 +9,14 @@ import {
   GameInProgressError,
   GamePasswordMismatchError,
   GamePhase,
+  IActionDocument,
   IBid,
   IChefDocument,
   ICreateGameActionDocument,
+  IEndGameActionDocument,
   IGameAction,
   IGameChef,
-  IGameChefs,
+  IGameChefsHistory,
   IGameDocument,
   IGameListResponse,
   IGameObject,
@@ -312,7 +314,7 @@ export class GameService extends BaseService {
     password?: string,
     session?: ClientSession,
   ): Promise<IGameChef> {
-    return this.withTransaction<IGameChef>(async () => {
+    return await this.withTransaction<IGameChef>(async () => {
       await this.validateCreateGameOrThrowAsync(
         user,
         displayName,
@@ -320,7 +322,7 @@ export class GameService extends BaseService {
         maxChefs,
         password,
       );
-      return this.createGameAsync(
+      return await this.createGameAsync(
         user,
         displayName,
         gameName,
@@ -343,17 +345,18 @@ export class GameService extends BaseService {
     user: IUserDocument,
     displayName: string,
     session?: ClientSession,
-  ): Promise<IGameChefs> {
+  ): Promise<IGameChefsHistory> {
     if (game.currentPhase === GamePhase.GAME_OVER) {
       throw new GameEndedError();
     } else if (game.currentPhase !== GamePhase.LOBBY) {
       throw new GameInProgressError();
     }
+    const history = await this.getGameHistoryAsync(game._id, session);
     // if the user is already in the game, just return the game and chef
     // get chefIds for this user and game
     const chefs = await this.chefService.getGameChefsByGameOrIdAsync(game);
     if (chefs.some((c) => c.userId.toString() === user._id.toString())) {
-      return { game, chefs };
+      return { game, chefs, history };
     }
     const chef = await this.chefService.newChefAsync(
       game,
@@ -363,11 +366,17 @@ export class GameService extends BaseService {
       undefined,
       session,
     );
-    await this.actionService.joinGameAsync(game, chef, user, session);
+    const joinGameAction = await this.actionService.joinGameAsync(
+      game,
+      chef,
+      user,
+      session,
+    );
     game.chefIds.push(chef._id);
     const savedGame = await game.save();
     chefs.push(chef);
-    return { game: savedGame, chefs: chefs };
+    history.push(joinGameAction);
+    return { game: savedGame, chefs, history };
   }
 
   public async validateJoinGameOrThrowAsync(
@@ -429,8 +438,8 @@ export class GameService extends BaseService {
     user: IUserDocument,
     displayName: string,
     session?: ClientSession,
-  ): Promise<IGameChefs> {
-    return this.withTransaction<IGameChefs>(async () => {
+  ): Promise<IGameChefsHistory> {
+    return await this.withTransaction<IGameChefsHistory>(async () => {
       const game = await this.getGameByCodeOrThrowAsync(
         gameCode,
         true,
@@ -442,7 +451,7 @@ export class GameService extends BaseService {
         displayName,
         password,
       );
-      return this.joinGameAsync(game, user, displayName, session);
+      return await this.joinGameAsync(game, user, displayName, session);
     }, session);
   }
 
@@ -503,17 +512,19 @@ export class GameService extends BaseService {
       const newGame = newGames[0];
 
       // Create new Chef documents
-      const chefCreations = newChefIds.map((newChefId, index) => {
-        const existingChef = existingChefs.find(
-          (chef) =>
-            chef._id.toString() == existingGame.chefIds[index].toString(),
-        );
-        return this.chefService.newChefFromExisting(
-          newGame,
-          existingChef,
-          newChefId,
-        );
-      });
+      const chefCreations = await Promise.all(
+        newChefIds.map(async (newChefId, index) => {
+          const existingChef = await existingChefs.find(
+            (chef) =>
+              chef._id.toString() == existingGame.chefIds[index].toString(),
+          );
+          return await this.chefService.newChefFromExistingAsync(
+            newGame,
+            existingChef,
+            newChefId,
+          );
+        }),
+      );
 
       // Execute all creations concurrently
       const chefs = await Promise.all(chefCreations);
@@ -551,14 +562,18 @@ export class GameService extends BaseService {
     user: IUserDocument,
     session?: ClientSession,
   ): Promise<IGameChef> {
-    return this.withTransaction<IGameChef>(async (session) => {
+    return await this.withTransaction<IGameChef>(async (session) => {
       const existingGame = await this.getGameByIdOrThrowAsync(
         existingGameId,
         true,
         session,
       );
       this.validateCreateNewGameFromExistingOrThrow(existingGame);
-      return this.createNewGameFromExistingAsync(existingGame, user, session);
+      return await this.createNewGameFromExistingAsync(
+        existingGame,
+        user,
+        session,
+      );
     }, session);
   }
 
@@ -623,7 +638,7 @@ export class GameService extends BaseService {
     userId: DefaultIdType,
     session?: ClientSession,
   ): Promise<IGameAction> {
-    return this.withTransaction<IGameAction>(async () => {
+    return await this.withTransaction<IGameAction>(async () => {
       const game = await this.getGameByCodeOrThrowAsync(gameCode, true);
       await this.validateStartGameOrThrowAsync(game, userId);
       return await this.startGameAsync(game);
@@ -663,7 +678,7 @@ export class GameService extends BaseService {
     game: IGameDocument,
     reason: EndGameReason,
     session?: ClientSession,
-  ): Promise<IGameAction> {
+  ): Promise<IGameAction<IGameDocument, IEndGameActionDocument>> {
     game.currentPhase = GamePhase.GAME_OVER;
     const savedGame = await game.save({ session });
     const action = await this.actionService.endGameAsync(
@@ -686,8 +701,10 @@ export class GameService extends BaseService {
     reason: EndGameReason,
     userId: DefaultIdType,
     session?: ClientSession,
-  ): Promise<IGameAction> {
-    return this.withTransaction<IGameAction>(async (session) => {
+  ): Promise<IGameAction<IGameDocument, IEndGameActionDocument>> {
+    return await this.withTransaction<
+      IGameAction<IGameDocument, IEndGameActionDocument>
+    >(async (session) => {
       const game = await this.getGameByCodeOrThrowAsync(
         gameCode,
         true,
@@ -788,7 +805,7 @@ export class GameService extends BaseService {
     session?: ClientSession,
   ): Promise<void> {
     const GameModel = this.application.getModel<IGameDocument>(ModelName.Game);
-    return this.withTransaction<void>(async () => {
+    return await this.withTransaction<void>(async () => {
       // find games not in GAME_OVER phase with a lastModified date older than MAX_GAME_AGE_WITHOUT_ACTIVITY_IN_MINUTES
       // cutoffDate is now minus MAX_GAME_AGE_WITHOUT_ACTIVITY_IN_MINUTES
       const cutoffDate = new Date();
@@ -831,7 +848,7 @@ export class GameService extends BaseService {
     chef: IChefDocument,
     message: string,
   ): Promise<IMessageActionDocument> {
-    return this.actionService.sendMessageAsync(game, chef, message);
+    return await this.actionService.sendMessageAsync(game, chef, message);
   }
 
   /**
@@ -849,10 +866,10 @@ export class GameService extends BaseService {
     session?: ClientSession,
   ): Promise<IMessageActionDocument> {
     this.validateSendMessageOrThrow(message);
-    return this.withTransaction<IMessageActionDocument>(async () => {
+    return await this.withTransaction<IMessageActionDocument>(async () => {
       const game = await this.getGameByCodeOrThrowAsync(gameCode, true);
       const chef = await this.chefService.getGameChefOrThrowAsync(game, user);
-      return this.sendMessageAsync(game, chef, message);
+      return await this.sendMessageAsync(game, chef, message);
     }, session);
   }
 
@@ -1099,8 +1116,8 @@ export class GameService extends BaseService {
     session?: ClientSession,
   ): Promise<IGameChef> {
     this.validatePlaceIngredientOrThrow(game, chef, ingredient);
-    return this.withTransaction<IGameChef>(async () => {
-      return this.placeIngredientAsync(game, chef, ingredient);
+    return await this.withTransaction<IGameChef>(async () => {
+      return await this.placeIngredientAsync(game, chef, ingredient);
     }, session);
   }
 
@@ -1176,7 +1193,7 @@ export class GameService extends BaseService {
     bid: number,
   ): Promise<IGameChef> {
     this.validateMakeBidOrThrow(game, chef, bid);
-    return this.makeBidAsync(game, chef, bid);
+    return await this.makeBidAsync(game, chef, bid);
   }
 
   /**
@@ -1290,7 +1307,7 @@ export class GameService extends BaseService {
     chef: IChefDocument,
   ): Promise<IGameChef> {
     this.validatePerformPassOrThrow(game, chef);
-    return this.passAsync(game, chef);
+    return await this.passAsync(game, chef);
   }
 
   /**
@@ -1309,7 +1326,7 @@ export class GameService extends BaseService {
     value?: IBidIngredient,
     session?: ClientSession,
   ): Promise<IGameChef> {
-    return this.withTransaction<IGameChef>(async () => {
+    return await this.withTransaction<IGameChef>(async () => {
       const game = await this.getGameByCodeOrThrowAsync(gameCode, true);
       if (game.chefIds[game.currentChef].toString() !== user._id.toString()) {
         throw new NotYourTurnError();
@@ -1385,5 +1402,25 @@ export class GameService extends BaseService {
       'game' in count[0] &&
       (count[0].game as number) > 0;
     return result;
+  }
+
+  /**
+   * Returns the history of actions for the specified game
+   * @param gameId The ID of the game
+   * @param session The session to use
+   * @returns An array of action documents
+   */
+  public async getGameHistoryAsync(
+    gameId: DefaultIdType,
+    session?: ClientSession,
+  ): Promise<IActionDocument[]> {
+    const ActionModel = this.application.getModel<IActionDocument>(
+      ModelName.Action,
+    );
+    return await ActionModel.find({ gameId: gameId })
+      .sort({
+        createdAt: 1,
+      })
+      .session(session);
   }
 }

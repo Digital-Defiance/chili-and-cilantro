@@ -22,5 +22,5 @@ export function useRegisterMenuOption(
     const unregister = registerMenuOption(option);
     return () => unregister();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [option, registerMenuOption, ...dependencies]);
+  }, [option, registerMenuOption, location.pathname, ...dependencies]);
 }

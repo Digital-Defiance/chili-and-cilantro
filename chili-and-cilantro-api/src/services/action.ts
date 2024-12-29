@@ -59,14 +59,17 @@ export class ActionService extends BaseService {
    * @param action The action document
    * @returns The action object
    */
-  public static actionToActionObject(action: IActionDocument): IActionObject {
+  public static actionToActionObject<
+    T extends IActionDocument,
+    O extends IActionObject,
+  >(action: T): O {
     return {
       ...action.toObject(),
       _id: action._id.toString(),
       chefId: action.chefId.toString(),
       gameId: action.gameId.toString(),
       userId: action.userId.toString(),
-    } as IActionObject;
+    } as O;
   }
 
   /**

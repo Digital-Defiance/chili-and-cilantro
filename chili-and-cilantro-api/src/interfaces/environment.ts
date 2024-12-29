@@ -7,7 +7,6 @@ export interface IEnvironment {
   sendgridKey: string;
   developer: {
     debug: boolean;
-    useTransactions: boolean;
     reactDistDir: string;
     host: string;
     port: number;
@@ -18,6 +17,7 @@ export interface IEnvironment {
   };
   mongo: {
     uri: string;
+    useTransactions: boolean;
   };
   cookies: {
     enabled: boolean;

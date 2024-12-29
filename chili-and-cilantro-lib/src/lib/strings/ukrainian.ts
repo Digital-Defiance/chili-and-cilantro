@@ -9,9 +9,13 @@ export const UkrainianStrings: StringsCollection = {
   [StringNames.AccountError_Title]: 'Помилка облікового запису',
   [StringNames.ChangePassword_ChangePasswordButton]: 'Змінити пароль',
   [StringNames.ChangePassword_Success]: 'Пароль успішно змінено',
+  [StringNames.Common_Cancel]: 'Скасувати',
   [StringNames.Common_ChangePassword]: 'Змінити пароль',
   [StringNames.Common_CheckingAuthentication]: 'Перевіряємо автентифікацію...',
   [StringNames.Common_Chef]: 'Шеф-кухар',
+  [StringNames.Common_Close]: 'Закрити',
+  [StringNames.Common_CopyLink]: 'Скопіювати посилання',
+  [StringNames.Common_Confirm]: 'Підтвердити',
   [StringNames.Common_ConfirmNewPassword]: 'Підтвердити новий пароль',
   [StringNames.Common_CurrentPassword]: 'Поточний пароль',
   [StringNames.Common_Email]: 'Електронна пошта',
@@ -23,6 +27,8 @@ export const UkrainianStrings: StringsCollection = {
   [StringNames.Common_GameCode]: 'Код гри',
   [StringNames.Common_GameName]: 'Назва гри',
   [StringNames.Common_GamePassword]: 'Пароль гри',
+  [StringNames.Common_GenerateQRCode]: 'Створити QR-код',
+  [StringNames.Common_IncludePassword]: 'Включити пароль',
   [StringNames.Common_Kitchen]: 'Кухня',
   [StringNames.Common_Loading]: 'Завантаження...',
   [StringNames.Common_Logo]: 'Логотип',
@@ -31,6 +37,8 @@ export const UkrainianStrings: StringsCollection = {
   [StringNames.Common_Optional]: 'Необов’язково',
   [StringNames.Common_Password]: 'Пароль',
   [StringNames.Common_ReturnToKitchen]: 'Повернутися до кухні',
+  [StringNames.Common_ShareGame]: 'Поділитися грою',
+  [StringNames.Common_ShareLink]: 'Поділитися посиланням',
   [StringNames.Common_Site]: site,
   [StringNames.Common_StartCooking]: 'Почати приготування',
   [StringNames.Common_Success]: 'Успіх',
@@ -74,6 +82,7 @@ export const UkrainianStrings: StringsCollection = {
   [StringNames.Error_InvalidAction]: 'Недійсна дія',
   [StringNames.Error_InvalidCredentials]: 'Неправильні дані',
   [StringNames.Error_InvalidEndGameReason]: 'Недійсна причина завершення гри',
+  [StringNames.Error_InvalidLanguageCode]: 'Недійсний код мови',
   [StringNames.Error_MustBeMasterChef]:
     'Ви повинні бути майстром-кухарем, щоб виконати цю дію.',
   [StringNames.Error_NotEnoughChefsTemplate]:
@@ -107,6 +116,8 @@ export const UkrainianStrings: StringsCollection = {
   [StringNames.Game_CreateGame]: 'Створити гру',
   [StringNames.Game_CreateGameSuccess]: 'Гру успішно створено',
   [StringNames.Game_EndGame]: 'Завершити гру',
+  [StringNames.Game_EndGameConfirmation]:
+    'Ви впевнені, що хочете завершити гру? Всі шеф-кухарі будуть відключені.',
   [StringNames.Game_JoinGame]: 'Приєднатися до гри',
   [StringNames.Game_JoinGameSuccess]: 'Успішно приєднано до гри',
   [StringNames.KeyFeatures_Title]: 'Ключові Жарактеристики',
@@ -200,6 +211,7 @@ export const UkrainianStrings: StringsCollection = {
   [StringNames.Validation_ConfirmNewPassword]:
     'Підтвердження нового пароля є обов’язковим',
   [StringNames.Validation_Required]: 'Обов’язково',
+  [StringNames.Validation_TokenExpired]: 'Токен закінчився',
   [StringNames.Validation_UsernameRegexErrorTemplate]: `Ім’я користувача повинно бути від {MIN_USERNAME_LENGTH} до {MAX_USERNAME_LENGTH} символів, та:
   • Починатися з літери, числа, або Unicode-символу
   • Містити літери, числа, підкреслення, тире, та Unicode-символи

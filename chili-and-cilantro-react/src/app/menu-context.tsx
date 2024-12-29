@@ -17,7 +17,6 @@ import React, {
 } from 'react';
 import { useAppTranslation } from './i18n-provider';
 
-import { Location } from '@remix-run/router';
 import { useLocation } from 'react-router-dom';
 import { IMenuOption } from './interfaces/menu-option';
 
@@ -44,8 +43,18 @@ export const MenuProvider: React.FC<MenuProviderProps> = ({ children }) => {
 
   const registerMenuOption = useCallback((option: IMenuOption) => {
     setRegisteredOptions((prevOptions) => {
-      const newOptions = [...prevOptions, option];
-      return newOptions;
+      const existingOptionIndex = prevOptions.findIndex(
+        (o) => o.id === option.id,
+      );
+      if (existingOptionIndex !== -1) {
+        // Replace the existing option
+        const newOptions = [...prevOptions];
+        newOptions[existingOptionIndex] = option;
+        return newOptions;
+      } else {
+        // Add new option
+        return [...prevOptions, option];
+      }
     });
 
     return () => {
@@ -153,31 +162,26 @@ export const MenuProvider: React.FC<MenuProviderProps> = ({ children }) => {
 
   const getMenuOptions = useCallback(
     (menuType: IncludeOnMenu, includeDividers = false) => {
-      const MenuFilter =
-        (
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          location: Location<any>,
-          isAuthenticated: boolean,
-          menuType: IncludeOnMenu,
-        ) =>
-        (o: IMenuOption) => {
-          const routeMatch =
-            o.routePattern === undefined ||
-            o.routePattern.test(location.pathname);
-          // Apply the custom filter if it exists
-          const customFilterPasses = o.filter === undefined || o.filter(o);
-          return (
-            routeMatch &&
-            o.includeOnMenus.includes(menuType) &&
-            (o.requiresAuth === undefined ||
-              o.requiresAuth === isAuthenticated) &&
-            customFilterPasses
-          );
-        };
+      const MenuFilter = (o: IMenuOption) => {
+        // Apply the custom filter first
+        const customFilterPasses = o.filter === undefined || o.filter(o);
+        if (!customFilterPasses) return false;
 
-      const menuFilter = MenuFilter(location, isAuthenticated, menuType);
+        if (o.divider === true && !includeDividers) return false;
+
+        const routeMatch =
+          o.routePattern === undefined ||
+          o.routePattern.test(location.pathname);
+
+        return (
+          routeMatch &&
+          o.includeOnMenus.includes(menuType) &&
+          (o.requiresAuth === undefined || o.requiresAuth === isAuthenticated)
+        );
+      };
+
       return menuOptions.filter(
-        (o) => menuFilter(o) && (includeDividers || o.divider === undefined),
+        (o) => MenuFilter(o) && (includeDividers || o.divider === undefined),
       );
     },
     [menuOptions, isAuthenticated, location],
@@ -191,8 +195,11 @@ export const MenuProvider: React.FC<MenuProviderProps> = ({ children }) => {
     };
   }, [menuOptions, getMenuOptions, registerMenuOption]);
 
+  const memoizedChildren = useMemo(() => children, [children]);
   return (
-    <MenuContext.Provider value={contextValue}>{children}</MenuContext.Provider>
+    <MenuContext.Provider value={contextValue}>
+      {memoizedChildren}
+    </MenuContext.Provider>
   );
 };
 

@@ -9,9 +9,13 @@ export const SpanishStrings: StringsCollection = {
   [StringNames.AccountError_Title]: 'Error de cuenta',
   [StringNames.ChangePassword_ChangePasswordButton]: 'Cambiar contraseña',
   [StringNames.ChangePassword_Success]: 'Contraseña cambiada con éxito',
+  [StringNames.Common_Cancel]: 'Cancelar',
   [StringNames.Common_ChangePassword]: 'Cambiar contraseña',
   [StringNames.Common_CheckingAuthentication]: 'Verificando autenticación...',
   [StringNames.Common_Chef]: 'Chef',
+  [StringNames.Common_Close]: 'Cerrar',
+  [StringNames.Common_CopyLink]: 'Copiar enlace',
+  [StringNames.Common_Confirm]: 'Confirmar',
   [StringNames.Common_ConfirmNewPassword]: 'Confirmar nueva contraseña',
   [StringNames.Common_CurrentPassword]: 'Contraseña actual',
   [StringNames.Common_Email]: 'Correo electrónica',
@@ -23,6 +27,8 @@ export const SpanishStrings: StringsCollection = {
   [StringNames.Common_GameCode]: 'Código de juego',
   [StringNames.Common_GameName]: 'Nombre de juego',
   [StringNames.Common_GamePassword]: 'Contraseña de juego',
+  [StringNames.Common_GenerateQRCode]: 'Generar código QR',
+  [StringNames.Common_IncludePassword]: 'Incluir contraseña',
   [StringNames.Common_Kitchen]: 'Cocina',
   [StringNames.Common_Loading]: 'Cargando...',
   [StringNames.Common_Logo]: 'logo',
@@ -31,6 +37,8 @@ export const SpanishStrings: StringsCollection = {
   [StringNames.Common_Optional]: 'Opcional',
   [StringNames.Common_Password]: 'Contraseña',
   [StringNames.Common_ReturnToKitchen]: 'Volver a la Cocina',
+  [StringNames.Common_ShareGame]: 'Compartir juego',
+  [StringNames.Common_ShareLink]: 'Compartir enlace',
   [StringNames.Common_Site]: site,
   [StringNames.Common_StartCooking]: 'Comenzar a cocinar',
   [StringNames.Common_Success]: 'Éxito',
@@ -78,6 +86,7 @@ export const SpanishStrings: StringsCollection = {
   [StringNames.Error_InvalidCredentials]: 'Credenciales inválidas.',
   [StringNames.Error_InvalidEndGameReason]:
     'Razón de finalización de juego inválida',
+  [StringNames.Error_InvalidLanguageCode]: 'Código de idioma inválido',
   [StringNames.Error_MustBeMasterChef]:
     'Debes ser el chef maestro para realizar esta acción.',
   [StringNames.Error_NotEnoughChefsTemplate]:
@@ -110,6 +119,8 @@ export const SpanishStrings: StringsCollection = {
   [StringNames.Game_CreateGame]: 'Crear juego',
   [StringNames.Game_CreateGameSuccess]: 'Juego creado con éxito',
   [StringNames.Game_EndGame]: 'Terminar juego',
+  [StringNames.Game_EndGameConfirmation]:
+    '¿Estás seguro de que quieres terminar el juego? Todos los chefs serán desconectados.',
   [StringNames.Game_JoinGame]: 'Unirse al juego',
   [StringNames.Game_JoinGameSuccess]: 'Juego unido con éxito',
   [StringNames.KeyFeatures_Title]: 'Características Clave',
@@ -201,6 +212,7 @@ export const SpanishStrings: StringsCollection = {
   [StringNames.Validation_ConfirmNewPassword]:
     'Se requiere la confirmación de la nueva contraseña',
   [StringNames.Validation_Required]: 'Requerido',
+  [StringNames.Validation_TokenExpired]: 'El token ha expirado.',
   [StringNames.Validation_UsernameRegexErrorTemplate]: `El nombre de usuario debe tener entre {MIN_USERNAME_LENGTH} y {MAX_USERNAME_LENGTH} caracteres, y:
   • Comenzar con una letra, un número, o un carácter Unicode
   • Puede contener letras, números, guiones bajos, guiones, y carácteres Unicode
