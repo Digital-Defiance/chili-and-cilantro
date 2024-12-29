@@ -15,7 +15,7 @@ import { ClientSession, Connection, Types } from 'mongoose';
 import { ExpressValidationError } from './errors/express-validation-error';
 import { MissingValidatedDataError } from './errors/missing-validated-data';
 import { MongooseValidationError } from './errors/mongoose-validation-error';
-import { SendFunction } from './shared-types';
+import { ApiErrorResponse, JsonResponse, SendFunction } from './shared-types';
 
 /**
  * Checks if the given id is a valid string id
@@ -182,7 +182,7 @@ export function sendApiErrorResponse(
   status: number,
   message: string,
   error: unknown,
-  res: Response,
+  res: Response<IApiErrorResponse>,
 ): void {
   sendApiMessageResponse<IApiErrorResponse>(status, { message, error }, res);
 }
@@ -196,7 +196,7 @@ export function sendApiErrorResponse(
 export function sendApiExpressValidationErrorResponse(
   status: number,
   errors: ValidationError[],
-  res: Response,
+  res: Response<IApiExpressValidationErrorResponse>,
 ): void {
   sendApiMessageResponse<IApiExpressValidationErrorResponse>(
     status,
@@ -216,7 +216,7 @@ export function sendApiMongoValidationErrorResponse(
   status: number,
   message: string,
   errors: IMongoErrors,
-  res: Response,
+  res: Response<IApiMongoValidationErrorResponse>,
 ): void {
   sendApiMessageResponse<IApiMongoValidationErrorResponse>(
     status,
@@ -231,22 +231,18 @@ export function sendApiMongoValidationErrorResponse(
  * @param response The response data
  * @param res The response object
  */
-export function sendRawJsonResponse<T>(
+export function sendRawJsonResponse(
   status: number,
-  response: T,
-  res: Response<T>,
+  response: JsonResponse,
+  res: Response<JsonResponse>,
 ) {
   res.status(status).json(response);
 }
 
 export function handleError(
   error: unknown,
-  res: Response,
-  send: SendFunction<
-    | IApiErrorResponse
-    | IApiExpressValidationErrorResponse
-    | IApiMongoValidationErrorResponse
-  >,
+  res: Response<ApiErrorResponse>,
+  send: SendFunction<ApiErrorResponse>,
   next: NextFunction,
 ): void {
   let handleableError: HandleableError;
@@ -257,7 +253,6 @@ export function handleError(
     alreadyHandled = error.handled;
     errorType = error.name;
   } else if (error instanceof Error) {
-    console.log(error);
     handleableError = new HandleableError(
       error.message ?? translate(StringNames.Common_UnexpectedError),
       {

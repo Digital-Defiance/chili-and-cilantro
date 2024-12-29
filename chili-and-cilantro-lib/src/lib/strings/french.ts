@@ -9,10 +9,14 @@ export const FrenchStrings: StringsCollection = {
   [StringNames.AccountError_Title]: 'Erreur de compte',
   [StringNames.ChangePassword_ChangePasswordButton]: 'Changer le mot de passe',
   [StringNames.ChangePassword_Success]: 'Mot de passe changé avec succès',
+  [StringNames.Common_Cancel]: 'Annuler',
   [StringNames.Common_ChangePassword]: 'Changer le mot de passe',
   [StringNames.Common_CheckingAuthentication]:
     'Vérification de l’authentification',
   [StringNames.Common_Chef]: 'Chef',
+  [StringNames.Common_Close]: 'Fermer',
+  [StringNames.Common_CopyLink]: 'Copier le lien',
+  [StringNames.Common_Confirm]: 'Confirmer',
   [StringNames.Common_ConfirmNewPassword]: 'Confirmer le nouveau mot de passe',
   [StringNames.Common_CurrentPassword]: 'Mot de passe actuel',
   [StringNames.Common_GoToSplash]: "Retourner aucran d'accueil",
@@ -24,6 +28,8 @@ export const FrenchStrings: StringsCollection = {
   [StringNames.Common_GameCode]: 'Code de jeu',
   [StringNames.Common_GameName]: 'Nom du jeu',
   [StringNames.Common_GamePassword]: 'Mot de passe du jeu',
+  [StringNames.Common_GenerateQRCode]: 'Générer un code QR',
+  [StringNames.Common_IncludePassword]: 'Inclure le mot de passe',
   [StringNames.Common_Kitchen]: 'Cuisine',
   [StringNames.Common_Loading]: 'Chargement...',
   [StringNames.Common_Logo]: 'logo',
@@ -32,6 +38,8 @@ export const FrenchStrings: StringsCollection = {
   [StringNames.Common_Optional]: 'Optionnel',
   [StringNames.Common_Password]: 'Mot de passe',
   [StringNames.Common_ReturnToKitchen]: 'Retour à la Cuisine',
+  [StringNames.Common_ShareGame]: 'Partager le Jeu',
+  [StringNames.Common_ShareLink]: 'Partager le Lien',
   [StringNames.Common_Site]: site,
   [StringNames.Common_StartCooking]: 'Commencer la Cuisine',
   [StringNames.Common_Success]: 'Succès',
@@ -77,6 +85,7 @@ export const FrenchStrings: StringsCollection = {
   [StringNames.Error_InvalidAction]: 'Action invalide',
   [StringNames.Error_InvalidCredentials]: 'Identifiants invalides',
   [StringNames.Error_InvalidEndGameReason]: 'Raison de fin de jeu invalide',
+  [StringNames.Error_InvalidLanguageCode]: 'Code de langue invalide',
   [StringNames.Error_MustBeMasterChef]:
     'Vous devez être le chef de cuisine pour effectuer cette action.',
   [StringNames.Error_NotEnoughChefsTemplate]:
@@ -110,6 +119,8 @@ export const FrenchStrings: StringsCollection = {
   [StringNames.Game_CreateGame]: 'Créer un Jeu',
   [StringNames.Game_CreateGameSuccess]: 'Jeu créé avec succès',
   [StringNames.Game_EndGame]: 'Terminer le Jeu',
+  [StringNames.Game_EndGameConfirmation]:
+    'Êtes-vous sûr de vouloir terminer le jeu? Tous les chefs seront déconnectés.',
   [StringNames.Game_JoinGame]: 'Rejoindre un Jeu',
   [StringNames.Game_JoinGameSuccess]: 'Jeu rejoint avec succès',
   [StringNames.KeyFeatures_Title]: 'Caractéristiques Principales',
@@ -205,6 +216,7 @@ export const FrenchStrings: StringsCollection = {
   [StringNames.Validation_ConfirmNewPassword]:
     'La confirmation du nouveau mot de passe est requise',
   [StringNames.Validation_Required]: 'Champ obligatoire',
+  [StringNames.Validation_TokenExpired]: 'Le jeton a expiré.',
   [StringNames.Validation_UsernameRegexErrorTemplate]: `Le nom d'utilisateur doit contenir entre {MIN_USERNAME_LENGTH} et {MAX_USERNAME_LENGTH} caractères, et :
   • Commencer par une lettre, un chiffre, ou un caractère Unicode
   • Peut contenir des lettres, des chiffres, des underscores, des tirets, et des caractères Unicode

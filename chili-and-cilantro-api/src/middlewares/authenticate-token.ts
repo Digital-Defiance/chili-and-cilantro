@@ -1,12 +1,20 @@
 import {
   AccountStatusTypeEnum,
-  ITokenUser,
   IUserDocument,
   ModelName,
+  StringNames,
+  translate,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { IApplication } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
+import {
+  IApplication,
+  TokenExpiredError,
+  withTransaction,
+} from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import { NextFunction, Request, Response } from 'express';
 import { IncomingHttpHeaders } from 'http';
+import { JsonWebTokenError } from 'jsonwebtoken';
+import { ClientSession } from 'mongoose';
+import { environment } from '../environment';
 import { JwtService } from '../services/jwt';
 import { RequestUserService } from '../services/request-user';
 
@@ -34,40 +42,59 @@ export function findAuthToken(headers: IncomingHttpHeaders): string | null {
  * @param next The next function
  * @returns The response
  */
-export function authenticateToken(
+export async function authenticateToken(
   application: IApplication,
   req: Request,
   res: Response,
   next: NextFunction,
-): Response {
+): Promise<Response> {
   const UserModel = application.getModel<IUserDocument>(ModelName.User);
   const token = findAuthToken(req.headers);
   if (token == null) {
     return res.status(401).send('No token provided');
   }
 
-  const jwtService: JwtService = new JwtService(application);
-  jwtService
-    .verifyToken(token)
-    .then((user: ITokenUser) => {
-      UserModel.findById(user.userId, { password: 0 })
-        .then((userDoc) => {
+  try {
+    return await withTransaction<Response>(
+      application.db.connection,
+      environment.mongo.useTransactions,
+      undefined,
+      async (session: ClientSession) => {
+        const jwtService: JwtService = new JwtService(application);
+        const user = await jwtService.verifyToken(token);
+        try {
+          const userDoc = await UserModel.findById(user.userId, {
+            password: 0,
+          }).session(session);
           if (
             !userDoc ||
             userDoc.accountStatusType !== AccountStatusTypeEnum.Active
           ) {
-            return res.status(403).send('User not found or inactive');
+            return res
+              .status(403)
+              .send(translate(StringNames.Error_UserNotFound));
           }
           req.user = RequestUserService.makeRequestUser(userDoc);
           next();
-        })
-        .catch((err) => {
-          console.error('Error finding user:', err);
-          return res.status(500).send('Internal server error');
-        });
-    })
-    .catch((err) => {
-      console.error('Error verifying token:', err);
-      return res.status(403).send('Invalid token');
-    });
+          return res;
+        } catch (err) {
+          return res
+            .status(500)
+            .send(translate(StringNames.Common_UnexpectedError));
+        }
+      },
+    );
+  } catch (err) {
+    if (err instanceof TokenExpiredError) {
+      return res.status(401).send(err.message);
+    } else if (err instanceof JsonWebTokenError) {
+      return res
+        .status(401)
+        .send(translate(StringNames.Validation_InvalidToken));
+    } else {
+      return res
+        .status(500)
+        .send(translate(StringNames.Common_UnexpectedError));
+    }
+  }
 }

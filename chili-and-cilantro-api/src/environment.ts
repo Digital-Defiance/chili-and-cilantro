@@ -47,7 +47,6 @@ export const environment: IEnvironment = {
   emailSender: process.env.EMAIL_SENDER ?? constants.EMAIL_FROM,
   developer: {
     debug: process.env.DEBUG === 'true',
-    useTransactions: process.env.USE_TRANSACTIONS === 'true',
     reactDistDir: reactDistDir,
     host: host,
     port: port,
@@ -58,6 +57,7 @@ export const environment: IEnvironment = {
   },
   mongo: {
     uri: process.env.MONGO_URI ?? 'mongodb://localhost:27017/chilicilantro',
+    useTransactions: process.env.USE_TRANSACTIONS === 'true',
   },
   cookies: {
     enabled: process.env.COOKIE_ENABLED === 'true',

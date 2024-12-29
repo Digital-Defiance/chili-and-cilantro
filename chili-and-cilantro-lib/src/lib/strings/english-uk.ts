@@ -9,9 +9,13 @@ export const BritishEnglishStrings: StringsCollection = {
   [StringNames.AccountError_Title]: 'Account Error',
   [StringNames.ChangePassword_ChangePasswordButton]: 'Change Password',
   [StringNames.ChangePassword_Success]: 'Password changed successfully',
+  [StringNames.Common_Cancel]: 'Cancel',
   [StringNames.Common_ChangePassword]: 'Change Password',
   [StringNames.Common_CheckingAuthentication]: 'Checking authentication...',
   [StringNames.Common_Chef]: 'Chef',
+  [StringNames.Common_Close]: 'Close',
+  [StringNames.Common_CopyLink]: 'Copy Link',
+  [StringNames.Common_Confirm]: 'Confirm',
   [StringNames.Common_ConfirmNewPassword]: 'Confirm New Password',
   [StringNames.Common_CurrentPassword]: 'Current Password',
   [StringNames.Common_Email]: 'Email',
@@ -23,6 +27,8 @@ export const BritishEnglishStrings: StringsCollection = {
   [StringNames.Common_GameCode]: 'Game Code',
   [StringNames.Common_GameName]: 'Game Name',
   [StringNames.Common_GamePassword]: 'Game Password',
+  [StringNames.Common_GenerateQRCode]: 'Generate QR Code',
+  [StringNames.Common_IncludePassword]: 'Include Password',
   [StringNames.Common_Kitchen]: 'Kitchen',
   [StringNames.Common_Loading]: 'Loading...',
   [StringNames.Common_Logo]: 'logo',
@@ -31,6 +37,8 @@ export const BritishEnglishStrings: StringsCollection = {
   [StringNames.Common_Optional]: 'Optional',
   [StringNames.Common_Password]: 'Password',
   [StringNames.Common_ReturnToKitchen]: 'Return to Kitchen',
+  [StringNames.Common_ShareGame]: 'Share Game',
+  [StringNames.Common_ShareLink]: 'Share Link',
   [StringNames.Common_Site]: site,
   [StringNames.Common_StartCooking]: 'Start Cooking',
   [StringNames.Common_Success]: 'Success',
@@ -73,6 +81,7 @@ export const BritishEnglishStrings: StringsCollection = {
   [StringNames.Error_InvalidAction]: 'Invalid action.',
   [StringNames.Error_InvalidCredentials]: 'Invalid credentials.',
   [StringNames.Error_InvalidEndGameReason]: 'Invalid end game reason',
+  [StringNames.Error_InvalidLanguageCode]: 'Invalid language code',
   [StringNames.Error_MustBeMasterChef]:
     'You must be the master chef to perform this action.',
   [StringNames.Error_NotEnoughChefsTemplate]:
@@ -104,6 +113,8 @@ export const BritishEnglishStrings: StringsCollection = {
   [StringNames.Game_CreateGame]: 'Create Game',
   [StringNames.Game_CreateGameSuccess]: 'Game created successfully',
   [StringNames.Game_EndGame]: 'End Game',
+  [StringNames.Game_EndGameConfirmation]:
+    'Are you sure you want to end the game? All chefs will be disconnected.',
   [StringNames.Game_JoinGame]: 'Join Game',
   [StringNames.Game_JoinGameSuccess]: 'Joined game successfully',
   [StringNames.KeyFeatures_Title]: 'Key Features',
@@ -193,6 +204,7 @@ export const BritishEnglishStrings: StringsCollection = {
   [StringNames.Validation_ConfirmNewPassword]:
     'Confirm new password is required',
   [StringNames.Validation_Required]: 'Required',
+  [StringNames.Validation_TokenExpired]: 'Token Expired',
   [StringNames.Validation_UsernameRegexErrorTemplate]: `Username must be between {MIN_USERNAME_LENGTH} and {MAX_USERNAME_LENGTH} characters, and:
   • Start with a letter, number, or Unicode character
   • Can contain letters, numbers, underscores, hyphens, and Unicode characters

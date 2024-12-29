@@ -94,7 +94,7 @@ export class App implements IApplication {
    */
   public async start(mongoUri?: string): Promise<void> {
     const mongo_uri = mongoUri ?? environment.mongo.uri;
-    this._useTransactions = environment.developer.useTransactions;
+    this._useTransactions = environment.mongo.useTransactions;
     try {
       if (this._ready) {
         console.error(

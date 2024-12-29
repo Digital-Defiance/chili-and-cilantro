@@ -74,7 +74,7 @@ export class ChefService extends BaseService {
    * @param newChefId The id of the chef to create. If not provided, a new id will be generated
    * @returns A new chef document
    */
-  public async newChefFromExisting(
+  public async newChefFromExistingAsync(
     newGame: IGameDocument,
     existingChef: IChefDocument,
     newChefId?: DefaultIdType,

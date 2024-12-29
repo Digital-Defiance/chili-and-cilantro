@@ -1,16 +1,20 @@
 import {
   ActionDocumentTypes,
   ActionType,
+  IApiErrorResponse,
+  IApiExpressValidationErrorResponse,
   IApiMessageResponse,
+  IApiMongoValidationErrorResponse,
   IBaseDocument,
   ModelName,
   StringLanguages,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
-import { NextFunction, Request, Response } from 'express';
+import { Request, RequestHandler, Response } from 'express';
 import { ValidationChain } from 'express-validator';
 import { ClientSession, Document, Model, Schema } from 'mongoose';
 import pusher from 'pusher';
 import { ISchemaData } from './interfaces/schema-data';
+import { IStatusCodeResponse } from './interfaces/status-code-response';
 
 /**
  * Transaction callback type for withTransaction
@@ -44,7 +48,38 @@ export type SchemaMap = {
   [K in keyof typeof ModelName]: ISchemaData<IBaseDocument<any>>;
 };
 
-export type HandlerArgs<T extends unknown[]> = T;
+export type HttpMethod = 'get' | 'post' | 'put' | 'delete' | 'patch';
+
+export interface TypedHandlers<T extends ApiResponse> {
+  [key: string]: ApiRequestHandler<T>;
+}
+
+export type RouteHandlers = Record<string, ApiRequestHandler<ApiResponse>>;
+
+export interface RouteConfig<
+  T extends ApiResponse,
+  H extends TypedHandlers<T>,
+> {
+  method: HttpMethod;
+  path: string;
+  handlerKey: keyof H;
+  handlerArgs?: Array<unknown>;
+  useAuthentication: boolean;
+  middleware?: RequestHandler[];
+  validation?: FlexibleValidationChain;
+  rawJsonHandler?: boolean;
+  authFailureStatusCode?: number;
+}
+
+export const routeConfig = <T extends ApiResponse, H extends TypedHandlers<T>>(
+  method: HttpMethod,
+  path: string,
+  config: Omit<RouteConfig<T, H>, 'method' | 'path'>,
+): RouteConfig<T, H> => ({
+  ...config,
+  method,
+  path,
+});
 
 export type ActionSchemaMapType = {
   [K in ActionType]: Schema<ActionDocumentTypes[K]>;
@@ -61,8 +96,14 @@ export type JsonResponse =
   | { [key: string]: JsonResponse }
   | JsonResponse[];
 
+export type ApiErrorResponse =
+  | IApiErrorResponse
+  | IApiExpressValidationErrorResponse
+  | IApiMongoValidationErrorResponse;
+
 export type ApiResponse =
   | IApiMessageResponse
+  | ApiErrorResponse
   | JsonResponse
   | pusher.UserAuthResponse;
 
@@ -75,14 +116,7 @@ export type SendFunction<T extends ApiResponse> = (
 /**
  * Response type for API requests
  */
-export type ApiRequestHandler<
-  T extends ApiResponse,
-  RawJsonResponse extends boolean = false,
-  AdditionalArgs extends Array<unknown> = Array<unknown>,
-> = (
+export type ApiRequestHandler<T extends ApiResponse> = (
   req: Request,
-  res: Response<RawJsonResponse extends true ? JsonResponse : T>,
-  send: SendFunction<T>,
-  next: NextFunction,
-  ...args: AdditionalArgs
-) => Promise<void>;
+  ...args: Array<unknown>
+) => Promise<IStatusCodeResponse<T>>;

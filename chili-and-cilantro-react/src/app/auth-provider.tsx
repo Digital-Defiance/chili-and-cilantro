@@ -48,7 +48,10 @@ export interface AuthContextData {
     email: string,
     password: string,
     timezone: string,
-  ) => Promise<void>;
+  ) => Promise<
+    | { success: boolean; message: string }
+    | { error: string; errorType?: string }
+  >;
   setUser: (user: IRequestUser | null) => void;
   setLanguage: (lang: StringLanguages) => void;
   token: string | null;
@@ -82,7 +85,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   useEffect(() => {
     if (user && user.siteLanguage) {
-      setLanguage(user.siteLanguage);
+      (async () => {
+        await i18n.changeLanguage(LanguageCodes[language]);
+        localStorage.setItem('language', user.siteLanguage);
+        localStorage.setItem('languageCode', LanguageCodes[user.siteLanguage]);
+        setLanguage(user.siteLanguage);
+      })();
     }
   }, [user]);
 
@@ -90,6 +98,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     (async () => {
       await i18n.changeLanguage(LanguageCodes[language]);
       localStorage.setItem('language', language);
+      localStorage.setItem('langugeCode', LanguageCodes[language]);
     })();
   }, [language]);
 
@@ -99,19 +108,45 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setUser(null);
       setIsAuthenticated(false);
       setLoading(false);
+      setToken(null);
       return;
     }
 
     try {
-      const userData: IRequestUser = await authService.verifyToken(token);
-      setUser(userData);
-      setIsAuthenticated(true);
-      setToken(token);
-      setError(null);
-      setErrorType(null);
+      const userData = await authService.verifyToken(token);
+      if ('error' in userData && typeof userData.error === 'string') {
+        setError(userData.error);
+        if (
+          'errorType' in userData &&
+          userData.errorType &&
+          typeof userData.errorType === 'string'
+        ) {
+          setErrorType(userData.errorType);
+        }
+        setToken(null);
+        setIsAuthenticated(false);
+      } else {
+        setUser(userData as IRequestUser);
+        setIsAuthenticated(true);
+        setToken(token);
+        setError(null);
+        setErrorType(null);
+      }
     } catch (error) {
       setUser(null);
       setIsAuthenticated(false);
+      if (isAxiosError(error)) {
+        if (error.response?.data?.errorType) {
+          setErrorType(error.response.data.errorType);
+        }
+        if (error.response?.data?.message) {
+          setError(error.response.data.message);
+        } else {
+          setError(error.message);
+        }
+      } else {
+        setError(translate(StringNames.Common_UnexpectedError));
+      }
       localStorage.removeItem('authToken');
     } finally {
       setLoading(false);
@@ -125,16 +160,47 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       email: string,
       password: string,
       timezone: string,
-    ) => {
-      await authService.register(
+    ): Promise<
+      | { success: boolean; message: string }
+      | { error: string; errorType?: string }
+    > => {
+      setLoading(true);
+      const registerResult = await authService.register(
         username,
         displayname,
         email,
         password,
         timezone,
       );
-      setError(null);
-      setErrorType(null);
+      setLoading(false);
+      if (
+        typeof registerResult === 'object' &&
+        'success' in registerResult &&
+        registerResult.success
+      ) {
+        setError(null);
+        setErrorType(null);
+        return {
+          success: true,
+          message:
+            registerResult.message ?? translate(StringNames.Register_Success),
+        };
+      } else if (
+        typeof registerResult === 'object' &&
+        'error' in registerResult
+      ) {
+        setError(registerResult.error);
+        if ('errorType' in registerResult && registerResult.errorType) {
+          setErrorType(registerResult.errorType);
+        }
+        return {
+          error: registerResult.error,
+          errorType: registerResult.errorType,
+        };
+      } else {
+        setError(translate(StringNames.Common_UnexpectedError));
+        return { error: translate(StringNames.Common_UnexpectedError) };
+      }
     },
     [],
   );
@@ -193,24 +259,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, [navigate]);
 
   const verifyToken = useCallback(async (token: string) => {
-    try {
-      const user = await authService.verifyToken(token);
-      setUser(user);
-      setIsAuthenticated(true);
-      setError(null);
-      setErrorType(null);
-    } catch (error) {
-      if (isAxiosError(error) || error instanceof Error) {
-        setError(error.message);
-        if (isAxiosError(error) && error.response?.data.errorType) {
-          setErrorType(error.response.data.errorType);
-        }
-      } else {
-        setError(translate(StringNames.Common_UnexpectedError));
-        setErrorType(null);
+    const requestUser = await authService.verifyToken(token);
+    if (typeof requestUser === 'object' && 'error' in requestUser) {
+      setError(requestUser.error);
+      if ('errorType' in requestUser && requestUser.errorType) {
+        setErrorType(requestUser.errorType);
       }
       setIsAuthenticated(false);
-      setUser(null);
+    } else {
+      setUser(requestUser);
+      setIsAuthenticated(true);
     }
   }, []);
 

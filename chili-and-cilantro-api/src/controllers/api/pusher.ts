@@ -1,24 +1,31 @@
 import {
-  IApiErrorResponse,
   IPusherAppInfoResponse,
   StringNames,
   translate,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import {
-  ApiResponse,
+  ApiErrorResponse,
+  ApiRequestHandler,
   IApplication,
-  RouteConfig,
-  SendFunction,
+  IStatusCodeResponse,
+  TypedHandlers,
   routeConfig,
 } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
-import { NextFunction, Request, Response } from 'express';
+import { Request } from 'express';
 import { body } from 'express-validator';
 import Pusher from 'pusher';
 import { environment } from '../../environment';
 import { UserService } from '../../services/user';
 import { BaseController } from '../base';
 
-export class PusherController extends BaseController {
+interface IPusherHandlers extends TypedHandlers<any> {
+  authenticatePusher: ApiRequestHandler<
+    Pusher.UserAuthResponse | ApiErrorResponse
+  >;
+  getAppInfo: ApiRequestHandler<IPusherAppInfoResponse | ApiErrorResponse>;
+}
+
+export class PusherController extends BaseController<any, IPusherHandlers> {
   private readonly pusher: Pusher;
   constructor(application: IApplication) {
     super(application);
@@ -29,66 +36,66 @@ export class PusherController extends BaseController {
       cluster: environment.pusher.cluster,
       useTLS: true,
     });
+    this.handlers = {
+      authenticatePusher: this.authenticatePusher,
+      getAppInfo: this.getAppInfo,
+    };
   }
 
-  public getRoutes(): RouteConfig<ApiResponse, any, Array<unknown>>[] {
-    return [
-      routeConfig<ApiResponse, true, Array<unknown>>({
-        method: 'post',
-        path: '/auth',
-        handler: this.authenticatePusher.bind(this),
+  protected initRouteDefinitions(): void {
+    this.routeDefinitions = [
+      routeConfig<Pusher.UserAuthResponse, IPusherHandlers>('post', '/auth', {
+        handlerKey: 'authenticatePusher',
         useAuthentication: true,
         authFailureStatusCode: 403,
         validation: [
           body('socket_id').isString().notEmpty(),
           body('channel_name').isString().notEmpty(),
         ],
+        rawJsonHandler: true,
       }),
-      routeConfig<ApiResponse, true, Array<unknown>>({
-        method: 'get',
-        path: '/appInfo',
-        handler: this.getAppInfo.bind(this),
+      routeConfig<IPusherAppInfoResponse, IPusherHandlers>('get', '/appInfo', {
+        handlerKey: 'getAppInfo',
         useAuthentication: true,
       }),
     ];
   }
 
-  private async getAppInfo(
+  private getAppInfo: ApiRequestHandler<
+    IPusherAppInfoResponse | ApiErrorResponse
+  > = async (
     req: Request,
-    res: Response,
-    send: SendFunction<IPusherAppInfoResponse | IApiErrorResponse>,
-    next: NextFunction,
-  ): Promise<void> {
+  ): Promise<
+    IStatusCodeResponse<IPusherAppInfoResponse | ApiErrorResponse>
+  > => {
     if (!req.user) {
       const errorMessage = translate(StringNames.Common_Unauthorized);
-      send(
-        401,
-        {
+      return {
+        statusCode: 401,
+        response: {
           message: errorMessage,
           error: new Error(errorMessage),
         },
-        res,
-      );
-      return;
+      };
     }
-    send(
-      200,
-      {
+    return {
+      statusCode: 200,
+      response: {
         message: translate(StringNames.Common_Success),
         appKey: environment.pusher.key,
         cluster: environment.pusher.cluster,
       },
-      res,
-    );
-  }
+    };
+  };
 
-  private async authenticatePusher(
+  private authenticatePusher: ApiRequestHandler<
+    Pusher.UserAuthResponse | ApiErrorResponse
+  > = async (
     req: Request,
-    res: Response,
-    send: SendFunction<Pusher.UserAuthResponse>,
-    next: NextFunction,
-  ): Promise<void> {
-    const user = await this.validateAndFetchRequestUser(req, res, next);
+  ): Promise<
+    IStatusCodeResponse<Pusher.UserAuthResponse | ApiErrorResponse>
+  > => {
+    const user = await this.validateAndFetchRequestUser(req);
     const socketId = req.validatedBody.socket_id;
     const channel = req.validatedBody.channel_name;
 
@@ -99,11 +106,14 @@ export class PusherController extends BaseController {
         }
       : null;
 
-    const authResponse = this.pusher.authenticateUser(socketId, {
-      id: user._id.toString(),
-      user_info: UserService.userToUserObject(user),
-      watchlist: [],
-    });
-    send(200, authResponse, res);
-  }
+    const authResponse: Pusher.UserAuthResponse = this.pusher.authenticateUser(
+      socketId,
+      {
+        id: user._id.toString(),
+        user_info: UserService.userToUserObject(user),
+        watchlist: [],
+      },
+    );
+    return { statusCode: 200, response: authResponse };
+  };
 }

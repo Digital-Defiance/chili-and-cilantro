@@ -29,9 +29,10 @@ interface FormValues {
 const LoginPage = () => {
   const [loginType, setLoginType] = useState<'email' | 'username'>('email');
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [loginErrorType, setLoginErrorType] = useState<string | null>(null);
   const [resendStatus, setResendStatus] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { login, errorType, user } = useAuth();
+  const { login, user } = useAuth();
   const { t } = useAppTranslation();
 
   const formik = useFormik({
@@ -60,23 +61,24 @@ const LoginPage = () => {
         .required(t(StringNames.Validation_Required)),
     }),
     onSubmit: async (values, { setSubmitting, resetForm }) => {
-      try {
-        const loginResult = await login(
-          loginType === 'email' ? values.email : values.username,
-          values.password,
-          loginType === 'email',
-        );
-        if ('error' in loginResult) {
-          setLoginError(loginResult.error);
-          return;
+      const loginResult = await login(
+        loginType === 'email' ? values.email : values.username,
+        values.password,
+        loginType === 'email',
+      );
+      setSubmitting(false);
+      if ('error' in loginResult) {
+        setLoginError(loginResult.error);
+        if (
+          'errorType' in loginResult &&
+          typeof loginResult.errorType === 'string'
+        ) {
+          setLoginErrorType(loginResult.errorType);
         }
-        resetForm();
-        navigate('/dashboard');
-      } catch (error) {
-        setLoginError(t(StringNames.Common_UnexpectedError));
-      } finally {
-        setSubmitting(false);
+        return;
       }
+      resetForm();
+      navigate('/dashboard');
     },
   });
 
@@ -195,7 +197,7 @@ const LoginPage = () => {
               ? t(StringNames.Login_Progress)
               : t(StringNames.Login_LoginButton)}
           </Button>
-          {errorType === 'PendingEmailVerification' && (
+          {loginErrorType === 'PendingEmailVerification' && (
             <Button
               fullWidth
               variant="outlined"

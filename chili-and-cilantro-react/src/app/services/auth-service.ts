@@ -21,7 +21,12 @@ const login = async (
       password,
     });
     if (!response.data.token) {
-      return { error: translate(StringNames.Validation_InvalidToken) };
+      return {
+        error:
+          response.data.message ??
+          translate(StringNames.Validation_InvalidToken),
+        ...(response.data.errorType && { errorType: response.data.errorType }),
+      };
     }
     return { token: response.data.token };
   } catch (error) {
@@ -31,12 +36,16 @@ const login = async (
           error.response.data.error?.message ??
           error.response.data.message ??
           translate(StringNames.Common_UnexpectedError),
-        errorType: error.response.data.errorType,
+        ...(error.response.data.errorType && {
+          errorType: error.response.data.errorType,
+        }),
         status: error.response.status,
       };
     } else {
       return {
-        error: translate(StringNames.Common_UnexpectedError),
+        error:
+          (error as any).message ??
+          translate(StringNames.Common_UnexpectedError),
       };
     }
   }
@@ -48,20 +57,48 @@ const register = async (
   email: string,
   password: string,
   timezone: string,
-): Promise<void> => {
-  const response = await api.post('/user/register', {
-    username,
-    displayname,
-    email,
-    password,
-    timezone,
-  });
-  if (response.status !== 201) {
-    throw new Error(
-      response.data.error?.message ??
-        response.data.message ??
-        translate(StringNames.Common_UnexpectedError),
-    );
+): Promise<
+  { success: boolean; message: string } | { error: string; errorType?: string }
+> => {
+  try {
+    const response = await api.post('/user/register', {
+      username,
+      displayname,
+      email,
+      password,
+      timezone,
+    });
+    if (response.status !== 201) {
+      return {
+        error: response.data.message
+          ? response.data.message
+          : translate(StringNames.Common_UnexpectedError),
+        ...(response.data.errorType
+          ? { errorType: response.data.errorType }
+          : {}),
+      };
+    }
+    return {
+      success: true,
+      message: response.data.message ?? translate(StringNames.Register_Success),
+    };
+  } catch (error) {
+    if (isAxiosError(error) && error.response) {
+      return {
+        error:
+          error.response.data.error.message ??
+          error.response.data.message ??
+          error.message ??
+          translate(StringNames.Common_UnexpectedError),
+        ...(error.response.data.errorType
+          ? { errorType: error.response.data.errorType }
+          : {}),
+      };
+    } else {
+      return {
+        error: translate(StringNames.Common_UnexpectedError),
+      };
+    }
   }
 };
 
@@ -87,19 +124,32 @@ const logout = () => {
   localStorage.removeItem('authToken');
 };
 
-const verifyToken = async (token: string): Promise<IRequestUser> => {
+const verifyToken = async (
+  token: string,
+): Promise<IRequestUser | { error: string; errorType?: string }> => {
   try {
     const response = await api.get('/user/verify', {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data.user as IRequestUser;
   } catch (error) {
-    console.error('Token verification error:', error);
     if (isAxiosError(error) && error.response) {
-      console.error('Error response:', error.response.data);
-      console.error('Error status:', error.response.status);
+      return {
+        error:
+          error.response.data.error?.message ??
+          error.response.data.message ??
+          translate(StringNames.Common_UnexpectedError),
+        ...(error.response.data.errorType && {
+          errorType: error.response.data.errorType,
+        }),
+      };
+    } else {
+      return {
+        error:
+          (error as any).message ??
+          translate(StringNames.Common_UnexpectedError),
+      };
     }
-    throw new Error('Invalid token');
   }
 };
 

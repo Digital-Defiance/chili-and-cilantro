@@ -12,6 +12,7 @@ import {
   UserNotFoundError,
 } from '@chili-and-cilantro/chili-and-cilantro-lib';
 import {
+  ApiErrorResponse,
   ApiResponse,
   ExpressValidationError,
   FlexibleValidationChain,
@@ -21,6 +22,7 @@ import {
   sendApiMessageResponse,
   SendFunction,
   sendRawJsonResponse,
+  TypedHandlers,
   withTransaction as utilsWithTransaction,
 } from '@chili-and-cilantro/chili-and-cilantro-node-lib';
 import {
@@ -39,38 +41,46 @@ import { ClientSession } from 'mongoose';
 import { authenticateToken } from '../middlewares/authenticate-token';
 import { setGlobalContextLanguageFromRequest } from '../middlewares/set-global-context-language';
 
-export abstract class BaseController {
+export abstract class BaseController<
+  T extends ApiResponse,
+  H extends TypedHandlers<T>,
+> {
   public readonly router: Router;
   private activeRequest: Request | null = null;
   private activeResponse: Response | null = null;
   public readonly application: IApplication;
+  protected routeDefinitions: RouteConfig<T, H>[] = [];
+  protected handlers: H;
 
   public constructor(application: IApplication) {
     this.application = application;
     this.router = Router();
+    this.handlers = {} as H;
+    this.initRouteDefinitions();
     this.initializeRoutes();
   }
 
-  /**
-   * Returns the routes that the controller will handle.
-   */
-  protected abstract getRoutes(): RouteConfig<
-    ApiResponse,
-    any,
-    Array<unknown>
-  >[];
+  protected abstract initRouteDefinitions(): void;
 
   private getAuthenticationMiddleware(
-    route: RouteConfig<ApiResponse, any, Array<unknown>>,
+    route: RouteConfig<T, H>,
   ): RequestHandler[] {
-    return route.useAuthentication
-      ? [this.authenticateRequest.bind(this, route)]
-      : [];
+    if (route.useAuthentication) {
+      return [
+        async (req, res, next) => {
+          try {
+            await this.authenticateRequest(route, req, res, next);
+          } catch (err) {
+            next(err);
+          }
+        },
+      ];
+    } else {
+      return [];
+    }
   }
 
-  private getValidationMiddleware(
-    route: RouteConfig<ApiResponse, any, Array<unknown>>,
-  ): RequestHandler[] {
+  private getValidationMiddleware(route: RouteConfig<T, H>): RequestHandler[] {
     if (Array.isArray(route.validation) && route.validation.length > 0) {
       return [
         ...route.validation,
@@ -113,46 +123,44 @@ export abstract class BaseController {
     };
   }
 
-  private createRequestHandler<
-    T extends ApiResponse,
-    RawJsonResponse extends boolean = false,
-    HandlerArgs extends Array<unknown> = Array<unknown>,
-  >(route: RouteConfig<T, RawJsonResponse, HandlerArgs>): RequestHandler {
-    return async (req: Request, res: Response, next: NextFunction) => {
+  private createRequestHandler(config: RouteConfig<T, H>): RequestHandler {
+    return async (req: Request, res: Response<T>, next: NextFunction) => {
       this.activeRequest = req;
       this.activeResponse = res;
-      // if req.user wasn't added above, return an unauthorized response
-      if (route.useAuthentication && !req.user) {
+
+      if (config.useAuthentication && !this.activeRequest?.user) {
         handleError(
           new HandleableError(translate(StringNames.Common_Unauthorized), {
             statusCode: 401,
           }),
-          res,
+          res as Response<ApiResponse>,
           sendApiMessageResponse,
           next,
         );
         return;
       }
 
-      // Check if handler is defined before calling it
-      if (typeof route.handler !== 'function') {
-        throw new Error('Handler is not a function');
-      }
-
       try {
-        const boundHandler = route.handler.bind(this);
-        const sendFunc: SendFunction<T> = route.rawJsonHandler
+        const handler = this.handlers[config.handlerKey];
+        const sendFunc: SendFunction<T> = config.rawJsonHandler
           ? sendRawJsonResponse.bind(this)
           : sendApiMessageResponse.bind(this);
-        await boundHandler(
+
+        const { statusCode, response, headers } = await handler(
           req,
-          res,
-          sendFunc,
-          next,
-          ...(route.handlerArgs ?? []),
+          ...(config.handlerArgs ?? []),
         );
+        if (headers) {
+          res.set(headers);
+        }
+        sendFunc(statusCode, response, res);
       } catch (error) {
-        handleError(error, res, sendApiMessageResponse, next);
+        handleError(
+          error,
+          res as Response<ApiErrorResponse>,
+          sendApiMessageResponse,
+          next,
+        );
       }
     };
   }
@@ -161,19 +169,20 @@ export abstract class BaseController {
    * Initializes the routes for the controller.
    */
   private initializeRoutes(): void {
-    const routes = this.getRoutes();
-    routes.forEach((route) => {
-      this.router[route.method](
-        route.path,
-        ...[
-          ...this.getAuthenticationMiddleware(route),
-          setGlobalContextLanguageFromRequest,
-          ...this.getValidationMiddleware(route),
-          ...(route.middleware ?? []),
-          this.createRequestHandler(route),
-        ],
-      );
-    });
+    Object.values(this.routeDefinitions).forEach(
+      (config: RouteConfig<T, H>) => {
+        this.router[config.method](
+          config.path,
+          ...[
+            ...this.getAuthenticationMiddleware(config),
+            setGlobalContextLanguageFromRequest,
+            ...this.getValidationMiddleware(config),
+            ...(config.middleware ?? []),
+            this.createRequestHandler(config),
+          ],
+        );
+      },
+    );
   }
 
   /**
@@ -183,27 +192,27 @@ export abstract class BaseController {
    * @param res The response object
    * @param next The next function
    */
-  protected authenticateRequest(
-    route: RouteConfig<ApiResponse, any, Array<unknown>>,
+  protected async authenticateRequest(
+    route: RouteConfig<T, H>,
     req: Request,
-    res: Response,
+    res: Response<T>,
     next: NextFunction,
-  ): void {
-    authenticateToken(this.application, req, res, (err) => {
+  ): Promise<void> {
+    await authenticateToken(this.application, req, res, (err) => {
       if (err || !req.user) {
         handleError(
           new HandleableError(translate(StringNames.Common_Unauthorized), {
             statusCode: route.authFailureStatusCode ?? 401,
             cause: err,
           }),
-          res,
+          res as Response<ApiErrorResponse>,
           sendApiMessageResponse,
           next,
         );
         return;
       }
-      next();
     });
+    next();
   }
 
   private handleBooleanFields(
@@ -316,26 +325,16 @@ export abstract class BaseController {
 
   protected async validateAndFetchRequestUser(
     req: Request,
-    res: Response,
-    next: NextFunction,
   ): Promise<IUserDocument> {
     const UserModel = this.application.getModel<IUserDocument>(ModelName.User);
     if (!req.user) {
-      handleError(
-        new HandleableError(translate(StringNames.Common_Unauthorized), {
-          statusCode: 401,
-        }),
-        res,
-        sendApiMessageResponse,
-        next,
-      );
-      return Promise.reject();
+      throw new HandleableError(translate(StringNames.Common_Unauthorized), {
+        statusCode: 401,
+      });
     }
     const user = await UserModel.findById(req.user.id);
     if (!user) {
-      handleError(new UserNotFoundError(), res, sendApiMessageResponse, next);
-      handleError(new UserNotFoundError(), res, sendApiMessageResponse, next);
-      return Promise.reject();
+      throw new UserNotFoundError();
     }
     return user;
   }

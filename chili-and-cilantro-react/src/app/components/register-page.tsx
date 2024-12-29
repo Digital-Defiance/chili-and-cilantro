@@ -10,7 +10,6 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { AxiosError } from 'axios';
 import { useFormik } from 'formik';
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -30,7 +29,9 @@ const RegisterPage: React.FC = () => {
   const [registrationError, setRegistrationError] = useState<string | null>(
     null,
   );
-  const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState<string | null>(
+    null,
+  );
   const navigate = useNavigate();
   const { t } = useAppTranslation();
   const { register, user } = useAuth();
@@ -66,37 +67,29 @@ const RegisterPage: React.FC = () => {
         .required(t(StringNames.Validation_Required)),
     }),
     onSubmit: async (values, { setSubmitting }) => {
-      try {
-        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        await register(
-          values.username,
-          values.displayname,
-          values.email,
-          values.password,
-          timezone,
-        );
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const registerResult = await register(
+        values.username,
+        values.displayname,
+        values.email,
+        values.password,
+        timezone,
+      );
+      setSubmitting(false);
+      if ('error' in registerResult) {
+        setRegistrationError(registerResult.error);
+        setRegistrationSuccess(null);
+      } else if (
+        'success' in registerResult &&
+        registerResult.success === true &&
+        'message' in registerResult &&
+        typeof registerResult.message === 'string'
+      ) {
         setRegistrationError(null);
-        setRegistrationSuccess(true);
+        setRegistrationSuccess(registerResult.message);
         setTimeout(() => {
           navigate('/login');
         }, 3000);
-      } catch (error: unknown) {
-        if (error instanceof AxiosError) {
-          setRegistrationError(
-            error.response?.data.message ??
-              error.message ??
-              t(StringNames.Common_UnexpectedError),
-          );
-        } else if (error instanceof Error) {
-          setRegistrationError(
-            error.message || t(StringNames.Common_UnexpectedError),
-          );
-        } else {
-          setRegistrationError(t(StringNames.Common_UnexpectedError));
-        }
-        setRegistrationSuccess(false);
-      } finally {
-        setSubmitting(false);
       }
     },
   });
