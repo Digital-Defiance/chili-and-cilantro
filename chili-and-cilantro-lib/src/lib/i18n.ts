@@ -78,14 +78,6 @@ export const buildNestedI18nForLanguage = (
 };
 
 /**
- * Replaces underscores with dots
- * @param name The string name
- * @returns The string name with underscores replaced with dots
- */
-export const stringNameToI18nKey = (name: StringNames) =>
-  name.replace('_', '.'); // only replace the first underscore
-
-/**
  * Replaces variables in a string with their corresponding values from the constants object
  * @param str The string with variables to replace
  * @returns The string with variables replaced
@@ -210,7 +202,6 @@ export function getLanguageCode(language: string): StringLanguages {
 export default {
   buildNestedI18n,
   buildNestedI18nForLanguage,
-  stringNameToI18nKey,
   translate,
   translateEnum,
   GlobalLanguageContext,

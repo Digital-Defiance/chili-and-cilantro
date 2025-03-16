@@ -17,6 +17,7 @@ import { environment } from '../environments/environment';
     .init({
       fallbackLng: LanguageCodes[StringLanguages.EnglishUS],
       debug: environment.debugI18n,
+      keySeparator: '_',
       interpolation: {
         escapeValue: false, // not needed for React
       },

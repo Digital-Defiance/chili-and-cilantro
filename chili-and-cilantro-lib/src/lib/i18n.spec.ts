@@ -18,7 +18,6 @@ import i18nModule, {
   getLanguageCode,
   GlobalLanguageContext,
   replaceVariables,
-  stringNameToI18nKey,
   translate,
   translateEnum,
   translationsMap,
@@ -168,15 +167,6 @@ describe('buildNestedI18nForLanguage', () => {
       expect(nestedI18n).toMatchSnapshot();
     },
   );
-});
-
-describe('stringNameToI18nKey', () => {
-  it('should replace underscores with dots', () => {
-    // note that the StringName value itself is camelCase
-    expect(stringNameToI18nKey(StringNames.Common_ChangePassword)).toBe(
-      'common.changePassword',
-    );
-  });
 });
 
 describe('translate', () => {
