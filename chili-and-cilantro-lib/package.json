@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "dependencies": {
     "express-validator": "^7.1.0",
-    "mongoose": "^8.9.1",
+    "mongoose": "^8.9.5",
     "tslib": "^2.6.3"
   },
   "devDependencies": {
